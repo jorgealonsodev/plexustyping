@@ -23,7 +23,7 @@ Delivery: `chain_strategy=feature-branch-chain` (~400-line slices). Forecast: ~2
 | T2 | S2, S3, S4 | `plexustyping-core`: input replay, 3 error modes, per-keystroke records, stats — writer A | done | aab052f |
 | T3 | S5 | `plexustyping-layouts`: TOML loader, `es-qwerty.toml`, dead-key composition, allowed chars — writer B | done | 1c55b05 |
 | T4 | S6 | `plexustyping-corpus`: FrequencyWords import + attribution, diagnostic text, sentences, offline generator — writer C | done | baf0d5c |
-| T7 | S9 | Themes: same 57 schemes as PlexusTerm, role mapping, hot switching, notices — writer (L13) | pending | — |
+| T7 | S9 | Themes: same 57 schemes as PlexusTerm, role mapping, hot switching, notices — writer (L13) | done | bd1e0b0 |
 | T5 | S1, S3, S4, S8, S9 | App integration: Tauri commands, practice screen, live stats, results, error-mode selector — writer (L13) | pending | — |
 | T6 | S1–S8 | Close: full suite, builds, review assessment, report | pending | — |
 
@@ -43,3 +43,5 @@ Delivery: `chain_strategy=feature-branch-chain` (~400-line slices). Forecast: ~2
 - **L12 (T2–T4 evidence):** three parallel writers. T2 core `aab052f`: 6 tests incl. 15-case `tests/fixtures/replay.json` (reuse from TS with float tolerance). T3 layouts `1c55b05`: 17 tests; `allowed_chars` always includes ' ' and '\n'; `locate` falls back to Space/Enter; standalone dead chars not locatable. T4 corpus `baf0d5c`: 12 tests; FrequencyWords commit `525f9b560de45753a5ea01069454e72e9aa541c6`, 5,622 read → 5,000 kept; diagnostic 310 chars, 46 sentences; `generate` ~6 ms debug, may return empty if `allowed` excludes all words. Seam check: `cargo test --workspace --exclude plexustyping-app` 35 passed; `cargo clippy --workspace --all-targets -D warnings` and `cargo fmt --all --check` clean.
 - **L13 (routing):** parent context passed the 150k backstop → T7 and T5 delegated to writers (sequential: T5 uses T7's theme API).
 - **L14 (RDD):** assess on `3a21c74..baf0d5c` (committed-only): nativeRisk high, `reviewDue: true`, reason `high_risk` (`process_boundary` signal in `scripts/import-frequencywords.py`), 16 paths / 7,383 lines (mostly generated `words.txt`).
+- **L15 (review + fixes):** native review lineage `review-05c7423bdb19170c` (lenses risk, reliability) approved and acknowledged; 5 advisory findings. Fixed test-first in `c2d081c`: R1/R3-001 empty pools overflow (RED: "attempt to add with overflow" at corpus lib.rs:237) and R3-003 unsupported dead keys (`LayoutError::UnsupportedDeadKey`). Deferred: R3-002 non-monotonic timestamps (frontend uses `performance.now()`), R3-004 derive builtin ids.
+- **L16 (T7 evidence):** themes ported from PlexusTerm commit `790edbb75f38bbac8feb8f75fa03a2395638b996`: 57 themes, default `catppuccin-mocha`, `typingColors`/`applyTheme`/`loadThemeId`/`saveThemeId`; 17 vitest tests; script output verified identical against the committed generated file; `pnpm check` 0 errors, `pnpm build` ok.
