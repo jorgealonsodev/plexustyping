@@ -2,7 +2,7 @@
 
 *Del cerebro a los dedos.* An adaptive typing tutor built with Rust and Tauri 2.
 
-Status: phase 1A (adaptive engine and local storage). See `PRD-PlexusTyping.v0.1.md` for the product plan.
+Status: phase 1B in progress (AI texts, metronome). See `PRD-PlexusTyping.v0.1.md` for the product plan.
 
 Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 
@@ -24,7 +24,7 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   "Teclado": on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
   colour themes, dark and light, switched live. Everything is remembered
   locally; targets and length apply from the next text. `Escape`, `×` or a
-  click outside closes the window and returns to the text.
+  click outside closes the window and returns to the text. "IA": see below.
 
 ### Adaptive loop
 
@@ -37,13 +37,42 @@ from words that contain them ("Practicando: ñ · qu · z" above the text). Resu
 list your top weaknesses, and the optional "Mapa de calor" tints each key of
 the on-screen keyboard by its score.
 
+### AI texts (optional)
+
+In "Ajustes → IA", turn on "Usar IA para generar textos" and build the fallback
+chain: up to four providers (Claude, OpenAI, Google Gemini, OpenCode Go), tried
+in order, each with its model (picked from the provider's list, or typed by
+hand), its API key ("Guardar clave" / "Borrar clave") and "Probar conexión".
+"Densidad" (2×–5×, default 3×) sets how much more often the targets appear and
+"Tema" an optional topic. The usage table counts calls and tokens per provider,
+today and in total, so you can watch your spending.
+
+- **Keys** are stored only in the system keychain (Keychain on macOS,
+  Credential Manager on Windows, Secret Service on Linux; service
+  `com.plexustyping.app`, account `ai:<provider>`), never in plain text, never
+  in the database, and never sent back to the interface. Without a working
+  keychain no key can be saved.
+- **Privacy:** only the target characters, the language, the length, the
+  allowed characters and the topic are sent. Nothing you type ever leaves
+  this machine. Requests go from Rust to the provider hosts only.
+- **Fallback:** each request has a 10 s timeout; a provider whose text fails
+  validation gets one retry, then the next provider is tried. If all fail (or
+  no key is set), a previously generated text from the local cache is used,
+  and then the local corpus. A short note above the text says why, and the
+  source is always shown ("Generado con IA · Claude · …", "Texto del caché",
+  "Corpus local").
+- **Latency:** the next text is requested in the background as soon as you
+  start typing the current one, so it is usually ready when you finish.
+
 ### Where data lives
 
 Sessions, keystrokes and statistics are stored only on this machine, in
 `plexustyping.sqlite3` under the app data directory (on Linux
 `~/.local/share/com.plexustyping.app/`). If that file cannot be opened the app
 still works with a temporary in-memory store and shows "Sin guardar: modo
-temporal" in the header. Display settings stay in the webview's local storage.
+temporal" in the header. The same database keeps the AI settings (without
+keys), the cache of generated texts and the usage counters. Display settings
+stay in the webview's local storage.
 
 ## Layout
 
@@ -52,13 +81,15 @@ temporal" in the header. Display settings stay in the webview's local storage.
 | `crates/plexustyping-core` | Typing session engine: input replay, error modes, stats |
 | `crates/plexustyping-layouts` | Keyboard layouts (TOML) and dead-key composition |
 | `crates/plexustyping-corpus` | Local offline corpus and AI-free text generator |
-| `crates/plexustyping-store` | Local SQLite store: profiles, sessions, keystrokes, statistics |
+| `crates/plexustyping-store` | Local SQLite store: profiles, sessions, keystrokes, statistics, AI text cache and usage |
+| `crates/plexustyping-ai` | AI providers, prompt, validation and fallback chain |
+| `crates/plexustyping-audio` | Metronome audio |
 | `src-tauri` | Tauri app (`plexustyping-app`, binary `plexustyping`) |
 | `src` | Svelte 5 frontend |
 
 ## Development
 
-Requirements: Rust 1.85+, Node 22+, pnpm, and the
+Requirements: Rust 1.88+, Node 22+, pnpm, and the
 [Tauri 2 system dependencies](https://v2.tauri.app/start/prerequisites/).
 
 ```sh

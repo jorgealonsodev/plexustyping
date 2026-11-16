@@ -85,7 +85,7 @@ fn unit(name: &str, e: f64) -> UnitStatRow {
 #[test]
 fn migrates_empty_db_to_current_version() {
     let store = Store::open_in_memory().unwrap();
-    assert_eq!(store.schema_version().unwrap(), 1);
+    assert_eq!(store.schema_version().unwrap(), 2);
 }
 
 #[test]
@@ -95,13 +95,13 @@ fn open_creates_parent_dir_and_reopen_is_idempotent() {
     let profile_id;
     {
         let store = Store::open(&path).unwrap();
-        assert_eq!(store.schema_version().unwrap(), 1);
+        assert_eq!(store.schema_version().unwrap(), 2);
         profile_id = store.default_profile().unwrap().id;
         store.set_setting("theme", "dark").unwrap();
     }
     assert!(path.exists());
     let store = Store::open(&path).unwrap();
-    assert_eq!(store.schema_version().unwrap(), 1);
+    assert_eq!(store.schema_version().unwrap(), 2);
     assert_eq!(store.default_profile().unwrap().id, profile_id);
     assert_eq!(store.get_setting("theme").unwrap().as_deref(), Some("dark"));
 }
@@ -118,7 +118,7 @@ fn newer_schema_is_refused_without_modifying_the_db() {
     match Store::open(&path) {
         Err(StoreError::NewerSchema { found, supported }) => {
             assert_eq!(found, 99);
-            assert_eq!(supported, 1);
+            assert_eq!(supported, 2);
         }
         other => panic!("expected NewerSchema, got {other:?}"),
     }
@@ -341,13 +341,13 @@ fn newer_schema_file_is_byte_identical_after_refusal() {
     std::fs::create_dir_all(path.parent().unwrap()).unwrap();
     {
         let c = rusqlite::Connection::open(&path).unwrap();
-        c.execute_batch("CREATE TABLE x(a); INSERT INTO x VALUES(1); PRAGMA user_version=2;")
+        c.execute_batch("CREATE TABLE x(a); INSERT INTO x VALUES(1); PRAGMA user_version=3;")
             .unwrap();
     }
     let before = std::fs::read(&path).unwrap();
     assert!(matches!(
         Store::open(&path),
-        Err(StoreError::NewerSchema { found: 2, .. })
+        Err(StoreError::NewerSchema { found: 3, .. })
     ));
     assert_eq!(before, std::fs::read(&path).unwrap());
 }

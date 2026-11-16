@@ -84,7 +84,7 @@ impl BeatClock {
 
     fn start_beat(&mut self, cfg: &MetronomeConfig) {
         let k = self.next_beat;
-        let accent = cfg.accent_every > 0 && k % u64::from(cfg.accent_every) == 0;
+        let accent = cfg.accent_every > 0 && k.is_multiple_of(u64::from(cfg.accent_every));
         self.voice = Some(Voice { accent, pos: 0 });
         self.next_beat += 1;
         let bpm = cfg.bpm.clamp(MIN_BPM, MAX_BPM);

@@ -1,5 +1,6 @@
 //! Local SQLite persistence for PlexusTyping: profiles, sessions, keystrokes,
-//! adaptive statistics rows and settings.
+//! adaptive statistics rows, settings, the cache of AI-generated texts and the
+//! AI usage counters.
 //!
 //! Data stays on the user's machine. This store never holds secrets: API keys
 //! and other credentials belong in the OS keychain, never in this database.
@@ -14,7 +15,11 @@ use rusqlite::{Connection, OptionalExtension, params};
 use serde::Serialize;
 
 /// Ordered schema migrations; migration `i` upgrades `user_version` `i` → `i + 1`.
-const MIGRATIONS: &[&str] = &[r#"
+/// Released migrations are never edited. v2 adds `text_cache` (`targets` is a
+/// JSON array; `last_used` is a use sequence, higher = more recent) and
+/// `ai_usage` (`day` is the user's local `YYYY-MM-DD`).
+const MIGRATIONS: &[&str] = &[
+    r#"
 CREATE TABLE profiles (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
@@ -81,7 +86,31 @@ CREATE TABLE settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
-"#];
+"#,
+    r#"
+CREATE TABLE text_cache (
+    id INTEGER PRIMARY KEY,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    language TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    targets TEXT NOT NULL,
+    text TEXT NOT NULL,
+    created_at_ms INTEGER NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    last_used INTEGER
+);
+CREATE INDEX text_cache_by_language_mode_used ON text_cache(language, mode, used);
+CREATE TABLE ai_usage (
+    provider TEXT NOT NULL,
+    day TEXT NOT NULL,
+    calls INTEGER NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    PRIMARY KEY (provider, day)
+);
+"#,
+];
 
 /// Schema version this build creates and understands.
 const SUPPORTED_VERSION: i64 = MIGRATIONS.len() as i64;
@@ -237,6 +266,69 @@ pub struct StatsSnapshot {
     pub confusions: Vec<ConfusionRow>,
     /// The user's mean keystroke interval, if known.
     pub mean_interval_ms: Option<f64>,
+}
+
+/// An AI-generated text to keep for offline reuse.
+#[derive(Clone, Debug, PartialEq)]
+pub struct NewCachedText<'a> {
+    /// Provider id, e.g. `"claude"`.
+    pub provider: &'a str,
+    /// Model id.
+    pub model: &'a str,
+    /// Language code, e.g. `es`.
+    pub language: &'a str,
+    /// Practice mode, e.g. `"prose"`.
+    pub mode: &'a str,
+    /// Units the text practises.
+    pub targets: &'a [String],
+    /// The text.
+    pub text: &'a str,
+    /// Generation time, Unix epoch milliseconds.
+    pub created_at_ms: i64,
+    /// Already shown to the user.
+    pub used: bool,
+}
+
+/// A cached AI-generated text.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CachedText {
+    /// Row id.
+    pub id: i64,
+    /// Provider id.
+    pub provider: String,
+    /// Model id.
+    pub model: String,
+    /// Language code.
+    pub language: String,
+    /// Practice mode.
+    pub mode: String,
+    /// Units the text practises.
+    pub targets: Vec<String>,
+    /// The text.
+    pub text: String,
+    /// Generation time, Unix epoch milliseconds.
+    pub created_at_ms: i64,
+}
+
+/// AI calls and tokens of one provider, today and in total.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UsageRow {
+    /// Provider id.
+    pub provider: String,
+    /// Successful calls today.
+    pub calls_today: u64,
+    /// Successful calls ever.
+    pub calls_total: u64,
+    /// Prompt tokens today.
+    pub input_tokens_today: u64,
+    /// Completion tokens today.
+    pub output_tokens_today: u64,
+    /// Prompt tokens ever.
+    pub input_tokens_total: u64,
+    /// Completion tokens ever.
+    pub output_tokens_total: u64,
 }
 
 impl Store {
@@ -461,6 +553,165 @@ impl Store {
         )?;
         Ok(())
     }
+}
+
+impl Store {
+    /// Stores a generated text and returns its id; a `used` text gets the
+    /// most recent use.
+    pub fn cache_text(&self, t: &NewCachedText) -> Result<i64> {
+        let targets =
+            serde_json::to_string(t.targets).map_err(|e| StoreError::InvalidData(e.to_string()))?;
+        self.conn.execute(
+            "INSERT INTO text_cache (provider, model, language, mode, targets, text,
+                 created_at_ms, used, last_used)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
+                 CASE WHEN ?8 THEN (SELECT COALESCE(MAX(last_used), 0) + 1 FROM text_cache) END)",
+            params![
+                t.provider,
+                t.model,
+                t.language,
+                t.mode,
+                targets,
+                t.text,
+                t.created_at_ms,
+                t.used
+            ],
+        )?;
+        Ok(self.conn.last_insert_rowid())
+    }
+
+    /// A cached text of `language` and `mode`, marked used: the unused text
+    /// sharing the most `targets` (oldest first on ties, any unused one when
+    /// none shares), else the least recently used one; `None` when empty.
+    pub fn take_cached_text(
+        &self,
+        language: &str,
+        mode: &str,
+        targets: &[String],
+    ) -> Result<Option<CachedText>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, targets FROM text_cache
+             WHERE language = ?1 AND mode = ?2 AND used = 0 ORDER BY id",
+        )?;
+        let unused = stmt
+            .query_map(params![language, mode], |r| {
+                Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?))
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        let mut best: Option<(i64, usize)> = None;
+        for (id, json) in unused {
+            let shared = parse_targets(&json)?
+                .iter()
+                .filter(|t| targets.contains(t))
+                .count();
+            if best.is_none_or(|(_, n)| shared > n) {
+                best = Some((id, shared));
+            }
+        }
+        let id = match best {
+            Some((id, _)) => Some(id),
+            None => self
+                .conn
+                .query_row(
+                    "SELECT id FROM text_cache WHERE language = ?1 AND mode = ?2
+                     ORDER BY last_used, id LIMIT 1",
+                    params![language, mode],
+                    |r| r.get::<_, i64>(0),
+                )
+                .optional()?,
+        };
+        let Some(id) = id else { return Ok(None) };
+        self.conn.execute(
+            "UPDATE text_cache SET used = 1,
+                 last_used = (SELECT COALESCE(MAX(last_used), 0) + 1 FROM text_cache)
+             WHERE id = ?1",
+            [id],
+        )?;
+        let (mut cached, json) = self.conn.query_row(
+            "SELECT id, provider, model, language, mode, targets, text, created_at_ms
+             FROM text_cache WHERE id = ?1",
+            [id],
+            |r| {
+                let cached = CachedText {
+                    id: r.get(0)?,
+                    provider: r.get(1)?,
+                    model: r.get(2)?,
+                    language: r.get(3)?,
+                    mode: r.get(4)?,
+                    targets: Vec::new(),
+                    text: r.get(6)?,
+                    created_at_ms: r.get(7)?,
+                };
+                Ok((cached, r.get::<_, String>(5)?))
+            },
+        )?;
+        cached.targets = parse_targets(&json)?;
+        Ok(Some(cached))
+    }
+
+    /// Counts one successful call of `provider` on local `day` with its tokens.
+    pub fn record_usage(&self, provider: &str, day: &str, input: u64, output: u64) -> Result<()> {
+        let input = u64_to_i64(input)?;
+        let output = u64_to_i64(output)?;
+        self.conn.execute(
+            "INSERT INTO ai_usage (provider, day, calls, input_tokens, output_tokens)
+             VALUES (?1, ?2, 1, ?3, ?4)
+             ON CONFLICT(provider, day) DO UPDATE SET
+                 calls = calls + 1,
+                 input_tokens = input_tokens + excluded.input_tokens,
+                 output_tokens = output_tokens + excluded.output_tokens",
+            params![provider, day, input, output],
+        )?;
+        Ok(())
+    }
+
+    /// Per-provider calls and tokens on `today` and in total, sorted by provider.
+    pub fn usage_totals(&self, today: &str) -> Result<Vec<UsageRow>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT provider,
+                 SUM(CASE WHEN day = ?1 THEN calls ELSE 0 END), SUM(calls),
+                 SUM(CASE WHEN day = ?1 THEN input_tokens ELSE 0 END),
+                 SUM(CASE WHEN day = ?1 THEN output_tokens ELSE 0 END),
+                 SUM(input_tokens), SUM(output_tokens)
+             FROM ai_usage GROUP BY provider ORDER BY provider",
+        )?;
+        let rows = stmt.query_map([today], |r| {
+            let mut n = [0i64; 6];
+            for (i, slot) in n.iter_mut().enumerate() {
+                *slot = r.get(i + 1)?;
+            }
+            Ok((r.get::<_, String>(0)?, n))
+        })?;
+        rows.map(|row| {
+            let (provider, n) = row?;
+            let [
+                calls_today,
+                calls_total,
+                input_today,
+                output_today,
+                input_total,
+                output_total,
+            ] = n.map(|v| u64::try_from(v).unwrap_or(0));
+            Ok(UsageRow {
+                provider,
+                calls_today,
+                calls_total,
+                input_tokens_today: input_today,
+                output_tokens_today: output_today,
+                input_tokens_total: input_total,
+                output_tokens_total: output_total,
+            })
+        })
+        .collect()
+    }
+}
+
+fn parse_targets(json: &str) -> Result<Vec<String>> {
+    serde_json::from_str(json).map_err(|e| StoreError::InvalidData(format!("cached targets: {e}")))
+}
+
+fn u64_to_i64(n: u64) -> Result<i64> {
+    i64::try_from(n).map_err(|_| StoreError::InvalidData(format!("{n} does not fit in i64")))
 }
 
 /// Inserts a session row and its keystrokes; the caller owns the transaction.
