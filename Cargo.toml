@@ -15,6 +15,8 @@ plexustyping-core = { path = "crates/plexustyping-core" }
 plexustyping-layouts = { path = "crates/plexustyping-layouts" }
 plexustyping-corpus = { path = "crates/plexustyping-corpus" }
 plexustyping-store = { path = "crates/plexustyping-store" }
+plexustyping-audio = { path = "crates/plexustyping-audio" }
+plexustyping-ai = { path = "crates/plexustyping-ai" }
 rusqlite = { version = "0.40", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -23,3 +25,7 @@ toml = "1"
 unicode-normalization = "0.1"
 tauri = { version = "2", features = [] }
 tauri-build = { version = "2", features = [] }
+cpal = "0.18"
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
+tokio = { version = "1", features = ["rt", "macros", "time", "net", "io-util", "sync"] }
+async-trait = "0.1"
