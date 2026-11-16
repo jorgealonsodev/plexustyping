@@ -19,12 +19,12 @@ Delivery: `chain_strategy=feature-branch-chain` (~400-line slices). Forecast: ~2
 
 | ID | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | S7, S8 | Scaffold Cargo workspace, Tauri 2 app, Svelte 5 frontend, licenses, README — inline | done | T1 commit |
-| T2 | S2, S3, S4 | `plexustyping-core`: input replay, 3 error modes, per-keystroke records, stats — writer A | pending | — |
-| T3 | S5 | `plexustyping-layouts`: TOML loader, `es-qwerty.toml`, dead-key composition, allowed chars — writer B | pending | — |
-| T4 | S6 | `plexustyping-corpus`: FrequencyWords import + attribution, diagnostic text, sentences, offline generator — writer C | pending | — |
-| T7 | S9 | Themes: same 57 schemes as PlexusTerm, role mapping, hot switching, notices — inline | pending | — |
-| T5 | S1, S3, S4, S8, S9 | App integration: Tauri commands, practice screen, live stats, results, error-mode selector — inline | pending | — |
+| T1 | S7, S8 | Scaffold Cargo workspace, Tauri 2 app, Svelte 5 frontend, licenses, README — inline | done | 214a894 |
+| T2 | S2, S3, S4 | `plexustyping-core`: input replay, 3 error modes, per-keystroke records, stats — writer A | done | aab052f |
+| T3 | S5 | `plexustyping-layouts`: TOML loader, `es-qwerty.toml`, dead-key composition, allowed chars — writer B | done | 1c55b05 |
+| T4 | S6 | `plexustyping-corpus`: FrequencyWords import + attribution, diagnostic text, sentences, offline generator — writer C | done | baf0d5c |
+| T7 | S9 | Themes: same 57 schemes as PlexusTerm, role mapping, hot switching, notices — writer (L13) | pending | — |
+| T5 | S1, S3, S4, S8, S9 | App integration: Tauri commands, practice screen, live stats, results, error-mode selector — writer (L13) | pending | — |
 | T6 | S1–S8 | Close: full suite, builds, review assessment, report | pending | — |
 
 ## Log
@@ -40,3 +40,6 @@ Delivery: `chain_strategy=feature-branch-chain` (~400-line slices). Forecast: ~2
 - **L9 (T1 evidence):** `cargo build --workspace` ok (tauri 2.11.6); `pnpm check` 0 errors; `pnpm build` ok; `pnpm test` passes with no tests. TypeScript pinned to ~6.0.3 (svelte-check peer `^5 || ^6`); tsconfig follows the create-vite svelte-ts template. Prod CSP has `style-src 'self'` without `unsafe-inline`: avoid Svelte transitions that inject `<style>`.
 - **L10 (Trello):** Board "PlexusTyping — Roadmap" https://trello.com/b/yTLEs12d/plexustyping-roadmap (private). Lists: Pendiente, En curso, En revisión, Hecho. One card per phase with checklist "Alcance"; phase 0 card https://trello.com/c/A9h89nMm lists T1–T7 (T1 checked). Update its checklist on each task transition.
 - **L11 (RDD):** T1 commit `214a894` assessment unavailable: "untracked files require an explicit declaration" (the two PRD files stay untracked; not user-committed) and the root commit has no base.
+- **L12 (T2–T4 evidence):** three parallel writers. T2 core `aab052f`: 6 tests incl. 15-case `tests/fixtures/replay.json` (reuse from TS with float tolerance). T3 layouts `1c55b05`: 17 tests; `allowed_chars` always includes ' ' and '\n'; `locate` falls back to Space/Enter; standalone dead chars not locatable. T4 corpus `baf0d5c`: 12 tests; FrequencyWords commit `525f9b560de45753a5ea01069454e72e9aa541c6`, 5,622 read → 5,000 kept; diagnostic 310 chars, 46 sentences; `generate` ~6 ms debug, may return empty if `allowed` excludes all words. Seam check: `cargo test --workspace --exclude plexustyping-app` 35 passed; `cargo clippy --workspace --all-targets -D warnings` and `cargo fmt --all --check` clean.
+- **L13 (routing):** parent context passed the 150k backstop → T7 and T5 delegated to writers (sequential: T5 uses T7's theme API).
+- **L14 (RDD):** assess on `3a21c74..baf0d5c` (committed-only): nativeRisk high, `reviewDue: true`, reason `high_risk` (`process_boundary` signal in `scripts/import-frequencywords.py`), 16 paths / 7,383 lines (mostly generated `words.txt`).
