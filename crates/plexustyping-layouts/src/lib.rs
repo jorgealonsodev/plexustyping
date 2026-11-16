@@ -118,6 +118,14 @@ pub enum LayoutError {
         /// Rejected value.
         value: String,
     },
+    /// A dead key has no known combining mark, so it would compose nothing.
+    #[error("layout `{id}`: dead key `{dead}` has no known composition")]
+    UnsupportedDeadKey {
+        /// Layout id.
+        id: String,
+        /// The dead key without a combining mark.
+        dead: char,
+    },
     /// A dead key that no layer of any key produces.
     #[error("layout `{id}`: dead key `{dead}` is not produced by any key")]
     DeadKeyNotProduced {
@@ -207,6 +215,12 @@ pub fn parse(id: &str, source: &str) -> Result<Layout, LayoutError> {
             id: id.to_owned(),
             value: value.clone(),
         })?;
+        if combining_mark(dead).is_none() {
+            return Err(LayoutError::UnsupportedDeadKey {
+                id: id.to_owned(),
+                dead,
+            });
+        }
         let produced = keys
             .values()
             .any(|key| key.layers().iter().any(|&(_, ch)| ch == Some(dead)));

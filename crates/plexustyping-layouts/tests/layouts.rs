@@ -298,3 +298,17 @@ fn layout_serializes_camel_case() {
     let toml = toml::to_string(&layout).unwrap();
     assert!(toml.contains("deadKeys = []"), "{toml}");
 }
+
+#[test]
+fn rejects_dead_key_without_known_composition() {
+    let source = "name = \"Cedilla\"\ndead_keys = [\"¸\"]\n\n[keys.KeyA]\nnormal = \"a\"\n\n[keys.Quote]\nnormal = \"¸\"\n";
+    let err = parse("cedilla", source).unwrap_err();
+    assert!(
+        matches!(err, LayoutError::UnsupportedDeadKey { dead: '¸', .. }),
+        "{err:?}"
+    );
+    assert_eq!(
+        err.to_string(),
+        "layout `cedilla`: dead key `¸` has no known composition"
+    );
+}

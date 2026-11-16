@@ -230,6 +230,10 @@ impl Pools<'_> {
             .chain(self.filler)
             .map(|w| w.chars().count());
         let (shortest, longest) = lengths.fold((usize::MAX, 0), |(a, b), n| (a.min(n), b.max(n)));
+        // Both pools empty (an `allowed` set rejecting every word): no sentence can be built.
+        if shortest == usize::MAX {
+            return None;
+        }
         let mut words: Vec<&str> = Vec::with_capacity(count);
         let mut used = 0;
         for (i, &target) in kinds.iter().enumerate() {

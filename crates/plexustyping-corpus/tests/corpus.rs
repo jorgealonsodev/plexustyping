@@ -214,3 +214,12 @@ fn allowed_set_without_sentence_matches_still_generates() {
         assert!(allowed.contains(&c), "{c:?} not allowed in {text}");
     }
 }
+
+#[test]
+fn allowed_set_rejecting_every_word_returns_empty_text() {
+    for targets in [&[][..], &['ñ'][..]] {
+        let mut opts = options(targets, 50..80, 7);
+        opts.allowed = Some(BTreeSet::from(['@']));
+        assert_eq!(es().generate(&opts), "");
+    }
+}
