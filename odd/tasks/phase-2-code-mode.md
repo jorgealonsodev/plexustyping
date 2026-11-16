@@ -1,0 +1,30 @@
+# Feature: PlexusTyping — Phase 2 (code mode) + AI hardening
+
+Source: `PRD-PlexusTyping.v0.1.md` phase 2. Branch: `feat/phase-2-code-mode` (stacked on `feat/phase-1b-ai-metronome`).
+Delivery: `chain_strategy=feature-branch-chain`. Forecast: ~3,000 authored lines (excluding snippet data).
+
+## Specs
+
+- **S1 — Languages.** RF3: "**Lenguajes:** Python, JavaScript, TypeScript, Java, C#, C++, C, Go, Rust, PHP, SQL, Bash, HTML/CSS, Kotlin y Swift."
+- **S2 — Snippets.** RF3: "La IA genera fragmentos de 5–20 líneas realistas (funciones, bucles, consultas) cargados con los símbolos débiles del usuario: `{} [] () <> ; : = -> => && || \" ' _ # $`." / "Corpus local de respaldo con fragmentos por lenguaje."
+- **S3 — Highlighting.** RF3: "Resaltado de sintaxis según el tema activo (tree-sitter o `syntect` en Rust)." RF9: "Cada tema define: ... colores de sintaxis para el modo código."
+- **S4 — Indentation and keys.** RF3: "Sangría: escribir los espacios a mano o sangría automática al pulsar Enter." / "Enter y Tab cuentan como teclas medidas."
+- **S5 — Separate stats.** RF3: "Estadísticas separadas del modo texto (los símbolos no contaminan las métricas de prosa)." PRD §7 `sessions.lenguaje_código`, `char_stats.modo`.
+- **S6 — Use case.** PRD §3: "**Código:** elige Rust o Python y practica fragmentos con sus símbolos débiles."
+- **S7 — AI hardening (phase 1B leftovers, L10 of `phase-1b-ai-metronome.md`).** `Endpoints::loopback` unreachable from production builds; HTTPS-only client outside tests; an overall deadline for a generation across the fallback chain so the corpus answers in bounded time; a size limit for `text_cache`. PRD §6: "sin acceso a red salvo los 4 proveedores"; §2: "Latencia hasta mostrar el siguiente texto | < 2 s (precarga en segundo plano)".
+
+## Tasks
+
+| ID | Specs | Route | Status | Commit |
+| --- | --- | --- | --- | --- |
+| T1 | S4 | Core: newline/tab chars, auto-indent mode in `replay` + TS mirror + shared fixtures — writer A (parallel) | pending | — |
+| T2 | S1, S2 | Corpus: original code snippets for 15 languages + code generator by weak symbols — writer B (parallel) | pending | — |
+| T3 | S3 | New crate `plexustyping-highlight` (syntect + two-face, fancy-regex): tokens with semantic classes — writer C (parallel) | pending | — |
+| T4 | S7 | AI hardening — writer D (parallel) | pending | — |
+| T5 | S1–S6 | Integration: mode/language selector, code rendering with highlighting, Enter/Tab/auto-indent capture, AI code mode, per-mode stats, theme syntax colours — writer E | pending | — |
+| T6 | all | Close: suite, real-app check, review/verify, Trello | pending | — |
+
+## Log
+
+- **L1 (user, verbatim):** "continua con lo que consideres mas optimo" (after phase 1B). Native-review decision of phase 1B left to the user (recommended: keep the independent verification).
+- **L2 (decisions):** phase 2 is next per PRD roadmap; AI hardening runs in parallel (disjoint files). Highlighting in Rust per S3 with `syntect` 5.3 + `two-face` 0.5 (bat syntaxes; covers TypeScript, Kotlin, Swift) using `fancy-regex` (pure Rust, no Oniguruma C build); tokenized once per text, never per keystroke; the frontend maps semantic classes to theme CSS variables. Code stats use mode `code` (all languages share symbol stats; per-language split later if needed); `sessions.code_language` records the language. Auto-indent: after an Enter, the next line's leading whitespace is filled automatically and not measured; manual mode measures every space. Parallel writers: only T3 adds dependencies → only T3 touches `Cargo.lock`.

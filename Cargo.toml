@@ -17,6 +17,7 @@ plexustyping-corpus = { path = "crates/plexustyping-corpus" }
 plexustyping-store = { path = "crates/plexustyping-store" }
 plexustyping-audio = { path = "crates/plexustyping-audio" }
 plexustyping-ai = { path = "crates/plexustyping-ai" }
+plexustyping-highlight = { path = "crates/plexustyping-highlight" }
 rusqlite = { version = "0.40", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -31,3 +32,5 @@ tokio = { version = "1", features = ["rt", "macros", "time", "net", "io-util", "
 async-trait = "0.1"
 keyring = "4.2"
 keyring-core = "1.0"
+syntect = { version = "5.3", default-features = false, features = ["default-syntaxes", "regex-fancy", "parsing"] }
+two-face = { version = "0.5", default-features = false, features = ["syntect-fancy"] }
