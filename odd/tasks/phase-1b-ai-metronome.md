@@ -12,6 +12,7 @@ Delivery: `chain_strategy=feature-branch-chain`. Forecast: ~2,000 authored lines
 - **S5 — Privacy.** §6: "a la IA solo se envían caracteres objetivo, idioma y tema, nunca lo que escribe el usuario".
 - **S6 — Latency.** §2: "Latencia hasta mostrar el siguiente texto | < 2 s (precarga en segundo plano)". §4: "El siguiente texto se pide en segundo plano mientras el usuario escribe el actual, para no esperar."
 - **S7 — Fixed metronome.** RF6: "**Fijo:** de 30 a 300 BPM, un clic = una pulsación esperada." / "Sonidos a elegir (clic, madera, bip), volumen y acento cada N pulsaciones." / "Indicador visual de ritmo y métrica de desvío: cuántos ms antes o después del clic cae cada tecla." / "Audio con baja latencia desde Rust (`rodio` o `cpal`), no desde la web." Data model: `keystrokes.desvío_metrónomo_ms`, `sessions.BPM`. (Adaptive metronome is phase 3.)
+- **S8 — Settings modal.** User: "hay que crear un icono de ajustes que abra una modal de ajustes".
 
 ## Tasks
 
@@ -21,6 +22,7 @@ Delivery: `chain_strategy=feature-branch-chain`. Forecast: ~2,000 authored lines
 | T2 | S1, S3, S4, S5 | New crate `plexustyping-ai`: `TextProvider` + 4 providers, prompt, JSON parse, validation, fallback chain, usage — writer B (parallel) | pending | — |
 | T3 | S2, S3, S6 | Integration: keychain, provider settings UI + test connection, schema v2 `text_cache` + usage, background prefetch, fallback to corpus — writer C | pending | — |
 | T4 | S7 | Integration: metronome commands, UI controls, visual beat, per-keystroke offset stored — writer D | pending | — |
+| T6 | S8 | Settings modal: gear icon in the header opens a modal with sectioned settings (Práctica, Teclado, Apariencia; IA and Metrónomo sections added by T3/T4) — writer E (parallel with T2) | pending | — |
 | T5 | all | Close: suite, real-app check, verify (credentials, network), Trello | pending | — |
 
 ## Log
@@ -30,3 +32,4 @@ Delivery: `chain_strategy=feature-branch-chain`. Forecast: ~2,000 authored lines
 - **L3 (decisions):** network calls only from Rust (`reqwest` + rustls), never the WebView; host allowlist = api.anthropic.com, api.openai.com, generativelanguage.googleapis.com, opencode.ai. Default models are editable suggestions, overridden by `list_models` where available. Schema v1 already exists on the user's machine → `text_cache` and usage counters come as a proper v2 migration.
 - **L4 (T1 evidence):** `plexustyping-audio` (cpal 0.18 on its own thread, atomics config, allocation-free callback, sample-accurate `BeatClock`); 12 tests + 1 ignored device test (passed on this host). `started_at` excludes device output latency (a few ms).
 - **L5 (user, verbatim):** "mira como implementa la ia /mnt/1tb/Repos/Personal/20261019_plexusterm/20261019_plexusterm_git/PlexusTerm igual hay cosas que te sirven" (first T2 writer cancelled by the user; then "continua, le di esc sin querer"). Explorer findings adopted: request = plain `Call {url, headers, body, shape}` + `parse(shape)` instead of per-provider HTTP code; error kinds NoKey/Auth/RateLimit/Network/Timeout/Refused/BadResponse/Config with key masking; redirects disabled; redacting `ApiKey` Debug; native JSON-schema output per provider (Anthropic `output_config.format`, OpenAI strict `json_schema` + `max_completion_tokens`, Gemini `responseSchema`); Gemini bad key = 400 `API_KEY_INVALID` → Auth; keychain behind a `SecretStore` trait called via `spawn_blocking`; hand-written loopback mock server. **OpenCode Go inference base is `https://opencode.ai/inference/go/v1`** (PlexusTerm working code + its user guide), not the PRD's `/zen/go/v1`; per-model format (chat / messages / responses) from models.dev `["opencode-go"].models[id].provider.npm`, every request with `x-opencode-session`. MSRV 1.85: no let-chains.
+- **L6 (user, verbatim):** "hay que crear un icono de ajustes que abra una modal de ajustes" → S8/T6; replaces the header selects and the "Ajustes" popover from phase 1A.
