@@ -33,6 +33,11 @@ pub use validate::{BASELINE_PER_CHAR, ValidationIssue, validate};
 /// Default per-request timeout (PRD RF2: 10 s).
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 
+/// Default total time for one [`AiClient::generate_with_fallback`] call
+/// across the whole chain; afterwards the caller falls back to the local
+/// cache and corpus (PRD §2: next text in under 2 s with background preload).
+pub const DEFAULT_DEADLINE: Duration = Duration::from_secs(15);
+
 /// Supported text providers.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -328,6 +333,8 @@ pub struct Endpoints {
     pub(crate) opencode_go: String,
     /// Full models.dev catalogue URL.
     pub(crate) models_dev: String,
+    /// Plain `http://` allowed; only [`Endpoints::loopback`] sets it.
+    pub(crate) allow_http: bool,
 }
 
 impl Endpoints {
@@ -339,11 +346,18 @@ impl Endpoints {
             openai: "https://api.openai.com/v1".into(),
             opencode_go: "https://opencode.ai/inference/go/v1".into(),
             models_dev: "https://models.dev/api.json".into(),
+            allow_http: false,
         }
     }
 
     /// Test-only: every root under `base` (e.g. `http://127.0.0.1:PORT`), with
-    /// the production paths (`/v1`, `/v1beta`, `/inference/go/v1`, `/api.json`).
+    /// the production paths (`/v1`, `/v1beta`, `/inference/go/v1`, `/api.json`),
+    /// plain http allowed.
+    ///
+    /// Exists only under `cfg(test)` or the `test-endpoints` feature, which
+    /// dependents enable in `[dev-dependencies]` only: production builds
+    /// cannot name it, so they can only reach [`Endpoints::production`].
+    #[cfg(any(test, feature = "test-endpoints"))]
     #[doc(hidden)]
     pub fn loopback(base: &str) -> Self {
         let base = base.trim_end_matches('/');
@@ -353,6 +367,7 @@ impl Endpoints {
             openai: format!("{base}/v1"),
             opencode_go: format!("{base}/inference/go/v1"),
             models_dev: format!("{base}/api.json"),
+            allow_http: true,
         }
     }
 }

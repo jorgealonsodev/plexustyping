@@ -5,6 +5,7 @@ mod common;
 use common::{Reply, chat_reply, config, mock, small_request, text_json};
 use plexustyping_ai::{ProviderError, ProviderId, ValidationIssue};
 use serde_json::json;
+use std::time::{Duration, Instant};
 
 const OPENAI: &str = "/v1/chat/completions";
 const GEMINI: &str = "/v1beta/models/gemini-3.5-flash-lite:generateContent";
@@ -148,4 +149,39 @@ async fn empty_chain_fails_without_requests() {
 
     assert!(errors.is_empty());
     assert!(server.requests().is_empty());
+}
+
+#[tokio::test]
+async fn the_deadline_skips_the_remaining_providers_with_timeout() {
+    let server = mock(vec![
+        (
+            OPENAI,
+            chat_reply(&text_json("Zapatos azules")).delayed(Duration::from_secs(3)),
+        ),
+        (GEMINI, gemini_reply("Zorro")),
+    ])
+    .await;
+    let deadline = Duration::from_millis(300);
+    let client = server.client().with_deadline(deadline);
+
+    let started = Instant::now();
+    let errors = client
+        .generate_with_fallback(&chain(), &small_request())
+        .await
+        .unwrap_err();
+
+    assert!(
+        started.elapsed() < deadline + Duration::from_millis(500),
+        "{:?}",
+        started.elapsed()
+    );
+    assert_eq!(
+        errors,
+        vec![
+            (ProviderId::Openai, ProviderError::Timeout),
+            (ProviderId::Gemini, ProviderError::Timeout),
+        ]
+    );
+    assert_eq!(server.hits(OPENAI), 1);
+    assert_eq!(server.hits(GEMINI), 0, "later providers are not contacted");
 }

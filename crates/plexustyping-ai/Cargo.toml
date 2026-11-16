@@ -13,7 +13,14 @@ reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+tokio.workspace = true
 unicode-normalization.workspace = true
 
+[features]
+# Exposes `Endpoints::loopback` (plain-http mock servers). Enable it only in
+# `[dev-dependencies]`: production builds must not be able to name it.
+test-endpoints = []
+
 [dev-dependencies]
-tokio.workspace = true
+# The integration tests in `tests/` use `Endpoints::loopback`.
+plexustyping-ai = { path = ".", features = ["test-endpoints"] }

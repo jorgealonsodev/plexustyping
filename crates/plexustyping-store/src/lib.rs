@@ -115,6 +115,9 @@ CREATE TABLE ai_usage (
 /// Schema version this build creates and understands.
 const SUPPORTED_VERSION: i64 = MIGRATIONS.len() as i64;
 
+/// Most rows kept in `text_cache`; see [`Store::cache_text`].
+pub const TEXT_CACHE_LIMIT: usize = 500;
+
 /// How long a file connection waits for another connection's lock.
 pub const BUSY_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(2);
 
@@ -582,11 +585,14 @@ impl Store {
 
 impl Store {
     /// Stores a generated text and returns its id; a `used` text gets the
-    /// most recent use.
+    /// most recent use. Then keeps at most [`TEXT_CACHE_LIMIT`] rows: the
+    /// least recently used used texts go first, unused ones (oldest first)
+    /// only when no used text is left.
     pub fn cache_text(&self, t: &NewCachedText) -> Result<i64> {
         let targets =
             serde_json::to_string(t.targets).map_err(|e| StoreError::InvalidData(e.to_string()))?;
-        self.conn.execute(
+        let tx = self.conn.unchecked_transaction()?;
+        tx.execute(
             "INSERT INTO text_cache (provider, model, language, mode, targets, text,
                  created_at_ms, used, last_used)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
@@ -602,7 +608,15 @@ impl Store {
                 t.used
             ],
         )?;
-        Ok(self.conn.last_insert_rowid())
+        let id = tx.last_insert_rowid();
+        tx.execute(
+            "DELETE FROM text_cache WHERE id IN (
+                 SELECT id FROM text_cache ORDER BY used DESC, last_used, id
+                 LIMIT MAX(0, (SELECT COUNT(*) FROM text_cache) - ?1))",
+            [TEXT_CACHE_LIMIT as i64],
+        )?;
+        tx.commit()?;
+        Ok(id)
     }
 
     /// A cached text of `language` and `mode`, marked used: the unused text

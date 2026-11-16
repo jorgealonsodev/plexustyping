@@ -35,4 +35,7 @@ serde.workspace = true
 serde_json.workspace = true
 
 [dev-dependencies]
+# Test-only `Endpoints::loopback`; never enable `test-endpoints` in
+# `[dependencies]`, so release code cannot reach a non-provider host.
+plexustyping-ai = { workspace = true, features = ["test-endpoints"] }
 rusqlite.workspace = true

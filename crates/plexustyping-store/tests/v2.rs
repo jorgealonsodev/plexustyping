@@ -3,7 +3,9 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use plexustyping_store::{CachedText, NewCachedText, Store, StoreError, UsageRow};
+use plexustyping_store::{
+    CachedText, NewCachedText, Store, StoreError, TEXT_CACHE_LIMIT, UsageRow,
+};
 
 /// Fresh directory under the system temp dir, removed on drop.
 struct TempDir(PathBuf);
@@ -308,4 +310,58 @@ fn record_usage_rejects_counts_that_do_not_fit() {
         Err(StoreError::InvalidData(_))
     ));
     assert_eq!(store.usage_totals("2026-11-16").unwrap(), vec![]);
+}
+
+/// The text cached for `language` (prose), marking it used.
+fn take_in(store: &Store, language: &str) -> Option<String> {
+    store
+        .take_cached_text(language, "prose", &[])
+        .unwrap()
+        .map(|c| c.text)
+}
+
+/// `n` unused Spanish fillers.
+fn fill(store: &Store, n: usize) {
+    for i in 0..n {
+        cache(store, "es", &["z"], &format!("filler {i}"), false);
+    }
+}
+
+#[test]
+fn the_cache_keeps_every_text_up_to_the_limit() {
+    let store = Store::open_in_memory().unwrap();
+    cache(&store, "en", &["z"], "oldest", false);
+    fill(&store, TEXT_CACHE_LIMIT - 1);
+    assert_eq!(take_in(&store, "en").as_deref(), Some("oldest"));
+}
+
+#[test]
+fn over_the_limit_the_least_recently_used_used_text_goes_first() {
+    assert_eq!(TEXT_CACHE_LIMIT, 500);
+    let store = Store::open_in_memory().unwrap();
+    cache(&store, "en", &["z"], "used first", true);
+    cache(&store, "fr", &["z"], "used second", true);
+    fill(&store, TEXT_CACHE_LIMIT - 1);
+    assert_eq!(take_in(&store, "en"), None);
+    assert_eq!(take_in(&store, "fr").as_deref(), Some("used second"));
+}
+
+#[test]
+fn unused_texts_outlive_a_newer_used_one() {
+    let store = Store::open_in_memory().unwrap();
+    cache(&store, "de", &["z"], "oldest unused", false);
+    fill(&store, TEXT_CACHE_LIMIT - 1);
+    cache(&store, "en", &["z"], "newest used", true);
+    assert_eq!(take_in(&store, "en"), None);
+    assert_eq!(take_in(&store, "de").as_deref(), Some("oldest unused"));
+}
+
+#[test]
+fn when_every_text_is_unused_the_oldest_goes() {
+    let store = Store::open_in_memory().unwrap();
+    cache(&store, "en", &["z"], "first", false);
+    cache(&store, "fr", &["z"], "second", false);
+    fill(&store, TEXT_CACHE_LIMIT - 1);
+    assert_eq!(take_in(&store, "en"), None);
+    assert_eq!(take_in(&store, "fr").as_deref(), Some("second"));
 }

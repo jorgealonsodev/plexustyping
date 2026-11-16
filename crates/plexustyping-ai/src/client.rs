@@ -5,8 +5,8 @@ use std::time::{Duration, Instant};
 use crate::opencode::{Catalog, MAX_CATALOGUE_BYTES, formats_from_models_dev};
 use crate::providers::{Wire, build, list_request, new_session_id, parse, parse_models};
 use crate::{
-    ApiKey, DEFAULT_TIMEOUT, Endpoints, Generated, GenerationRequest, ProviderConfig,
-    ProviderError, ProviderId, Usage, build_prompt, parse_text_json, validate,
+    ApiKey, DEFAULT_DEADLINE, DEFAULT_TIMEOUT, Endpoints, Generated, GenerationRequest,
+    ProviderConfig, ProviderError, ProviderId, Usage, build_prompt, parse_text_json, validate,
 };
 
 /// The common provider interface (PRD RF2 `TextProvider`), implemented by
@@ -36,15 +36,18 @@ const MAX_REPLY_BYTES: usize = 4 * 1024 * 1024;
 /// The cheapest generation, used to check an OpenCode Go key.
 const PING_PROMPT: &str = "Responde solo con JSON: {\"text\": \"ok\"}";
 
-/// HTTP client for the four providers: redirects off (keys are never re-sent
-/// to another host), 5 s connect timeout, fixed [`Endpoints`], and the
-/// in-memory OpenCode Go format catalogue.
+/// HTTP client for the four providers: HTTPS only, redirects off (keys are
+/// never re-sent to another host), 5 s connect timeout, fixed [`Endpoints`],
+/// an overall deadline per fallback chain, and the in-memory OpenCode Go
+/// format catalogue.
 pub struct AiClient {
     http: Result<reqwest::Client, String>,
     endpoints: Endpoints,
     catalog: Catalog,
     /// OpenCode Go session id used when a config has none.
     session: String,
+    /// Total time for one [`AiClient::generate_with_fallback`] call.
+    deadline: Duration,
 }
 
 impl AiClient {
@@ -54,6 +57,7 @@ impl AiClient {
             .user_agent(USER_AGENT)
             .redirect(reqwest::redirect::Policy::none())
             .connect_timeout(Duration::from_secs(5))
+            .https_only(!endpoints.allow_http)
             .build()
             .map_err(|err| err.to_string());
         AiClient {
@@ -61,7 +65,21 @@ impl AiClient {
             endpoints,
             catalog: Catalog::default(),
             session: new_session_id(),
+            deadline: DEFAULT_DEADLINE,
         }
+    }
+
+    /// The same client with `deadline` as the total time of one
+    /// [`AiClient::generate_with_fallback`] call.
+    pub fn with_deadline(mut self, deadline: Duration) -> Self {
+        self.deadline = deadline;
+        self
+    }
+
+    /// Total time of one [`AiClient::generate_with_fallback`] call
+    /// ([`DEFAULT_DEADLINE`] unless set with [`AiClient::with_deadline`]).
+    pub fn deadline(&self) -> Duration {
+        self.deadline
     }
 
     /// Builds the prompt from `req` (only its fields are sent), calls the
@@ -121,17 +139,29 @@ impl AiClient {
     /// gets one retry when its text fails validation
     /// ([`ProviderError::Invalid`]) or the reply is malformed
     /// ([`ProviderError::BadResponse`]); any other error moves to the next
-    /// one. When all fail, every attempt's error is returned in order (empty
-    /// for an empty chain); falling back to the local corpus is the caller's job.
+    /// one. The whole call ends within [`AiClient::deadline`]: the attempt
+    /// running when it expires fails with [`ProviderError::Timeout`], and so
+    /// does every remaining provider, without a request. When all fail, every
+    /// attempt's error is returned in order (empty for an empty chain);
+    /// falling back to the local corpus is the caller's job.
     pub async fn generate_with_fallback(
         &self,
         chain: &[ProviderConfig],
         req: &GenerationRequest,
     ) -> Result<Generated, Vec<(ProviderId, ProviderError)>> {
+        let end = Instant::now() + self.deadline;
         let mut errors = Vec::new();
         for cfg in chain {
             for attempt in 0..2 {
-                match self.generate(cfg, req).await {
+                let left = end.saturating_duration_since(Instant::now());
+                let result = if left.is_zero() {
+                    Err(ProviderError::Timeout)
+                } else {
+                    tokio::time::timeout(left, self.generate(cfg, req))
+                        .await
+                        .unwrap_or(Err(ProviderError::Timeout))
+                };
+                match result {
                     Ok(generated) => return Ok(generated),
                     Err(err) => {
                         let retry = attempt == 0
@@ -275,5 +305,50 @@ impl TextProvider for AiClient {
 
     async fn test_connection(&self, cfg: &ProviderConfig) -> Result<(), ProviderError> {
         AiClient::test_connection(self, cfg).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{GenerationRequest, Mode};
+
+    #[tokio::test]
+    async fn production_client_refuses_plain_http_before_connecting() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        let endpoints = Endpoints {
+            openai: format!("{base}/v1"),
+            ..Endpoints::production()
+        };
+        let mut cfg = ProviderConfig::new(ProviderId::Openai, ApiKey::new("sk-x").unwrap());
+        cfg.timeout = Duration::from_secs(2);
+        let req = GenerationRequest {
+            language: "es".into(),
+            mode: Mode::Prose,
+            targets: vec!["z".into()],
+            density: 3.0,
+            length: 5..60,
+            allowed_chars: "abcz".into(),
+            topic: None,
+        };
+
+        let err = AiClient::new(endpoints)
+            .generate(&cfg, &req)
+            .await
+            .unwrap_err();
+
+        assert!(matches!(err, ProviderError::Network { .. }), "{err:?}");
+        let accepted = tokio::time::timeout(Duration::from_millis(200), listener.accept()).await;
+        assert!(accepted.is_err(), "no connection may reach the http host");
+    }
+
+    #[test]
+    fn the_default_deadline_bounds_the_whole_chain() {
+        assert_eq!(DEFAULT_DEADLINE, Duration::from_secs(15));
+        let client = AiClient::new(Endpoints::production());
+        assert_eq!(client.deadline(), DEFAULT_DEADLINE);
+        let short = client.with_deadline(Duration::from_millis(5));
+        assert_eq!(short.deadline(), Duration::from_millis(5));
     }
 }
