@@ -13,8 +13,8 @@ const key = (k: string, mods: Partial<Record<"ctrlKey" | "altKey" | "metaKey" | 
 });
 
 describe("settings sections", () => {
-  it("lists Práctica, Teclado and Apariencia in order, each with a unique id and a component", () => {
-    expect(SECTIONS.map((s) => s.label)).toEqual(["Práctica", "Teclado", "Apariencia"]);
+  it("lists Práctica, Teclado, Apariencia and IA in order, each with a unique id and a component", () => {
+    expect(SECTIONS.map((s) => s.label)).toEqual(["Práctica", "Teclado", "Apariencia", "IA"]);
     expect(new Set(SECTIONS.map((s) => s.id)).size).toBe(SECTIONS.length);
     for (const s of SECTIONS) expect(s.component).toBeTypeOf("function");
   });

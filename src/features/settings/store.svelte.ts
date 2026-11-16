@@ -27,6 +27,12 @@ export class SettingsStore {
   heatmap = $state(loadHeatmap());
   targetCount = $state(loadTargetCount());
   textLength = $state(loadTextLength());
+  /** Bumped whenever AI settings or keys change: a prefetched next text is then stale. */
+  aiRevision = $state(0);
+
+  bumpAi() {
+    this.aiRevision++;
+  }
 
   /** Changing the mode restarts the current text (the practice screen watches it). */
   setMode(next: ErrorMode) {

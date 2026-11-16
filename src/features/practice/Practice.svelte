@@ -19,6 +19,7 @@
   } from "./api";
   import { type ErrorMode, type InputEvent as TypingEvent, TypingSession, acceptsInput, keyAction, textToEvents } from "./engine";
   import { focusTyping, setTypingField } from "./focus";
+  import { Prefetcher, generationKey, provisionalFailedChars, sourceLabel } from "./prefetch";
   import Results from "./Results.svelte";
 
   let {
@@ -29,6 +30,7 @@
     heatmap,
     targetCount,
     textLength,
+    aiRevision,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -37,6 +39,8 @@
     heatmap: boolean;
     targetCount: number;
     textLength: number;
+    /** Changes when AI settings or keys change. */
+    aiRevision: number;
   } = $props();
 
   type Phase = "loading" | "typing" | "scoring" | "results" | "error";
@@ -45,6 +49,13 @@
   // Weak units the current text practises, and whether it is the diagnostic text.
   let targets = $state.raw<string[]>([]);
   let diagnostic = $state(false);
+  // Origin of the current text, and why the AI was not used (when enabled).
+  let source = $state("");
+  let notice = $state<string | null>(null);
+  let loadingLabel = $state("Cargando texto…");
+  // The next text, requested in the background while this one is typed (S6).
+  const prefetch = new Prefetcher<PracticeText>();
+  const genKey = $derived(generationKey(targetCount, textLength, aiRevision));
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
   let session = $state.raw<TypingSession | null>(null);
@@ -85,8 +96,9 @@
     tick++;
   }
 
-  async function load(fetch: () => Promise<PracticeText>, again: () => void) {
+  async function load(fetch: () => Promise<PracticeText>, again: () => void, label = "Cargando texto…") {
     const id = ++run;
+    loadingLabel = label;
     phase = "loading";
     try {
       const next = await fetch();
@@ -94,6 +106,8 @@
       text = next.text;
       targets = next.targets;
       diagnostic = next.diagnostic ?? false;
+      source = sourceLabel(next);
+      notice = next.notice ?? null;
       restart();
     } catch (err) {
       if (id !== run) return;
@@ -107,13 +121,27 @@
     void load(firstText, loadFirst);
   }
 
-  // Settings are read here, so a change affects the next text only.
+  const randomSeed = () => Math.floor(Math.random() * 2 ** 32);
+
+  // Settings are read here, so a change affects the next text only. A prefetched text made
+  // with the same settings is used (awaited if still pending); otherwise one is requested now.
   function loadNext() {
     const fallback = scored?.failedChars ?? [];
-    const seed = Math.floor(Math.random() * 2 ** 32);
+    const seed = randomSeed();
     const [count, length] = [targetCount, textLength];
-    const again = () => void load(() => nextText(seed, count, length, fallback), again);
-    again();
+    const fresh = () => nextText(seed, count, length, fallback);
+    const again = () => void load(fresh, again, "Generando texto…");
+    const ready = prefetch.take(genKey);
+    if (ready) void load(() => ready.catch(fresh), again, "Generando texto…");
+    else again();
+  }
+
+  // Not while the diagnostic is typed: the model is empty until it is scored.
+  function startPrefetch() {
+    if (!session || diagnostic) return;
+    const fallback = provisionalFailedChars(session.result().records);
+    const [count, length] = [targetCount, textLength];
+    prefetch.start(genKey, () => nextText(randomSeed(), count, length, fallback));
   }
 
   // Weaknesses and heatmap scores from the stored model; missing ones only hide those views.
@@ -152,9 +180,11 @@
   function applyEvent(event: TypingEvent) {
     if (phase !== "typing" || !session) return;
     const expected = session.chars[session.cursor];
+    const first = session.firstT === null;
     if (!session.apply(event)) return;
     now = event.tMs;
     tick++;
+    if (first) startPrefetch();
     if (event.kind === "char" && flashes && layout) {
       const code = keyForChar(layout, event.ch);
       if (code) flash = { code, ok: event.ch === expected };
@@ -238,6 +268,14 @@
     refocusIfLost();
   });
 
+  // New generation settings make a held prefetch stale: request again if a text is under way.
+  $effect(() => {
+    void genKey;
+    untrack(() => {
+      if (phase === "typing" && session?.firstT != null) startPrefetch();
+    });
+  });
+
   // Changing the error mode restarts the current text.
   $effect(() => {
     void mode;
@@ -298,7 +336,7 @@
     {/if}
 
     {#if phase === "loading"}
-      <p class="status">Cargando texto…</p>
+      <p class="status">{loadingLabel}</p>
     {:else if phase === "error"}
       <div class="status" role="alert">
         <p>{message}</p>
@@ -308,12 +346,13 @@
       <Results {scored} {weak} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
       <p class="kind">
-        {diagnostic ? "Texto de diagnóstico" : "Texto adaptativo"}
+        {source}
         {#if targets.length > 0}
           · Practicando:
           {#each targets as t, i (i)}{#if i > 0}<span class="sep">·</span>{/if}<kbd>{charLabel(t)}</kbd>{/each}
         {/if}
       </p>
+      {#if notice}<p class="notice" role="status">{notice}</p>{/if}
       <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
       <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
             class="ch {view.states[i]}"
@@ -429,6 +468,11 @@
     margin: 0 0 -0.75rem;
     font-size: 0.85rem;
     color: var(--muted);
+  }
+  .notice {
+    margin: 0 0 -0.75rem;
+    font-size: 0.8rem;
+    color: var(--warning);
   }
   .kind kbd {
     display: inline-block;
