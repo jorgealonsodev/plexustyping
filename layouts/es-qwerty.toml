@@ -1,0 +1,216 @@
+# Spanish (Spain) ISO keyboard layout.
+# Keys are `KeyboardEvent.code` values; layers are `normal`, `shift` and `altgr`.
+name = "Español QWERTY"
+dead_keys = ["´", "`", "^", "¨"]
+
+# Number row
+[keys.Backquote]
+normal = "º"
+shift = "ª"
+altgr = "\\"
+
+[keys.Digit1]
+normal = "1"
+shift = "!"
+altgr = "|"
+
+[keys.Digit2]
+normal = "2"
+shift = "\""
+altgr = "@"
+
+[keys.Digit3]
+normal = "3"
+shift = "·"
+altgr = "#"
+
+[keys.Digit4]
+normal = "4"
+shift = "$"
+altgr = "~"
+
+[keys.Digit5]
+normal = "5"
+shift = "%"
+
+[keys.Digit6]
+normal = "6"
+shift = "&"
+altgr = "¬"
+
+[keys.Digit7]
+normal = "7"
+shift = "/"
+
+[keys.Digit8]
+normal = "8"
+shift = "("
+
+[keys.Digit9]
+normal = "9"
+shift = ")"
+
+[keys.Digit0]
+normal = "0"
+shift = "="
+
+[keys.Minus]
+normal = "'"
+shift = "?"
+
+[keys.Equal]
+normal = "¡"
+shift = "¿"
+
+# Top row
+[keys.KeyQ]
+normal = "q"
+shift = "Q"
+
+[keys.KeyW]
+normal = "w"
+shift = "W"
+
+[keys.KeyE]
+normal = "e"
+shift = "E"
+altgr = "€"
+
+[keys.KeyR]
+normal = "r"
+shift = "R"
+
+[keys.KeyT]
+normal = "t"
+shift = "T"
+
+[keys.KeyY]
+normal = "y"
+shift = "Y"
+
+[keys.KeyU]
+normal = "u"
+shift = "U"
+
+[keys.KeyI]
+normal = "i"
+shift = "I"
+
+[keys.KeyO]
+normal = "o"
+shift = "O"
+
+[keys.KeyP]
+normal = "p"
+shift = "P"
+
+# ` and ^ are dead keys.
+[keys.BracketLeft]
+normal = "`"
+shift = "^"
+altgr = "["
+
+[keys.BracketRight]
+normal = "+"
+shift = "*"
+altgr = "]"
+
+# Home row
+[keys.KeyA]
+normal = "a"
+shift = "A"
+
+[keys.KeyS]
+normal = "s"
+shift = "S"
+
+[keys.KeyD]
+normal = "d"
+shift = "D"
+
+[keys.KeyF]
+normal = "f"
+shift = "F"
+
+[keys.KeyG]
+normal = "g"
+shift = "G"
+
+[keys.KeyH]
+normal = "h"
+shift = "H"
+
+[keys.KeyJ]
+normal = "j"
+shift = "J"
+
+[keys.KeyK]
+normal = "k"
+shift = "K"
+
+[keys.KeyL]
+normal = "l"
+shift = "L"
+
+[keys.Semicolon]
+normal = "ñ"
+shift = "Ñ"
+
+# ´ and ¨ are dead keys.
+[keys.Quote]
+normal = "´"
+shift = "¨"
+altgr = "{"
+
+[keys.Backslash]
+normal = "ç"
+shift = "Ç"
+altgr = "}"
+
+# Bottom row
+[keys.IntlBackslash]
+normal = "<"
+shift = ">"
+
+[keys.KeyZ]
+normal = "z"
+shift = "Z"
+
+[keys.KeyX]
+normal = "x"
+shift = "X"
+
+[keys.KeyC]
+normal = "c"
+shift = "C"
+
+[keys.KeyV]
+normal = "v"
+shift = "V"
+
+[keys.KeyB]
+normal = "b"
+shift = "B"
+
+[keys.KeyN]
+normal = "n"
+shift = "N"
+
+[keys.KeyM]
+normal = "m"
+shift = "M"
+
+[keys.Comma]
+normal = ","
+shift = ";"
+
+[keys.Period]
+normal = "."
+shift = ":"
+
+[keys.Slash]
+normal = "-"
+shift = "_"
+
+[keys.Space]
+normal = " "
