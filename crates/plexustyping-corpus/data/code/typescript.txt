@@ -1,0 +1,130 @@
+%% typescript
+interface Task {
+    id: number;
+    title: string;
+    done: boolean;
+    tags?: string[];
+}
+
+function pending(tasks: Task[]): Task[] {
+    return tasks.filter((task) => !task.done);
+}
+
+%% typescript
+type Result<T, E = Error> =
+    | { ok: true; value: T }
+    | { ok: false; error: E };
+
+function parseNumber(input: string): Result<number> {
+    const value = Number(input);
+    return Number.isNaN(value)
+        ? { ok: false, error: new Error(`not a number: ${input}`) }
+        : { ok: true, value };
+}
+
+%% typescript
+class Cache<K, V> {
+    private readonly entries = new Map<K, V>();
+
+    constructor(private readonly capacity: number) {}
+
+    get(key: K): V | undefined {
+        return this.entries.get(key);
+    }
+
+    set(key: K, value: V): void {
+        if (this.entries.size >= this.capacity && !this.entries.has(key)) {
+            const oldest = this.entries.keys().next().value as K;
+            this.entries.delete(oldest);
+        }
+        this.entries.set(key, value);
+    }
+}
+
+%% typescript
+enum Level {
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
+
+function log(level: Level, message: string, minimum = Level.Info): void {
+    if (level < minimum) {
+        return;
+    }
+    console.log(`[${Level[level]}] ${new Date().toISOString()} ${message}`);
+}
+
+%% typescript
+async function loadAll<T>(urls: string[]): Promise<T[]> {
+    const responses = await Promise.all(urls.map((url) => fetch(url)));
+    const failed = responses.find((r) => !r.ok);
+    if (failed !== undefined) {
+        throw new Error(`HTTP ${failed.status} for ${failed.url}`);
+    }
+    return Promise.all(responses.map((r) => r.json() as Promise<T>));
+}
+
+%% typescript
+type Shape =
+    | { kind: 'circle'; radius: number }
+    | { kind: 'rect'; width: number; height: number };
+
+function area(shape: Shape): number {
+    switch (shape.kind) {
+        case 'circle':
+            return Math.PI * shape.radius ** 2;
+        case 'rect':
+            return shape.width * shape.height;
+    }
+}
+
+%% typescript
+function pick<T extends object, K extends keyof T>(
+    source: T,
+    keys: readonly K[],
+): Pick<T, K> {
+    const target = {} as Pick<T, K>;
+    for (const key of keys) {
+        target[key] = source[key];
+    }
+    return target;
+}
+
+%% typescript
+const scores: Record<string, number> = { ana: 92, luis: 78, marta: 85 };
+
+const ranking = Object.entries(scores)
+    .sort(([, a], [, b]) => b - a)
+    .map(([player, points], index) => `${index + 1}. ${player}: ${points}`);
+
+ranking.forEach((line) => console.log(line));
+
+%% typescript
+function validatePassword(password: string): string[] {
+    const problems: string[] = [];
+    if (password.length < 12) {
+        problems.push('at least 12 characters');
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password)) {
+        problems.push('upper and lower case letters');
+    }
+    if (!/[0-9_#$]/.test(password)) {
+        problems.push('a digit or one of _ # $');
+    }
+    return problems;
+}
+
+%% typescript
+export class EventBus<Events extends Record<string, unknown>> {
+    private handlers: { [E in keyof Events]?: ((p: Events[E]) => void)[] } = {};
+
+    on<E extends keyof Events>(event: E, fn: (p: Events[E]) => void): void {
+        (this.handlers[event] ??= []).push(fn);
+    }
+
+    emit<E extends keyof Events>(event: E, payload: Events[E]): void {
+        this.handlers[event]?.forEach((fn) => fn(payload));
+    }
+}

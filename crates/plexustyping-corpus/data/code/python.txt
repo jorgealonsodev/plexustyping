@@ -1,0 +1,126 @@
+%% python
+def average_score(scores: list[float]) -> float:
+    """Return the mean of the scores, or 0.0 when there are none."""
+    if not scores:
+        return 0.0
+    total = 0.0
+    for value in scores:
+        total += value
+    return total / len(scores)
+
+%% python
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Inventory:
+    items: dict[str, int] = field(default_factory=dict)
+
+    def add(self, name: str, amount: int = 1) -> None:
+        self.items[name] = self.items.get(name, 0) + amount
+
+    def remove(self, name: str) -> bool:
+        if self.items.get(name, 0) <= 0:
+            return False
+        self.items[name] -= 1
+        return True
+
+%% python
+import json
+from pathlib import Path
+
+
+def load_settings(path: Path) -> dict:
+    # Fall back to defaults when the file is missing or broken.
+    defaults = {"theme": "dark", "font_size": 14, "sound": True}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return defaults
+    return {**defaults, **data}
+
+%% python
+def word_counts(text: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for raw in text.split():
+        word = raw.strip(".,;:!?'\"").lower()
+        if word:
+            counts[word] = counts.get(word, 0) + 1
+    return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
+
+%% python
+def binary_search(values: list[int], target: int) -> int:
+    low, high = 0, len(values) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if values[mid] == target:
+            return mid
+        if values[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+
+%% python
+class RateLimiter:
+    def __init__(self, limit: int, window: float) -> None:
+        self._limit = limit
+        self._window = window
+        self._calls: list[float] = []
+
+    def allow(self, now: float) -> bool:
+        start = now - self._window
+        self._calls = [t for t in self._calls if t > start]
+        if len(self._calls) >= self._limit:
+            return False
+        self._calls.append(now)
+        return True
+
+%% python
+import csv
+
+
+def read_orders(path: str) -> list[dict[str, str]]:
+    orders = []
+    with open(path, newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            if row["status"] != "cancelled":
+                row["total"] = f"{float(row['total']):.2f}"
+                orders.append(row)
+    return orders
+
+%% python
+def chunked(items: list, size: int) -> list[list]:
+    if size <= 0:
+        raise ValueError(f"size must be positive, got {size!r}")
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+
+print(chunked([1, 2, 3, 4, 5], 2))  # [[1, 2], [3, 4], [5]]
+
+%% python
+def fibonacci_memo(n: int, cache: dict[int, int] | None = None) -> int:
+    cache = {} if cache is None else cache
+    if n < 2:
+        return n
+    if n not in cache:
+        cache[n] = fibonacci_memo(n - 1, cache) + fibonacci_memo(n - 2, cache)
+    return cache[n]
+
+
+assert fibonacci_memo(30) == 832040
+
+%% python
+import re
+
+EMAIL = re.compile(r"^[\w.+-]+@[\w-]+\.[a-z]{2,}$", re.IGNORECASE)
+
+
+def valid_emails(candidates: list[str]) -> list[str]:
+    seen = set()
+    result = []
+    for email in map(str.strip, candidates):
+        if EMAIL.match(email) and email not in seen:
+            seen.add(email)
+            result.append(email)
+    return result

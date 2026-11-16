@@ -1,0 +1,107 @@
+%% sql
+SELECT c.name, COUNT(o.id) AS orders, SUM(o.total) AS spent
+FROM customers AS c
+LEFT JOIN orders AS o ON o.customer_id = c.id
+WHERE c.created_at >= '2024-01-01'
+GROUP BY c.name
+HAVING COUNT(o.id) > 3
+ORDER BY spent DESC
+LIMIT 10;
+
+%% sql
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    sku VARCHAR(32) NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+    stock INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+%% sql
+UPDATE accounts
+SET balance = balance - 50.00,
+    updated_at = now()
+WHERE id = $1
+    AND balance >= 50.00
+    AND status <> 'frozen'
+RETURNING id, balance;
+
+%% sql
+WITH monthly AS (
+    SELECT date_trunc('month', paid_at) AS month,
+        SUM(amount) AS revenue
+    FROM payments
+    WHERE status = 'paid'
+    GROUP BY 1
+)
+SELECT month,
+    revenue,
+    revenue - LAG(revenue) OVER (ORDER BY month) AS change
+FROM monthly
+ORDER BY month;
+
+%% sql
+SELECT e.first_name || ' ' || e.last_name AS full_name,
+    d.name AS department,
+    e.salary
+FROM employees e
+JOIN departments d ON d.id = e.department_id
+WHERE e.salary > (
+    SELECT AVG(salary) FROM employees WHERE department_id = e.department_id
+)
+ORDER BY d.name, e.salary DESC;
+
+%% sql
+INSERT INTO sessions (user_id, language, wpm, accuracy, started_at)
+VALUES
+    ($1, 'rust', 62.5, 0.97, now()),
+    ($1, 'python', 70.1, 0.95, now() - INTERVAL '1 day')
+ON CONFLICT (user_id, started_at)
+DO UPDATE SET wpm = EXCLUDED.wpm, accuracy = EXCLUDED.accuracy;
+
+%% sql
+SELECT p.title,
+    p.data ->> 'author' AS author,
+    (p.data -> 'stats' ->> 'views')::int AS views
+FROM posts p
+WHERE p.data ? 'author'
+    AND p.published = true
+ORDER BY views DESC NULLS LAST;
+
+%% sql
+CREATE OR REPLACE FUNCTION add_points(p_user INT, p_amount INT)
+RETURNS INT AS $$
+DECLARE
+    new_total INT;
+BEGIN
+    UPDATE scores SET total = total + p_amount
+    WHERE user_id = p_user
+    RETURNING total INTO new_total;
+    RETURN new_total;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT add_points(p_user => 7, p_amount => 15);
+
+%% sql
+SELECT product_id,
+    quantity,
+    CASE
+        WHEN quantity = 0 THEN 'out of stock'
+        WHEN quantity < 10 THEN 'low'
+        ELSE 'ok'
+    END AS stock_level
+FROM inventory
+WHERE warehouse_id IN (1, 2, 5)
+ORDER BY quantity ASC;
+
+%% sql
+DELETE FROM audit_log
+WHERE created_at < now() - INTERVAL '90 days'
+    AND level NOT IN ('error', 'critical');
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_created
+    ON audit_log (created_at);
+
+ANALYZE audit_log;

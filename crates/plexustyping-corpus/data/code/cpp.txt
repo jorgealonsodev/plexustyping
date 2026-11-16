@@ -1,0 +1,147 @@
+%% cpp
+#include <algorithm>
+#include <string>
+#include <vector>
+
+std::vector<std::string> sortedUnique(std::vector<std::string> words) {
+    std::sort(words.begin(), words.end());
+    auto last = std::unique(words.begin(), words.end());
+    words.erase(last, words.end());
+    return words;
+}
+
+%% cpp
+template <typename T>
+class Stack {
+public:
+    void push(const T& value) { items_.push_back(value); }
+
+    T pop() {
+        T top = items_.back();
+        items_.pop_back();
+        return top;
+    }
+
+    bool empty() const { return items_.empty(); }
+
+private:
+    std::vector<T> items_;
+};
+
+%% cpp
+#include <fstream>
+#include <map>
+
+std::map<std::string, int> countWords(const std::string& path) {
+    std::ifstream input(path);
+    std::map<std::string, int> counts;
+    std::string word;
+    while (input >> word) {
+        ++counts[word];
+    }
+    return counts;
+}
+
+%% cpp
+struct Node {
+    int value;
+    Node* next = nullptr;
+};
+
+int listLength(const Node* head) {
+    int length = 0;
+    for (const Node* node = head; node != nullptr; node = node->next) {
+        ++length;
+    }
+    return length;
+}
+
+%% cpp
+auto makeCounter() {
+    int count = 0;
+    return [count]() mutable -> int { return ++count; };
+}
+
+int main() {
+    auto next = makeCounter();
+    for (int i = 0; i < 3; ++i) {
+        std::cout << "tick " << next() << '\n';
+    }
+    return 0;
+}
+
+%% cpp
+class Matrix {
+public:
+    Matrix(std::size_t rows, std::size_t cols)
+        : rows_(rows), cols_(cols), data_(rows * cols, 0.0) {}
+
+    double& operator()(std::size_t r, std::size_t c) {
+        return data_[r * cols_ + c];
+    }
+
+    std::size_t rows() const { return rows_; }
+
+private:
+    std::size_t rows_, cols_;
+    std::vector<double> data_;
+};
+
+%% cpp
+#include <memory>
+
+class Logger {
+public:
+    virtual ~Logger() = default;
+    virtual void write(const std::string& line) = 0;
+};
+
+class ConsoleLogger : public Logger {
+public:
+    void write(const std::string& line) override {
+        std::cout << "[log] " << line << std::endl;
+    }
+};
+
+auto logger = std::make_unique<ConsoleLogger>();
+
+%% cpp
+bool isPalindrome(const std::string& text) {
+    std::size_t left = 0;
+    std::size_t right = text.empty() ? 0 : text.size() - 1;
+    while (left < right) {
+        if (!std::isalnum(text[left])) { ++left; continue; }
+        if (!std::isalnum(text[right])) { --right; continue; }
+        if (std::tolower(text[left]) != std::tolower(text[right])) {
+            return false;
+        }
+        ++left;
+        --right;
+    }
+    return true;
+}
+
+%% cpp
+#include <optional>
+#include <unordered_map>
+
+std::optional<int> findPort(
+    const std::unordered_map<std::string, int>& services,
+    const std::string& name) {
+    auto it = services.find(name);
+    if (it == services.end() || it->second <= 0) {
+        return std::nullopt;
+    }
+    return it->second;
+}
+
+%% cpp
+#include <numeric>
+
+double weightedAverage(const std::vector<double>& values,
+        const std::vector<double>& weights) {
+    double total = std::inner_product(values.begin(), values.end(),
+        weights.begin(), 0.0);
+    double sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+    return sum > 0.0 && !values.empty() ? total / sum : 0.0;
+}

@@ -1,0 +1,144 @@
+%% csharp
+public static double Median(IReadOnlyList<double> values)
+{
+    if (values.Count == 0)
+    {
+        throw new ArgumentException("No values", nameof(values));
+    }
+    var sorted = values.OrderBy(v => v).ToArray();
+    int mid = sorted.Length / 2;
+    return sorted.Length % 2 == 0
+        ? (sorted[mid - 1] + sorted[mid]) / 2.0
+        : sorted[mid];
+}
+
+%% csharp
+public record Product(string Name, decimal Price, int Stock);
+
+var products = new List<Product>
+{
+    new("Keyboard", 49.90m, 12),
+    new("Mouse", 19.50m, 0),
+    new("Monitor", 189.00m, 4),
+};
+
+foreach (var p in products.Where(p => p.Stock > 0).OrderBy(p => p.Price))
+{
+    Console.WriteLine($"{p.Name,-10} {p.Price,8:C}");
+}
+
+%% csharp
+public async Task<string?> DownloadAsync(HttpClient client, Uri uri)
+{
+    using var response = await client.GetAsync(uri);
+    if (!response.IsSuccessStatusCode)
+    {
+        _logger.LogWarning("GET {Uri} returned {Code}", uri,
+            (int)response.StatusCode);
+        return null;
+    }
+    return await response.Content.ReadAsStringAsync();
+}
+
+%% csharp
+public class Thermostat
+{
+    private double _target = 21.0;
+
+    public double Target
+    {
+        get => _target;
+        set => _target = Math.Clamp(value, 5.0, 30.0);
+    }
+
+    public bool ShouldHeat(double current) => current < _target - 0.5;
+}
+
+%% csharp
+#nullable enable
+public static Dictionary<char, int> LetterFrequency(string text)
+{
+    var counts = new Dictionary<char, int>();
+    foreach (char c in text.ToLowerInvariant())
+    {
+        if (!char.IsLetter(c)) continue;
+        counts[c] = counts.TryGetValue(c, out var n) ? n + 1 : 1;
+    }
+    return counts;
+}
+
+%% csharp
+string Classify(object input) => input switch
+{
+    null => "nothing",
+    int n when n < 0 => "negative number",
+    int n => $"number {n}",
+    string { Length: 0 } => "empty text",
+    string s => $"text '{s}'",
+    _ => input.GetType().Name,
+};
+
+%% csharp
+public interface IRepository<T> where T : class
+{
+    Task<T?> FindAsync(int id);
+    Task AddAsync(T entity);
+}
+
+public sealed class MemoryRepository<T> : IRepository<T> where T : class
+{
+    private readonly Dictionary<int, T> _items = new();
+    private int _nextId = 1;
+
+    public Task<T?> FindAsync(int id) =>
+        Task.FromResult(_items.TryGetValue(id, out var item) ? item : null);
+
+    public Task AddAsync(T entity)
+    {
+        _items[_nextId++] = entity;
+        return Task.CompletedTask;
+    }
+}
+
+%% csharp
+var lines = File.ReadAllLines("access.log");
+var topPaths = lines
+    .Select(line => line.Split(' '))
+    .Where(parts => parts.Length > 8 && parts[8] == "404")
+    .GroupBy(parts => parts[6])
+    .OrderByDescending(g => g.Count())
+    .Take(5);
+
+foreach (var group in topPaths)
+{
+    Console.WriteLine($"{group.Count(),5} {group.Key}");
+}
+
+%% csharp
+public static IEnumerable<int> Primes(int limit)
+{
+    var composite = new bool[limit + 1];
+    for (int i = 2; i <= limit; i++)
+    {
+        if (composite[i]) continue;
+        yield return i;
+        for (long j = (long)i * i; j <= limit; j += i)
+        {
+            composite[j] = true;
+        }
+    }
+}
+
+%% csharp
+public event EventHandler<int>? ScoreChanged;
+private int _score;
+
+public void AddPoints(int points)
+{
+    if (points <= 0 && _score == 0)
+    {
+        return;
+    }
+    _score = Math.Max(0, _score + points);
+    ScoreChanged?.Invoke(this, _score);
+}

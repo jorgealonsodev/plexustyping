@@ -1,0 +1,129 @@
+%% swift
+func average(_ values: [Double]) -> Double? {
+    guard !values.isEmpty else { return nil }
+    var total = 0.0
+    for value in values {
+        total += value
+    }
+    return total / Double(values.count)
+}
+
+%% swift
+struct Temperature {
+    var celsius: Double
+
+    var fahrenheit: Double {
+        get { celsius * 9 / 5 + 32 }
+        set { celsius = (newValue - 32) * 5 / 9 }
+    }
+}
+
+var today = Temperature(celsius: 21)
+today.fahrenheit = 75
+print("Celsius: \(today.celsius)")
+
+%% swift
+enum Direction: String, CaseIterable {
+    case north, east, south, west
+
+    var opposite: Direction {
+        switch self {
+        case .north: return .south
+        case .east: return .west
+        case .south: return .north
+        case .west: return .east
+        }
+    }
+}
+
+%% swift
+let scores = ["ana": 92, "luis": 78, "marta": 85]
+
+let ranking = scores
+    .sorted { $0.value > $1.value }
+    .enumerated()
+    .map { "\($0.offset + 1). \($0.element.key): \($0.element.value)" }
+
+ranking.forEach { print($0) }
+
+%% swift
+protocol Shape {
+    func area() -> Double
+}
+
+struct Circle: Shape {
+    let radius: Double
+    func area() -> Double { .pi * radius * radius }
+}
+
+struct Rectangle: Shape {
+    let width: Double, height: Double
+    func area() -> Double { width * height }
+}
+
+%% swift
+enum NetworkError: Error {
+    case badStatus(Int)
+}
+
+func fetchData(from url: URL) async throws -> Data {
+    let (data, response) = try await URLSession.shared.data(from: url)
+    guard let http = response as? HTTPURLResponse,
+        (200..<300).contains(http.statusCode) else {
+        throw NetworkError.badStatus(
+            (response as? HTTPURLResponse)?.statusCode ?? -1)
+    }
+    return data
+}
+
+%% swift
+final class Stack<Element> {
+    private var items: [Element] = []
+
+    func push(_ item: Element) {
+        items.append(item)
+    }
+
+    func pop() -> Element? {
+        items.popLast()
+    }
+
+    var isEmpty: Bool { items.isEmpty }
+}
+
+%% swift
+func isValidUsername(_ name: String) -> Bool {
+    let underscore = CharacterSet(charactersIn: "_")
+    let allowed = CharacterSet.alphanumerics.union(underscore)
+    return name.count >= 3
+        && name.count <= 20
+        && name.unicodeScalars.allSatisfy { allowed.contains($0) }
+}
+
+#if DEBUG
+print(isValidUsername("swift_dev"))
+#endif
+
+%% swift
+struct Todo: Codable {
+    let id: Int
+    var title: String
+    var done: Bool
+}
+
+let json = #"[{"id": 1, "title": "Buy milk", "done": false}]"#
+let todos = try JSONDecoder().decode([Todo].self, from: Data(json.utf8))
+let pending = todos.filter { !$0.done || $0.title.isEmpty }
+print("Pending: \(pending.count)")
+
+%% swift
+func wordFrequency(in text: String) -> [String: Int] {
+    var counts: [String: Int] = [:]
+    let words = text.lowercased()
+        .split { !$0.isLetter && $0 != "'" }
+        .map(String.init)
+    for word in words {
+        counts[word, default: 0] += 1
+    }
+    return counts
+}

@@ -1,0 +1,120 @@
+%% javascript
+function debounce(fn, delay = 250) {
+    let timer = null;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+const onResize = debounce(() => console.log(window.innerWidth));
+window.addEventListener('resize', onResize);
+
+%% javascript
+async function fetchUser(id) {
+    const response = await fetch(`/api/users/${id}`);
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+    const { name, email, roles = [] } = await response.json();
+    return { id, name, email, isAdmin: roles.includes('admin') };
+}
+
+%% javascript
+const groupBy = (items, key) =>
+    items.reduce((groups, item) => {
+        const value = item[key] ?? 'unknown';
+        (groups[value] ||= []).push(item);
+        return groups;
+    }, {});
+
+const byCity = groupBy(people, 'city');
+console.log(Object.keys(byCity).length);
+
+%% javascript
+class Counter {
+    #count = 0;
+
+    increment(step = 1) {
+        this.#count += step;
+        return this;
+    }
+
+    get value() {
+        return this.#count;
+    }
+}
+
+console.log(new Counter().increment().increment(5).value);
+
+%% javascript
+function renderList(container, todos) {
+    container.innerHTML = '';
+    for (const todo of todos) {
+        const li = document.createElement('li');
+        li.textContent = todo.title;
+        if (todo.done && !todo.archived) {
+            li.classList.add('done');
+        }
+        container.appendChild(li);
+    }
+}
+
+%% javascript
+const cart = [
+    { sku: 'A1', price: 12.5, qty: 2 },
+    { sku: 'B7', price: 3.99, qty: 10 },
+    { sku: 'C3', price: 45, qty: 1 },
+];
+
+const subtotal = cart
+    .filter((line) => line.qty > 0)
+    .map((line) => line.price * line.qty)
+    .reduce((sum, amount) => sum + amount, 0);
+console.log(`Subtotal: $${subtotal.toFixed(2)}`);
+
+%% javascript
+function parseQuery(search) {
+    const params = {};
+    for (const pair of search.replace(/^\?/, '').split('&')) {
+        if (!pair) continue;
+        const [key, value = ''] = pair.split('=');
+        params[decodeURIComponent(key)] = decodeURIComponent(value);
+    }
+    return params;
+}
+
+%% javascript
+function retry(task, attempts = 3) {
+    return task().catch((error) => {
+        if (attempts <= 1 || error.fatal === true) {
+            throw error;
+        }
+        return new Promise((resolve) => setTimeout(resolve, 500))
+            .then(() => retry(task, attempts - 1));
+    });
+}
+
+%% javascript
+const storage = {
+    read(key, fallback = null) {
+        const stored = localStorage.getItem(key);
+        return stored === null ? fallback : JSON.parse(stored);
+    },
+    write(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    },
+};
+
+storage.write('stored_level', storage.read('stored_level', 1) + 1);
+
+%% javascript
+function formatDuration(ms) {
+    const total = Math.round(ms / 1000);
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return minutes > 0 || seconds > 0
+        ? `${pad(minutes)}:${pad(seconds)}`
+        : '00:00';
+}

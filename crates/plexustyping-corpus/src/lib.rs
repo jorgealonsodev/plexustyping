@@ -2,7 +2,12 @@
 //!
 //! Each language bundles a frequency-ordered word list, everyday sentences and
 //! a diagnostic text, embedded at compile time. [`Corpus::generate`] builds
-//! practice text from them without any network or AI service.
+//! practice text from them without any network or AI service. Code mode
+//! bundles original snippets per programming language; see [`generate_code`].
+
+mod code;
+
+pub use code::{CodeLanguage, CodeOptions, Snippet, code_languages, code_snippets, generate_code};
 
 use std::collections::BTreeSet;
 use std::ops::Range;

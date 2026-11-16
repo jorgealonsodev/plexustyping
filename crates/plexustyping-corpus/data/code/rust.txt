@@ -1,0 +1,141 @@
+%% rust
+fn mean(values: &[f64]) -> Option<f64> {
+    if values.is_empty() {
+        return None;
+    }
+    let sum: f64 = values.iter().sum();
+    Some(sum / values.len() as f64)
+}
+
+%% rust
+#[derive(Debug, Clone, PartialEq)]
+enum Command {
+    Move { x: i32, y: i32 },
+    Say(String),
+    Quit,
+}
+
+fn describe(command: &Command) -> String {
+    match command {
+        Command::Move { x, y } => format!("move to ({x}, {y})"),
+        Command::Say(text) => format!("say '{text}'"),
+        Command::Quit => "quit".to_string(),
+    }
+}
+
+%% rust
+use std::collections::HashMap;
+
+fn word_counts(text: &str) -> HashMap<&str, usize> {
+    let mut counts = HashMap::new();
+    for word in text.split_whitespace() {
+        *counts.entry(word).or_insert(0) += 1;
+    }
+    counts
+}
+
+%% rust
+pub struct Fibonacci {
+    current: u64,
+    next: u64,
+}
+
+impl Iterator for Fibonacci {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.current;
+        self.current = self.next;
+        self.next = self.next.checked_add(value)?;
+        Some(value)
+    }
+}
+
+%% rust
+use std::fs;
+use std::io;
+
+fn read_numbers(path: &str) -> io::Result<Vec<i64>> {
+    let text = fs::read_to_string(path)?;
+    let numbers = text
+        .lines()
+        .filter(|line| !line.trim().is_empty() && !line.starts_with('#'))
+        .filter_map(|line| line.trim().parse().ok())
+        .collect();
+    Ok(numbers)
+}
+
+%% rust
+fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
+    if a.chars().count() >= b.chars().count() { a } else { b }
+}
+
+#[test]
+fn picks_the_longer_word() {
+    assert_eq!(longest("tecla", "teclado"), "teclado");
+    assert_eq!(longest("", "x"), "x");
+}
+
+%% rust
+trait Shape {
+    fn area(&self) -> f64;
+}
+
+struct Square(f64);
+struct Circle(f64);
+
+impl Shape for Square {
+    fn area(&self) -> f64 { self.0 * self.0 }
+}
+
+impl Shape for Circle {
+    fn area(&self) -> f64 { std::f64::consts::PI * self.0 * self.0 }
+}
+
+fn total_area(shapes: &[Box<dyn Shape>]) -> f64 {
+    shapes.iter().map(|s| s.area()).sum()
+}
+
+%% rust
+macro_rules! square_all {
+    ($($x:expr),* $(,)?) => {
+        [$($x * $x),*]
+    };
+}
+
+fn main() {
+    let squares = square_all![1, 2, 3, 4];
+    println!("{squares:?}");
+}
+
+%% rust
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+let total = Arc::new(Mutex::new(0_u32));
+let handles: Vec<_> = (1..=4)
+    .map(|n| {
+        let total = Arc::clone(&total);
+        thread::spawn(move || *total.lock().unwrap() += n)
+    })
+    .collect();
+for handle in handles {
+    handle.join().unwrap();
+}
+
+%% rust
+#[derive(Debug)]
+pub enum ParseError {
+    Empty,
+    Invalid(char),
+}
+
+pub fn parse_digits(input: &str) -> Result<Vec<u8>, ParseError> {
+    if input.is_empty() {
+        return Err(ParseError::Empty);
+    }
+    input
+        .chars()
+        .map(|c| c.to_digit(10).map(|d| d as u8).ok_or(ParseError::Invalid(c)))
+        .collect()
+}

@@ -1,0 +1,116 @@
+%% bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+backup_dir="${HOME}/backups/$(date +%Y-%m-%d)"
+mkdir -p "$backup_dir"
+for file in "$@"; do
+    cp -- "$file" "$backup_dir/"
+    echo "copied $file"
+done
+
+%% bash
+count_extensions() {
+    local dir="${1:-.}"
+    find "$dir" -type f -name '*.*' \
+        | sed 's/.*\.//' \
+        | sort \
+        | uniq -c \
+        | sort -rn \
+        | head -n 10
+}
+
+%% bash
+declare -A ports=([http]=80 [https]=443 [ssh]=22)
+
+for name in "${!ports[@]}"; do
+    printf '%-6s => %s\n' "$name" "${ports[$name]}"
+done
+
+if [[ -n "${ports[ssh]:-}" && ${ports[ssh]} -lt 1024 ]]; then
+    echo "ssh uses a privileged port"
+fi
+
+%% bash
+wait_for_port() {
+    local host=$1 port=$2 tries=${3:-30}
+    while (( tries > 0 )); do
+        if nc -z "$host" "$port" 2>/dev/null; then
+            return 0
+        fi
+        tries=$(( tries - 1 ))
+        sleep 1
+    done
+    echo "timeout waiting for $host:$port" >&2
+    return 1
+}
+
+%% bash
+log() {
+    local level=$1
+    shift
+    printf '[%s] %s %s\n' "$level" "$(date +%H:%M:%S)" "$*" >&2
+}
+
+log INFO "starting deploy"
+git pull --ff-only || { log ERROR "pull failed"; exit 1; }
+log INFO "done"
+
+%% bash
+total=0
+while IFS=, read -r name qty price; do
+    [[ $name == "name" ]] && continue
+    line=$(echo "$qty * $price" | bc)
+    total=$(echo "$total + $line" | bc)
+    echo "$name: $line"
+done < orders.csv
+echo "total: $total"
+
+%% bash
+case "${1:-}" in
+    start)
+        systemctl start myapp && echo "started"
+        ;;
+    stop)
+        systemctl stop myapp && echo "stopped"
+        ;;
+    status|'')
+        systemctl --no-pager status myapp
+        ;;
+    *)
+        echo "usage: $0 {start|stop|status}" >&2
+        exit 2
+        ;;
+esac
+
+%% bash
+files=(src/*.rs)
+echo "found ${#files[@]} files"
+
+for ((i = 0; i < ${#files[@]}; i++)); do
+    lines=$(wc -l < "${files[$i]}")
+    if (( lines > 300 )); then
+        echo "${files[$i]} is long ($lines lines)"
+    fi
+done
+
+%% bash
+cleanup() {
+    rm -f -- "$tmp_file"
+}
+trap cleanup EXIT
+
+tmp_file=$(mktemp)
+curl -fsSL "https://example.com/data.json" -o "$tmp_file"
+jq -r '.items[] | select(.active) | .name' "$tmp_file" | sort -u
+
+%% bash
+read -rp "Project name: " project
+if [[ ! $project =~ ^[a-z][a-z0-9_-]*$ ]]; then
+    echo "invalid name: '$project'" >&2
+    exit 1
+fi
+
+mkdir -p "$project"/{src,tests,docs}
+cat > "$project/README.md" <<< "# $project"
+echo "created $project"

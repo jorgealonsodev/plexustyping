@@ -1,0 +1,116 @@
+%% kotlin
+fun average(values: List<Double>): Double? {
+    if (values.isEmpty()) return null
+    var total = 0.0
+    for (value in values) {
+        total += value
+    }
+    return total / values.size
+}
+
+%% kotlin
+data class Book(val title: String, val author: String, val year: Int)
+
+val books = listOf(
+    Book("Dune", "Frank Herbert", 1965),
+    Book("Kindred", "Octavia Butler", 1979),
+    Book("Neuromancer", "William Gibson", 1984),
+)
+
+val recent = books.filter { it.year >= 1970 }.map { it.title }
+println("Recent: $recent")
+
+%% kotlin
+fun grade(score: Int): String = when {
+    score >= 90 -> "A"
+    score >= 75 -> "B"
+    score >= 60 -> "C"
+    else -> "F"
+}
+
+for (s in listOf(95, 80, 42)) {
+    println("$s -> ${grade(s)}")
+}
+
+%% kotlin
+sealed interface Result<out T> {
+    data class Success<T>(val value: T) : Result<T>
+    data class Failure(val error: Throwable) : Result<Nothing>
+}
+
+fun <T> attempt(block: () -> T): Result<T> =
+    try {
+        Result.Success(block())
+    } catch (e: Exception) {
+        Result.Failure(e)
+    }
+
+%% kotlin
+class Counter(private var count: Int = 0) {
+    fun increment(step: Int = 1): Counter {
+        require(step > 0) { "step must be positive" }
+        count += step
+        return this
+    }
+
+    val value: Int
+        get() = count
+}
+
+%% kotlin
+fun String.isPalindrome(): Boolean {
+    val clean = filter { it.isLetterOrDigit() }.lowercase()
+    return clean == clean.reversed()
+}
+
+fun main() {
+    val words = arrayOf("level", "kotlin", "A man, a plan, a canal: Panama")
+    words.forEach { println("'$it' palindrome: ${it.isPalindrome()}") }
+}
+
+%% kotlin
+suspend fun loadProfile(api: Api, id: Long): Profile = coroutineScope {
+    val user = async { api.user(id) }
+    val posts = async { api.posts(id) }
+    Profile(user.await(), posts.await())
+}
+
+fun main() = runBlocking {
+    val profile = loadProfile(FakeApi(), 42)
+    println(profile)
+}
+
+%% kotlin
+val inventory = mutableMapOf("apples" to 3, "pears" to 0, "plums" to 12)
+
+inventory["pears"] = inventory.getOrDefault("pears", 0) + 5
+inventory.remove("apples")
+
+val lowStock = inventory.filterValues { it < 10 }.keys
+if (lowStock.isNotEmpty() && !inventory.containsKey("apples")) {
+    println("Reorder: ${lowStock.joinToString(", ")}")
+}
+
+%% kotlin
+object Validator {
+    private val emailRegex = Regex("^[\\w.+-]+@[\\w-]+\\.[a-z]{2,}$")
+
+    fun email(input: String?): Boolean =
+        input != null && emailRegex.matches(input.trim())
+
+    fun username(input: String): Boolean =
+        input.length in 3..20 && input.all { it.isLetterOrDigit() || it == '_' }
+}
+
+%% kotlin
+fun fizzBuzz(limit: Int): List<String> =
+    (1..limit).map { n ->
+        when {
+            n % 15 == 0 -> "FizzBuzz"
+            n % 3 == 0 -> "Fizz"
+            n % 5 == 0 -> "Buzz"
+            else -> n.toString()
+        }
+    }
+
+fizzBuzz(15).forEach(::println)

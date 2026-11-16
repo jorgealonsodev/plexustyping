@@ -1,0 +1,127 @@
+%% html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Typing practice</title>
+    <link rel="stylesheet" href="styles/main.css">
+  </head>
+  <body>
+    <main id="app"></main>
+  </body>
+</html>
+
+%% css
+:root {
+  --bg: #1e1f24;
+  --fg: #e6e6e6;
+  --accent: #4fb3ff;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 system-ui, sans-serif;
+}
+
+%% html
+<form action="/signup" method="post" class="signup">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required>
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" minlength="12">
+  <label>
+    <input type="checkbox" name="terms"> I accept the terms
+  </label>
+  <button type="submit">Create account</button>
+</form>
+
+%% css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.card-grid > .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+%% html
+<table class="scores">
+  <thead>
+    <tr><th>Player</th><th>WPM</th><th>Accuracy</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Ana</td><td>72</td><td>98%</td></tr>
+    <tr><td>Luis</td><td>65</td><td>95%</td></tr>
+  </tbody>
+</table>
+
+%% css
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  #main-content {
+    padding: 0 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+%% html
+<nav class="menu" aria-label="Main">
+  <ul>
+    <li><a href="/" aria-current="page">Home</a></li>
+    <li><a href="/practice">Practice</a></li>
+    <li><a href="/stats">Stats</a></li>
+    <li><a href="/settings">Settings</a></li>
+  </ul>
+</nav>
+
+%% css
+.button {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #4fb3ff;
+  transition: background 150ms ease-in-out;
+}
+
+.button:focus-visible,
+.button:hover:not([disabled]) {
+  background: #2b8fe0;
+}
+
+input[type="text"]::placeholder {
+  color: #8a8a8a;
+}
+
+%% html
+<button id="theme-toggle" type="button">Toggle theme</button>
+<script>
+  const toggle = document.querySelector('#theme-toggle');
+  toggle.addEventListener('click', () => {
+    const dark = document.body.classList.toggle('dark');
+    localStorage.setItem('theme', dark && 'dark' || 'light');
+  });
+</script>
+
+%% css
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.caret::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: currentColor;
+  animation: blink 1s steps(1) infinite;
+}

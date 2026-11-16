@@ -1,0 +1,144 @@
+%% go
+func Sum(values []int) int {
+    total := 0
+    for _, v := range values {
+        total += v
+    }
+    return total
+}
+
+%% go
+type Stack[T any] struct {
+    items []T
+}
+
+func (s *Stack[T]) Push(v T) { s.items = append(s.items, v) }
+
+func (s *Stack[T]) Pop() (T, bool) {
+    var zero T
+    if len(s.items) == 0 {
+        return zero, false
+    }
+    v := s.items[len(s.items)-1]
+    s.items = s.items[:len(s.items)-1]
+    return v, true
+}
+
+%% go
+func ReadConfig(path string) (map[string]string, error) {
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return nil, fmt.Errorf("read %q: %w", path, err)
+    }
+    config := make(map[string]string)
+    for _, line := range strings.Split(string(data), "\n") {
+        key, value, ok := strings.Cut(line, "=")
+        if ok && !strings.HasPrefix(key, "#") {
+            config[strings.TrimSpace(key)] = strings.TrimSpace(value)
+        }
+    }
+    return config, nil
+}
+
+%% go
+func worker(id int, jobs <-chan int, results chan<- string) {
+    for job := range jobs {
+        time.Sleep(10 * time.Millisecond)
+        results <- fmt.Sprintf("worker %d finished job %d", id, job)
+    }
+}
+
+func main() {
+    jobs := make(chan int, 5)
+    results := make(chan string, 5)
+    for w := 1; w <= 3; w++ {
+        go worker(w, jobs, results)
+    }
+}
+
+%% go
+type User struct {
+    ID    int64  `json:"id"`
+    Name  string `json:"name"`
+    Email string `json:"email,omitempty"`
+}
+
+func handleUser(w http.ResponseWriter, r *http.Request) {
+    user := User{ID: 7, Name: "Ana"}
+    w.Header().Set("Content-Type", "application/json")
+    if err := json.NewEncoder(w).Encode(user); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+}
+
+%% go
+type Shape interface {
+    Area() float64
+}
+
+type Rect struct{ W, H float64 }
+type Circle struct{ R float64 }
+
+func (r Rect) Area() float64   { return r.W * r.H }
+func (c Circle) Area() float64 { return math.Pi * c.R * c.R }
+
+func TotalArea(shapes ...Shape) (sum float64) {
+    for _, s := range shapes {
+        sum += s.Area()
+    }
+    return
+}
+
+%% go
+func WordFreq(text string) map[string]int {
+    freq := map[string]int{}
+    for _, word := range strings.Fields(strings.ToLower(text)) {
+        word = strings.Trim(word, ".,;:!?'\"")
+        if word != "" {
+            freq[word]++
+        }
+    }
+    for word, n := range freq {
+        fmt.Printf("%s => %d\n", word, n)
+    }
+    return freq
+}
+
+%% go
+type SafeCounter struct {
+    mu     sync.Mutex
+    counts map[string]int
+}
+
+func (c *SafeCounter) Inc(key string) {
+    c.mu.Lock()
+    defer c.mu.Unlock()
+    c.counts[key]++
+}
+
+%% go
+func Retry(attempts int, delay time.Duration, fn func() error) error {
+    var err error
+    for i := 0; i < attempts; i++ {
+        if err = fn(); err == nil {
+            return nil
+        }
+        if i < attempts-1 && delay > 0 {
+            time.Sleep(delay << i)
+        }
+    }
+    return fmt.Errorf("after %d attempts: %w", attempts, err)
+}
+
+%% go
+func Reverse(s string) string {
+    runes := []rune(s)
+    for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+        runes[i], runes[j] = runes[j], runes[i]
+    }
+    return string(runes)
+}
+
+func IsVowel(r rune) bool {
+    return r == 'a' || r == 'e' || r == 'i' || r == 'o' || r == 'u'
+}

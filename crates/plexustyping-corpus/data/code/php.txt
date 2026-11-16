@@ -1,0 +1,145 @@
+%% php
+<?php
+
+function slugify(string $title): string
+{
+    $slug = strtolower(trim($title));
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+    return trim($slug, '-');
+}
+
+echo slugify("Hello World, again!"); // hello-world-again
+
+%% php
+<?php
+
+$prices = ['apple' => 0.5, 'bread' => 1.25, 'milk' => 0.99];
+$total = 0.0;
+
+foreach ($prices as $item => $price) {
+    printf("%-8s %5.2f\n", $item, $price);
+    $total += $price;
+}
+
+echo "Total: " . number_format($total, 2) . PHP_EOL;
+
+%% php
+<?php
+
+final class Temperature
+{
+    public function __construct(private float $celsius)
+    {
+    }
+
+    public function toFahrenheit(): float
+    {
+        return $this->celsius * 9 / 5 + 32;
+    }
+}
+
+$t = new Temperature(21.5);
+echo $t->toFahrenheit();
+
+%% php
+<?php
+
+function findUser(PDO $db, string $email): ?array
+{
+    $stmt = $db->prepare('SELECT id, name FROM users WHERE email = :email');
+    $stmt->execute([':email' => $email]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row === false ? null : $row;
+}
+
+%% php
+<?php
+
+$users = [
+    ['name' => 'Ana', 'age' => 34, 'active' => true],
+    ['name' => 'Luis', 'age' => 19, 'active' => false],
+    ['name' => 'Marta', 'age' => 27, 'active' => true],
+];
+
+$names = array_map(
+    fn ($u) => $u['name'],
+    array_filter($users, fn ($u) => $u['active'] && $u['age'] >= 21)
+);
+
+%% php
+<?php
+
+function validateForm(array $input): array
+{
+    $errors = [];
+    if (empty($input['name'])) {
+        $errors['name'] = 'Name is required';
+    }
+    if (!filter_var($input['email'] ?? '', FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = 'Email is not valid';
+    }
+    return $errors;
+}
+
+%% php
+<?php
+
+interface Notifier
+{
+    public function send(string $to, string $message): bool;
+}
+
+class MailNotifier implements Notifier
+{
+    public function send(string $to, string $message): bool
+    {
+        return mail($to, 'Notice', $message);
+    }
+}
+
+%% php
+<?php
+
+session_start();
+$_SESSION['visits'] = ($_SESSION['visits'] ?? 0) + 1;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['reset'])) {
+    $_SESSION['visits'] = 0;
+}
+
+header('Content-Type: text/plain');
+echo "Visits: {$_SESSION['visits']}";
+
+%% php
+<?php
+
+enum Suit: string
+{
+    case Hearts = 'H';
+    case Spades = 'S';
+
+    public function color(): string
+    {
+        return match ($this) {
+            Suit::Hearts => 'Red',
+            Suit::Spades => 'Black',
+        };
+    }
+}
+
+%% php
+<?php
+
+function readCsv(string $path): array
+{
+    $rows = [];
+    $handle = fopen($path, 'r');
+    if ($handle === false) {
+        throw new RuntimeException("Cannot open $path");
+    }
+    while (($line = fgetcsv($handle)) !== false) {
+        $rows[] = $line;
+    }
+    fclose($handle);
+    return $rows;
+}

@@ -1,0 +1,144 @@
+%% c
+#include <stdio.h>
+
+int main(void) {
+    int celsius;
+    for (celsius = -10; celsius <= 40; celsius += 10) {
+        double fahrenheit = celsius * 9.0 / 5.0 + 32.0;
+        printf("%4d C = %6.1f F\n", celsius, fahrenheit);
+    }
+    return 0;
+}
+
+%% c
+#include <stddef.h>
+
+size_t count_char(const char *text, char wanted) {
+    size_t count = 0;
+    for (; *text != '\0'; text++) {
+        if (*text == wanted) {
+            count++;
+        }
+    }
+    return count;
+}
+
+%% c
+struct point {
+    int x;
+    int y;
+};
+
+int manhattan(const struct point *a, const struct point *b) {
+    int dx = a->x > b->x ? a->x - b->x : b->x - a->x;
+    int dy = a->y > b->y ? a->y - b->y : b->y - a->y;
+    return dx + dy;
+}
+
+%% c
+#include <stdlib.h>
+#include <string.h>
+
+char *duplicate_upper(const char *src) {
+    size_t len = strlen(src);
+    char *copy = malloc(len + 1);
+    if (copy == NULL) {
+        return NULL;
+    }
+    for (size_t i = 0; i <= len; i++) {
+        copy[i] = (src[i] >= 'a' && src[i] <= 'z') ? src[i] - 32 : src[i];
+    }
+    return copy;
+}
+
+%% c
+void bubble_sort(int values[], int n) {
+    int swapped = 1;
+    while (swapped) {
+        swapped = 0;
+        for (int i = 1; i < n; i++) {
+            if (values[i - 1] > values[i]) {
+                int tmp = values[i - 1];
+                values[i - 1] = values[i];
+                values[i] = tmp;
+                swapped = 1;
+            }
+        }
+    }
+}
+
+%% c
+#define MAX_LINE 256
+
+int count_lines(const char *path) {
+    FILE *file = fopen(path, "r");
+    char buffer[MAX_LINE];
+    int lines = 0;
+    if (!file) {
+        perror("fopen");
+        return -1;
+    }
+    while (fgets(buffer, sizeof buffer, file) != NULL) {
+        lines++;
+    }
+    fclose(file);
+    return lines;
+}
+
+%% c
+typedef struct node {
+    int value;
+    struct node *next;
+} node_t;
+
+node_t *push_front(node_t *head, int value) {
+    node_t *node = malloc(sizeof *node);
+    if (node == NULL) {
+        return head;
+    }
+    node->value = value;
+    node->next = head;
+    return node;
+}
+
+%% c
+enum color { RED, GREEN, BLUE, COLOR_COUNT };
+
+static const char *color_names[COLOR_COUNT] = {
+    [RED] = "red",
+    [GREEN] = "green",
+    [BLUE] = "blue",
+};
+
+const char *color_name(enum color c) {
+    return (c >= 0 && c < COLOR_COUNT) ? color_names[c] : "unknown";
+}
+
+%% c
+unsigned int gcd(unsigned int a, unsigned int b) {
+    while (b != 0) {
+        unsigned int r = a % b;
+        a = b;
+        b = r;
+    }
+    return a;
+}
+
+unsigned int lcm(unsigned int a, unsigned int b) {
+    return (a == 0 || b == 0) ? 0 : a / gcd(a, b) * b;
+}
+
+%% c
+#include <ctype.h>
+
+int is_valid_identifier(const char *s) {
+    if (s == NULL || !(isalpha((unsigned char)*s) || *s == '_')) {
+        return 0;
+    }
+    while (*++s) {
+        if (!isalnum((unsigned char)*s) && *s != '_') {
+            return 0;
+        }
+    }
+    return 1;
+}

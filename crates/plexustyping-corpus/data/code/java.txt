@@ -1,0 +1,142 @@
+%% java
+public static int maxSubarraySum(int[] values) {
+    int best = Integer.MIN_VALUE;
+    int current = 0;
+    for (int value : values) {
+        current = Math.max(value, current + value);
+        best = Math.max(best, current);
+    }
+    return best;
+}
+
+%% java
+public record Point(double x, double y) {
+    public double distanceTo(Point other) {
+        double dx = x - other.x();
+        double dy = y - other.y();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public static final Point ORIGIN = new Point(0, 0);
+}
+
+%% java
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+Map<String, Long> countByDepartment(List<Employee> employees) {
+    return employees.stream()
+        .filter(e -> e.active() && e.salary() > 0)
+        .collect(Collectors.groupingBy(
+            Employee::department,
+            Collectors.counting()));
+}
+
+%% java
+public class BankAccount {
+    private final String owner;
+    private long balanceCents;
+
+    public BankAccount(String owner) {
+        this.owner = owner;
+    }
+
+    public void withdraw(long cents) {
+        if (cents <= 0 || cents > balanceCents) {
+            throw new IllegalArgumentException("Invalid amount: " + cents);
+        }
+        balanceCents -= cents;
+    }
+}
+
+%% java
+static boolean isBalanced(String text) {
+    Deque<Character> stack = new ArrayDeque<>();
+    String open = "([{";
+    String close = ")]}";
+    for (char c : text.toCharArray()) {
+        if (open.indexOf(c) >= 0) {
+            stack.push(c);
+        } else if (close.indexOf(c) >= 0) {
+            char expected = open.charAt(close.indexOf(c));
+            if (stack.isEmpty() || stack.pop() != expected) {
+                return false;
+            }
+        }
+    }
+    return stack.isEmpty();
+}
+
+%% java
+public Optional<User> findByEmail(Connection conn, String email)
+        throws SQLException {
+    String sql = "SELECT id, name FROM users WHERE email = ?";
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+        statement.setString(1, email);
+        ResultSet rows = statement.executeQuery();
+        if (!rows.next()) {
+            return Optional.empty();
+        }
+        User user = new User(rows.getLong("id"), rows.getString("name"));
+        return Optional.of(user);
+    }
+}
+
+%% java
+public interface Shape {
+    double area();
+
+    default String describe() {
+        return String.format("%s with area %.2f", getClass().getSimpleName(),
+            area());
+    }
+}
+
+public record Circle(double radius) implements Shape {
+    public double area() { return Math.PI * radius * radius; }
+}
+
+%% java
+ExecutorService pool = Executors.newFixedThreadPool(4);
+List<Future<Integer>> futures = new ArrayList<>();
+for (int i = 1; i <= 10; i++) {
+    final int n = i;
+    futures.add(pool.submit(() -> n * n));
+}
+int sum = 0;
+for (Future<Integer> future : futures) {
+    sum += future.get();
+}
+pool.shutdown();
+
+%% java
+public static String reverseWords(String sentence) {
+    String[] words = sentence.trim().split("\\s+");
+    StringBuilder builder = new StringBuilder();
+    for (int i = words.length - 1; i >= 0; i--) {
+        builder.append(words[i]);
+        if (i > 0) {
+            builder.append(' ');
+        }
+    }
+    return builder.toString();
+}
+
+%% java
+enum Status {
+    ACTIVE("A"), SUSPENDED("S"), CLOSED("C");
+
+    private final String code;
+
+    Status(String code) {
+        this.code = code;
+    }
+
+    static Status fromCode(String code) {
+        return Arrays.stream(values())
+            .filter(s -> s.code.equals(code))
+            .findFirst()
+            .orElseThrow();
+    }
+}
