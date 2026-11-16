@@ -78,17 +78,17 @@ pub(crate) fn valid_session(id: &str) -> bool {
             .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
 }
 
-/// A fresh valid session id (`plexustyping-<time>-<counter>`).
+/// A fresh valid session id (`plexustyping-<128 random bits in hex>`), revealing nothing
+/// about the user or when the app started.
 pub(crate) fn new_session_id() -> String {
-    use std::sync::atomic::{AtomicU64, Ordering};
-    static NEXT: AtomicU64 = AtomicU64::new(0);
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |d| d.as_nanos());
-    format!(
-        "plexustyping-{nanos:x}-{}",
-        NEXT.fetch_add(1, Ordering::Relaxed)
-    )
+    use std::hash::{BuildHasher, Hasher};
+    // Each `RandomState` is seeded from OS randomness; two of them give 128 bits.
+    let random = || {
+        let mut hasher = std::collections::hash_map::RandomState::new().build_hasher();
+        hasher.write_u8(0);
+        hasher.finish()
+    };
+    format!("plexustyping-{:016x}{:016x}", random(), random())
 }
 
 /// `{text: string}`, the only answer accepted (Anthropic and OpenAI strict mode).

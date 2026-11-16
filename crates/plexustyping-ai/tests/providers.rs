@@ -539,3 +539,20 @@ async fn text_provider_trait_delegates_to_the_client() {
 
     assert_eq!(got.text, NORMALIZED);
 }
+
+#[tokio::test]
+async fn a_capped_error_detail_never_keeps_a_key_prefix() {
+    let msg = format!("{} {}", "x".repeat(185), KEY);
+    let body = json!({"error": {"message": msg}}).to_string();
+    let server = mock(vec![("/v1/messages", Reply::status(400, &body))]).await;
+    let err = server
+        .client()
+        .generate(
+            &config(ProviderId::Claude, "claude-haiku-5-5"),
+            &small_request(),
+        )
+        .await
+        .unwrap_err();
+    let shown = format!("{err} {err:?} {}", serde_json::to_string(&err).unwrap());
+    assert!(!shown.contains(&KEY[..10]), "{shown}");
+}

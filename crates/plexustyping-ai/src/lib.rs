@@ -191,13 +191,36 @@ pub enum ProviderError {
     },
 }
 
+/// Shortest key start treated as a leak when a cut message ends with it.
+const MIN_KEY_PREFIX: usize = 4;
+
+/// Masks a start of `key` left at the end of a message cut with `…`.
+fn mask_key(message: &str, key: &str) -> String {
+    let Some(body) = message.strip_suffix('…') else {
+        return message.to_string();
+    };
+    let ends: Vec<usize> = key
+        .char_indices()
+        .map(|(i, _)| i)
+        .skip(MIN_KEY_PREFIX)
+        .collect();
+    for end in ends.into_iter().rev() {
+        if let Some(kept) = body.strip_suffix(&key[..end]) {
+            return format!("{kept}***…");
+        }
+    }
+    message.to_string()
+}
+
 impl ProviderError {
     /// Replaces every occurrence of `key` in the message with `***`.
+    /// Replaces the key in every message, including a start of the key left at the end of
+    /// a message that was cut to its maximum length.
     pub(crate) fn masked(self, key: &str) -> Self {
         if key.is_empty() {
             return self;
         }
-        let mask = |message: String| message.replace(key, "***");
+        let mask = |message: String| mask_key(&message.replace(key, "***"), key);
         match self {
             ProviderError::Auth { message } => ProviderError::Auth {
                 message: mask(message),
@@ -412,6 +435,14 @@ mod tests {
             serde_json::to_value(ProviderError::Timeout).unwrap(),
             serde_json::json!({"kind": "timeout"})
         );
+    }
+
+    #[test]
+    fn masked_hides_a_key_start_left_by_a_cut_message() {
+        let err = ProviderError::config("bad key sk-12…").masked("sk-123456");
+        assert_eq!(err, ProviderError::config("bad key ***…"));
+        let short = ProviderError::config("ends in sk…").masked("sk-123456");
+        assert_eq!(short, ProviderError::config("ends in sk…"));
     }
 
     #[test]
