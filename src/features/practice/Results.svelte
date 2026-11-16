@@ -1,9 +1,15 @@
 <script lang="ts">
-  import type { ScoredSession } from "./api";
+  import { heatLevel } from "../keyboard/heat";
+  import type { ScoredSession, Weakness } from "./api";
   import { focusTyping } from "./focus";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
 
-  let { scored, onNext, onRepeat }: { scored: ScoredSession; onNext: () => void; onRepeat: () => void } = $props();
+  let {
+    scored,
+    weak,
+    onNext,
+    onRepeat,
+  }: { scored: ScoredSession; weak: Weakness[]; onNext: () => void; onRepeat: () => void } = $props();
   const stats = $derived(scored.result.stats);
 
   const focusAnd = (action: () => void) => () => {
@@ -26,9 +32,22 @@
       Caracteres fallados:
       {#each scored.failedChars as c, i (i)}<kbd>{charLabel(c)}</kbd>{/each}
     </p>
-    <p class="note">El siguiente texto practica estos caracteres.</p>
   {:else}
-    <p class="note">Sin fallos. El siguiente texto será de práctica general.</p>
+    <p class="note">Sin fallos.</p>
+  {/if}
+  {#if weak.length > 0}
+    <div class="weak">
+      <h3>Tus puntos débiles</h3>
+      <ol>
+        {#each weak as w (w.unit)}
+          <li><kbd>{charLabel(w.unit)}</kbd><span class="bar"><span class="fill fill-{heatLevel(w.score)}"></span></span></li>
+        {/each}
+      </ol>
+      <p class="note">El siguiente texto los practica.</p>
+    </div>
+  {/if}
+  {#if !scored.saved && scored.saveError}
+    <p class="note" role="status">No se pudo guardar la sesión: {scored.saveError}</p>
   {/if}
   <div class="actions">
     <button type="button" class="primary" onclick={focusAnd(onNext)}>Siguiente texto <kbd>Intro</kbd></button>
@@ -91,6 +110,48 @@
     border: 1px solid var(--key-border);
     border-radius: 0.3em;
   }
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  /* Score bar: classes, not style attributes (CSP), one per tenth. */
+  .bar {
+    width: 4rem;
+    height: 0.4rem;
+    background: var(--surface-2);
+    border-radius: 0.2rem;
+  }
+  .fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--danger);
+    border-radius: inherit;
+  }
+  .fill-1 { width: 10%; }
+  .fill-2 { width: 20%; }
+  .fill-3 { width: 30%; }
+  .fill-4 { width: 40%; }
+  .fill-5 { width: 50%; }
+  .fill-6 { width: 60%; }
+  .fill-7 { width: 70%; }
+  .fill-8 { width: 80%; }
+  .fill-9 { width: 90%; }
+  .fill-10 { width: 100%; }
   .actions {
     display: flex;
     flex-wrap: wrap;

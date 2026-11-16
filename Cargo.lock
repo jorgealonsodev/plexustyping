@@ -2184,6 +2184,7 @@ dependencies = [
  "plexustyping-core",
  "plexustyping-corpus",
  "plexustyping-layouts",
+ "plexustyping-store",
  "serde",
  "serde_json",
  "tauri",

@@ -9,9 +9,9 @@ fn es() -> &'static Corpus {
     corpus("es").expect("Spanish corpus is registered")
 }
 
-fn options(targets: &[char], length: std::ops::Range<usize>, seed: u64) -> GenerateOptions {
+fn options(targets: &[&str], length: std::ops::Range<usize>, seed: u64) -> GenerateOptions {
     GenerateOptions {
-        targets: targets.to_vec(),
+        targets: targets.iter().map(|t| (*t).to_owned()).collect(),
         length,
         allowed: None,
         seed,
@@ -135,15 +135,25 @@ fn sentence_mode_joins_corpus_sentences() {
 
 #[test]
 fn target_mode_respects_length_density_and_shape() {
-    for targets in [&['ñ'][..], &['z', 'q'], &['V'], &['x', '7']] {
-        let lower: Vec<char> = targets.iter().flat_map(|c| c.to_lowercase()).collect();
+    for targets in [
+        &["ñ"][..],
+        &["z", "q"],
+        &["V"],
+        &["x", "7"],
+        &["qu"],
+        &["RR", "ñ"],
+    ] {
+        let lower: Vec<String> = targets.iter().map(|t| t.to_lowercase()).collect();
         for length in RANGES {
             for seed in 0..40 {
                 let text = es().generate(&options(targets, length.clone(), seed));
                 assert_shape(&text, &length);
                 for sentence in pseudo_sentences(&text) {
                     assert!((4..=10).contains(&sentence.len()), "{sentence:?}");
-                    let hits = sentence.iter().filter(|w| w.contains(&lower[..])).count();
+                    let hits = sentence
+                        .iter()
+                        .filter(|w| lower.iter().any(|t| w.contains(t.as_str())))
+                        .count();
                     assert!(
                         hits * 2 >= sentence.len(),
                         "{targets:?} density in {sentence:?}"
@@ -156,7 +166,7 @@ fn target_mode_respects_length_density_and_shape() {
 
 #[test]
 fn target_mode_capitalizes_every_sentence() {
-    let text = es().generate(&options(&['ñ'], 500..601, 3));
+    let text = es().generate(&options(&["ñ"], 500..601, 3));
     for sentence in text.split(". ") {
         assert!(
             sentence.chars().next().unwrap().is_uppercase(),
@@ -168,7 +178,7 @@ fn target_mode_capitalizes_every_sentence() {
 #[test]
 fn unknown_targets_fall_back_to_sentence_mode() {
     for seed in 0..10 {
-        let unknown = es().generate(&options(&['7', '@'], 120..200, seed));
+        let unknown = es().generate(&options(&["7", "@"], 120..200, seed));
         let empty = es().generate(&options(&[], 120..200, seed));
         assert_shape(&unknown, &(120..200));
         assert_eq!(unknown, empty);
@@ -177,10 +187,10 @@ fn unknown_targets_fall_back_to_sentence_mode() {
 
 #[test]
 fn same_options_give_same_text_and_seeds_vary_it() {
-    let a = options(&['ñ'], 250..301, 42);
+    let a = options(&["ñ"], 250..301, 42);
     assert_eq!(es().generate(&a), es().generate(&a.clone()));
     let outputs: BTreeSet<String> = (0..10)
-        .map(|seed| es().generate(&options(&['ñ'], 250..301, seed)))
+        .map(|seed| es().generate(&options(&["ñ"], 250..301, seed)))
         .collect();
     assert!(outputs.len() > 5, "seeds barely change the output");
 }
@@ -190,7 +200,13 @@ fn allowed_set_filters_words_and_capitals() {
     let lower = "abcdefghijlmnopqrstuvyzáéíóú";
     let mut allowed: BTreeSet<char> = lower.chars().collect();
     allowed.extend(['A', 'E', 'L', 'M', 'P']);
-    for (targets, seed) in [(&['z'][..], 1), (&['m'], 2), (&[][..], 3), (&['ñ'], 4)] {
+    for (targets, seed) in [
+        (&["z"][..], 1),
+        (&["m"], 2),
+        (&[][..], 3),
+        (&["ñ"], 4),
+        (&["rr"], 5),
+    ] {
         let mut opts = options(targets, 120..201, seed);
         opts.allowed = Some(allowed.clone());
         let text = es().generate(&opts);
@@ -217,9 +233,31 @@ fn allowed_set_without_sentence_matches_still_generates() {
 
 #[test]
 fn allowed_set_rejecting_every_word_returns_empty_text() {
-    for targets in [&[][..], &['ñ'][..]] {
+    for targets in [&[][..], &["ñ"][..]] {
         let mut opts = options(targets, 50..80, 7);
         opts.allowed = Some(BTreeSet::from(['@']));
         assert_eq!(es().generate(&opts), "");
+    }
+}
+
+#[test]
+fn bigram_targets_match_words_containing_the_whole_bigram() {
+    for (target, seed) in [("qu", 1), ("RR", 2), ("rr", 3)] {
+        let text = es().generate(&options(&[target], 250..301, seed));
+        assert_shape(&text, &(250..301));
+        let bigram = target.to_lowercase();
+        for sentence in pseudo_sentences(&text) {
+            let hits = sentence.iter().filter(|w| w.contains(&bigram)).count();
+            assert!(hits * 2 >= sentence.len(), "{target:?} in {sentence:?}");
+        }
+    }
+}
+
+#[test]
+fn unmatched_bigram_and_empty_targets_fall_back_to_sentence_mode() {
+    for seed in 0..5 {
+        let empty = es().generate(&options(&[], 120..200, seed));
+        assert_eq!(es().generate(&options(&["zx"], 120..200, seed)), empty);
+        assert_eq!(es().generate(&options(&[""], 120..200, seed)), empty);
     }
 }

@@ -29,8 +29,9 @@ pub struct Corpus {
 /// Options for [`Corpus::generate`].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GenerateOptions {
-    /// Weak characters to practice; empty joins corpus sentences instead.
-    pub targets: Vec<char>,
+    /// Weak characters or bigrams to practice: a word matches when it contains
+    /// one of them, case-insensitively. Empty joins corpus sentences instead.
+    pub targets: Vec<String>,
     /// Wanted length in chars, end exclusive.
     pub length: Range<usize>,
     /// Characters the output may contain besides spaces and the final `.`.
@@ -94,10 +95,11 @@ impl Corpus {
     pub fn generate(&self, options: &GenerateOptions) -> String {
         let allowed = |c: char| options.allowed.as_ref().is_none_or(|set| set.contains(&c));
         let fits_charset = |text: &str| text.chars().all(|c| c == ' ' || c == '.' || allowed(c));
-        let targets: Vec<char> = options
+        let targets: Vec<String> = options
             .targets
             .iter()
-            .flat_map(|c| c.to_lowercase())
+            .filter(|t| !t.is_empty())
+            .map(|t| t.to_lowercase())
             .collect();
         let words: Vec<&str> = self
             .words
@@ -108,7 +110,7 @@ impl Corpus {
         let target_words: Vec<&str> = words
             .iter()
             .copied()
-            .filter(|w| w.contains(&targets[..]))
+            .filter(|w| targets.iter().any(|t| w.contains(t.as_str())))
             .collect();
         let filler: Vec<&str> = self.words[..FILLER_WORDS.min(self.words.len())]
             .iter()

@@ -2,7 +2,7 @@
   import type { ErrorMode } from "../practice/engine";
   import { focusTyping } from "../practice/focus";
   import { THEMES } from "../themes";
-  import { ERROR_MODES } from "./settings";
+  import { ERROR_MODES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
 
   let {
     mode,
@@ -10,22 +10,34 @@
     liveStats,
     showKeyboard,
     flashes,
+    heatmap,
+    targetCount,
+    textLength,
     onMode,
     onTheme,
     onLiveStats,
     onShowKeyboard,
     onFlashes,
+    onHeatmap,
+    onTargetCount,
+    onTextLength,
   }: {
     mode: ErrorMode;
     themeId: string;
     liveStats: boolean;
     showKeyboard: boolean;
     flashes: boolean;
+    heatmap: boolean;
+    targetCount: number;
+    textLength: number;
     onMode: (mode: ErrorMode) => void;
     onTheme: (id: string) => void;
     onLiveStats: (on: boolean) => void;
     onShowKeyboard: (on: boolean) => void;
     onFlashes: (on: boolean) => void;
+    onHeatmap: (on: boolean) => void;
+    onTargetCount: (count: number) => void;
+    onTextLength: (length: number) => void;
   } = $props();
 
   const groups = [
@@ -43,6 +55,11 @@
     onTheme(e.currentTarget.value);
     focusTyping();
   }
+
+  const pickNumber = (set: (n: number) => void) => (e: Event & { currentTarget: HTMLSelectElement }) => {
+    set(Number(e.currentTarget.value));
+    focusTyping();
+  };
 
   const toggle = (set: (on: boolean) => void) => (e: Event & { currentTarget: HTMLInputElement }) => {
     set(e.currentTarget.checked);
@@ -71,6 +88,22 @@
       {/each}
     </select>
   </label>
+  <label title="Caracteres o bigramas débiles por texto">
+    Objetivos
+    <select onchange={pickNumber(onTargetCount)}>
+      {#each TARGET_COUNTS as n (n)}
+        <option value={n} selected={n === targetCount}>{n}</option>
+      {/each}
+    </select>
+  </label>
+  <label title="Caracteres por texto">
+    Longitud
+    <select onchange={pickNumber(onTextLength)}>
+      {#each TEXT_LENGTHS as n (n)}
+        <option value={n} selected={n === textLength}>{n}</option>
+      {/each}
+    </select>
+  </label>
   <label class="toggle">
     <input type="checkbox" checked={liveStats} onchange={toggle(onLiveStats)} />
     Estadísticas en vivo
@@ -82,6 +115,10 @@
   <label class="toggle">
     <input type="checkbox" checked={flashes} onchange={toggle(onFlashes)} />
     Destellos
+  </label>
+  <label class="toggle">
+    <input type="checkbox" checked={heatmap} onchange={toggle(onHeatmap)} />
+    Mapa de calor
   </label>
 </div>
 

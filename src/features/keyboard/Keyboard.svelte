@@ -1,10 +1,22 @@
 <script lang="ts">
   import { onDestroy, untrack } from "svelte";
   import { ISO_ROWS, NAMED_LABELS, fingerOf } from "./geometry";
+  import { heatLevel } from "./heat";
   import { type Flash, type Highlight, keyLabels } from "./keys";
   import type { Layout } from "./types";
 
-  let { layout, highlights, flash }: { layout: Layout | null; highlights: Highlight[]; flash: Flash | null } = $props();
+  let {
+    layout,
+    highlights,
+    flash,
+    heat = null,
+  }: {
+    layout: Layout | null;
+    highlights: Highlight[];
+    flash: Flash | null;
+    /** Error score per key code (`heatScores`); `null` hides the heatmap. */
+    heat?: Map<string, number> | null;
+  } = $props();
 
   const FLASH_MS = 150;
 
@@ -51,8 +63,9 @@
     <div class="row">
       {#each row as key, i (i)}
         {@const role = roles.get(key.code)}
+        {@const level = heat ? heatLevel(heat.get(key.code) ?? 0) : 0}
         <div
-          class="key {key.widthClass} {role && key.finger ? `finger-${key.finger}` : ''}"
+          class="key {key.widthClass} {role && key.finger ? `finger-${key.finger}` : ''} {level ? `heat heat-${level}` : ''}"
           class:primary={role === "primary"}
           class:modifier={role === "modifier"}
           class:secondary={role === "secondary"}
@@ -72,6 +85,9 @@
     </div>
   {/each}
 </div>
+{#if heat}
+  <p class="legend">menos ← <span class="scale" aria-hidden="true"></span> → más errores</p>
+{/if}
 
 <style>
   .keyboard {
@@ -139,6 +155,35 @@
   .home .main {
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+  /* Heatmap tint: the key background mixed toward --danger by score, under any highlight. */
+  .heat { background: color-mix(in srgb, var(--danger) var(--heat), var(--key-bg)); }
+  .heat-1 { --heat: 6%; }
+  .heat-2 { --heat: 12%; }
+  .heat-3 { --heat: 18%; }
+  .heat-4 { --heat: 24%; }
+  .heat-5 { --heat: 30%; }
+  .heat-6 { --heat: 36%; }
+  .heat-7 { --heat: 42%; }
+  .heat-8 { --heat: 48%; }
+  .heat-9 { --heat: 54%; }
+  .heat-10 { --heat: 60%; }
+  .legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1;
+    color: var(--muted);
+  }
+  .scale {
+    width: 8rem;
+    height: 0.5rem;
+    background: linear-gradient(to right, var(--key-bg), color-mix(in srgb, var(--danger) 60%, var(--key-bg)));
+    border: 1px solid var(--key-border);
+    border-radius: 0.25rem;
   }
   .finger-l-pinky { --finger: var(--finger-l-pinky); }
   .finger-l-ring { --finger: var(--finger-l-ring); }

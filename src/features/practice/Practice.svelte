@@ -1,13 +1,24 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
   import { getLayout, keySequences } from "../keyboard/api";
+  import { type CharScore, heatScores } from "../keyboard/heat";
   import Keyboard from "../keyboard/Keyboard.svelte";
   import { type Flash, highlightsFor, keyForChar } from "../keyboard/keys";
   import type { KeyPress, Layout } from "../keyboard/types";
-  import { LAYOUT, diagnosticText, nextText, scoreSession, type ScoredSession } from "./api";
+  import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
+  import {
+    LAYOUT,
+    type PracticeText,
+    type ScoredSession,
+    type Weakness,
+    firstText,
+    heatmap as fetchHeatmap,
+    nextText,
+    scoreSession,
+    weaknesses,
+  } from "./api";
   import { type ErrorMode, type InputEvent as TypingEvent, TypingSession, acceptsInput, keyAction, textToEvents } from "./engine";
   import { focusTyping, setTypingField } from "./focus";
-  import { formatPercent, formatTime, formatWpm } from "./format";
   import Results from "./Results.svelte";
 
   let {
@@ -15,18 +26,34 @@
     liveStats,
     showKeyboard,
     flashes,
-  }: { mode: ErrorMode; liveStats: boolean; showKeyboard: boolean; flashes: boolean } = $props();
+    heatmap,
+    targetCount,
+    textLength,
+  }: {
+    mode: ErrorMode;
+    liveStats: boolean;
+    showKeyboard: boolean;
+    flashes: boolean;
+    heatmap: boolean;
+    targetCount: number;
+    textLength: number;
+  } = $props();
 
   type Phase = "loading" | "typing" | "scoring" | "results" | "error";
   let phase = $state<Phase>("loading");
   let text = $state("");
+  // Weak units the current text practises, and whether it is the diagnostic text.
+  let targets = $state.raw<string[]>([]);
+  let diagnostic = $state(false);
+  let weak = $state.raw<Weakness[]>([]);
+  let charScores = $state.raw<CharScore[]>([]);
   let session = $state.raw<TypingSession | null>(null);
   // Bumped after each applied event: the session object itself is not reactive.
   let tick = $state(0);
   let now = $state(0);
   let scored = $state.raw<ScoredSession | null>(null);
   let message = $state("");
-  let retry: () => void = loadDiagnostic;
+  let retry: () => void = loadFirst;
   // Invalidates in-flight IPC results when the user restarts or moves on.
   let run = 0;
   let field = $state<HTMLTextAreaElement>();
@@ -46,6 +73,7 @@
     if (!session || session.firstT === null) return 0;
     return phase === "typing" ? Math.max(now - session.firstT, 0) : (view?.stats.durationMs ?? 0);
   });
+  const heat = $derived(heatmap && layout ? heatScores(layout, charScores) : null);
   const highlights = $derived(phase === "typing" && view && sequences ? highlightsFor(sequences[view.cursor]) : []);
 
   function restart() {
@@ -57,13 +85,15 @@
     tick++;
   }
 
-  async function load(fetch: () => Promise<string>, again: () => void) {
+  async function load(fetch: () => Promise<PracticeText>, again: () => void) {
     const id = ++run;
     phase = "loading";
     try {
       const next = await fetch();
       if (id !== run) return;
-      text = next;
+      text = next.text;
+      targets = next.targets;
+      diagnostic = next.diagnostic ?? false;
       restart();
     } catch (err) {
       if (id !== run) return;
@@ -73,25 +103,41 @@
     }
   }
 
-  function loadDiagnostic() {
-    void load(diagnosticText, loadDiagnostic);
+  function loadFirst() {
+    void load(firstText, loadFirst);
   }
 
+  // Settings are read here, so a change affects the next text only.
   function loadNext() {
-    const targets = scored?.failedChars ?? [];
+    const fallback = scored?.failedChars ?? [];
     const seed = Math.floor(Math.random() * 2 ** 32);
-    const again = () => void load(() => nextText(targets, seed), again);
+    const [count, length] = [targetCount, textLength];
+    const again = () => void load(() => nextText(seed, count, length, fallback), again);
     again();
+  }
+
+  // Weaknesses and heatmap scores from the stored model; missing ones only hide those views.
+  function refreshModel(id = run) {
+    weaknesses(5)
+      .then((next) => id === run && (weak = next))
+      .catch((err) => console.warn("weaknesses failed", err));
+    fetchHeatmap()
+      .then((next) => (charScores = next))
+      .catch((err) => console.warn("heatmap failed", err));
   }
 
   async function finish(done: TypingSession) {
     const id = ++run;
     phase = "scoring";
     try {
-      const result = await scoreSession(text, done.mode, done.events);
+      // Wall-clock start: `performance.now()` stamps are relative to the page's time origin.
+      const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
+      const result = await scoreSession(text, done.mode, done.events, startedAtMs);
       if (id !== run) return;
       scored = result;
+      weak = [];
       phase = "results";
+      refreshModel(id);
     } catch (err) {
       if (id !== run) return;
       retry = () => void finish(done);
@@ -208,7 +254,8 @@
   onMount(() => {
     setTypingField(field ?? null);
     focusTyping();
-    loadDiagnostic();
+    loadFirst();
+    refreshModel();
     getLayout(LAYOUT)
       .then((next) => (layout = next))
       .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
@@ -258,8 +305,15 @@
         <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
       </div>
     {:else if phase === "results" && scored}
-      <Results {scored} onNext={loadNext} onRepeat={restart} />
+      <Results {scored} {weak} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
+      <p class="kind">
+        {diagnostic ? "Texto de diagnóstico" : "Texto adaptativo"}
+        {#if targets.length > 0}
+          · Practicando:
+          {#each targets as t, i (i)}{#if i > 0}<span class="sep">·</span>{/if}<kbd>{charLabel(t)}</kbd>{/each}
+        {/if}
+      </p>
       <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
       <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
             class="ch {view.states[i]}"
@@ -275,7 +329,7 @@
 
 {#if showKeyboard}
   <footer>
-    <Keyboard {layout} {highlights} {flash} />
+    <Keyboard {layout} {highlights} {flash} {heat} />
   </footer>
 {/if}
 
@@ -370,6 +424,24 @@
   .cursor.error {
     background: color-mix(in srgb, var(--text-error) 22%, transparent);
     box-shadow: inset 0 -0.12em var(--text-error);
+  }
+  .kind {
+    margin: 0 0 -0.75rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .kind kbd {
+    display: inline-block;
+    margin-left: 0.3rem;
+    padding: 0 0.35em;
+    font-family: var(--mono);
+    color: var(--key-fg);
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 0.3em;
+  }
+  .kind .sep {
+    margin-left: 0.3rem;
   }
   .hint,
   .status {
