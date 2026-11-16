@@ -288,8 +288,9 @@ pub fn first_text(
     })
 }
 
-/// Replays a session; a completed one with keystrokes is stored, then folded
-/// into the model, whose statistics are stored. A storage failure keeps the result.
+/// Replays a session; a completed one with keystrokes is stored and folded
+/// into the stored model atomically. A storage failure stores nothing and
+/// keeps the result.
 pub fn score_session(
     store: &mut Store,
     profile: &Profile,
@@ -316,6 +317,7 @@ pub fn score_session(
     }
 }
 
+/// Stores the session and folds it into the stored model in one transaction.
 fn persist(
     store: &mut Store,
     profile: &Profile,
@@ -325,11 +327,13 @@ fn persist(
     started_at_ms: i64,
 ) -> Result<(), StoreError> {
     let stats = &result.stats;
-    store.save_session(&NewSession {
+    let session = NewSession {
         profile_id: profile.id,
         started_at_ms,
         mode: STATS_MODE,
         code_language: None,
+        language: Some(&profile.language),
+        layout: Some(&profile.layout),
         error_mode: mode,
         text,
         duration_ms: stats.duration_ms,
@@ -339,10 +343,13 @@ fn persist(
         keystrokes: stats.keystrokes,
         bpm: None,
         records: &result.records,
+    };
+    store.save_session_with_stats(&session, STATS_MODE, |snapshot| {
+        let mut model = model_from_snapshot(snapshot);
+        model.update(text, result);
+        snapshot_from_model(&model)
     })?;
-    let mut model = model_from_snapshot(store.load_stats(profile.id, STATS_MODE)?);
-    model.update(text, result);
-    store.save_stats(profile.id, STATS_MODE, &snapshot_from_model(&model))
+    Ok(())
 }
 
 /// Up to `limit` weakest ranked units.
@@ -492,6 +499,13 @@ mod tests {
             (42, "prose")
         );
         assert_eq!(
+            (
+                sessions[0].language.as_deref(),
+                sessions[0].layout.as_deref()
+            ),
+            (Some("es"), Some("es-qwerty"))
+        );
+        assert_eq!(
             store.session_keystrokes(sessions[0].id).unwrap(),
             scored.result.records
         );
@@ -563,6 +577,63 @@ mod tests {
         );
         assert_eq!(recent_sessions(&store, &profile, 5), Ok(vec![]));
         assert_eq!(load_model(&store, &ghost), Ok(WeaknessModel::new()));
+    }
+
+    #[test]
+    fn score_session_stats_failure_stores_nothing_and_keeps_the_model() {
+        let dir = std::env::temp_dir().join(format!(
+            "plexustyping-app-test-{}-{}",
+            std::process::id(),
+            std::time::UNIX_EPOCH.elapsed().unwrap().as_nanos()
+        ));
+        let path = dir.join("db.sqlite3");
+        let mut store = Store::open(&path).unwrap();
+        let profile = store.default_profile().unwrap();
+        let events = typing("hxla");
+        let first = score_session(
+            &mut store,
+            &profile,
+            "hola",
+            ErrorMode::AllowContinue,
+            &events,
+            1,
+        );
+        assert!(first.saved);
+        let model = load_model(&store, &profile).unwrap();
+        rusqlite::Connection::open(&path)
+            .unwrap()
+            .execute_batch(
+                "CREATE TRIGGER t BEFORE INSERT ON char_stats
+                 BEGIN SELECT RAISE(ABORT, 'boom'); END;",
+            )
+            .unwrap();
+        let scored = score_session(
+            &mut store,
+            &profile,
+            "hola",
+            ErrorMode::AllowContinue,
+            &events,
+            2,
+        );
+        let sessions = recent_sessions(&store, &profile, 5).map(|s| s.len());
+        let after = load_model(&store, &profile);
+        drop(store);
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_eq!(
+            scored.result,
+            replay("hola", ErrorMode::AllowContinue, &events)
+        );
+        assert!(!scored.saved);
+        assert!(
+            scored
+                .save_error
+                .as_deref()
+                .is_some_and(|e| e.contains("boom")),
+            "{:?}",
+            scored.save_error
+        );
+        assert_eq!(sessions, Ok(1), "the failed session is rolled back");
+        assert_eq!(after, Ok(model));
     }
 
     #[test]

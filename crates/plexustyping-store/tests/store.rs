@@ -58,6 +58,8 @@ fn session<'a>(profile_id: i64, started: i64, records: &'a [KeystrokeRecord]) ->
         started_at_ms: started,
         mode: "prose",
         code_language: None,
+        language: None,
+        layout: None,
         error_mode: ErrorMode::AllowContinue,
         text: "año",
         duration_ms: 1500.5,
@@ -316,4 +318,191 @@ fn settings_upsert() {
         store.get_setting("layout").unwrap().as_deref(),
         Some("us-qwerty")
     );
+}
+
+/// Bytes 18–19 of the SQLite header: 1/1 rollback journal, 2/2 WAL.
+fn header_versions(path: &Path) -> [u8; 2] {
+    let bytes = std::fs::read(path).unwrap();
+    [bytes[18], bytes[19]]
+}
+
+fn snapshot(units: Vec<UnitStatRow>, mean: Option<f64>) -> StatsSnapshot {
+    StatsSnapshot {
+        units,
+        confusions: vec![],
+        mean_interval_ms: mean,
+    }
+}
+
+#[test]
+fn newer_schema_file_is_byte_identical_after_refusal() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    {
+        let c = rusqlite::Connection::open(&path).unwrap();
+        c.execute_batch("CREATE TABLE x(a); INSERT INTO x VALUES(1); PRAGMA user_version=2;")
+            .unwrap();
+    }
+    let before = std::fs::read(&path).unwrap();
+    assert!(matches!(
+        Store::open(&path),
+        Err(StoreError::NewerSchema { found: 2, .. })
+    ));
+    assert_eq!(before, std::fs::read(&path).unwrap());
+}
+
+#[test]
+fn non_database_file_is_refused_untouched() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    std::fs::write(&path, b"not sqlite ".repeat(500)).unwrap();
+    let before = std::fs::read(&path).unwrap();
+    assert!(Store::open(&path).is_err());
+    assert_eq!(before, std::fs::read(&path).unwrap());
+}
+
+#[test]
+fn reopen_is_byte_noop() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    {
+        let mut s = Store::open(&path).unwrap();
+        let pid = s.default_profile().unwrap().id;
+        s.save_session(&session(pid, 1, &[rec(0, 'a', 'a', None)]))
+            .unwrap();
+    }
+    let before = std::fs::read(&path).unwrap();
+    drop(Store::open(&path).unwrap());
+    assert_eq!(before, std::fs::read(&path).unwrap());
+}
+
+#[test]
+fn new_file_database_uses_wal() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    drop(Store::open(&path).unwrap());
+    assert_eq!(header_versions(&path), [2, 2]);
+}
+
+#[test]
+fn failed_migration_of_a_foreign_v0_file_keeps_its_journal_mode() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    {
+        let c = rusqlite::Connection::open(&path).unwrap();
+        c.execute_batch("CREATE TABLE settings(other INTEGER); INSERT INTO settings VALUES(7);")
+            .unwrap();
+    }
+    assert_eq!(header_versions(&path), [1, 1]);
+    assert!(Store::open(&path).is_err());
+    assert_eq!(header_versions(&path), [1, 1]);
+    assert_eq!(raw_user_version(&path), 0);
+    assert!(!path.with_extension("sqlite3-wal").exists());
+}
+
+#[test]
+fn save_session_failing_mid_keystrokes_stores_nothing() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    let pid = Store::open(&path).unwrap().default_profile().unwrap().id;
+    rusqlite::Connection::open(&path)
+        .unwrap()
+        .execute_batch(
+            "CREATE TRIGGER t BEFORE INSERT ON keystrokes WHEN NEW.expected='z'
+             BEGIN SELECT RAISE(ABORT,'boom'); END;",
+        )
+        .unwrap();
+    let mut s = Store::open(&path).unwrap();
+    let r = [rec(0, 'a', 'a', None), rec(1, 'z', 'z', None)];
+    assert!(s.save_session(&session(pid, 1, &r)).is_err());
+    assert!(s.recent_sessions(pid, 10).unwrap().is_empty());
+}
+
+#[test]
+fn session_language_and_layout_round_trip() {
+    let mut store = Store::open_in_memory().unwrap();
+    let pid = store.default_profile().unwrap().id;
+    let records = [rec(0, 'a', 'a', None)];
+    let mut s = session(pid, 2, &records);
+    s.language = Some("es");
+    s.layout = Some("es-qwerty");
+    store.save_session(&s).unwrap();
+    store.save_session(&session(pid, 1, &records)).unwrap();
+    let recent = store.recent_sessions(pid, 10).unwrap();
+    let got: Vec<_> = recent
+        .iter()
+        .map(|s| (s.language.as_deref(), s.layout.as_deref()))
+        .collect();
+    assert_eq!(got, [(Some("es"), Some("es-qwerty")), (None, None)]);
+}
+
+#[test]
+fn save_session_with_stats_stores_both_and_passes_the_previous_snapshot() {
+    let mut store = Store::open_in_memory().unwrap();
+    let pid = store.default_profile().unwrap().id;
+    let old = snapshot(vec![unit("a", 0.5)], Some(200.0));
+    store.save_stats(pid, "prose", &old).unwrap();
+    let new = snapshot(vec![unit("a", 0.4), unit("b", 0.1)], Some(190.0));
+    let records = [rec(0, 'a', 'a', None)];
+    let mut seen = None;
+    let id = store
+        .save_session_with_stats(&session(pid, 1, &records), "prose", |prev| {
+            seen = Some(prev);
+            new.clone()
+        })
+        .unwrap();
+    assert_eq!(seen, Some(old));
+    assert_eq!(store.load_stats(pid, "prose").unwrap(), new);
+    assert_eq!(store.session_keystrokes(id).unwrap(), records);
+    assert_eq!(store.recent_sessions(pid, 10).unwrap()[0].id, id);
+}
+
+#[test]
+fn save_session_with_stats_rolls_back_the_session_when_stats_fail() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    let old = snapshot(vec![unit("a", 0.5)], Some(200.0));
+    let pid = {
+        let mut store = Store::open(&path).unwrap();
+        let pid = store.default_profile().unwrap().id;
+        store.save_stats(pid, "prose", &old).unwrap();
+        pid
+    };
+    rusqlite::Connection::open(&path)
+        .unwrap()
+        .execute_batch(
+            "CREATE TRIGGER t BEFORE INSERT ON char_stats WHEN NEW.unit='b'
+             BEGIN SELECT RAISE(ABORT,'boom'); END;",
+        )
+        .unwrap();
+    let mut store = Store::open(&path).unwrap();
+    let records = [rec(0, 'a', 'a', None)];
+    let new = snapshot(vec![unit("a", 0.4), unit("b", 0.1)], Some(190.0));
+    let r = store.save_session_with_stats(&session(pid, 1, &records), "prose", |_| new);
+    assert!(matches!(r, Err(StoreError::Sqlite(_))), "{r:?}");
+    assert!(store.recent_sessions(pid, 10).unwrap().is_empty());
+    assert_eq!(store.load_stats(pid, "prose").unwrap(), old);
+}
+
+#[test]
+fn file_store_gives_up_on_a_locked_database_after_about_two_seconds() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    let store = Store::open(&path).unwrap();
+    let other = rusqlite::Connection::open(&path).unwrap();
+    other.execute_batch("BEGIN IMMEDIATE;").unwrap();
+    let start = std::time::Instant::now();
+    let r = store.set_setting("k", "v");
+    let waited = start.elapsed();
+    assert!(r.is_err(), "write must fail while locked");
+    assert!(
+        (1_800..4_000).contains(&waited.as_millis()),
+        "waited {waited:?}"
+    );
+    other.execute_batch("COMMIT;").unwrap();
+    store.set_setting("k", "v").unwrap();
+    assert_eq!(store.get_setting("k").unwrap().as_deref(), Some("v"));
 }

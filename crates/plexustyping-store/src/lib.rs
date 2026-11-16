@@ -30,6 +30,8 @@ CREATE TABLE sessions (
     started_at_ms INTEGER NOT NULL,
     mode TEXT NOT NULL,
     code_language TEXT,
+    language TEXT,
+    layout TEXT,
     error_mode TEXT NOT NULL,
     text TEXT NOT NULL,
     duration_ms REAL NOT NULL,
@@ -83,6 +85,9 @@ CREATE TABLE settings (
 
 /// Schema version this build creates and understands.
 const SUPPORTED_VERSION: i64 = MIGRATIONS.len() as i64;
+
+/// How long a file connection waits for another connection's lock.
+pub const BUSY_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(2);
 
 /// Handle to the PlexusTyping database.
 #[derive(Debug)]
@@ -147,6 +152,10 @@ pub struct NewSession<'a> {
     pub mode: &'a str,
     /// Programming language in code mode.
     pub code_language: Option<&'a str>,
+    /// Natural language of the text, e.g. `es`.
+    pub language: Option<&'a str>,
+    /// Keyboard layout id used, e.g. `es-qwerty`.
+    pub layout: Option<&'a str>,
     /// Error mode used.
     pub error_mode: ErrorMode,
     /// Text that was typed.
@@ -177,6 +186,10 @@ pub struct SessionSummary {
     pub started_at_ms: i64,
     /// Practice mode.
     pub mode: String,
+    /// Natural language of the text, if recorded.
+    pub language: Option<String>,
+    /// Keyboard layout id, if recorded.
+    pub layout: Option<String>,
     /// Duration in milliseconds.
     pub duration_ms: f64,
     /// Gross words per minute.
@@ -228,12 +241,16 @@ pub struct StatsSnapshot {
 
 impl Store {
     /// Opens (or creates) the database at `path`, creating its parent
-    /// directory, enabling WAL and foreign keys, and migrating the schema.
+    /// directory, migrating the schema, then enabling WAL. Writers wait up to
+    /// [`BUSY_TIMEOUT`] for a lock. A file that cannot be migrated keeps its
+    /// journal mode.
     pub fn open(path: &Path) -> Result<Self> {
         if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
             std::fs::create_dir_all(parent)?;
         }
-        Self::init(Connection::open(path)?, true)
+        let conn = Connection::open(path)?;
+        conn.busy_timeout(BUSY_TIMEOUT)?;
+        Self::init(conn, true)
     }
 
     /// Opens a fresh in-memory database with the current schema.
@@ -256,14 +273,15 @@ impl Store {
                 "negative schema version {found}"
             )));
         }
-        if wal {
-            conn.query_row("PRAGMA journal_mode = WAL", [], |_| Ok(()))?;
-        }
         for (i, sql) in MIGRATIONS.iter().enumerate().skip(found as usize) {
             let tx = conn.transaction()?;
             tx.execute_batch(sql)?;
             tx.pragma_update(None, "user_version", i as i64 + 1)?;
             tx.commit()?;
+        }
+        // Only a database we fully own switches to WAL (it rewrites the header).
+        if wal {
+            conn.query_row("PRAGMA journal_mode = WAL", [], |_| Ok(()))?;
         }
         Ok(Store { conn })
     }
@@ -316,45 +334,25 @@ impl Store {
     /// returns the new session id.
     pub fn save_session(&mut self, s: &NewSession) -> Result<i64> {
         let tx = self.conn.transaction()?;
-        tx.execute(
-            "INSERT INTO sessions (profile_id, started_at_ms, mode, code_language,
-                 error_mode, text, duration_ms, gross_wpm, net_wpm, accuracy,
-                 keystrokes, bpm)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
-            params![
-                s.profile_id,
-                s.started_at_ms,
-                s.mode,
-                s.code_language,
-                error_mode_str(s.error_mode),
-                s.text,
-                s.duration_ms,
-                s.gross_wpm,
-                s.net_wpm,
-                s.accuracy,
-                to_i64(s.keystrokes)?,
-                s.bpm,
-            ],
-        )?;
-        let id = tx.last_insert_rowid();
-        {
-            let mut stmt = tx.prepare(
-                "INSERT INTO keystrokes (session_id, idx, position, expected, typed,
-                     correct, ms_since_previous, metronome_offset_ms)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL)",
-            )?;
-            for (idx, r) in s.records.iter().enumerate() {
-                stmt.execute(params![
-                    id,
-                    to_i64(idx)?,
-                    to_i64(r.index)?,
-                    r.expected.to_string(),
-                    r.typed.to_string(),
-                    r.correct,
-                    r.ms_since_previous,
-                ])?;
-            }
-        }
+        let id = insert_session(&tx, s)?;
+        tx.commit()?;
+        Ok(id)
+    }
+
+    /// Stores a session with its keystrokes and replaces the statistics of
+    /// its profile in `mode` with `update(previous statistics)`, all in one
+    /// transaction: on any failure nothing is stored and the previous
+    /// statistics are kept. Returns the new session id.
+    pub fn save_session_with_stats(
+        &mut self,
+        s: &NewSession,
+        mode: &str,
+        update: impl FnOnce(StatsSnapshot) -> StatsSnapshot,
+    ) -> Result<i64> {
+        let tx = self.conn.transaction()?;
+        let id = insert_session(&tx, s)?;
+        let next = update(load_stats(&tx, s.profile_id, mode)?);
+        replace_stats(&tx, s.profile_id, mode, &next)?;
         tx.commit()?;
         Ok(id)
     }
@@ -362,8 +360,8 @@ impl Store {
     /// Up to `limit` sessions of `profile_id`, newest first.
     pub fn recent_sessions(&self, profile_id: i64, limit: usize) -> Result<Vec<SessionSummary>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, started_at_ms, mode, duration_ms, gross_wpm, net_wpm,
-                 accuracy, keystrokes
+            "SELECT id, started_at_ms, mode, language, layout, duration_ms,
+                 gross_wpm, net_wpm, accuracy, keystrokes
              FROM sessions WHERE profile_id = ?1
              ORDER BY started_at_ms DESC, id DESC LIMIT ?2",
         )?;
@@ -373,13 +371,15 @@ impl Store {
                     id: r.get(0)?,
                     started_at_ms: r.get(1)?,
                     mode: r.get(2)?,
-                    duration_ms: r.get(3)?,
-                    gross_wpm: r.get(4)?,
-                    net_wpm: r.get(5)?,
-                    accuracy: r.get(6)?,
+                    language: r.get(3)?,
+                    layout: r.get(4)?,
+                    duration_ms: r.get(5)?,
+                    gross_wpm: r.get(6)?,
+                    net_wpm: r.get(7)?,
+                    accuracy: r.get(8)?,
                     keystrokes: 0,
                 },
-                r.get::<_, i64>(7)?,
+                r.get::<_, i64>(9)?,
             ))
         })?;
         rows.map(|row| {
@@ -430,105 +430,14 @@ impl Store {
 
     /// Statistics of `profile_id` in `mode`; empty when nothing is stored.
     pub fn load_stats(&self, profile_id: i64, mode: &str) -> Result<StatsSnapshot> {
-        let mut stmt = self.conn.prepare(
-            "SELECT unit, ema_error, ema_slowness, samples, slowness_samples
-             FROM char_stats WHERE profile_id = ?1 AND mode = ?2 ORDER BY unit",
-        )?;
-        let units = stmt
-            .query_map(params![profile_id, mode], |r| {
-                Ok(UnitStatRow {
-                    unit: r.get(0)?,
-                    ema_error: r.get(1)?,
-                    ema_slowness: r.get(2)?,
-                    samples: r.get(3)?,
-                    slowness_samples: r.get(4)?,
-                })
-            })?
-            .collect::<rusqlite::Result<Vec<_>>>()?;
-        let mut stmt = self.conn.prepare(
-            "SELECT expected, typed, count FROM confusions
-             WHERE profile_id = ?1 AND mode = ?2 ORDER BY expected, typed",
-        )?;
-        let confusions = stmt
-            .query_map(params![profile_id, mode], |r| {
-                Ok((
-                    r.get::<_, String>(0)?,
-                    r.get::<_, String>(1)?,
-                    r.get::<_, u32>(2)?,
-                ))
-            })?
-            .map(|row| {
-                let (expected, typed, count) = row?;
-                Ok(ConfusionRow {
-                    expected: one_char(&expected)?,
-                    typed: one_char(&typed)?,
-                    count,
-                })
-            })
-            .collect::<Result<Vec<_>>>()?;
-        let mean_interval_ms = self
-            .conn
-            .query_row(
-                "SELECT mean_interval_ms FROM profile_stats
-                 WHERE profile_id = ?1 AND mode = ?2",
-                params![profile_id, mode],
-                |r| r.get::<_, Option<f64>>(0),
-            )
-            .optional()?
-            .flatten();
-        Ok(StatsSnapshot {
-            units,
-            confusions,
-            mean_interval_ms,
-        })
+        load_stats(&self.conn, profile_id, mode)
     }
 
     /// Atomically replaces all statistics of `profile_id` in `mode` with `s`.
     /// On failure (e.g. a duplicate unit) the previous snapshot is kept.
     pub fn save_stats(&mut self, profile_id: i64, mode: &str, s: &StatsSnapshot) -> Result<()> {
         let tx = self.conn.transaction()?;
-        for table in ["char_stats", "confusions", "profile_stats"] {
-            tx.execute(
-                &format!("DELETE FROM {table} WHERE profile_id = ?1 AND mode = ?2"),
-                params![profile_id, mode],
-            )?;
-        }
-        {
-            let mut stmt = tx.prepare(
-                "INSERT INTO char_stats (profile_id, mode, unit, ema_error,
-                     ema_slowness, samples, slowness_samples)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            )?;
-            for u in &s.units {
-                stmt.execute(params![
-                    profile_id,
-                    mode,
-                    u.unit,
-                    u.ema_error,
-                    u.ema_slowness,
-                    u.samples,
-                    u.slowness_samples,
-                ])?;
-            }
-            let mut stmt = tx.prepare(
-                "INSERT INTO confusions (profile_id, mode, expected, typed, count)
-                 VALUES (?1, ?2, ?3, ?4, ?5)",
-            )?;
-            for c in &s.confusions {
-                stmt.execute(params![
-                    profile_id,
-                    mode,
-                    c.expected.to_string(),
-                    c.typed.to_string(),
-                    c.count,
-                ])?;
-            }
-        }
-        tx.execute(
-            "INSERT INTO profile_stats (profile_id, mode, mean_interval_ms)
-             VALUES (?1, ?2, ?3)",
-            params![profile_id, mode, s.mean_interval_ms],
-        )?;
+        replace_stats(&tx, profile_id, mode, s)?;
         tx.commit()?;
         Ok(())
     }
@@ -552,6 +461,152 @@ impl Store {
         )?;
         Ok(())
     }
+}
+
+/// Inserts a session row and its keystrokes; the caller owns the transaction.
+fn insert_session(tx: &Connection, s: &NewSession) -> Result<i64> {
+    tx.execute(
+        "INSERT INTO sessions (profile_id, started_at_ms, mode, code_language,
+             language, layout, error_mode, text, duration_ms, gross_wpm,
+             net_wpm, accuracy, keystrokes, bpm)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+        params![
+            s.profile_id,
+            s.started_at_ms,
+            s.mode,
+            s.code_language,
+            s.language,
+            s.layout,
+            error_mode_str(s.error_mode),
+            s.text,
+            s.duration_ms,
+            s.gross_wpm,
+            s.net_wpm,
+            s.accuracy,
+            to_i64(s.keystrokes)?,
+            s.bpm,
+        ],
+    )?;
+    let id = tx.last_insert_rowid();
+    {
+        let mut stmt = tx.prepare(
+            "INSERT INTO keystrokes (session_id, idx, position, expected, typed,
+                 correct, ms_since_previous, metronome_offset_ms)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL)",
+        )?;
+        for (idx, r) in s.records.iter().enumerate() {
+            stmt.execute(params![
+                id,
+                to_i64(idx)?,
+                to_i64(r.index)?,
+                r.expected.to_string(),
+                r.typed.to_string(),
+                r.correct,
+                r.ms_since_previous,
+            ])?;
+        }
+    }
+    Ok(id)
+}
+
+fn load_stats(conn: &Connection, profile_id: i64, mode: &str) -> Result<StatsSnapshot> {
+    let mut stmt = conn.prepare(
+        "SELECT unit, ema_error, ema_slowness, samples, slowness_samples
+         FROM char_stats WHERE profile_id = ?1 AND mode = ?2 ORDER BY unit",
+    )?;
+    let units = stmt
+        .query_map(params![profile_id, mode], |r| {
+            Ok(UnitStatRow {
+                unit: r.get(0)?,
+                ema_error: r.get(1)?,
+                ema_slowness: r.get(2)?,
+                samples: r.get(3)?,
+                slowness_samples: r.get(4)?,
+            })
+        })?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+    let mut stmt = conn.prepare(
+        "SELECT expected, typed, count FROM confusions
+         WHERE profile_id = ?1 AND mode = ?2 ORDER BY expected, typed",
+    )?;
+    let confusions = stmt
+        .query_map(params![profile_id, mode], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, u32>(2)?,
+            ))
+        })?
+        .map(|row| {
+            let (expected, typed, count) = row?;
+            Ok(ConfusionRow {
+                expected: one_char(&expected)?,
+                typed: one_char(&typed)?,
+                count,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let mean_interval_ms = conn
+        .query_row(
+            "SELECT mean_interval_ms FROM profile_stats
+             WHERE profile_id = ?1 AND mode = ?2",
+            params![profile_id, mode],
+            |r| r.get::<_, Option<f64>>(0),
+        )
+        .optional()?
+        .flatten();
+    Ok(StatsSnapshot {
+        units,
+        confusions,
+        mean_interval_ms,
+    })
+}
+
+/// Replaces the statistics rows; the caller owns the transaction.
+fn replace_stats(tx: &Connection, profile_id: i64, mode: &str, s: &StatsSnapshot) -> Result<()> {
+    for table in ["char_stats", "confusions", "profile_stats"] {
+        tx.execute(
+            &format!("DELETE FROM {table} WHERE profile_id = ?1 AND mode = ?2"),
+            params![profile_id, mode],
+        )?;
+    }
+    {
+        let mut stmt = tx.prepare(
+            "INSERT INTO char_stats (profile_id, mode, unit, ema_error,
+                 ema_slowness, samples, slowness_samples)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        )?;
+        for u in &s.units {
+            stmt.execute(params![
+                profile_id,
+                mode,
+                u.unit,
+                u.ema_error,
+                u.ema_slowness,
+                u.samples,
+                u.slowness_samples,
+            ])?;
+        }
+        let mut stmt = tx.prepare(
+            "INSERT INTO confusions (profile_id, mode, expected, typed, count)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+        )?;
+        for c in &s.confusions {
+            stmt.execute(params![
+                profile_id,
+                mode,
+                c.expected.to_string(),
+                c.typed.to_string(),
+                c.count,
+            ])?;
+        }
+    }
+    tx.execute(
+        "INSERT INTO profile_stats (profile_id, mode, mean_interval_ms)
+         VALUES (?1, ?2, ?3)",
+        params![profile_id, mode, s.mean_interval_ms],
+    )?;
+    Ok(())
 }
 
 fn user_version(conn: &Connection) -> Result<i64> {
