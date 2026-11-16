@@ -124,15 +124,16 @@
   header {
     flex: none;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem 2rem;
-    padding: clamp(0.5rem, 2vh, 1rem) 2rem;
+    gap: 1rem;
+    padding: clamp(0.5rem, 2vh, 1rem) clamp(1rem, 3vw, 2rem);
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
   .brand {
+    flex: none;
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
@@ -142,12 +143,30 @@
     font-size: 1.1rem;
   }
   .temporary {
+    white-space: nowrap;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--warning);
   }
   .brand span {
+    white-space: nowrap;
     color: var(--muted);
     font-size: 0.9rem;
+  }
+  /* Narrow windows keep the header to one row: drop the tagline, wrap the warning onto two lines. */
+  @media (max-width: 1100px) {
+    .brand span {
+      display: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .brand {
+      align-items: center;
+    }
+    .temporary {
+      max-width: 7.5rem;
+      white-space: normal;
+      line-height: 1.15;
+    }
   }
 </style>
