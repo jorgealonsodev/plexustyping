@@ -1,10 +1,13 @@
 import type { ErrorMode } from "../practice/engine";
 import { applyTheme, loadThemeId, saveThemeId, themeById } from "../themes";
+import type { MetronomeSettings } from "../metronome/beat";
 import {
+  checkMetronome,
   loadErrorMode,
   loadFlashes,
   loadHeatmap,
   loadLiveStats,
+  loadMetronome,
   loadShowKeyboard,
   loadTargetCount,
   loadTextLength,
@@ -12,6 +15,7 @@ import {
   saveFlashes,
   saveHeatmap,
   saveLiveStats,
+  saveMetronome,
   saveShowKeyboard,
   saveTargetCount,
   saveTextLength,
@@ -27,6 +31,7 @@ export class SettingsStore {
   heatmap = $state(loadHeatmap());
   targetCount = $state(loadTargetCount());
   textLength = $state(loadTextLength());
+  metronome = $state.raw(loadMetronome());
   /** Bumped whenever AI settings or keys change: a prefetched next text is then stale. */
   aiRevision = $state(0);
 
@@ -77,5 +82,11 @@ export class SettingsStore {
   setTextLength(length: number) {
     this.textLength = length;
     saveTextLength(length);
+  }
+
+  /** Changes apply live; an out-of-range field keeps its current value. */
+  setMetronome(patch: Partial<MetronomeSettings>) {
+    this.metronome = checkMetronome({ ...this.metronome, ...patch }, this.metronome);
+    saveMetronome(this.metronome);
   }
 }

@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   ERROR_MODES,
+  checkMetronome,
   TARGET_COUNTS,
   TEXT_LENGTHS,
   loadErrorMode,
   loadFlashes,
   loadHeatmap,
   loadLiveStats,
+  loadMetronome,
   loadShowKeyboard,
   loadTargetCount,
   loadTextLength,
@@ -14,6 +16,7 @@ import {
   saveFlashes,
   saveHeatmap,
   saveLiveStats,
+  saveMetronome,
   saveShowKeyboard,
   saveTargetCount,
   saveTextLength,
@@ -131,5 +134,36 @@ describe("settings", () => {
     saveTextLength(100, storage);
     expect([loadLiveStats(storage), loadFlashes(storage), loadShowKeyboard(storage)]).toEqual([true, true, true]);
     expect([loadHeatmap(storage), loadTargetCount(storage), loadTextLength(storage)]).toEqual([true, 4, 100]);
+  });
+
+  it("keeps the metronome off at 60 BPM by default and persists every field", () => {
+    const storage = memoryStorage();
+    expect(loadMetronome(storage)).toEqual({ enabled: false, bpm: 60, sound: "click", volume: 80, accentEvery: 4 });
+    const next = { enabled: true, bpm: 300, sound: "beep" as const, volume: 0, accentEvery: 16 };
+    saveMetronome(next, storage);
+    expect(loadMetronome(storage)).toEqual(next);
+    saveMetronome({ ...next, bpm: 30, accentEvery: 0, volume: 100, sound: "wood" }, storage);
+    expect(loadMetronome(storage)).toEqual({ ...next, bpm: 30, accentEvery: 0, volume: 100, sound: "wood" });
+  });
+
+  it("replaces an invalid stored metronome field by its default, keeping the others", () => {
+    const load = (value: unknown) => loadMetronome(memoryStorage({ "plexustyping.metronome": JSON.stringify(value) }));
+    expect(load({ enabled: true, bpm: 29, sound: "gong", volume: 101, accentEvery: 17 })).toEqual({
+      enabled: true,
+      bpm: 60,
+      sound: "click",
+      volume: 80,
+      accentEvery: 4,
+    });
+    expect(load({ bpm: 120.5, volume: -1, accentEvery: 2 })).toEqual({
+      enabled: false,
+      bpm: 60,
+      sound: "click",
+      volume: 80,
+      accentEvery: 2,
+    });
+    expect(loadMetronome(memoryStorage({ "plexustyping.metronome": "{nope" }))).toEqual(load({}));
+    const current = { enabled: true, bpm: 90, sound: "wood" as const, volume: 30, accentEvery: 3 };
+    expect(checkMetronome({ ...current, bpm: Number.NaN, volume: 50 }, current)).toEqual({ ...current, volume: 50 });
   });
 });

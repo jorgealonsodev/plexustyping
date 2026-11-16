@@ -1,3 +1,4 @@
+import { MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS } from "../metronome/beat";
 import type { ErrorMode } from "../practice/engine";
 
 const MODE_KEY = "plexustyping.errorMode";
@@ -71,3 +72,45 @@ export const loadTextLength = (storage: Storage = localStorage) => loadChoice(LE
 
 export const saveTextLength = (length: number, storage: Storage = localStorage) =>
   storage.setItem(LENGTH_KEY, String(length));
+
+const METRONOME_KEY = "plexustyping.metronome";
+
+/** Off, 60 BPM (S7: one beat = one expected keystroke), click, 80 %, accent every 4. */
+export const DEFAULT_METRONOME: MetronomeSettings = {
+  enabled: false,
+  bpm: 60,
+  sound: SOUNDS[0].id,
+  volume: 80,
+  accentEvery: 4,
+};
+
+const intIn = (value: unknown, min: number, max: number) =>
+  Number.isInteger(value) && (value as number) >= min && (value as number) <= max;
+
+/** The stored metronome settings; each missing or invalid field takes its default. */
+export function loadMetronome(storage: Storage = localStorage): MetronomeSettings {
+  let stored: Partial<Record<keyof MetronomeSettings, unknown>> = {};
+  try {
+    stored = JSON.parse(storage.getItem(METRONOME_KEY) ?? "{}") ?? {};
+  } catch {
+    // Corrupt value: defaults.
+  }
+  return checkMetronome(stored, DEFAULT_METRONOME);
+}
+
+/** `value` with each missing or invalid field taken from `d`. */
+export function checkMetronome(
+  stored: Partial<Record<keyof MetronomeSettings, unknown>>,
+  d: MetronomeSettings,
+): MetronomeSettings {
+  return {
+    enabled: typeof stored.enabled === "boolean" ? stored.enabled : d.enabled,
+    bpm: intIn(stored.bpm, MIN_BPM, MAX_BPM) ? (stored.bpm as number) : d.bpm,
+    sound: SOUNDS.find((s) => s.id === stored.sound)?.id ?? d.sound,
+    volume: intIn(stored.volume, 0, 100) ? (stored.volume as number) : d.volume,
+    accentEvery: intIn(stored.accentEvery, 0, MAX_ACCENT_EVERY) ? (stored.accentEvery as number) : d.accentEvery,
+  };
+}
+
+export const saveMetronome = (settings: MetronomeSettings, storage: Storage = localStorage) =>
+  storage.setItem(METRONOME_KEY, JSON.stringify(settings));

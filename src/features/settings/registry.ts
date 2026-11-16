@@ -2,6 +2,7 @@ import type { Component } from "svelte";
 import AiSection from "./AiSection.svelte";
 import AppearanceSection from "./AppearanceSection.svelte";
 import KeyboardSection from "./KeyboardSection.svelte";
+import MetronomeSection from "./MetronomeSection.svelte";
 import PracticeSection from "./PracticeSection.svelte";
 import type { SettingsStore } from "./store.svelte";
 
@@ -17,5 +18,6 @@ export const SECTIONS: SettingsSection[] = [
   { id: "practice", label: "Práctica", component: PracticeSection },
   { id: "keyboard", label: "Teclado", component: KeyboardSection },
   { id: "appearance", label: "Apariencia", component: AppearanceSection },
+  { id: "metronome", label: "Metrónomo", component: MetronomeSection },
   { id: "ai", label: "IA", component: AiSection },
 ];

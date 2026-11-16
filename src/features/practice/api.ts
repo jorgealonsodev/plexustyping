@@ -9,6 +9,8 @@ export interface ScoredSession {
   failedChars: string[];
   saved: boolean;
   saveError: string | null;
+  /** Metronome offset of each record, ms (negative = early); empty without a metronome. */
+  offsetsMs: (number | null)[];
 }
 
 /** Where a practice text came from: generated now, the local cache of AI texts, or the corpus. */
@@ -54,8 +56,15 @@ export const nextText = (seed: number, targetCount: number, length: number, fall
     day: localDay(),
   });
 
-export const scoreSession = (text: string, mode: ErrorMode, events: InputEvent[], startedAtMs: number) =>
-  invoke<ScoredSession>("score_session", { text, mode, events, startedAtMs });
+/** `offsetsMs` has one entry per event; `bpm` is the one metronome tempo of the text, if any. */
+export const scoreSession = (
+  text: string,
+  mode: ErrorMode,
+  events: InputEvent[],
+  startedAtMs: number,
+  offsetsMs: (number | null)[] | null = null,
+  bpm: number | null = null,
+) => invoke<ScoredSession>("score_session", { text, mode, events, startedAtMs, offsetsMs, bpm });
 
 export const weaknesses = (limit: number) => invoke<Weakness[]>("weaknesses", { limit });
 

@@ -3,6 +3,7 @@
   import type { ScoredSession, Weakness } from "./api";
   import { focusTyping } from "./focus";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
+  import { rhythmSummary } from "../metronome/beat";
 
   let {
     scored,
@@ -11,6 +12,7 @@
     onRepeat,
   }: { scored: ScoredSession; weak: Weakness[]; onNext: () => void; onRepeat: () => void } = $props();
   const stats = $derived(scored.result.stats);
+  const rhythm = $derived(rhythmSummary(scored.offsetsMs ?? []));
 
   const focusAnd = (action: () => void) => () => {
     focusTyping();
@@ -27,6 +29,12 @@
     <div><dt>Tiempo</dt><dd>{formatTime(stats.durationMs)}</dd></div>
     <div><dt>Errores</dt><dd>{stats.errors}</dd></div>
   </dl>
+  {#if rhythm}
+    <p class="rhythm">
+      Ritmo: desvío medio ±{Math.round(rhythm.meanAbsMs)} ms
+      <span class="note">· adelantadas {Math.round(rhythm.earlyPct)}% / atrasadas {Math.round(rhythm.latePct)}%</span>
+    </p>
+  {/if}
   {#if scored.failedChars.length > 0}
     <p class="failed">
       Caracteres fallados:
@@ -90,6 +98,7 @@
     color: var(--accent);
   }
   .failed,
+  .rhythm,
   .note {
     margin: 0;
   }
