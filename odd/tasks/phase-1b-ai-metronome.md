@@ -18,11 +18,11 @@ Delivery: `chain_strategy=feature-branch-chain`. Forecast: ~2,000 authored lines
 
 | ID | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | S7 | New crate `plexustyping-audio`: synthesized sounds, fixed-BPM scheduler on cpal, accent, volume — writer A (parallel) | pending | — |
-| T2 | S1, S3, S4, S5 | New crate `plexustyping-ai`: `TextProvider` + 4 providers, prompt, JSON parse, validation, fallback chain, usage — writer B (parallel) | pending | — |
+| T1 | S7 | New crate `plexustyping-audio`: synthesized sounds, fixed-BPM scheduler on cpal, accent, volume — writer A (parallel) | done | 7968f14 |
+| T2 | S1, S3, S4, S5 | New crate `plexustyping-ai`: `TextProvider` + 4 providers, prompt, JSON parse, validation, fallback chain, usage — writer B (parallel) | done | 7957ea2 |
 | T3 | S2, S3, S6 | Integration: keychain, provider settings UI + test connection, schema v2 `text_cache` + usage, background prefetch, fallback to corpus — writer C | pending | — |
 | T4 | S7 | Integration: metronome commands, UI controls, visual beat, per-keystroke offset stored — writer D | pending | — |
-| T6 | S8 | Settings modal: gear icon in the header opens a modal with sectioned settings (Práctica, Teclado, Apariencia; IA and Metrónomo sections added by T3/T4) — writer E (parallel with T2) | pending | — |
+| T6 | S8 | Settings modal: gear icon in the header opens a modal with sectioned settings (Práctica, Teclado, Apariencia; IA and Metrónomo sections added by T3/T4) — writer E (parallel with T2) | done | 720cedd |
 | T5 | all | Close: suite, real-app check, verify (credentials, network), Trello | pending | — |
 
 ## Log
@@ -33,3 +33,5 @@ Delivery: `chain_strategy=feature-branch-chain`. Forecast: ~2,000 authored lines
 - **L4 (T1 evidence):** `plexustyping-audio` (cpal 0.18 on its own thread, atomics config, allocation-free callback, sample-accurate `BeatClock`); 12 tests + 1 ignored device test (passed on this host). `started_at` excludes device output latency (a few ms).
 - **L5 (user, verbatim):** "mira como implementa la ia /mnt/1tb/Repos/Personal/20261019_plexusterm/20261019_plexusterm_git/PlexusTerm igual hay cosas que te sirven" (first T2 writer cancelled by the user; then "continua, le di esc sin querer"). Explorer findings adopted: request = plain `Call {url, headers, body, shape}` + `parse(shape)` instead of per-provider HTTP code; error kinds NoKey/Auth/RateLimit/Network/Timeout/Refused/BadResponse/Config with key masking; redirects disabled; redacting `ApiKey` Debug; native JSON-schema output per provider (Anthropic `output_config.format`, OpenAI strict `json_schema` + `max_completion_tokens`, Gemini `responseSchema`); Gemini bad key = 400 `API_KEY_INVALID` → Auth; keychain behind a `SecretStore` trait called via `spawn_blocking`; hand-written loopback mock server. **OpenCode Go inference base is `https://opencode.ai/inference/go/v1`** (PlexusTerm working code + its user guide), not the PRD's `/zen/go/v1`; per-model format (chat / messages / responses) from models.dev `["opencode-go"].models[id].provider.npm`, every request with `x-opencode-session`. MSRV 1.85: no let-chains.
 - **L6 (user, verbatim):** "hay que crear un icono de ajustes que abra una modal de ajustes" → S8/T6; replaces the header selects and the "Ajustes" popover from phase 1A.
+- **L7 (T2/T6 evidence):** T2 `7957ea2`: `plexustyping-ai` 65 tests (43 unit + 6 fallback + 16 providers, loopback mock), also passes on Rust 1.85; contacts models.dev for the OpenCode Go format catalogue (allowlist = 4 providers + models.dev); shapes unverified against live endpoints (no key yet); BASELINE_PER_CHAR 0.02 may be strict. T6 `720cedd`: gear icon + native `<dialog>` modal, sections registry (Práctica, Teclado, Apariencia), Ctrl+,; 89 vitest. Real-app check at 720×480: modal fits, opens from the gear, Escape closes it without restarting the text.
+- **L8 (decision):** raise workspace `rust-version` 1.85 → 1.88 so T3 can use `keyring` 4.2 + `keyring-core` 1.0 exactly as PlexusTerm (keyring 4.2 needs 1.88; toolchain is 1.98; project unpublished).
