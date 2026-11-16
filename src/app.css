@@ -1,0 +1,12 @@
+:root {
+  color-scheme: dark;
+  --bg: #282c34;
+  --fg: #abb2bf;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  margin: 0;
+}
