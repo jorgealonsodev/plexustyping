@@ -14,6 +14,8 @@ publish = false
 plexustyping-core = { path = "crates/plexustyping-core" }
 plexustyping-layouts = { path = "crates/plexustyping-layouts" }
 plexustyping-corpus = { path = "crates/plexustyping-corpus" }
+plexustyping-store = { path = "crates/plexustyping-store" }
+rusqlite = { version = "0.40", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
