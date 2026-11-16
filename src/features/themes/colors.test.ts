@@ -1,0 +1,124 @@
+import { describe, expect, it } from "vitest";
+import { applyTheme, contrastRatio, mix, readableOn, themeById, typingColors } from "./index";
+
+const KEYS = [
+  "--bg",
+  "--surface",
+  "--surface-2",
+  "--border",
+  "--text",
+  "--muted",
+  "--accent",
+  "--on-accent",
+  "--success",
+  "--warning",
+  "--danger",
+  "--text-pending",
+  "--text-correct",
+  "--text-error",
+  "--error-bg",
+  "--cursor",
+  "--cursor-text",
+  "--key-bg",
+  "--key-fg",
+  "--key-border",
+  "--key-active",
+  "color-scheme",
+];
+
+/** A minimal stand-in for `document.documentElement` (vitest runs in node, without a DOM). */
+function fakeRoot() {
+  const properties = new Map<string, string>();
+  const root = {
+    style: { setProperty: (name: string, value: string) => void properties.set(name, value) },
+    dataset: {} as Record<string, string>,
+  };
+  return { root: root as unknown as HTMLElement, properties, dataset: root.dataset };
+}
+
+describe("colour helpers", () => {
+  it("mixes two colours by weight and ignores an alpha suffix", () => {
+    expect(mix("#000000", "#ffffff", 0)).toBe("#000000");
+    expect(mix("#000000", "#ffffff", 1)).toBe("#ffffff");
+    expect(mix("#000000", "#ffffff", 0.5)).toBe("#808080");
+    expect(mix("#00000080", "#ff0000", 1)).toBe("#ff0000");
+  });
+
+  it("picks black on light backgrounds and white on dark ones", () => {
+    expect(readableOn("#ffffff")).toBe("#000000");
+    expect(readableOn("#89b4fa")).toBe("#000000");
+    expect(readableOn("#1e1e2e")).toBe("#ffffff");
+  });
+
+  it("computes the WCAG contrast ratio", () => {
+    expect(contrastRatio("#000000", "#ffffff")).toBeCloseTo(21, 5);
+    expect(contrastRatio("#ffffff", "#000000")).toBeCloseTo(21, 5);
+    expect(contrastRatio("#777777", "#777777")).toBe(1);
+  });
+});
+
+describe("typingColors", () => {
+  it("maps Catppuccin Mocha to exactly the typing roles", () => {
+    expect(typingColors(themeById("catppuccin-mocha"))).toEqual({
+      "--bg": "#1e1e2e",
+      "--surface": "#252536",
+      "--surface-2": "#2c2d3e",
+      "--border": "#3a3b4e",
+      "--text": "#cdd6f4",
+      "--muted": "#878ca5",
+      "--accent": "#89b4fa",
+      "--on-accent": "#000000",
+      "--success": "#a6e3a1",
+      "--warning": "#f9e2af",
+      "--danger": "#f38ba8",
+      "--text-pending": "#6d7187",
+      "--text-correct": "#cdd6f4",
+      "--text-error": "#f38ba8",
+      "--error-bg": "#4d3649",
+      "--cursor": "#f5e0dc",
+      "--cursor-text": "#1e1e2e",
+      "--key-bg": "#2c2d3e",
+      "--key-fg": "#cdd6f4",
+      "--key-border": "#414356",
+      "--key-active": "#89b4fa",
+      "color-scheme": "dark",
+    });
+  });
+
+  it("gives every theme the same keys, derived from its palette", () => {
+    for (const entry of [themeById("plexusterm"), themeById("catppuccin-latte"), themeById("laser")]) {
+      const colors = typingColors(entry);
+      const { background: bg, foreground: fg, red } = entry.palette;
+      expect(Object.keys(colors).sort()).toEqual([...KEYS].sort());
+      expect(colors["--text-pending"]).toBe(mix(bg, fg, 0.45));
+      expect(colors["--error-bg"]).toBe(mix(bg, red, 0.22));
+      expect(colors["--key-active"]).toBe(entry.palette.blue);
+      expect(colors["color-scheme"]).toBe(entry.dark ? "dark" : "light");
+    }
+  });
+
+  it("falls back to the background for the text under the cursor", () => {
+    const entry = themeById("plexusterm");
+    const { cursorAccent: _ignored, ...palette } = entry.palette;
+    expect(typingColors({ ...entry, palette })["--cursor-text"]).toBe("#0f1419");
+  });
+});
+
+describe("applyTheme", () => {
+  it("writes every typing colour and data-theme on the given root", () => {
+    const { root, properties, dataset } = fakeRoot();
+    const dark = themeById("catppuccin-mocha");
+    applyTheme(dark, root);
+    expect(Object.fromEntries(properties)).toEqual(typingColors(dark));
+    expect(dataset.theme).toBe("dark");
+  });
+
+  it("switches a root to another theme in place", () => {
+    const { root, properties, dataset } = fakeRoot();
+    applyTheme(themeById("catppuccin-mocha"), root);
+    const light = themeById("catppuccin-latte");
+    applyTheme(light, root);
+    expect(Object.fromEntries(properties)).toEqual(typingColors(light));
+    expect(dataset.theme).toBe("light");
+  });
+});
