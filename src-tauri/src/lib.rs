@@ -1,19 +1,23 @@
+pub mod ai;
 pub mod commands;
+pub mod secrets;
 
-use std::sync::MutexGuard;
+use std::sync::{Arc, MutexGuard};
 
+use ai::{AiFailure, AiSettings, ProviderInfo, TextParams};
 use commands::{
-    AppState, FirstText, HeatScore, NextText, NextTextRequest, ScoredSession, StorageStatus,
-    Weakness,
+    AppState, FirstText, HeatScore, NextText, ScoredSession, StorageStatus, Weakness, lock_store,
 };
+use plexustyping_ai::{AiClient, Endpoints, ProviderId};
 use plexustyping_core::{ErrorMode, InputEvent};
 use plexustyping_layouts::{KeyPress, Layout};
-use plexustyping_store::{SessionSummary, Store};
+use plexustyping_store::{SessionSummary, Store, UsageRow};
+use secrets::KeyringStore;
 use tauri::{Manager, State};
 
-/// The store; a panic while it was held leaves it usable (each write is transactional).
+/// The store; never held across an `.await` (async commands must be `Send`).
 fn store<'a>(state: &'a State<AppState>) -> MutexGuard<'a, Store> {
-    state.store.lock().unwrap_or_else(|e| e.into_inner())
+    lock_store(&state.store)
 }
 
 /// A per-call seed for text generation.
@@ -28,30 +32,36 @@ fn diagnostic_text(language: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn first_text(state: State<AppState>, language: String) -> Result<FirstText, String> {
-    commands::first_text(&store(&state), &state.profile, &language, time_seed())
+async fn first_text(
+    state: State<'_, AppState>,
+    language: String,
+    day: String,
+) -> Result<FirstText, String> {
+    ai::first_text(&state, &language, time_seed(), &day).await
 }
 
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
-fn next_text(
-    state: State<AppState>,
+async fn next_text(
+    state: State<'_, AppState>,
     language: String,
     layout: String,
     seed: u64,
     target_count: usize,
     length: usize,
     fallback: Vec<String>,
+    day: String,
 ) -> Result<NextText, String> {
-    let model = commands::load_model(&store(&state), &state.profile)?;
-    let req = NextTextRequest {
-        language: &language,
-        layout: &layout,
+    let params = TextParams {
+        language,
+        layout,
         seed,
         target_count,
         length,
-        fallback: &fallback,
+        fallback,
+        day,
     };
-    commands::next_text(&model, &req)
+    ai::next_text(&state, &params).await
 }
 
 #[tauri::command]
@@ -105,6 +115,66 @@ fn key_sequences(layout: String, text: String) -> Result<Vec<Option<Vec<KeyPress
     commands::key_sequences(&layout, &text)
 }
 
+#[tauri::command]
+fn ai_settings_get(state: State<AppState>) -> AiSettings {
+    ai::load_settings(&store(&state))
+}
+
+#[tauri::command]
+fn ai_settings_set(state: State<AppState>, settings: AiSettings) -> Result<AiSettings, AiFailure> {
+    ai::save_settings(&store(&state), settings)
+}
+
+#[tauri::command]
+fn ai_providers() -> Vec<ProviderInfo> {
+    ai::providers()
+}
+
+#[tauri::command]
+async fn ai_key_status(
+    state: State<'_, AppState>,
+    provider: ProviderId,
+) -> Result<bool, AiFailure> {
+    ai::key_status(&state.secrets, provider).await
+}
+
+/// The key goes straight to the keychain; it is never returned or logged.
+#[tauri::command]
+async fn ai_key_save(
+    state: State<'_, AppState>,
+    provider: ProviderId,
+    key: String,
+) -> Result<(), AiFailure> {
+    ai::key_save(&state.secrets, provider, key).await
+}
+
+#[tauri::command]
+async fn ai_key_delete(state: State<'_, AppState>, provider: ProviderId) -> Result<(), AiFailure> {
+    ai::key_delete(&state.secrets, provider).await
+}
+
+#[tauri::command]
+async fn ai_models(
+    state: State<'_, AppState>,
+    provider: ProviderId,
+) -> Result<Vec<String>, AiFailure> {
+    ai::models(&state.ai, &state.secrets, provider).await
+}
+
+#[tauri::command]
+async fn ai_test(
+    state: State<'_, AppState>,
+    provider: ProviderId,
+    model: String,
+) -> Result<(), AiFailure> {
+    ai::test_connection(&state.ai, &state.secrets, provider, &model).await
+}
+
+#[tauri::command]
+fn ai_usage(state: State<AppState>, day: String) -> Result<Vec<UsageRow>, String> {
+    ai::usage(&store(&state), &ai::usage_day(&day))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -112,6 +182,8 @@ pub fn run() {
             let path = app.path().app_data_dir().map_err(|e| e.to_string());
             app.manage(commands::open_state(
                 path.map(|dir| dir.join("plexustyping.sqlite3")),
+                Arc::new(KeyringStore::default()),
+                AiClient::new(Endpoints::production()),
             ));
             Ok(())
         })
@@ -125,7 +197,16 @@ pub fn run() {
             recent_sessions,
             storage_status,
             get_layout,
-            key_sequences
+            key_sequences,
+            ai_settings_get,
+            ai_settings_set,
+            ai_providers,
+            ai_key_status,
+            ai_key_save,
+            ai_key_delete,
+            ai_models,
+            ai_test,
+            ai_usage
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");

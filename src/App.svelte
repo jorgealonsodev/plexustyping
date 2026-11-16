@@ -57,6 +57,7 @@
   heatmap={settings.heatmap}
   targetCount={settings.targetCount}
   textLength={settings.textLength}
+  aiRevision={settings.aiRevision}
 />
 
 <SettingsModal bind:this={modal} {settings} />

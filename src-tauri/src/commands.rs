@@ -1,17 +1,22 @@
 //! Command logic behind the Tauri IPC handlers, testable without a Tauri runtime.
 
+use std::collections::BTreeSet;
+use std::ops::Range;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Mutex, MutexGuard};
 
+use plexustyping_ai::AiClient;
 use plexustyping_core::adaptive::{Confusion, UnitStat, WeaknessModel};
 use plexustyping_core::{ErrorMode, InputEvent, SessionResult, failed_chars, replay};
-use plexustyping_corpus::{GenerateOptions, corpus};
+use plexustyping_corpus::{Corpus, GenerateOptions, corpus};
 use plexustyping_layouts::{KeyPress, Layout};
 use plexustyping_store::{
     ConfusionRow, NewSession, Profile, SessionSummary, StatsSnapshot, Store, StoreError,
     UnitStatRow,
 };
 use serde::{Deserialize, Serialize};
+
+use crate::secrets::SharedSecrets;
 
 /// Mode of practice sessions and of their statistics.
 pub const STATS_MODE: &str = "prose";
@@ -28,6 +33,16 @@ pub struct AppState {
     pub profile: Profile,
     /// Whether sessions survive a restart.
     pub status: StorageStatus,
+    /// The one AI client (production endpoints in the app).
+    pub ai: AiClient,
+    /// Where AI keys live (the system keychain in the app).
+    pub secrets: SharedSecrets,
+}
+
+/// The store; a panic while it was held leaves it usable (each write is
+/// transactional). Never hold the guard across an `.await`.
+pub fn lock_store(store: &Mutex<Store>) -> MutexGuard<'_, Store> {
+    store.lock().unwrap_or_else(|e| e.into_inner())
 }
 
 /// Whether the store is persistent, and why not.
@@ -51,18 +66,54 @@ pub struct ScoredSession {
     pub save_error: Option<String>,
 }
 
-/// A generated practice text and the targets it really practises.
+/// Where a practice text came from.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum TextSource {
+    /// Generated now by an AI provider.
+    Ai,
+    /// A previously generated AI text from the local cache.
+    Cache,
+    /// The local corpus.
+    Corpus,
+}
+
+/// A practice text, the targets it really practises and its origin.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct NextText {
     pub text: String,
     pub targets: Vec<String>,
+    pub source: TextSource,
+    /// Provider id (`ai` and `cache` texts).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider: Option<String>,
+    /// Model id (`ai` and `cache` texts).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    /// Why the AI was not used although it is enabled (Spanish, for the user).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notice: Option<String>,
+}
+
+impl NextText {
+    /// A text of the local corpus.
+    pub fn corpus(text: String, targets: Vec<String>) -> Self {
+        NextText {
+            text,
+            targets,
+            source: TextSource::Corpus,
+            provider: None,
+            model: None,
+            notice: None,
+        }
+    }
 }
 
 /// The text to start the app with.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct FirstText {
-    pub text: String,
-    pub targets: Vec<String>,
+    #[serde(flatten)]
+    pub text: NextText,
     /// The fixed diagnostic text (no session saved yet).
     pub diagnostic: bool,
 }
@@ -95,8 +146,19 @@ pub struct NextTextRequest<'a> {
     pub fallback: &'a [String],
 }
 
+/// What [`next_text`] decided before generating: shared by the AI and corpus paths.
+#[derive(Clone, Debug)]
+pub struct TextPlan {
+    pub corpus: &'static Corpus,
+    pub targets: Vec<String>,
+    /// Accepted length in chars.
+    pub length: Range<usize>,
+    /// Chars the layout can type.
+    pub allowed: BTreeSet<char>,
+}
+
 /// Opens the database at `path`, or an in-memory one (logging why) so practice still works.
-pub fn open_state(path: Result<PathBuf, String>) -> AppState {
+pub fn open_state(path: Result<PathBuf, String>, secrets: SharedSecrets, ai: AiClient) -> AppState {
     let opened = path.and_then(|path| {
         let store = Store::open(&path).map_err(|e| format!("{}: {e}", path.display()))?;
         let profile = store.default_profile().map_err(|e| e.to_string())?;
@@ -126,6 +188,8 @@ pub fn open_state(path: Result<PathBuf, String>) -> AppState {
         store: Mutex::new(store),
         profile,
         status,
+        ai,
+        secrets,
     }
 }
 
@@ -211,24 +275,26 @@ pub fn generate_with_retry(
 ) -> Result<NextText, String> {
     let text = generate(targets);
     if !text.is_empty() {
-        let targets = targets.to_vec();
-        return Ok(NextText { text, targets });
+        return Ok(NextText::corpus(text, targets.to_vec()));
     }
     let text = generate(&[]);
     if text.is_empty() {
         Err("could not generate a practice text".to_owned())
     } else {
-        Ok(NextText {
-            text,
-            targets: Vec::new(),
-        })
+        Ok(NextText::corpus(text, Vec::new()))
     }
 }
 
-/// An adaptive practice text: the model's weakest units, else `fallback`, as
-/// targets. Targets no corpus word contains (spaces, signs) are dropped, so
-/// the reported targets are the ones the text practises.
+/// An adaptive corpus practice text: see [`plan_text`] and [`corpus_text`].
 pub fn next_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<NextText, String> {
+    corpus_text(&plan_text(model, req)?, req.seed)
+}
+
+/// Targets, length and allowed chars of the next text: the model's weakest
+/// units, else `fallback`, as targets. Targets no corpus word contains
+/// (spaces, signs) are dropped, so the reported targets are the ones the text
+/// practises.
+pub fn plan_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<TextPlan, String> {
     let corpus = corpus(req.language).ok_or_else(|| unknown_language(req.language))?;
     let layout = get_layout(req.layout)?;
     let count = req.target_count.clamp(3, 5);
@@ -242,50 +308,42 @@ pub fn next_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<NextTex
         !t.is_empty() && corpus.words().iter().any(|w| w.contains(&t))
     });
     targets.truncate(count);
-    let allowed = layout.allowed_chars();
-    generate_with_retry(&targets, |targets| {
-        corpus.generate(&GenerateOptions {
+    Ok(TextPlan {
+        corpus,
+        targets,
+        length: length..length + length / 5 + 1,
+        allowed: layout.allowed_chars(),
+    })
+}
+
+/// A corpus text for `plan`.
+pub fn corpus_text(plan: &TextPlan, seed: u64) -> Result<NextText, String> {
+    generate_with_retry(&plan.targets, |targets| {
+        plan.corpus.generate(&GenerateOptions {
             targets: targets.to_vec(),
-            length: length..length + length / 5 + 1,
-            allowed: Some(allowed.clone()),
-            seed: req.seed,
+            length: plan.length.clone(),
+            allowed: Some(plan.allowed.clone()),
+            seed,
         })
     })
 }
 
-/// The diagnostic text until `profile` has a saved session, then an adaptive text.
-pub fn first_text(
+/// The diagnostic text while `profile` has no saved session.
+pub fn diagnostic_for_new_profile(
     store: &Store,
     profile: &Profile,
     language: &str,
-    seed: u64,
-) -> Result<FirstText, String> {
+) -> Result<Option<FirstText>, String> {
     let sessions = store
         .recent_sessions(profile.id, 1)
         .map_err(|e| e.to_string())?;
-    if sessions.is_empty() {
-        let text = diagnostic_text(language)?;
-        let targets = Vec::new();
-        return Ok(FirstText {
-            text,
-            targets,
-            diagnostic: true,
-        });
+    if !sessions.is_empty() {
+        return Ok(None);
     }
-    let req = NextTextRequest {
-        language,
-        layout: &profile.layout,
-        seed,
-        target_count: DEFAULT_TARGETS,
-        length: DEFAULT_LENGTH,
-        fallback: &[],
-    };
-    let next = next_text(&load_model(store, profile)?, &req)?;
-    Ok(FirstText {
-        text: next.text,
-        targets: next.targets,
-        diagnostic: false,
-    })
+    Ok(Some(FirstText {
+        text: NextText::corpus(diagnostic_text(language)?, Vec::new()),
+        diagnostic: true,
+    }))
 }
 
 /// Replays a session; a completed one with keystrokes is stored and folded
@@ -443,7 +501,9 @@ mod tests {
             Err("no data dir".to_owned()),
             Ok("/dev/null/x.sqlite3".into()),
         ] {
-            let state = open_state(path);
+            let secrets: SharedSecrets = std::sync::Arc::new(crate::secrets::NoStore);
+            let ai = AiClient::new(plexustyping_ai::Endpoints::loopback("http://127.0.0.1:9"));
+            let state = open_state(path, secrets, ai);
             assert!(!state.status.persistent);
             assert!(state.status.error.is_some());
             let mut store = state.store.lock().unwrap();
@@ -657,47 +717,6 @@ mod tests {
     }
 
     #[test]
-    fn first_text_is_the_diagnostic_until_a_session_is_saved() {
-        let (mut store, profile) = memory();
-        let first = first_text(&store, &profile, "es", 1).unwrap();
-        assert_eq!(
-            first,
-            FirstText {
-                text: diagnostic_text("es").unwrap(),
-                targets: vec![],
-                diagnostic: true
-            }
-        );
-        // An unsaved (incomplete) session changes nothing.
-        score_session(
-            &mut store,
-            &profile,
-            "ñañaña",
-            ErrorMode::AllowContinue,
-            &typing("n"),
-            1,
-        );
-        assert!(first_text(&store, &profile, "es", 1).unwrap().diagnostic);
-        score_session(
-            &mut store,
-            &profile,
-            "ñañaña",
-            ErrorMode::AllowContinue,
-            &typing("nanana"),
-            1,
-        );
-        let next = first_text(&store, &profile, "es", 1).unwrap();
-        assert!(!next.diagnostic);
-        let req = request(1, DEFAULT_TARGETS, DEFAULT_LENGTH);
-        let expected = next_text(&load_model(&store, &profile).unwrap(), &req).unwrap();
-        assert_eq!((next.text, next.targets), (expected.text, expected.targets));
-        assert_eq!(
-            first_text(&store, &profile, "xx", 1),
-            Err("unknown language: xx".to_owned())
-        );
-    }
-
-    #[test]
     fn next_text_uses_the_model_targets_within_length_and_layout() {
         let model = model(&[("ñ", 0.9), ("qu", 0.8), ("z", 0.7)]);
         let next = next_text(&model, &request(7, 3, 300)).unwrap();
@@ -799,10 +818,7 @@ mod tests {
         });
         assert_eq!(
             next,
-            Ok(NextText {
-                text: "qué".to_owned(),
-                targets: targets(&["qu"])
-            })
+            Ok(NextText::corpus("qué".to_owned(), targets(&["qu"])))
         );
         assert_eq!(calls.into_inner(), vec![targets(&["qu"])]);
     }
@@ -814,13 +830,7 @@ mod tests {
             calls.borrow_mut().push(t.to_vec());
             if t.is_empty() { "hola." } else { "" }.to_owned()
         });
-        assert_eq!(
-            next,
-            Ok(NextText {
-                text: "hola.".to_owned(),
-                targets: vec![]
-            })
-        );
+        assert_eq!(next, Ok(NextText::corpus("hola.".to_owned(), vec![])));
         assert_eq!(calls.into_inner(), vec![targets(&["q"]), vec![]]);
     }
 
