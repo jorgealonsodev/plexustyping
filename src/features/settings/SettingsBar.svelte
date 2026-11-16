@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ErrorMode } from "../practice/engine";
+  import { focusTyping } from "../practice/focus";
   import { THEMES } from "../themes";
   import { ERROR_MODES } from "./settings";
 
@@ -7,16 +8,24 @@
     mode,
     themeId,
     liveStats,
+    showKeyboard,
+    flashes,
     onMode,
     onTheme,
     onLiveStats,
+    onShowKeyboard,
+    onFlashes,
   }: {
     mode: ErrorMode;
     themeId: string;
     liveStats: boolean;
+    showKeyboard: boolean;
+    flashes: boolean;
     onMode: (mode: ErrorMode) => void;
     onTheme: (id: string) => void;
     onLiveStats: (on: boolean) => void;
+    onShowKeyboard: (on: boolean) => void;
+    onFlashes: (on: boolean) => void;
   } = $props();
 
   const groups = [
@@ -24,21 +33,21 @@
     { label: "Claros", themes: THEMES.filter((t) => !t.dark) },
   ];
 
-  // Each handler gives the keyboard back to the practice text after the change.
+  // Each handler gives the keyboard back to the typing field after the change.
   function pickMode(e: Event & { currentTarget: HTMLSelectElement }) {
     onMode(e.currentTarget.value as ErrorMode);
-    e.currentTarget.blur();
+    focusTyping();
   }
 
   function pickTheme(e: Event & { currentTarget: HTMLSelectElement }) {
     onTheme(e.currentTarget.value);
-    e.currentTarget.blur();
+    focusTyping();
   }
 
-  function toggleLive(e: Event & { currentTarget: HTMLInputElement }) {
-    onLiveStats(e.currentTarget.checked);
-    e.currentTarget.blur();
-  }
+  const toggle = (set: (on: boolean) => void) => (e: Event & { currentTarget: HTMLInputElement }) => {
+    set(e.currentTarget.checked);
+    focusTyping();
+  };
 </script>
 
 <div class="settings">
@@ -63,8 +72,16 @@
     </select>
   </label>
   <label class="toggle">
-    <input type="checkbox" checked={liveStats} onchange={toggleLive} />
+    <input type="checkbox" checked={liveStats} onchange={toggle(onLiveStats)} />
     Estadísticas en vivo
+  </label>
+  <label class="toggle" title="Mostrar u ocultar con F2">
+    <input type="checkbox" checked={showKeyboard} onchange={toggle(onShowKeyboard)} />
+    Teclado <kbd>F2</kbd>
+  </label>
+  <label class="toggle">
+    <input type="checkbox" checked={flashes} onchange={toggle(onFlashes)} />
+    Destellos
   </label>
 </div>
 
@@ -93,5 +110,12 @@
   }
   input {
     accent-color: var(--accent);
+  }
+  kbd {
+    padding: 0 0.3em;
+    font-family: var(--mono);
+    font-size: 0.85em;
+    border: 1px solid var(--key-border);
+    border-radius: 0.25em;
   }
 </style>

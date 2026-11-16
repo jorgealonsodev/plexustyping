@@ -144,16 +144,41 @@ export function replay(text: string, mode: ErrorMode, events: InputEvent[]): Ses
   return session.result();
 }
 
+// Typed text arrives through a focused text field, not keydown: on Linux, WebKitGTK only commits
+// dead-key compositions (´ + a = á) from the input method to a focused editable element (S10).
+
+/** One char event per Unicode scalar of text the typing field received (NFC first, so á counts once). */
+export function textToEvents(value: string, tMs: number): InputEvent[] {
+  return [...value.normalize("NFC")].map((ch) => ({ kind: "char", ch, tMs }));
+}
+
+/** Whether an `input` event's `inputType` is typing; paste, drop, undo, deletions and line breaks are not. */
+export function acceptsInput(inputType: string): boolean {
+  return !/^(insertFrom|history|delete)/.test(inputType) && inputType !== "insertLineBreak" && inputType !== "insertParagraph";
+}
+
 export type KeyLike = Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey" | "isComposing" | "getModifierState">;
 
+export type KeyAction = "backspace" | "escape" | "enter" | "tab";
+
 /**
- * Maps a keydown to an input event, or `null` when it is not typing: dead keys (the composed
- * char arrives later as one key), modifiers, named keys, IME composition and Ctrl/Meta shortcuts.
- * AltGr is accepted even though Linux and Windows report it as Ctrl+Alt.
+ * The keydown that the typing field handles itself, or `null` for keys that type (left to the
+ * field's input events), modifiers, function keys, keys pressed while composing and Ctrl/Meta
+ * Backspace. AltGr is accepted even though Linux and Windows report it as Ctrl+Alt.
  */
-export function keyToEvent(e: KeyLike, tMs: number): InputEvent | null {
-  if (e.isComposing || e.key === "Dead" || e.metaKey) return null;
-  if (e.ctrlKey && !e.getModifierState("AltGraph")) return null;
-  if (e.key === "Backspace") return { kind: "backspace", tMs };
-  return [...e.key].length === 1 ? { kind: "char", ch: e.key, tMs } : null;
+export function keyAction(e: KeyLike): KeyAction | null {
+  if (e.isComposing) return null;
+  switch (e.key) {
+    case "Escape":
+      return "escape";
+    case "Enter":
+      return "enter";
+    case "Tab":
+      return "tab";
+    case "Backspace":
+      if (e.metaKey || (e.ctrlKey && !e.getModifierState("AltGraph"))) return null;
+      return "backspace";
+    default:
+      return null;
+  }
 }

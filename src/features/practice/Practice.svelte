@@ -1,11 +1,21 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
-  import { diagnosticText, nextText, scoreSession, type ScoredSession } from "./api";
-  import { type ErrorMode, TypingSession, keyToEvent } from "./engine";
+  import { getLayout, keySequences } from "../keyboard/api";
+  import Keyboard from "../keyboard/Keyboard.svelte";
+  import { type Flash, highlightsFor, keyForChar } from "../keyboard/keys";
+  import type { KeyPress, Layout } from "../keyboard/types";
+  import { LAYOUT, diagnosticText, nextText, scoreSession, type ScoredSession } from "./api";
+  import { type ErrorMode, type InputEvent as TypingEvent, TypingSession, acceptsInput, keyAction, textToEvents } from "./engine";
+  import { focusTyping, setTypingField } from "./focus";
   import { formatPercent, formatTime, formatWpm } from "./format";
   import Results from "./Results.svelte";
 
-  let { mode, liveStats }: { mode: ErrorMode; liveStats: boolean } = $props();
+  let {
+    mode,
+    liveStats,
+    showKeyboard,
+    flashes,
+  }: { mode: ErrorMode; liveStats: boolean; showKeyboard: boolean; flashes: boolean } = $props();
 
   type Phase = "loading" | "typing" | "scoring" | "results" | "error";
   let phase = $state<Phase>("loading");
@@ -19,6 +29,11 @@
   let retry: () => void = loadDiagnostic;
   // Invalidates in-flight IPC results when the user restarts or moves on.
   let run = 0;
+  let field = $state<HTMLTextAreaElement>();
+  let layout = $state.raw<Layout | null>(null);
+  // Key presses for each char of `text`, fetched once per text.
+  let sequences = $state.raw<(KeyPress[] | null)[] | null>(null);
+  let flash = $state.raw<Flash | null>(null);
 
   const view = $derived.by(() => {
     void tick;
@@ -31,6 +46,7 @@
     if (!session || session.firstT === null) return 0;
     return phase === "typing" ? Math.max(now - session.firstT, 0) : (view?.stats.durationMs ?? 0);
   });
+  const highlights = $derived(phase === "typing" && view && sequences ? highlightsFor(sequences[view.cursor]) : []);
 
   function restart() {
     if (!text) return;
@@ -85,32 +101,96 @@
   }
 
   const isFormControl = (target: EventTarget | null) =>
-    target instanceof HTMLElement && ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
+    target !== field && target instanceof HTMLElement && ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
+
+  function applyEvent(event: TypingEvent) {
+    if (phase !== "typing" || !session) return;
+    const expected = session.chars[session.cursor];
+    if (!session.apply(event)) return;
+    now = event.tMs;
+    tick++;
+    if (event.kind === "char" && flashes && layout) {
+      const code = keyForChar(layout, event.ch);
+      if (code) flash = { code, ok: event.ch === expected };
+    }
+    if (session.completed) void finish(session);
+  }
+
+  // Typed chars come only from text the field received; reading and clearing it makes the
+  // `input` and `compositionend` paths idempotent.
+  function takeText() {
+    if (!field) return;
+    const value = field.value;
+    field.value = "";
+    for (const event of textToEvents(value, performance.now())) applyEvent(event);
+  }
+
+  function onInput(e: Event) {
+    const input = e as globalThis.InputEvent;
+    if (input.isComposing) return;
+    if (acceptsInput(input.inputType)) takeText();
+    else if (field) field.value = "";
+  }
 
   function onKeydown(e: KeyboardEvent) {
     if (isFormControl(e.target)) return;
+    const action = keyAction(e);
     // Escape restarts only a text being typed or reviewed; while a text loads or is scored,
     // restarting would silently discard the pending result.
-    if (e.key === "Escape" && (phase === "typing" || phase === "results")) {
+    if (action === "escape" && (phase === "typing" || phase === "results")) {
       e.preventDefault();
       restart();
       return;
     }
-    // Enter on a focused button keeps its native activation (e.g. "Repetir").
-    if (phase === "results" && e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) {
-      e.preventDefault();
-      loadNext();
+    if (action === "enter") {
+      // Enter on a focused button keeps its native activation (e.g. "Repetir").
+      if (phase === "results" && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault();
+        loadNext();
+      } else if (e.target === field) {
+        // Not typeable yet: no practice text contains a newline.
+        e.preventDefault();
+      }
       return;
     }
-    if (phase !== "typing" || !session) return;
-    const event = keyToEvent(e, performance.now());
-    if (!event) return;
-    e.preventDefault();
-    if (!session.apply(event)) return;
-    now = event.tMs;
-    tick++;
-    if (session.completed) void finish(session);
+    if (e.target !== field) return;
+    if (action === "tab" && phase === "typing") e.preventDefault();
+    if (action === "backspace") {
+      e.preventDefault();
+      applyEvent({ kind: "backspace", tMs: performance.now() });
+    }
   }
+
+  // Any click outside a settings control, or focus lost to the page, returns to the typing field.
+  function onWindowClick(e: MouseEvent) {
+    if (e.target instanceof Element && e.target.closest("select, input, label")) return;
+    focusTyping();
+  }
+
+  function refocusIfLost() {
+    setTimeout(() => {
+      if (!document.activeElement || document.activeElement === document.body) focusTyping();
+    });
+  }
+
+  $effect(() => {
+    const current = text;
+    sequences = null;
+    if (!current) return;
+    let live = true;
+    keySequences(LAYOUT, current)
+      .then((next) => {
+        if (live) sequences = next;
+      })
+      .catch((err) => console.warn("key_sequences failed; no key highlight", err));
+    return () => (live = false);
+  });
+
+  // A phase change can remove the focused button (e.g. "Siguiente texto").
+  $effect(() => {
+    void phase;
+    refocusIfLost();
+  });
 
   // Changing the error mode restarts the current text.
   $effect(() => {
@@ -125,49 +205,107 @@
     return () => clearInterval(timer);
   });
 
-  onMount(loadDiagnostic);
+  onMount(() => {
+    setTypingField(field ?? null);
+    focusTyping();
+    loadDiagnostic();
+    getLayout(LAYOUT)
+      .then((next) => (layout = next))
+      .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
+    return () => setTypingField(null);
+  });
 
-  const blurAnd = (action: () => void) => (e: MouseEvent) => {
-    (e.currentTarget as HTMLElement).blur();
+  // WebKit's `autocorrect` is missing from Svelte's textarea attribute types.
+  const noAutocorrect: Record<string, string> = { autocorrect: "off" };
+
+  const focusAnd = (action: () => void) => () => {
+    focusTyping();
     action();
   };
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydown={onKeydown} onclick={onWindowClick} />
+<svelte:document onfocusout={refocusIfLost} />
 
-<section class="practice">
-  {#if liveStats && view && phase === "typing"}
-    <dl class="live" aria-label="Estadísticas en vivo">
-      <div><dt>PPM</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
-      <div><dt>Pulsaciones/min</dt><dd>{formatWpm(view.stats.kpm)}</dd></div>
-      <div><dt>Precisión</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
-      <div><dt>Tiempo</dt><dd>{formatTime(elapsed)}</dd></div>
-    </dl>
-  {/if}
+<textarea
+  bind:this={field}
+  class="capture"
+  aria-label="Entrada de mecanografía"
+  autocomplete="off"
+  {...noAutocorrect}
+  autocapitalize="off"
+  spellcheck="false"
+  oninput={onInput}
+  oncompositionend={takeText}
+></textarea>
 
-  {#if phase === "loading"}
-    <p class="status">Cargando texto…</p>
-  {:else if phase === "error"}
-    <div class="status" role="alert">
-      <p>{message}</p>
-      <button type="button" onclick={blurAnd(() => retry())}>Reintentar</button>
-    </div>
-  {:else if phase === "results" && scored}
-    <Results {scored} onNext={loadNext} onRepeat={restart} />
-  {:else if session && view}
-    <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
-    <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
-          class="ch {view.states[i]}"
-          class:space={c === " "}
-          class:cursor={i === view.cursor}>{c}</span
-        >{/each}</p>
-    <p class="hint">
-      {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · Esc reinicia{:else}Esc reinicia el texto{/if}
-    </p>
-  {/if}
-</section>
+<main>
+  <section class="practice">
+    {#if liveStats && view && phase === "typing"}
+      <dl class="live" aria-label="Estadísticas en vivo">
+        <div><dt>PPM</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
+        <div><dt>Pulsaciones/min</dt><dd>{formatWpm(view.stats.kpm)}</dd></div>
+        <div><dt>Precisión</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
+        <div><dt>Tiempo</dt><dd>{formatTime(elapsed)}</dd></div>
+      </dl>
+    {/if}
+
+    {#if phase === "loading"}
+      <p class="status">Cargando texto…</p>
+    {:else if phase === "error"}
+      <div class="status" role="alert">
+        <p>{message}</p>
+        <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
+      </div>
+    {:else if phase === "results" && scored}
+      <Results {scored} onNext={loadNext} onRepeat={restart} />
+    {:else if session && view}
+      <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
+      <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
+            class="ch {view.states[i]}"
+            class:space={c === " "}
+            class:cursor={i === view.cursor}>{c}</span
+          >{/each}</p>
+      <p class="hint">
+        {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · Esc reinicia{:else}Esc reinicia el texto{/if}
+      </p>
+    {/if}
+  </section>
+</main>
+
+{#if showKeyboard}
+  <footer>
+    <Keyboard {layout} {highlights} {flash} />
+  </footer>
+{/if}
 
 <style>
+  /* Focusable but invisible: it only collects typed and composed text. */
+  .capture {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    resize: none;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  main {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: clamp(1rem, 5vh, 4rem) 2rem;
+  }
+  footer {
+    flex: none;
+    padding: clamp(0.25rem, 1.5vh, 1rem) 1.5rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
   .practice {
     display: flex;
     flex-direction: column;
@@ -200,7 +338,8 @@
   .text {
     margin: 0;
     font-family: var(--mono);
-    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    /* Also scales with the height, so the text and the keyboard fit at 720×480. */
+    font-size: clamp(1rem, min(2.4vw, 4vh), 2rem);
     line-height: 1.75;
     white-space: pre-wrap;
     overflow-wrap: break-word;
@@ -221,12 +360,16 @@
   .space.error {
     box-shadow: inset 0 -0.15em var(--text-error);
   }
+  /* A soft tint with an underline bar: marks the next char without pulling the eye. */
   .cursor {
-    color: var(--cursor-text);
-    background: var(--cursor);
+    color: var(--text);
+    background: color-mix(in srgb, var(--cursor) 18%, transparent);
+    box-shadow: inset 0 -0.12em var(--cursor);
+    border-radius: 0.1em;
   }
   .cursor.error {
-    background: var(--text-error);
+    background: color-mix(in srgb, var(--text-error) 22%, transparent);
+    box-shadow: inset 0 -0.12em var(--text-error);
   }
   .hint,
   .status {

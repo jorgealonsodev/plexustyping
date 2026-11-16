@@ -11,8 +11,14 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   keystrokes per minute, accuracy and time.
 - Results show gross and net WPM, accuracy, time, errors and the failed characters.
   "Siguiente texto" (`Enter`) generates a text that practises those characters.
+- Accents and dead keys work: typing goes through a hidden text field, so the
+  system input method composes `´` + `a` into one `á`.
+- On-screen ISO keyboard at the bottom, labelled from the active layout (normal,
+  Shift, AltGr; dead keys underlined): it highlights the next key, plus Shift or
+  AltGr, coloured by finger, and flashes typed keys green or red. `F2` shows or hides it.
 - Settings: error mode (continue, stop until corrected, or fix with Backspace),
-  57 colour themes switched live, live-stats toggle; all remembered locally.
+  57 colour themes switched live, live stats, keyboard and flashes toggles;
+  all remembered locally.
 
 ## Layout
 

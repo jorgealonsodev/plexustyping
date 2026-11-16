@@ -8,7 +8,15 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header, scrolling practice area, keyboard docked at the bottom. */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 button {

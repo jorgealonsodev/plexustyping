@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import cases from "../../../crates/plexustyping-core/tests/fixtures/replay.json";
-import { type ErrorMode, type InputEvent, type KeyLike, TypingSession, keyToEvent, replay } from "./engine";
+import {
+  type ErrorMode,
+  type InputEvent,
+  type KeyLike,
+  TypingSession,
+  acceptsInput,
+  keyAction,
+  replay,
+  textToEvents,
+} from "./engine";
 
 const close = (actual: number, expected: number, label: string) =>
   expect(Math.abs(actual - expected) < 1e-9, `${label}: ${actual} vs ${expected}`).toBe(true);
@@ -82,29 +91,50 @@ const key = (k: string, mods: Partial<KeyLike> & { altGraph?: boolean } = {}): K
   getModifierState: (m: string) => m === "AltGraph" && !!mods.altGraph,
 });
 
-describe("keyToEvent", () => {
-  it("turns printable keys, including composed accents, into one char event", () => {
-    expect(keyToEvent(key("a"), 3)).toEqual(ch("a", 3));
-    expect(keyToEvent(key(" "), 4)).toEqual(ch(" ", 4));
-    expect(keyToEvent(key("á"), 5)).toEqual(ch("á", 5));
-    expect(keyToEvent(key("Ñ"), 6)).toEqual(ch("Ñ", 6));
+describe("textToEvents", () => {
+  it("emits one char event per Unicode scalar, composed accents included", () => {
+    expect(textToEvents("á", 5)).toEqual([ch("á", 5)]);
+    expect(textToEvents("Ñ ü", 6)).toEqual([ch("Ñ", 6), ch(" ", 6), ch("ü", 6)]);
+    expect(textToEvents("😀", 7)).toEqual([ch("😀", 7)]);
+    expect(textToEvents("", 8)).toEqual([]);
   });
 
-  it("turns Backspace into a backspace event", () => {
-    expect(keyToEvent(key("Backspace"), 7)).toEqual(bs(7));
+  it("keeps a dead key that composed nothing as its own char", () => {
+    expect(textToEvents("´q", 9)).toEqual([ch("´", 9), ch("q", 9)]);
   });
 
-  it("ignores dead keys, modifiers, named keys and IME composition", () => {
-    for (const k of ["Dead", "Shift", "Control", "Alt", "AltGraph", "Meta", "CapsLock", "Enter", "Tab", "Escape", "ArrowLeft"])
-      expect(keyToEvent(key(k), 0), k).toBeNull();
-    expect(keyToEvent(key("a", { isComposing: true }), 0)).toBeNull();
+  it("composes a decomposed accent into one char", () => {
+    expect(textToEvents("a\u0301", 10)).toEqual([ch("á", 10)]);
+  });
+});
+
+describe("acceptsInput", () => {
+  it("accepts typed and composed text", () => {
+    for (const t of ["insertText", "insertCompositionText", "insertReplacementText", ""]) expect(acceptsInput(t), t).toBe(true);
   });
 
-  it("ignores Ctrl and Meta shortcuts but accepts AltGr characters", () => {
-    expect(keyToEvent(key("c", { ctrlKey: true }), 0)).toBeNull();
-    expect(keyToEvent(key("Backspace", { ctrlKey: true }), 0)).toBeNull();
-    expect(keyToEvent(key("v", { metaKey: true }), 0)).toBeNull();
-    expect(keyToEvent(key("@", { ctrlKey: true, altKey: true, altGraph: true }), 1)).toEqual(ch("@", 1));
-    expect(keyToEvent(key("€", { altGraph: true }), 2)).toEqual(ch("€", 2));
+  it("rejects paste, drop, undo, deletions and line breaks", () => {
+    for (const t of ["insertFromPaste", "insertFromDrop", "insertFromYank", "historyUndo", "historyRedo", "deleteContentBackward", "insertLineBreak", "insertParagraph"])
+      expect(acceptsInput(t), t).toBe(false);
+  });
+});
+
+describe("keyAction", () => {
+  it("maps Backspace, Escape, Enter and Tab", () => {
+    expect(["Backspace", "Escape", "Enter", "Tab"].map((k) => keyAction(key(k)))).toEqual(["backspace", "escape", "enter", "tab"]);
+  });
+
+  it("leaves printable, dead, modifier and function keys to the text input", () => {
+    for (const k of ["a", "á", " ", "Dead", "Shift", "Control", "AltGraph", "CapsLock", "ArrowLeft", "F2"]) expect(keyAction(key(k)), k).toBeNull();
+  });
+
+  it("ignores every key while composing", () => {
+    for (const k of ["Backspace", "Escape", "Enter", "Tab"]) expect(keyAction(key(k, { isComposing: true })), k).toBeNull();
+  });
+
+  it("ignores Ctrl and Meta Backspace but accepts it with AltGr", () => {
+    expect(keyAction(key("Backspace", { ctrlKey: true }))).toBeNull();
+    expect(keyAction(key("Backspace", { metaKey: true }))).toBeNull();
+    expect(keyAction(key("Backspace", { ctrlKey: true, altKey: true, altGraph: true }))).toBe("backspace");
   });
 });

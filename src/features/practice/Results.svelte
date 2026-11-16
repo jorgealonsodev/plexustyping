@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { ScoredSession } from "./api";
+  import { focusTyping } from "./focus";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
 
   let { scored, onNext, onRepeat }: { scored: ScoredSession; onNext: () => void; onRepeat: () => void } = $props();
   const stats = $derived(scored.result.stats);
 
-  const blurAnd = (action: () => void) => (e: MouseEvent) => {
-    (e.currentTarget as HTMLElement).blur();
+  const focusAnd = (action: () => void) => () => {
+    focusTyping();
     action();
   };
 </script>
@@ -30,8 +31,8 @@
     <p class="note">Sin fallos. El siguiente texto será de práctica general.</p>
   {/if}
   <div class="actions">
-    <button type="button" class="primary" onclick={blurAnd(onNext)}>Siguiente texto <kbd>Intro</kbd></button>
-    <button type="button" onclick={blurAnd(onRepeat)}>Repetir <kbd>Esc</kbd></button>
+    <button type="button" class="primary" onclick={focusAnd(onNext)}>Siguiente texto <kbd>Intro</kbd></button>
+    <button type="button" onclick={focusAnd(onRepeat)}>Repetir <kbd>Esc</kbd></button>
   </div>
 </section>
 

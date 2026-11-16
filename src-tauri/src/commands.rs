@@ -2,6 +2,7 @@
 
 use plexustyping_core::{ErrorMode, InputEvent, SessionResult, failed_chars, replay};
 use plexustyping_corpus::{GenerateOptions, corpus};
+use plexustyping_layouts::{KeyPress, Layout};
 use serde::{Deserialize, Serialize};
 
 /// Wanted length of a generated practice text, in chars (end exclusive).
@@ -19,6 +20,17 @@ pub struct ScoredSession {
 
 fn unknown_language(language: &str) -> String {
     format!("unknown language: {language}")
+}
+
+/// The built-in layout `layout`.
+pub fn get_layout(layout: &str) -> Result<Layout, String> {
+    plexustyping_layouts::builtin(layout).ok_or_else(|| format!("unknown layout: {layout}"))
+}
+
+/// The key presses that type each char of `text` on `layout`, `None` for untypeable chars.
+pub fn key_sequences(layout: &str, text: &str) -> Result<Vec<Option<Vec<KeyPress>>>, String> {
+    let layout = get_layout(layout)?;
+    Ok(text.chars().map(|ch| layout.locate(ch)).collect())
 }
 
 /// The fixed diagnostic text of `language`.
@@ -53,8 +65,7 @@ pub fn next_text(
     seed: u64,
 ) -> Result<String, String> {
     let corpus = corpus(language).ok_or_else(|| unknown_language(language))?;
-    let layout =
-        plexustyping_layouts::builtin(layout).ok_or_else(|| format!("unknown layout: {layout}"))?;
+    let layout = get_layout(layout)?;
     let allowed = layout.allowed_chars();
     generate_with_retry(targets, |targets| {
         corpus.generate(&GenerateOptions {
@@ -79,6 +90,7 @@ pub fn score_session(text: &str, mode: ErrorMode, events: &[InputEvent]) -> Scor
 #[cfg(test)]
 mod tests {
     use super::*;
+    use plexustyping_layouts::{KeyPress, Layer};
     use std::cell::RefCell;
 
     #[test]
@@ -152,6 +164,54 @@ mod tests {
         });
         assert_eq!(text, Err("could not generate a practice text".to_owned()));
         assert_eq!(calls.into_inner(), 2);
+    }
+
+    #[test]
+    fn key_sequences_locates_each_char_once_as_camel_case_json() {
+        let seqs = key_sequences("es-qwerty", "aÁ@¨").expect("es-qwerty is bundled");
+        let press = |code: &str, layer| KeyPress {
+            code: code.to_owned(),
+            layer,
+        };
+        assert_eq!(
+            seqs,
+            vec![
+                Some(vec![press("KeyA", Layer::Normal)]),
+                Some(vec![
+                    press("Quote", Layer::Normal),
+                    press("KeyA", Layer::Shift)
+                ]),
+                Some(vec![press("Digit2", Layer::Altgr)]),
+                None,
+            ]
+        );
+        assert_eq!(
+            serde_json::to_value(&seqs[0]).unwrap(),
+            serde_json::json!([{ "code": "KeyA", "layer": "normal" }])
+        );
+        assert_eq!(key_sequences("es-qwerty", ""), Ok(vec![]));
+    }
+
+    #[test]
+    fn key_sequences_and_get_layout_reject_an_unknown_layout() {
+        assert_eq!(
+            key_sequences("xx", "a"),
+            Err("unknown layout: xx".to_owned())
+        );
+        assert_eq!(get_layout("xx"), Err("unknown layout: xx".to_owned()));
+    }
+
+    #[test]
+    fn get_layout_returns_the_builtin_layout_as_camel_case_json() {
+        let layout = get_layout("es-qwerty").expect("es-qwerty is bundled");
+        assert_eq!(layout, plexustyping_layouts::builtin("es-qwerty").unwrap());
+        let json = serde_json::to_value(&layout).unwrap();
+        assert_eq!(json["name"], "Español QWERTY");
+        assert_eq!(json["deadKeys"], serde_json::json!(["´", "`", "^", "¨"]));
+        assert_eq!(
+            json["keys"]["Semicolon"],
+            serde_json::json!({ "normal": "ñ", "shift": "Ñ", "altgr": null })
+        );
     }
 
     #[test]

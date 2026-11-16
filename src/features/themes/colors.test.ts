@@ -23,6 +23,15 @@ const KEYS = [
   "--key-fg",
   "--key-border",
   "--key-active",
+  "--finger-l-pinky",
+  "--finger-l-ring",
+  "--finger-l-middle",
+  "--finger-l-index",
+  "--finger-r-index",
+  "--finger-r-middle",
+  "--finger-r-ring",
+  "--finger-r-pinky",
+  "--finger-thumb",
   "color-scheme",
 ];
 
@@ -81,6 +90,15 @@ describe("typingColors", () => {
       "--key-fg": "#cdd6f4",
       "--key-border": "#414356",
       "--key-active": "#89b4fa",
+      "--finger-l-pinky": "#f5c2e7",
+      "--finger-l-ring": "#89b4fa",
+      "--finger-l-middle": "#94e2d5",
+      "--finger-l-index": "#a6e3a1",
+      "--finger-r-index": "#f9e2af",
+      "--finger-r-middle": "#b1eae1",
+      "--finger-r-ring": "#aeccfc",
+      "--finger-r-pinky": "#f398da",
+      "--finger-thumb": "#bac2de",
       "color-scheme": "dark",
     });
   });
@@ -93,6 +111,9 @@ describe("typingColors", () => {
       expect(colors["--text-pending"]).toBe(mix(bg, fg, 0.45));
       expect(colors["--error-bg"]).toBe(mix(bg, red, 0.22));
       expect(colors["--key-active"]).toBe(entry.palette.blue);
+      expect(colors["--finger-l-index"]).toBe(entry.palette.green);
+      expect(colors["--finger-r-index"]).toBe(entry.palette.yellow);
+      expect(colors["--finger-thumb"]).toBe(entry.dark ? entry.palette.white : entry.palette.black);
       expect(colors["color-scheme"]).toBe(entry.dark ? "dark" : "light");
     }
   });

@@ -67,6 +67,16 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
     "--key-fg": fg,
     "--key-border": mix(bg, fg, 0.2),
     "--key-active": accent,
+    // Touch-typing fingers, coloured on the on-screen keyboard (S11).
+    "--finger-l-pinky": palette.magenta,
+    "--finger-l-ring": palette.blue,
+    "--finger-l-middle": palette.cyan,
+    "--finger-l-index": palette.green,
+    "--finger-r-index": palette.yellow,
+    "--finger-r-middle": palette.brightCyan,
+    "--finger-r-ring": palette.brightBlue,
+    "--finger-r-pinky": palette.brightMagenta,
+    "--finger-thumb": dark ? palette.white : palette.black,
     "color-scheme": dark ? "dark" : "light",
   };
 }
