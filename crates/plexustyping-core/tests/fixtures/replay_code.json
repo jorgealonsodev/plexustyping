@@ -1,0 +1,377 @@
+[
+  {
+    "name": "allow-continue manual: newline is a measured char",
+    "text": "a\nb",
+    "mode": "allow-continue",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "\n", "tMs": 1000 },
+      { "kind": "char", "ch": "b", "tMs": 2000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 3,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 2000, "keystrokes": 3, "charKeystrokes": 3, "correctKeystrokes": 3, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 3, "accuracy": 1, "grossWpm": 18, "netWpm": 18, "kpm": 90 }
+    }
+  },
+  {
+    "name": "allow-continue auto: wrong newline advances without skipping the indent",
+    "text": "a\n  b",
+    "mode": "allow-continue",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "x", "tMs": 1000 },
+      { "kind": "char", "ch": " ", "tMs": 2000 },
+      { "kind": "char", "ch": " ", "tMs": 3000 },
+      { "kind": "char", "ch": "b", "tMs": 4000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 5,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "x", "correct": false, "msSincePrevious": 1000 },
+        { "index": 2, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 3, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 4000, "keystrokes": 5, "charKeystrokes": 5, "correctKeystrokes": 4, "errors": 1, "uncorrectedErrors": 1, "charsTyped": 5, "accuracy": 0.8, "grossWpm": 15, "netWpm": 0, "kpm": 75 }
+    }
+  },
+  {
+    "name": "stop-on-error auto: wrong newline blocks without skipping, correct one skips",
+    "text": "a\n  b",
+    "mode": "stop-on-error",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "x", "tMs": 1000 },
+      { "kind": "char", "ch": "\n", "tMs": 2000 },
+      { "kind": "char", "ch": "b", "tMs": 3000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 5,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "x", "correct": false, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 3000, "keystrokes": 4, "charKeystrokes": 4, "correctKeystrokes": 3, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 5, "accuracy": 0.75, "grossWpm": 20, "netWpm": 20, "kpm": 80 }
+    }
+  },
+  {
+    "name": "stop-on-error auto: wrong newline leaves the cursor on the newline",
+    "text": "a\n  b",
+    "mode": "stop-on-error",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": " ", "tMs": 1000 }
+    ],
+    "expected": {
+      "completed": false,
+      "cursor": 1,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": " ", "correct": false, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 1, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 1, "accuracy": 0.5, "grossWpm": 12, "netWpm": 12, "kpm": 120 }
+    }
+  },
+  {
+    "name": "allow-continue auto: correct newline skips the indent; charsTyped counts it, keystrokes do not",
+    "text": "a:\n    b",
+    "mode": "allow-continue",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": ":", "tMs": 1000 },
+      { "kind": "char", "ch": "\n", "tMs": 2000 },
+      { "kind": "char", "ch": "b", "tMs": 3000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 8,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": ":", "typed": ":", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 7, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 3000, "keystrokes": 4, "charKeystrokes": 4, "correctKeystrokes": 4, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 8, "accuracy": 1, "grossWpm": 32, "netWpm": 32, "kpm": 80 }
+    }
+  },
+  {
+    "name": "allow-continue manual: every indent space is typed and measured",
+    "text": "a:\n    b",
+    "mode": "allow-continue",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": ":", "tMs": 1000 },
+      { "kind": "char", "ch": "\n", "tMs": 2000 },
+      { "kind": "char", "ch": " ", "tMs": 3000 },
+      { "kind": "char", "ch": " ", "tMs": 4000 },
+      { "kind": "char", "ch": " ", "tMs": 5000 },
+      { "kind": "char", "ch": " ", "tMs": 6000 },
+      { "kind": "char", "ch": "b", "tMs": 7000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 8,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": ":", "typed": ":", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 3, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 5, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 6, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 7, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 7000, "keystrokes": 8, "charKeystrokes": 8, "correctKeystrokes": 8, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 8, "accuracy": 1, "grossWpm": 13.714285714285714, "netWpm": 13.714285714285714, "kpm": 68.57142857142857 }
+    }
+  },
+  {
+    "name": "allow-continue auto: skips tab and mixed leading whitespace; empty indent skips nothing",
+    "text": "{\n\t x\n}",
+    "mode": "allow-continue",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "{", "tMs": 0 },
+      { "kind": "char", "ch": "\n", "tMs": 1000 },
+      { "kind": "char", "ch": "x", "tMs": 2000 },
+      { "kind": "char", "ch": "\n", "tMs": 3000 },
+      { "kind": "char", "ch": "}", "tMs": 4000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 7,
+      "records": [
+        { "index": 0, "expected": "{", "typed": "{", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": "x", "typed": "x", "correct": true, "msSincePrevious": 1000 },
+        { "index": 5, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 6, "expected": "}", "typed": "}", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 4000, "keystrokes": 5, "charKeystrokes": 5, "correctKeystrokes": 5, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 7, "accuracy": 1, "grossWpm": 21, "netWpm": 21, "kpm": 75 }
+    }
+  },
+  {
+    "name": "allow-continue manual: tab at line start consumes spaces to the next stop",
+    "text": "a\n        b",
+    "mode": "allow-continue",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "\n", "tMs": 1000 },
+      { "kind": "tab", "tMs": 2000 },
+      { "kind": "tab", "tMs": 3000 },
+      { "kind": "char", "ch": "b", "tMs": 4000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 11,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": " ", "typed": "\t", "correct": true, "msSincePrevious": 1000 },
+        { "index": 6, "expected": " ", "typed": "\t", "correct": true, "msSincePrevious": 1000 },
+        { "index": 10, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 4000, "keystrokes": 5, "charKeystrokes": 5, "correctKeystrokes": 5, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 11, "accuracy": 1, "grossWpm": 33, "netWpm": 33, "kpm": 75 }
+    }
+  },
+  {
+    "name": "allow-continue manual: tab mid-line stops at the line's next multiple-of-4 column or the end of the spaces",
+    "text": "x\nab   c",
+    "mode": "allow-continue",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "x", "tMs": 0 },
+      { "kind": "char", "ch": "\n", "tMs": 1000 },
+      { "kind": "char", "ch": "a", "tMs": 2000 },
+      { "kind": "char", "ch": "b", "tMs": 3000 },
+      { "kind": "tab", "tMs": 4000 },
+      { "kind": "tab", "tMs": 5000 },
+      { "kind": "char", "ch": "c", "tMs": 6000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 8,
+      "records": [
+        { "index": 0, "expected": "x", "typed": "x", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": 1000 },
+        { "index": 3, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": " ", "typed": "\t", "correct": true, "msSincePrevious": 1000 },
+        { "index": 6, "expected": " ", "typed": "\t", "correct": true, "msSincePrevious": 1000 },
+        { "index": 7, "expected": "c", "typed": "c", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 6000, "keystrokes": 7, "charKeystrokes": 7, "correctKeystrokes": 7, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 8, "accuracy": 1, "grossWpm": 16, "netWpm": 16, "kpm": 70 }
+    }
+  },
+  {
+    "name": "stop-on-error manual: tab on a literal tab is a correct char",
+    "text": "a\tb",
+    "mode": "stop-on-error",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "tab", "tMs": 1000 },
+      { "kind": "char", "ch": "b", "tMs": 2000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 3,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\t", "typed": "\t", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 2000, "keystrokes": 3, "charKeystrokes": 3, "correctKeystrokes": 3, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 3, "accuracy": 1, "grossWpm": 18, "netWpm": 18, "kpm": 90 }
+    }
+  },
+  {
+    "name": "allow-continue manual: tab on a non-space char is a wrong key that advances",
+    "text": "ab",
+    "mode": "allow-continue",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "tab", "tMs": 1000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "\t", "correct": false, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 1, "errors": 1, "uncorrectedErrors": 1, "charsTyped": 2, "accuracy": 0.5, "grossWpm": 24, "netWpm": 0, "kpm": 120 }
+    }
+  },
+  {
+    "name": "stop-on-error manual: wrong tab keeps the cursor",
+    "text": "ab",
+    "mode": "stop-on-error",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "tab", "tMs": 1000 },
+      { "kind": "char", "ch": "b", "tMs": 2000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "\t", "correct": false, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 2000, "keystrokes": 3, "charKeystrokes": 3, "correctKeystrokes": 2, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 0.6666666666666666, "grossWpm": 12, "netWpm": 12, "kpm": 90 }
+    }
+  },
+  {
+    "name": "backspace-correct auto: backspace after the skipped indent reopens the newline",
+    "text": "a\n  b",
+    "mode": "backspace-correct",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "\n", "tMs": 1000 },
+      { "kind": "backspace", "tMs": 2000 },
+      { "kind": "char", "ch": "\n", "tMs": 3000 },
+      { "kind": "char", "ch": "b", "tMs": 4000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 5,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 4000, "keystrokes": 5, "charKeystrokes": 4, "correctKeystrokes": 4, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 5, "accuracy": 1, "grossWpm": 15, "netWpm": 15, "kpm": 75 }
+    }
+  },
+  {
+    "name": "backspace-correct auto: wrong newline advances without skip, corrected newline skips",
+    "text": "a\n  b",
+    "mode": "backspace-correct",
+    "indent": "auto",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "x", "tMs": 1000 },
+      { "kind": "backspace", "tMs": 2000 },
+      { "kind": "char", "ch": "\n", "tMs": 3000 },
+      { "kind": "char", "ch": "b", "tMs": 4000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 5,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "x", "correct": false, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 4, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 4000, "keystrokes": 5, "charKeystrokes": 4, "correctKeystrokes": 3, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 5, "accuracy": 0.75, "grossWpm": 15, "netWpm": 15, "kpm": 75 }
+    }
+  },
+  {
+    "name": "backspace-correct manual: backspace after a newline reopens it; indent typed by hand",
+    "text": "a\n b",
+    "mode": "backspace-correct",
+    "indent": "manual",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "\n", "tMs": 1000 },
+      { "kind": "backspace", "tMs": 2000 },
+      { "kind": "char", "ch": "\n", "tMs": 3000 },
+      { "kind": "char", "ch": " ", "tMs": 4000 },
+      { "kind": "char", "ch": "b", "tMs": 5000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 4,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "\n", "typed": "\n", "correct": true, "msSincePrevious": 1000 },
+        { "index": 2, "expected": " ", "typed": " ", "correct": true, "msSincePrevious": 1000 },
+        { "index": 3, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 5000, "keystrokes": 6, "charKeystrokes": 5, "correctKeystrokes": 5, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 4, "accuracy": 1, "grossWpm": 9.6, "netWpm": 9.6, "kpm": 72 }
+    }
+  },
+  {
+    "name": "allow-continue manual: tab at the start of the text uses column 0",
+    "text": "     a\nb",
+    "mode": "allow-continue",
+    "indent": "manual",
+    "events": [
+      { "kind": "tab", "tMs": 0 },
+      { "kind": "tab", "tMs": 1000 }
+    ],
+    "expected": {
+      "completed": false,
+      "cursor": 5,
+      "records": [
+        { "index": 0, "expected": " ", "typed": "\t", "correct": true, "msSincePrevious": null },
+        { "index": 4, "expected": " ", "typed": "\t", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 2, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 5, "accuracy": 1, "grossWpm": 60, "netWpm": 60, "kpm": 120 }
+    }
+  }
+]

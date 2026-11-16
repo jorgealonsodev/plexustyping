@@ -1,42 +1,54 @@
 import { describe, expect, it } from "vitest";
 import cases from "../../../crates/plexustyping-core/tests/fixtures/replay.json";
+import codeCases from "../../../crates/plexustyping-core/tests/fixtures/replay_code.json";
 import {
   type ErrorMode,
+  type IndentMode,
   type InputEvent,
   type KeyLike,
+  type SessionResult,
   TypingSession,
   acceptsInput,
   keyAction,
   replay,
+  replayWith,
   textToEvents,
 } from "./engine";
 
 const close = (actual: number, expected: number, label: string) =>
   expect(Math.abs(actual - expected) < 1e-9, `${label}: ${actual} vs ${expected}`).toBe(true);
 
+function checkFixture(result: SessionResult, exp: SessionResult) {
+  expect(result.cursor).toBe(exp.cursor);
+  expect(result.completed).toBe(exp.completed);
+  expect(result.records.length).toBe(exp.records.length);
+  result.records.forEach((r, i) => {
+    const w = exp.records[i];
+    expect([r.index, r.expected, r.typed, r.correct]).toEqual([w.index, w.expected, w.typed, w.correct]);
+    if (w.msSincePrevious === null) expect(r.msSincePrevious).toBeNull();
+    else close(r.msSincePrevious!, w.msSincePrevious, `records[${i}].ms`);
+  });
+  const { stats: s } = result;
+  const e = exp.stats;
+  for (const k of ["keystrokes", "charKeystrokes", "correctKeystrokes", "errors", "uncorrectedErrors", "charsTyped"] as const)
+    expect(s[k], k).toBe(e[k]);
+  for (const k of ["durationMs", "accuracy", "grossWpm", "netWpm", "kpm"] as const) close(s[k], e[k], k);
+}
+
 describe("replay mirrors plexustyping-core fixtures", () => {
   it("has the shared fixture set", () => expect(cases.length).toBeGreaterThanOrEqual(15));
 
-  for (const c of cases) {
-    it(c.name, () => {
-      const result = replay(c.text, c.mode as ErrorMode, c.events as InputEvent[]);
-      const exp = c.expected;
-      expect(result.cursor).toBe(exp.cursor);
-      expect(result.completed).toBe(exp.completed);
-      expect(result.records.length).toBe(exp.records.length);
-      result.records.forEach((r, i) => {
-        const w = exp.records[i];
-        expect([r.index, r.expected, r.typed, r.correct]).toEqual([w.index, w.expected, w.typed, w.correct]);
-        if (w.msSincePrevious === null) expect(r.msSincePrevious).toBeNull();
-        else close(r.msSincePrevious!, w.msSincePrevious, `records[${i}].ms`);
-      });
-      const { stats: s } = result;
-      const e = exp.stats;
-      for (const k of ["keystrokes", "charKeystrokes", "correctKeystrokes", "errors", "uncorrectedErrors", "charsTyped"] as const)
-        expect(s[k], k).toBe(e[k]);
-      for (const k of ["durationMs", "accuracy", "grossWpm", "netWpm", "kpm"] as const) close(s[k], e[k], k);
-    });
-  }
+  for (const c of cases)
+    it(c.name, () => checkFixture(replay(c.text, c.mode as ErrorMode, c.events as InputEvent[]), c.expected as SessionResult));
+});
+
+describe("replayWith mirrors plexustyping-core code fixtures", () => {
+  it("has the shared code fixture set", () => expect(codeCases.length).toBeGreaterThanOrEqual(12));
+
+  for (const c of codeCases)
+    it(c.name, () =>
+      checkFixture(replayWith(c.text, c.mode as ErrorMode, c.indent as IndentMode, c.events as InputEvent[]), c.expected as SessionResult),
+    );
 });
 
 const ch = (c: string, tMs = 0): InputEvent => ({ kind: "char", ch: c, tMs });
@@ -71,6 +83,23 @@ describe("TypingSession display state", () => {
     s.apply(ch("b"));
     expect(s.completed).toBe(true);
     expect(s.apply(ch("c"))).toBe(false);
+  });
+
+  it("shows auto-indented positions as correct and reopens the newline on Backspace (auto)", () => {
+    const s = new TypingSession("a\n  b", "backspace-correct", "auto");
+    s.apply(ch("a"));
+    s.apply(ch("\n"));
+    expect([s.cursor, ...states(s)]).toEqual([4, "correct", "correct", "correct", "correct", "pending"]);
+    s.apply(bs());
+    expect([s.cursor, ...states(s)]).toEqual([1, "correct", "pending", "pending", "pending", "pending"]);
+  });
+
+  it("consumes spaces to the next tab stop with one Tab", () => {
+    const s = new TypingSession("ab    c", "allow-continue");
+    s.apply(ch("a"));
+    s.apply(ch("b"));
+    expect(s.apply({ kind: "tab", tMs: 0 })).toBe(true);
+    expect([s.cursor, s.state(2), s.state(3), s.state(4)]).toEqual([4, "correct", "correct", "pending"]);
   });
 
   it("result() equals replay over the same events", () => {

@@ -1,9 +1,18 @@
 // Live-display mirror of `plexustyping-core::replay`; Rust stays authoritative for results (L4).
-// Both are tested against crates/plexustyping-core/tests/fixtures/replay.json.
+// Both are tested against crates/plexustyping-core/tests/fixtures/replay.json and replay_code.json.
 
 export type ErrorMode = "stop-on-error" | "allow-continue" | "backspace-correct";
 
-export type InputEvent = { kind: "char"; ch: string; tMs: number } | { kind: "backspace"; tMs: number };
+/** manual: every indentation char is typed; auto: a correct newline fills the next line's indent. */
+export type IndentMode = "manual" | "auto";
+
+export type InputEvent =
+  | { kind: "char"; ch: string; tMs: number }
+  | { kind: "backspace"; tMs: number }
+  | { kind: "tab"; tMs: number };
+
+/** Columns between tab stops when a Tab consumes a run of spaces. */
+const TAB_WIDTH = 4;
 
 export interface KeystrokeRecord {
   index: number;
@@ -48,15 +57,19 @@ export class TypingSession {
   private keystrokes = 0;
   private readonly records: KeystrokeRecord[] = [];
   private readonly typedAt: (string | null)[];
+  /** Positions filled by auto indent (not typed). */
+  private readonly autoFilled: boolean[];
   /** stop-on-error: the last key at the cursor was wrong. */
   private blocked = false;
 
   constructor(
     text: string,
     readonly mode: ErrorMode,
+    readonly indent: IndentMode = "manual",
   ) {
     this.chars = [...text];
     this.typedAt = this.chars.map(() => null);
+    this.autoFilled = this.chars.map(() => false);
   }
 
   get completed(): boolean {
@@ -67,31 +80,52 @@ export class TypingSession {
   apply(event: InputEvent): boolean {
     this.events.push(event);
     if (this.completed) return false;
-    if (event.kind === "char") {
+    if (event.kind === "backspace") {
+      if (this.mode !== "backspace-correct" || this.cursor === 0) return false;
+      this.cursor -= 1;
+      // Never stop inside an auto-filled indent: reopen the newline before it.
+      while (this.cursor > 0 && this.autoFilled[this.cursor]) this.autoFilled[this.cursor--] = false;
+    } else {
+      const typed = event.kind === "tab" ? "\t" : event.ch;
       const expected = this.chars[this.cursor];
-      const correct = event.ch === expected;
+      const tabOverSpace = event.kind === "tab" && expected === " ";
+      const correct = typed === expected || tabOverSpace;
       this.records.push({
         index: this.cursor,
         expected,
-        typed: event.ch,
+        typed,
         correct,
         msSincePrevious: this.lastT === null ? null : event.tMs - this.lastT,
       });
-      if (correct || this.mode !== "stop-on-error") {
-        this.typedAt[this.cursor] = event.ch;
+      this.blocked = !correct && this.mode === "stop-on-error";
+      if (correct) {
+        const run = tabOverSpace ? this.tabRun() : 1;
+        for (let i = this.cursor; i < this.cursor + run; i++) this.typedAt[i] = this.chars[i];
+        this.cursor += run;
+        if (this.indent === "auto" && expected === "\n")
+          while (this.cursor < this.chars.length && (this.chars[this.cursor] === " " || this.chars[this.cursor] === "\t")) {
+            this.typedAt[this.cursor] = this.chars[this.cursor];
+            this.autoFilled[this.cursor++] = true;
+          }
+      } else if (this.mode !== "stop-on-error") {
+        this.typedAt[this.cursor] = typed;
         this.cursor += 1;
-        this.blocked = false;
-      } else {
-        this.blocked = true;
       }
-    } else {
-      if (this.mode !== "backspace-correct" || this.cursor === 0) return false;
-      this.cursor -= 1;
     }
     this.keystrokes += 1;
     this.firstT ??= event.tMs;
     this.lastT = event.tMs;
     return true;
+  }
+
+  /** Spaces a Tab at the cursor (on a space) consumes: up to the line's next tab stop, at least 1. */
+  private tabRun(): number {
+    // lastIndexOf(x, -1) would search from the end, so position 0 is handled apart.
+    const lineStart = this.cursor === 0 ? 0 : this.chars.lastIndexOf("\n", this.cursor - 1) + 1;
+    const end = this.cursor + TAB_WIDTH - ((this.cursor - lineStart) % TAB_WIDTH);
+    let i = this.cursor;
+    while (i < end && this.chars[i] === " ") i++;
+    return i - this.cursor;
   }
 
   state(index: number): CharState {
@@ -139,7 +173,11 @@ export class TypingSession {
 }
 
 export function replay(text: string, mode: ErrorMode, events: InputEvent[]): SessionResult {
-  const session = new TypingSession(text, mode);
+  return replayWith(text, mode, "manual", events);
+}
+
+export function replayWith(text: string, mode: ErrorMode, indent: IndentMode, events: InputEvent[]): SessionResult {
+  const session = new TypingSession(text, mode, indent);
   for (const event of events) session.apply(event);
   return session.result();
 }

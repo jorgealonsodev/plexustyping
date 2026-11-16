@@ -17,6 +17,21 @@ pub enum ErrorMode {
     BackspaceCorrect,
 }
 
+/// How leading indentation of a line is handled in code mode.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum IndentMode {
+    /// Every indentation char is typed and measured (default).
+    #[default]
+    Manual,
+    /// After a correct newline, the next line's leading spaces/tabs are filled
+    /// automatically and not measured.
+    Auto,
+}
+
+/// Columns between tab stops when a Tab consumes a run of spaces.
+const TAB_WIDTH: usize = 4;
+
 /// One raw input event captured by the frontend, timestamped in milliseconds.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(
@@ -34,6 +49,12 @@ pub enum InputEvent {
     },
     /// A Backspace key press.
     Backspace {
+        /// Event timestamp in milliseconds.
+        t_ms: f64,
+    },
+    /// A Tab key press: a literal `'\t'`, or a run of spaces up to the next
+    /// tab stop of the line.
+    Tab {
         /// Event timestamp in milliseconds.
         t_ms: f64,
     },
@@ -99,13 +120,35 @@ pub struct SessionResult {
 
 /// Replays `events` against `text` under `mode` and returns records and stats.
 ///
-/// The text is treated as a sequence of `char`s. Events that are not applied
-/// (ignored backspaces, anything after the end of the text) leave no trace:
-/// no record, no timing and no keystroke count.
+/// Same as [`replay_with`] with [`IndentMode::Manual`].
 pub fn replay(text: &str, mode: ErrorMode, events: &[InputEvent]) -> SessionResult {
+    replay_with(text, mode, IndentMode::Manual, events)
+}
+
+/// Replays `events` against `text` under `mode` and `indent`, returning
+/// records and stats.
+///
+/// The text is treated as a sequence of `char`s; `'\n'` is an ordinary char.
+/// Events that are not applied (ignored backspaces, anything after the end of
+/// the text) leave no trace: no record, no timing and no keystroke count.
+///
+/// A [`InputEvent::Tab`] on a `'\t'` is a correct char; on a space it consumes
+/// the spaces up to the next multiple-of-4 column of the line (columns count
+/// chars) as one correct record typed `'\t'` at the first space; elsewhere it is
+/// a wrong key typed `'\t'`. With [`IndentMode::Auto`], positions filled after
+/// a correct newline count in `chars_typed` but create no record, keystroke or
+/// timing, and a Backspace never stops inside them.
+pub fn replay_with(
+    text: &str,
+    mode: ErrorMode,
+    indent: IndentMode,
+    events: &[InputEvent],
+) -> SessionResult {
     let expected: Vec<char> = text.chars().collect();
     // Final typed char per position; reopened positions are overwritten.
     let mut typed_at: Vec<Option<char>> = vec![None; expected.len()];
+    // Positions filled by auto indent (not typed).
+    let mut auto_filled = vec![false; expected.len()];
     let mut records = Vec::new();
     let mut cursor = 0;
     let mut keystrokes = 0;
@@ -116,31 +159,55 @@ pub fn replay(text: &str, mode: ErrorMode, events: &[InputEvent]) -> SessionResu
         if cursor >= expected.len() {
             break;
         }
-        let t_ms = match *event {
-            InputEvent::Char { ch, t_ms } => {
-                let want = expected[cursor];
-                let correct = ch == want;
-                records.push(KeystrokeRecord {
-                    index: cursor,
-                    expected: want,
-                    typed: ch,
-                    correct,
-                    ms_since_previous: last_t.map(|prev| t_ms - prev),
-                });
-                if correct || mode != ErrorMode::StopOnError {
-                    typed_at[cursor] = Some(ch);
-                    cursor += 1;
-                }
-                t_ms
-            }
+        let (typed, t_ms) = match *event {
+            InputEvent::Char { ch, t_ms } => (ch, t_ms),
+            InputEvent::Tab { t_ms } => ('\t', t_ms),
             InputEvent::Backspace { t_ms } => {
                 if mode != ErrorMode::BackspaceCorrect || cursor == 0 {
                     continue;
                 }
                 cursor -= 1;
-                t_ms
+                while cursor > 0 && auto_filled[cursor] {
+                    auto_filled[cursor] = false;
+                    cursor -= 1;
+                }
+                keystrokes += 1;
+                first_t.get_or_insert(t_ms);
+                last_t = Some(t_ms);
+                continue;
             }
         };
+        let want = expected[cursor];
+        let tab_over_space = matches!(event, InputEvent::Tab { .. }) && want == ' ';
+        let correct = typed == want || tab_over_space;
+        records.push(KeystrokeRecord {
+            index: cursor,
+            expected: want,
+            typed,
+            correct,
+            ms_since_previous: last_t.map(|prev| t_ms - prev),
+        });
+        if correct {
+            let run = if tab_over_space {
+                tab_run(&expected, cursor)
+            } else {
+                1
+            };
+            for i in cursor..cursor + run {
+                typed_at[i] = Some(expected[i]);
+            }
+            cursor += run;
+            if indent == IndentMode::Auto && want == '\n' {
+                while cursor < expected.len() && matches!(expected[cursor], ' ' | '\t') {
+                    typed_at[cursor] = Some(expected[cursor]);
+                    auto_filled[cursor] = true;
+                    cursor += 1;
+                }
+            }
+        } else if mode != ErrorMode::StopOnError {
+            typed_at[cursor] = Some(typed);
+            cursor += 1;
+        }
         keystrokes += 1;
         first_t.get_or_insert(t_ms);
         last_t = Some(t_ms);
@@ -163,6 +230,21 @@ pub fn replay(text: &str, mode: ErrorMode, events: &[InputEvent]) -> SessionResu
         completed: cursor == expected.len(),
         cursor,
     }
+}
+
+/// Spaces a Tab at `cursor` (on a space) consumes: up to the next tab stop of
+/// the line, bounded by the run of spaces; at least 1.
+fn tab_run(expected: &[char], cursor: usize) -> usize {
+    let line_start = expected[..cursor]
+        .iter()
+        .rposition(|&c| c == '\n')
+        .map_or(0, |i| i + 1);
+    let width = TAB_WIDTH - (cursor - line_start) % TAB_WIDTH;
+    expected[cursor..]
+        .iter()
+        .take(width)
+        .take_while(|&&c| c == ' ')
+        .count()
 }
 
 fn compute_stats(
