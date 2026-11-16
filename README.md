@@ -17,10 +17,14 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 - On-screen ISO keyboard at the bottom, labelled from the active layout (normal,
   Shift, AltGr; dead keys underlined): it highlights the next key, plus Shift or
   AltGr, coloured by finger, and flashes typed keys green or red. `F2` shows or hides it.
-- Settings: error mode (continue, stop until corrected, or fix with Backspace),
-  57 colour themes switched live, live stats, keyboard, flashes and heatmap
-  toggles, targets per text (3–5) and text length (100–600 characters);
-  all remembered locally. Targets and length apply from the next text.
+- Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
+  window, with one section per topic. "Práctica": error mode (continue, stop
+  until corrected, or fix with Backspace; changing it restarts the text),
+  targets per text (3–5), text length (100–600 characters) and live stats.
+  "Teclado": on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
+  colour themes, dark and light, switched live. Everything is remembered
+  locally; targets and length apply from the next text. `Escape`, `×` or a
+  click outside closes the window and returns to the text.
 
 ### Adaptive loop
 

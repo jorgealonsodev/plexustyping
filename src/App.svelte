@@ -1,78 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { storageStatus } from "./features/practice/api";
-  import type { ErrorMode } from "./features/practice/engine";
   import Practice from "./features/practice/Practice.svelte";
-  import SettingsBar from "./features/settings/SettingsBar.svelte";
-  import {
-    loadErrorMode,
-    loadFlashes,
-    loadHeatmap,
-    loadLiveStats,
-    loadShowKeyboard,
-    loadTargetCount,
-    loadTextLength,
-    saveErrorMode,
-    saveFlashes,
-    saveHeatmap,
-    saveLiveStats,
-    saveShowKeyboard,
-    saveTargetCount,
-    saveTextLength,
-  } from "./features/settings/settings";
-  import { applyTheme, loadThemeId, saveThemeId, themeById } from "./features/themes";
+  import { isSettingsShortcut } from "./features/settings/sections";
+  import SettingsModal from "./features/settings/SettingsModal.svelte";
+  import { SettingsStore } from "./features/settings/store.svelte";
 
-  let mode = $state(loadErrorMode());
-  let liveStats = $state(loadLiveStats());
-  let showKeyboard = $state(loadShowKeyboard());
-  let flashes = $state(loadFlashes());
-  let themeId = $state(loadThemeId());
-  let heatmap = $state(loadHeatmap());
-  let targetCount = $state(loadTargetCount());
-  let textLength = $state(loadTextLength());
+  const settings = new SettingsStore();
+  let modal: SettingsModal | undefined = $state();
   // Why sessions are not kept on disk; `null` while persistent or unknown.
   let storageError = $state<string | null>(null);
-
-  function setMode(next: ErrorMode) {
-    mode = next;
-    saveErrorMode(next);
-  }
-
-  function setTheme(id: string) {
-    themeId = id;
-    applyTheme(themeById(id));
-    saveThemeId(id);
-  }
-
-  function setLiveStats(on: boolean) {
-    liveStats = on;
-    saveLiveStats(on);
-  }
-
-  function setShowKeyboard(on: boolean) {
-    showKeyboard = on;
-    saveShowKeyboard(on);
-  }
-
-  function setFlashes(on: boolean) {
-    flashes = on;
-    saveFlashes(on);
-  }
-
-  function setHeatmap(on: boolean) {
-    heatmap = on;
-    saveHeatmap(on);
-  }
-
-  function setTargetCount(count: number) {
-    targetCount = count;
-    saveTargetCount(count);
-  }
-
-  function setTextLength(length: number) {
-    textLength = length;
-    saveTextLength(length);
-  }
 
   onMount(() => {
     storageStatus()
@@ -80,11 +17,17 @@
       .catch((err) => console.warn("storage_status failed", err));
   });
 
-  // F2 shows or hides the keyboard from anywhere (S11); it never reaches the practice text.
+  // F2 shows or hides the keyboard from anywhere (S11) and Ctrl+, opens the settings (S8);
+  // neither reaches the practice text.
   function onKeydown(e: KeyboardEvent) {
+    if (isSettingsShortcut(e)) {
+      e.preventDefault();
+      modal?.open();
+      return;
+    }
     if (e.key !== "F2" || e.repeat) return;
     e.preventDefault();
-    setShowKeyboard(!showKeyboard);
+    settings.setShowKeyboard(!settings.showKeyboard);
   }
 </script>
 
@@ -98,27 +41,25 @@
       <strong class="temporary" title={storageError}>Sin guardar: modo temporal</strong>
     {/if}
   </div>
-  <SettingsBar
-    {mode}
-    {themeId}
-    {liveStats}
-    {showKeyboard}
-    {flashes}
-    {heatmap}
-    {targetCount}
-    {textLength}
-    onMode={setMode}
-    onTheme={setTheme}
-    onLiveStats={setLiveStats}
-    onShowKeyboard={setShowKeyboard}
-    onFlashes={setFlashes}
-    onHeatmap={setHeatmap}
-    onTargetCount={setTargetCount}
-    onTextLength={setTextLength}
-  />
+  <button type="button" class="gear" aria-label="Ajustes" title="Ajustes" onclick={() => modal?.open()}>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="8.4" stroke-width="3" stroke-dasharray="3.3 3.3" />
+      <circle cx="12" cy="12" r="5.6" stroke-width="2.6" />
+    </svg>
+  </button>
 </header>
 
-<Practice {mode} {liveStats} {showKeyboard} {flashes} {heatmap} {targetCount} {textLength} />
+<Practice
+  mode={settings.mode}
+  liveStats={settings.liveStats}
+  showKeyboard={settings.showKeyboard}
+  flashes={settings.flashes}
+  heatmap={settings.heatmap}
+  targetCount={settings.targetCount}
+  textLength={settings.textLength}
+/>
+
+<SettingsModal bind:this={modal} {settings} />
 
 <style>
   header {
@@ -147,6 +88,16 @@
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--warning);
+  }
+  .gear {
+    flex: none;
+    display: flex;
+    padding: 0.35rem;
+    color: var(--muted);
+  }
+  .gear:hover {
+    color: var(--text);
+    border-color: var(--accent);
   }
   .brand span {
     white-space: nowrap;

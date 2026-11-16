@@ -1,0 +1,19 @@
+import type { Component } from "svelte";
+import AppearanceSection from "./AppearanceSection.svelte";
+import KeyboardSection from "./KeyboardSection.svelte";
+import PracticeSection from "./PracticeSection.svelte";
+import type { SettingsStore } from "./store.svelte";
+
+/** One tab of the settings modal: a section component that reads and writes the shared store. */
+export interface SettingsSection {
+  id: string;
+  label: string;
+  component: Component<{ settings: SettingsStore }>;
+}
+
+/** Settings modal sections in display order (S8). A new section is one entry here plus its component. */
+export const SECTIONS: SettingsSection[] = [
+  { id: "practice", label: "Práctica", component: PracticeSection },
+  { id: "keyboard", label: "Teclado", component: KeyboardSection },
+  { id: "appearance", label: "Apariencia", component: AppearanceSection },
+];
