@@ -16,8 +16,8 @@ Delivery: `chain_strategy=feature-branch-chain` (cached from phase 0). Forecast:
 
 | ID | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | S1, S2, S3 | `plexustyping-core::adaptive`: `WeaknessModel` (EMA, scores, confusions, seeded target selection) — writer A (parallel) | pending | — |
-| T2 | S5 | New crate `plexustyping-store` (rusqlite, migrations, profile, sessions, keystrokes, stats rows, settings) — writer B (parallel) | pending | — |
+| T1 | S1, S2, S3 | `plexustyping-core::adaptive`: `WeaknessModel` (EMA, scores, confusions, seeded target selection) — writer A (parallel) | done | 79c7714 |
+| T2 | S5 | New crate `plexustyping-store` (rusqlite, migrations, profile, sessions, keystrokes, stats rows, settings) — writer B (parallel) | done | 84e652f |
 | T3 | S2, S4, S6 | Integration: corpus string targets, app state + commands, adaptive next text, heatmap overlay, settings — writer C | pending | — |
 | T4 | all | Close: suite, real-app check, review assessment, Trello | pending | — |
 
@@ -27,3 +27,4 @@ Delivery: `chain_strategy=feature-branch-chain` (cached from phase 0). Forecast:
 - **L2 (decision):** Phase 1 split. 1A = adaptive engine + SQLite + heatmap (core value, offline, prerequisite of the MVP exit criterion "un usuario de prueba reduce un 30 % el error en sus 5 caracteres peores en 5 sesiones"). 1B = 4 AI providers + keychain (need user API keys), metronome (needs ALSA dev headers: `pkg-config alsa` not found → `sudo apt install libasound2-dev`).
 - **L3 (decisions, adaptive rules):** slowness sample = clamp(ms/mean − 1, 0, 1) (twice the user's mean interval → 1), intervals > 2,000 ms are pauses and are skipped for slowness and the mean; mean interval is itself an EMA (α 0.2); first sample initializes an EMA; candidates need ≥ 3 samples; bigrams = two consecutive expected chars without whitespace. Corpus targets become strings (chars or bigrams).
 - **L4 (decisions, storage):** `rusqlite` with `bundled` SQLite (no system lib), schema versioned with `PRAGMA user_version`, DB at Tauri `app_data_dir()/plexustyping.sqlite3`; one default profile "Principal" (es, es-qwerty). Store crate exposes plain row structs so it does not depend on the adaptive model types (parallel writers).
+- **L5 (T1/T2 evidence):** parallel writers. T1 `79c7714`: `adaptive.rs`, 22 tests; serde `{units, confusions, meanIntervalMs}`; `from_parts` keeps the last duplicate; score clamped to 0..=1. T2 `84e652f`: `plexustyping-store`, rusqlite 0.40 bundled (0.41+ need Rust 1.89; checked with `cargo +1.85`), schema v1, 12 tests; additive: `Store: Debug`, `StoreError::{Io, InvalidData}`, `session_keystrokes` → `NotFound` for unknown ids, `load_stats` sorted, error mode stored kebab-case. Seam: `cargo test --workspace` 82 passed, clippy/fmt clean.
