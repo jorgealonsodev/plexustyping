@@ -18,8 +18,8 @@ Delivery: `chain_strategy=feature-branch-chain` (cached from phase 0). Forecast:
 | --- | --- | --- | --- | --- |
 | T1 | S1, S2, S3 | `plexustyping-core::adaptive`: `WeaknessModel` (EMA, scores, confusions, seeded target selection) — writer A (parallel) | done | 79c7714 |
 | T2 | S5 | New crate `plexustyping-store` (rusqlite, migrations, profile, sessions, keystrokes, stats rows, settings) — writer B (parallel) | done | 84e652f |
-| T3 | S2, S4, S6 | Integration: corpus string targets, app state + commands, adaptive next text, heatmap overlay, settings — writer C | pending | — |
-| T4 | all | Close: suite, real-app check, review assessment, Trello | pending | — |
+| T3 | S2, S4, S6 | Integration: corpus string targets, app state + commands, adaptive next text, heatmap overlay, settings — writer C | done | 46fe5e0 |
+| T4 | all | Close: suite, real-app check, review assessment, Trello | done | e52071d, 1bd7612 |
 
 ## Log
 
@@ -30,3 +30,4 @@ Delivery: `chain_strategy=feature-branch-chain` (cached from phase 0). Forecast:
 - **L5 (T1/T2 evidence):** parallel writers. T1 `79c7714`: `adaptive.rs`, 22 tests; serde `{units, confusions, meanIntervalMs}`; `from_parts` keeps the last duplicate; score clamped to 0..=1. T2 `84e652f`: `plexustyping-store`, rusqlite 0.40 bundled (0.41+ need Rust 1.89; checked with `cargo +1.85`), schema v1, 12 tests; additive: `Store: Debug`, `StoreError::{Io, InvalidData}`, `session_keystrokes` → `NotFound` for unknown ids, `load_stats` sorted, error mode stored kebab-case. Seam: `cargo test --workspace` 82 passed, clippy/fmt clean.
 - **L6 (T3 + T4 evidence):** T3 `46fe5e0` (corpus string targets, AppState + store, first_text/next_text/score_session persistence, weaknesses, heatmap; 21 app tests, 84 vitest). Real-app check (xdotool, 1000×760): diagnostic first, full text saved to `~/.local/share/com.plexustyping.app/plexustyping.sqlite3`, "Tus puntos débiles" shown, next text "Texto adaptativo · Practicando: b · s · es", heatmap + highlight OK. Test DB (only my filler session) deleted afterwards. Header wrapped to 3 rows at 720×480 → `e52071d` "Ajustes" popover; verified one row + panel overlay in the real app.
 - **L7 (risk):** native assess on `49f94ab..e52071d` medium/under_budget; escalated item 1 (persisted schema v1 + migrations) → independent verify: S5 met, S6 met; non-blocking F1 (session and stats saves are separate transactions), F2 (WAL set before migrations modifies a foreign v0 file header), F3a (no per-session language/layout), F3b (no busy_timeout), F3d (no NFC normalization of units). Fixing F1, F2, F3a, F3b now (schema v1 unreleased, so v1 itself is amended, no v2 migration).
+- **L8 (close):** `1bd7612` fixes F1 (`Store::save_session_with_stats`, one transaction), F2 (WAL after migrations, file DBs only), F3a (`sessions.language/layout`), F3b (busy timeout 2 s); 105 Rust tests, clippy/fmt clean, svelte-check 0. Local v1 DB from the header check (0 sessions) deleted since v1 was amended. Deferred: F3d unit NFC normalization; R3-003 newline typing; component tests. Not done: native review (assess not due; independent verify ran instead under escalated item 1).
