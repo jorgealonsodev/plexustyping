@@ -2,6 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod adaptive;
+
 /// How the session reacts to a wrong keystroke.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
