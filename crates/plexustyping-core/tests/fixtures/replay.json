@@ -1,0 +1,297 @@
+[
+  {
+    "name": "allow-continue: all correct",
+    "text": "hola",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "h", "tMs": 0 },
+      { "kind": "char", "ch": "o", "tMs": 20000 },
+      { "kind": "char", "ch": "l", "tMs": 40000 },
+      { "kind": "char", "ch": "a", "tMs": 60000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 4,
+      "records": [
+        { "index": 0, "expected": "h", "typed": "h", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "o", "typed": "o", "correct": true, "msSincePrevious": 20000 },
+        { "index": 2, "expected": "l", "typed": "l", "correct": true, "msSincePrevious": 20000 },
+        { "index": 3, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": 20000 }
+      ],
+      "stats": { "durationMs": 60000, "keystrokes": 4, "charKeystrokes": 4, "correctKeystrokes": 4, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 4, "accuracy": 1, "grossWpm": 0.8, "netWpm": 0.8, "kpm": 4 }
+    }
+  },
+  {
+    "name": "allow-continue: wrong key advances and stays uncorrected",
+    "text": "abcdefghij",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "b", "tMs": 6000 },
+      { "kind": "char", "ch": "c", "tMs": 12000 },
+      { "kind": "char", "ch": "d", "tMs": 18000 },
+      { "kind": "char", "ch": "x", "tMs": 24000 },
+      { "kind": "char", "ch": "f", "tMs": 30000 },
+      { "kind": "char", "ch": "g", "tMs": 36000 },
+      { "kind": "char", "ch": "h", "tMs": 42000 },
+      { "kind": "char", "ch": "i", "tMs": 48000 },
+      { "kind": "char", "ch": "j", "tMs": 60000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 10,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 6000 },
+        { "index": 2, "expected": "c", "typed": "c", "correct": true, "msSincePrevious": 6000 },
+        { "index": 3, "expected": "d", "typed": "d", "correct": true, "msSincePrevious": 6000 },
+        { "index": 4, "expected": "e", "typed": "x", "correct": false, "msSincePrevious": 6000 },
+        { "index": 5, "expected": "f", "typed": "f", "correct": true, "msSincePrevious": 6000 },
+        { "index": 6, "expected": "g", "typed": "g", "correct": true, "msSincePrevious": 6000 },
+        { "index": 7, "expected": "h", "typed": "h", "correct": true, "msSincePrevious": 6000 },
+        { "index": 8, "expected": "i", "typed": "i", "correct": true, "msSincePrevious": 6000 },
+        { "index": 9, "expected": "j", "typed": "j", "correct": true, "msSincePrevious": 12000 }
+      ],
+      "stats": { "durationMs": 60000, "keystrokes": 10, "charKeystrokes": 10, "correctKeystrokes": 9, "errors": 1, "uncorrectedErrors": 1, "charsTyped": 10, "accuracy": 0.9, "grossWpm": 2, "netWpm": 1, "kpm": 10 }
+    }
+  },
+  {
+    "name": "allow-continue: backspace ignored entirely",
+    "text": "ab",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "backspace", "tMs": 10 },
+      { "kind": "char", "ch": "b", "tMs": 100 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 100 }
+      ],
+      "stats": { "durationMs": 100, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 2, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 1, "grossWpm": 240, "netWpm": 240, "kpm": 1200 }
+    }
+  },
+  {
+    "name": "allow-continue: net WPM clamped at 0",
+    "text": "sol",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "s", "tMs": 0 },
+      { "kind": "char", "ch": "x", "tMs": 30000 },
+      { "kind": "char", "ch": "l", "tMs": 60000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 3,
+      "records": [
+        { "index": 0, "expected": "s", "typed": "s", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "o", "typed": "x", "correct": false, "msSincePrevious": 30000 },
+        { "index": 2, "expected": "l", "typed": "l", "correct": true, "msSincePrevious": 30000 }
+      ],
+      "stats": { "durationMs": 60000, "keystrokes": 3, "charKeystrokes": 3, "correctKeystrokes": 2, "errors": 1, "uncorrectedErrors": 1, "charsTyped": 3, "accuracy": 0.6666666666666666, "grossWpm": 0.6, "netWpm": 0, "kpm": 3 }
+    }
+  },
+  {
+    "name": "allow-continue: events after completion ignored",
+    "text": "ab",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "b", "tMs": 1000 },
+      { "kind": "char", "ch": "c", "tMs": 2000 },
+      { "kind": "backspace", "tMs": 3000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 2, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 1, "grossWpm": 24, "netWpm": 24, "kpm": 120 }
+    }
+  },
+  {
+    "name": "allow-continue: empty events",
+    "text": "hola",
+    "mode": "allow-continue",
+    "events": [],
+    "expected": {
+      "completed": false,
+      "cursor": 0,
+      "records": [],
+      "stats": { "durationMs": 0, "keystrokes": 0, "charKeystrokes": 0, "correctKeystrokes": 0, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 0, "accuracy": 1, "grossWpm": 0, "netWpm": 0, "kpm": 0 }
+    }
+  },
+  {
+    "name": "allow-continue: empty text is completed and ignores events",
+    "text": "",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 0,
+      "records": [],
+      "stats": { "durationMs": 0, "keystrokes": 0, "charKeystrokes": 0, "correctKeystrokes": 0, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 0, "accuracy": 1, "grossWpm": 0, "netWpm": 0, "kpm": 0 }
+    }
+  },
+  {
+    "name": "allow-continue: accented chars are single chars",
+    "text": "ñá",
+    "mode": "allow-continue",
+    "events": [
+      { "kind": "char", "ch": "ñ", "tMs": 0 },
+      { "kind": "char", "ch": "a", "tMs": 1000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "ñ", "typed": "ñ", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "á", "typed": "a", "correct": false, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 1, "errors": 1, "uncorrectedErrors": 1, "charsTyped": 2, "accuracy": 0.5, "grossWpm": 24, "netWpm": 0, "kpm": 120 }
+    }
+  },
+  {
+    "name": "stop-on-error: wrong key keeps the cursor",
+    "text": "ab",
+    "mode": "stop-on-error",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "x", "tMs": 1000 },
+      { "kind": "char", "ch": "b", "tMs": 2000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "x", "correct": false, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 2000, "keystrokes": 3, "charKeystrokes": 3, "correctKeystrokes": 2, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 0.6666666666666666, "grossWpm": 12, "netWpm": 12, "kpm": 90 }
+    }
+  },
+  {
+    "name": "stop-on-error: backspace ignored entirely",
+    "text": "ab",
+    "mode": "stop-on-error",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "backspace", "tMs": 500 },
+      { "kind": "char", "ch": "b", "tMs": 1000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 2, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 1, "grossWpm": 24, "netWpm": 24, "kpm": 120 }
+    }
+  },
+  {
+    "name": "stop-on-error: unfinished with duration 0",
+    "text": "abc",
+    "mode": "stop-on-error",
+    "events": [
+      { "kind": "char", "ch": "x", "tMs": 0 }
+    ],
+    "expected": {
+      "completed": false,
+      "cursor": 0,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "x", "correct": false, "msSincePrevious": null }
+      ],
+      "stats": { "durationMs": 0, "keystrokes": 1, "charKeystrokes": 1, "correctKeystrokes": 0, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 0, "accuracy": 0, "grossWpm": 0, "netWpm": 0, "kpm": 0 }
+    }
+  },
+  {
+    "name": "backspace-correct: backspace reopens and retype fixes",
+    "text": "ab",
+    "mode": "backspace-correct",
+    "events": [
+      { "kind": "char", "ch": "x", "tMs": 0 },
+      { "kind": "backspace", "tMs": 1000 },
+      { "kind": "char", "ch": "a", "tMs": 2000 },
+      { "kind": "char", "ch": "b", "tMs": 3000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "x", "correct": false, "msSincePrevious": null },
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 3000, "keystrokes": 4, "charKeystrokes": 3, "correctKeystrokes": 2, "errors": 1, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 0.6666666666666666, "grossWpm": 8, "netWpm": 8, "kpm": 80 }
+    }
+  },
+  {
+    "name": "backspace-correct: retyped wrong stays uncorrected and net clamps at 0",
+    "text": "abc",
+    "mode": "backspace-correct",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "x", "tMs": 1000 },
+      { "kind": "backspace", "tMs": 2000 },
+      { "kind": "char", "ch": "y", "tMs": 3000 },
+      { "kind": "char", "ch": "c", "tMs": 4000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 3,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "x", "correct": false, "msSincePrevious": 1000 },
+        { "index": 1, "expected": "b", "typed": "y", "correct": false, "msSincePrevious": 1000 },
+        { "index": 2, "expected": "c", "typed": "c", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 4000, "keystrokes": 5, "charKeystrokes": 4, "correctKeystrokes": 2, "errors": 2, "uncorrectedErrors": 1, "charsTyped": 3, "accuracy": 0.5, "grossWpm": 9, "netWpm": 0, "kpm": 75 }
+    }
+  },
+  {
+    "name": "backspace-correct: backspace at 0 ignored entirely",
+    "text": "a",
+    "mode": "backspace-correct",
+    "events": [
+      { "kind": "backspace", "tMs": 0 },
+      { "kind": "char", "ch": "a", "tMs": 500 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 1,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null }
+      ],
+      "stats": { "durationMs": 0, "keystrokes": 1, "charKeystrokes": 1, "correctKeystrokes": 1, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 1, "accuracy": 1, "grossWpm": 0, "netWpm": 0, "kpm": 0 }
+    }
+  },
+  {
+    "name": "backspace-correct: events after completion ignored",
+    "text": "ab",
+    "mode": "backspace-correct",
+    "events": [
+      { "kind": "char", "ch": "a", "tMs": 0 },
+      { "kind": "char", "ch": "b", "tMs": 1000 },
+      { "kind": "backspace", "tMs": 2000 },
+      { "kind": "char", "ch": "c", "tMs": 3000 }
+    ],
+    "expected": {
+      "completed": true,
+      "cursor": 2,
+      "records": [
+        { "index": 0, "expected": "a", "typed": "a", "correct": true, "msSincePrevious": null },
+        { "index": 1, "expected": "b", "typed": "b", "correct": true, "msSincePrevious": 1000 }
+      ],
+      "stats": { "durationMs": 1000, "keystrokes": 2, "charKeystrokes": 2, "correctKeystrokes": 2, "errors": 0, "uncorrectedErrors": 0, "charsTyped": 2, "accuracy": 1, "grossWpm": 24, "netWpm": 24, "kpm": 120 }
+    }
+  }
+]
