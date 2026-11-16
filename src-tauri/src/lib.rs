@@ -1,14 +1,18 @@
 pub mod ai;
 pub mod commands;
+pub mod metronome;
 pub mod secrets;
 
 use std::sync::{Arc, MutexGuard};
 
 use ai::{AiFailure, AiSettings, ProviderInfo, TextParams};
 use commands::{
-    AppState, FirstText, HeatScore, NextText, ScoredSession, StorageStatus, Weakness, lock_store,
+    AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoredSession, StorageStatus,
+    Weakness, lock_store,
 };
+use metronome::{MetronomeStarted, MetronomeState};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
+use plexustyping_audio::MetronomeConfig;
 use plexustyping_core::{ErrorMode, InputEvent};
 use plexustyping_layouts::{KeyPress, Layout};
 use plexustyping_store::{SessionSummary, Store, UsageRow};
@@ -71,16 +75,55 @@ fn score_session(
     mode: ErrorMode,
     events: Vec<InputEvent>,
     started_at_ms: i64,
+    offsets_ms: Option<Vec<Option<f64>>>,
+    bpm: Option<u32>,
 ) -> ScoredSession {
     let mut store = store(&state);
-    commands::score_session(
+    let metronome = MetronomeTrack { bpm, offsets_ms };
+    commands::score_session_with_metronome(
         &mut store,
         &state.profile,
         &text,
         mode,
         &events,
         started_at_ms,
+        &metronome,
     )
+}
+
+/// Runs a metronome call off the main thread: opening the device blocks.
+async fn on_audio_thread<T: Send + 'static>(
+    state: &State<'_, MetronomeState>,
+    call: impl FnOnce(MetronomeState) -> Result<T, String> + Send + 'static,
+) -> Result<T, String> {
+    let state = MetronomeState::clone(state);
+    let joined = tauri::async_runtime::spawn_blocking(move || call(state)).await;
+    joined.map_err(|e| format!("Error interno del metrónomo: {e}"))?
+}
+
+#[tauri::command]
+async fn metronome_start(
+    state: State<'_, MetronomeState>,
+    config: MetronomeConfig,
+) -> Result<MetronomeStarted, String> {
+    on_audio_thread(&state, move |m| m.start(config)).await
+}
+
+#[tauri::command]
+async fn metronome_update(
+    state: State<'_, MetronomeState>,
+    config: MetronomeConfig,
+) -> Result<Option<MetronomeStarted>, String> {
+    on_audio_thread(&state, move |m| m.update(config)).await
+}
+
+#[tauri::command]
+async fn metronome_stop(state: State<'_, MetronomeState>) -> Result<(), String> {
+    on_audio_thread(&state, |m| {
+        m.stop();
+        Ok(())
+    })
+    .await
 }
 
 #[tauri::command]
@@ -185,6 +228,7 @@ pub fn run() {
                 Arc::new(KeyringStore::default()),
                 AiClient::new(Endpoints::production()),
             ));
+            app.manage(MetronomeState::audio());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -206,7 +250,10 @@ pub fn run() {
             ai_key_delete,
             ai_models,
             ai_test,
-            ai_usage
+            ai_usage,
+            metronome_start,
+            metronome_update,
+            metronome_stop
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { storageStatus } from "./features/practice/api";
   import Practice from "./features/practice/Practice.svelte";
+  import { isMetronomeShortcut } from "./features/metronome/beat";
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
@@ -17,12 +18,17 @@
       .catch((err) => console.warn("storage_status failed", err));
   });
 
-  // F2 shows or hides the keyboard from anywhere (S11) and Ctrl+, opens the settings (S8);
-  // neither reaches the practice text.
+  // F2 shows or hides the keyboard from anywhere (S11), F4 turns the metronome on or off (S7) and
+  // Ctrl+, opens the settings (S8); none reaches the practice text.
   function onKeydown(e: KeyboardEvent) {
     if (isSettingsShortcut(e)) {
       e.preventDefault();
       modal?.open();
+      return;
+    }
+    if (isMetronomeShortcut(e)) {
+      e.preventDefault();
+      settings.setMetronome({ enabled: !settings.metronome.enabled });
       return;
     }
     if (e.key !== "F2" || e.repeat) return;
@@ -58,6 +64,7 @@
   targetCount={settings.targetCount}
   textLength={settings.textLength}
   aiRevision={settings.aiRevision}
+  metronome={settings.metronome}
 />
 
 <SettingsModal bind:this={modal} {settings} />

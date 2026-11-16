@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use std::sync::{Mutex, MutexGuard};
 
 use plexustyping_ai::AiClient;
+use plexustyping_audio::{MAX_BPM, MIN_BPM};
 use plexustyping_core::adaptive::{Confusion, UnitStat, WeaknessModel};
 use plexustyping_core::{ErrorMode, InputEvent, SessionResult, failed_chars, replay};
 use plexustyping_corpus::{Corpus, GenerateOptions, corpus};
@@ -64,6 +65,41 @@ pub struct ScoredSession {
     pub saved: bool,
     /// Why storing failed; `None` when saved or not meant to be saved.
     pub save_error: Option<String>,
+    /// Metronome offset of each record (negative = early); empty without a metronome.
+    #[serde(default)]
+    pub offsets_ms: Vec<Option<f64>>,
+}
+
+/// What the metronome measured while a text was typed.
+#[derive(Clone, Debug, Default, PartialEq, Deserialize)]
+pub struct MetronomeTrack {
+    /// Tempo, when one metronome tempo covered the whole text.
+    pub bpm: Option<u32>,
+    /// One entry per input event (`None` for backspaces and keys without a beat).
+    pub offsets_ms: Option<Vec<Option<f64>>>,
+}
+
+impl MetronomeTrack {
+    /// The offsets of the records: records are the char events before the end
+    /// of the text, in order. Empty when the offsets do not match the events.
+    fn record_offsets(&self, events: &[InputEvent], records: usize) -> Vec<Option<f64>> {
+        let Some(offsets) = self.offsets_ms.as_ref().filter(|o| o.len() == events.len()) else {
+            return Vec::new();
+        };
+        let chars = events.iter().zip(offsets);
+        chars
+            .filter(|(e, _)| matches!(e, InputEvent::Char { .. }))
+            .map(|(_, offset)| *offset)
+            .take(records)
+            .collect()
+    }
+
+    /// The stored tempo: in range and with every record measured.
+    fn session_bpm(&self, offsets: &[Option<f64>]) -> Option<u32> {
+        let measured = !offsets.is_empty() && offsets.iter().all(Option::is_some);
+        self.bpm
+            .filter(|bpm| measured && (MIN_BPM..=MAX_BPM).contains(bpm))
+    }
 }
 
 /// Where a practice text came from.
@@ -357,10 +393,32 @@ pub fn score_session(
     events: &[InputEvent],
     started_at_ms: i64,
 ) -> ScoredSession {
+    let none = MetronomeTrack::default();
+    score_session_with_metronome(store, profile, text, mode, events, started_at_ms, &none)
+}
+
+/// [`score_session`] that also stores the metronome offsets and tempo.
+pub fn score_session_with_metronome(
+    store: &mut Store,
+    profile: &Profile,
+    text: &str,
+    mode: ErrorMode,
+    events: &[InputEvent],
+    started_at_ms: i64,
+    metronome: &MetronomeTrack,
+) -> ScoredSession {
     let result = replay(text, mode, events);
     let failed_chars = failed_chars(&result);
+    let offsets_ms = metronome.record_offsets(events, result.records.len());
+    let saved_session = SavedSession {
+        text,
+        mode,
+        started_at_ms,
+        bpm: metronome.session_bpm(&offsets_ms),
+        offsets_ms: &offsets_ms,
+    };
     let (saved, save_error) = if result.completed && !result.records.is_empty() {
-        match persist(store, profile, text, mode, &result, started_at_ms) {
+        match persist(store, profile, &saved_session, &result) {
             Ok(()) => (true, None),
             Err(e) => (false, Some(e.to_string())),
         }
@@ -372,18 +430,32 @@ pub fn score_session(
         failed_chars,
         saved,
         save_error,
+        offsets_ms,
     }
+}
+
+/// What [`persist`] stores besides the replay result.
+struct SavedSession<'a> {
+    text: &'a str,
+    mode: ErrorMode,
+    started_at_ms: i64,
+    bpm: Option<u32>,
+    offsets_ms: &'a [Option<f64>],
 }
 
 /// Stores the session and folds it into the stored model in one transaction.
 fn persist(
     store: &mut Store,
     profile: &Profile,
-    text: &str,
-    mode: ErrorMode,
+    saved: &SavedSession,
     result: &SessionResult,
-    started_at_ms: i64,
 ) -> Result<(), StoreError> {
+    let SavedSession {
+        text,
+        mode,
+        started_at_ms,
+        ..
+    } = *saved;
     let stats = &result.stats;
     let session = NewSession {
         profile_id: profile.id,
@@ -399,8 +471,9 @@ fn persist(
         net_wpm: stats.net_wpm,
         accuracy: stats.accuracy,
         keystrokes: stats.keystrokes,
-        bpm: None,
+        bpm: saved.bpm,
         records: &result.records,
+        metronome_offsets_ms: saved.offsets_ms,
     };
     store.save_session_with_stats(&session, STATS_MODE, |snapshot| {
         let mut model = model_from_snapshot(snapshot);
@@ -694,6 +767,100 @@ mod tests {
         );
         assert_eq!(sessions, Ok(1), "the failed session is rolled back");
         assert_eq!(after, Ok(model));
+    }
+
+    fn track(bpm: Option<u32>, offsets: &[Option<f64>]) -> MetronomeTrack {
+        MetronomeTrack {
+            bpm,
+            offsets_ms: Some(offsets.to_vec()),
+        }
+    }
+
+    fn score_with(
+        store: &mut Store,
+        profile: &Profile,
+        events: &[InputEvent],
+        t: &MetronomeTrack,
+    ) -> ScoredSession {
+        score_session_with_metronome(
+            store,
+            profile,
+            "hola",
+            ErrorMode::BackspaceCorrect,
+            events,
+            1,
+            t,
+        )
+    }
+
+    #[test]
+    fn score_session_stores_metronome_offsets_of_applied_chars_and_the_bpm() {
+        let (mut store, profile) = memory();
+        let mut events = typing("hx");
+        events.push(
+            serde_json::from_value(serde_json::json!({ "kind": "backspace", "tMs": 250.0 }))
+                .unwrap(),
+        );
+        events.extend(typing("ola!"));
+        let offsets = [
+            Some(-5.0),
+            Some(3.0),
+            None,
+            Some(0.0),
+            Some(10.0),
+            Some(-1.5),
+            Some(99.0),
+        ];
+        let scored = score_with(&mut store, &profile, &events, &track(Some(60), &offsets));
+        assert!(scored.saved, "{:?}", scored.save_error);
+        // One offset per record: the chars before the end of the text, backspaces skipped.
+        let expected = vec![Some(-5.0), Some(3.0), Some(0.0), Some(10.0), Some(-1.5)];
+        assert_eq!(scored.offsets_ms, expected);
+        let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+        assert_eq!(session.bpm, Some(60));
+        assert_eq!(
+            store.session_metronome_offsets(session.id).unwrap(),
+            expected
+        );
+    }
+
+    #[test]
+    fn score_session_drops_the_bpm_unless_every_keystroke_has_an_in_range_offset() {
+        let (mut store, profile) = memory();
+        let events = typing("hola");
+        let partial = [Some(1.0), None, Some(2.0), Some(3.0)];
+        let full = [Some(1.0); 4];
+        for (t, offsets) in [
+            (track(Some(60), &partial), partial.to_vec()),
+            (track(Some(301), &full), full.to_vec()),
+            (track(Some(29), &full), full.to_vec()),
+        ] {
+            let scored = score_with(&mut store, &profile, &events, &t);
+            assert_eq!(scored.offsets_ms, offsets);
+            let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+            assert_eq!(session.bpm, None, "{t:?}");
+            assert_eq!(
+                store.session_metronome_offsets(session.id).unwrap(),
+                offsets
+            );
+        }
+    }
+
+    #[test]
+    fn score_session_ignores_offsets_not_aligned_with_the_events() {
+        let (mut store, profile) = memory();
+        let events = typing("hola");
+        for t in [track(Some(60), &[Some(1.0); 3]), MetronomeTrack::default()] {
+            let scored = score_with(&mut store, &profile, &events, &t);
+            assert!(scored.saved);
+            assert_eq!(scored.offsets_ms, Vec::<Option<f64>>::new());
+            let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+            assert_eq!(session.bpm, None);
+            assert_eq!(
+                store.session_metronome_offsets(session.id).unwrap(),
+                vec![None; 4]
+            );
+        }
     }
 
     #[test]

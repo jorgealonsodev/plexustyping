@@ -24,7 +24,8 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   "Teclado": on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
   colour themes, dark and light, switched live. Everything is remembered
   locally; targets and length apply from the next text. `Escape`, `×` or a
-  click outside closes the window and returns to the text. "IA": see below.
+  click outside closes the window and returns to the text. "IA" and
+  "Metrónomo": see below.
 
 ### Adaptive loop
 
@@ -63,6 +64,26 @@ today and in total, so you can watch your spending.
   "Corpus local").
 - **Latency:** the next text is requested in the background as soon as you
   start typing the current one, so it is usually ready when you finish.
+
+### Metronome
+
+In "Ajustes → Metrónomo" (or with `F4` from anywhere), turn on the fixed
+metronome: 30–300 BPM (default 60; one click = one expected keystroke), sound
+"Clic", "Madera" or "Bip", volume 0–100 % and an accent every N beats (0 = no
+accent, up to 16). Changes apply live. It plays from Rust (`cpal`, the default
+output device) only while a text is ready or being typed, and stops on the
+results screen and when the window is hidden. A dot next to the live stats
+flashes on each beat (accented beats in another colour).
+
+- **Offset metric:** each typed character records how many ms before
+  (negative, "adelantada") or after (positive, "atrasada") the nearest click
+  it fell. Results show "Ritmo: desvío medio ±X ms" (mean absolute offset) and
+  the share of early and late keys. Offsets are stored per keystroke, and the
+  session's BPM when one tempo covered the whole text. Changing the tempo
+  restarts the beat.
+- **Latency caveat:** beat 0 is timed when the audio stream starts; the
+  device's own output latency (a few ms) is not included: the click is heard
+  that much later, so keys in time with it read a few ms late.
 
 ### Where data lives
 

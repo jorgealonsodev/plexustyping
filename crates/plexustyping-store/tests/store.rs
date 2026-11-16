@@ -69,6 +69,7 @@ fn session<'a>(profile_id: i64, started: i64, records: &'a [KeystrokeRecord]) ->
         keystrokes: records.len(),
         bpm: None,
         records,
+        metronome_offsets_ms: &[],
     }
 }
 
@@ -170,6 +171,37 @@ fn session_and_keystrokes_round_trip() {
     assert_eq!(got.net_wpm, 38.5);
     assert_eq!(got.accuracy, 0.95);
     assert_eq!(got.keystrokes, 4);
+    assert_eq!(got.bpm, Some(80));
+    assert_eq!(store.session_metronome_offsets(id).unwrap(), vec![None; 4]);
+}
+
+#[test]
+fn metronome_offsets_round_trip_aligned_with_records() {
+    let mut store = Store::open_in_memory().unwrap();
+    let pid = store.default_profile().unwrap().id;
+    let records = vec![rec(0, 'a', 'a', None), rec(1, 'ñ', 'ñ', Some(500.0))];
+    let offsets = [Some(-12.5), None];
+    let mut s = session(pid, 1, &records);
+    s.metronome_offsets_ms = &offsets;
+    let id = store.save_session(&s).unwrap();
+    assert_eq!(store.session_metronome_offsets(id).unwrap(), offsets);
+    assert_eq!(store.recent_sessions(pid, 1).unwrap()[0].bpm, None);
+    assert!(matches!(
+        store.session_metronome_offsets(id + 1),
+        Err(StoreError::NotFound)
+    ));
+}
+
+#[test]
+fn metronome_offsets_of_another_length_are_rejected_and_store_nothing() {
+    let mut store = Store::open_in_memory().unwrap();
+    let pid = store.default_profile().unwrap().id;
+    let records = vec![rec(0, 'a', 'a', None), rec(1, 'b', 'b', Some(5.0))];
+    let mut s = session(pid, 1, &records);
+    s.metronome_offsets_ms = &[Some(1.0)];
+    let err = store.save_session(&s).unwrap_err();
+    assert!(matches!(err, StoreError::InvalidData(_)), "{err:?}");
+    assert_eq!(store.recent_sessions(pid, 5).unwrap(), vec![]);
 }
 
 #[test]

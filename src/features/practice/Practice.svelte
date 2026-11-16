@@ -21,6 +21,10 @@
   import { focusTyping, setTypingField } from "./focus";
   import { Prefetcher, generationKey, provisionalFailedChars, sourceLabel } from "./prefetch";
   import Results from "./Results.svelte";
+  import { metronomeApi } from "../metronome/api";
+  import { type BeatAnchor, type MetronomeSettings, beatOffsetMs, toConfig } from "../metronome/beat";
+  import BeatDot from "../metronome/BeatDot.svelte";
+  import { MetronomeController } from "../metronome/controller";
 
   let {
     mode,
@@ -31,6 +35,7 @@
     targetCount,
     textLength,
     aiRevision,
+    metronome,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -41,7 +46,20 @@
     textLength: number;
     /** Changes when AI settings or keys change. */
     aiRevision: number;
+    metronome: MetronomeSettings;
   } = $props();
+
+  // The metronome plays only while a text is ready or being typed and the window is visible (S7).
+  let visible = $state(!document.hidden);
+  let anchor = $state.raw<BeatAnchor | null>(null);
+  let metronomeError = $state<string | null>(null);
+  const controller = new MetronomeController(metronomeApi, () => {
+    anchor = controller.anchor;
+    metronomeError = controller.error;
+  });
+  /** Metronome offset of each event of the current session (aligned with `session.events`) and the tempos heard. */
+  type Track = { offsets: (number | null)[]; bpms: Set<number> };
+  let track: Track = { offsets: [], bpms: new Set() };
 
   type Phase = "loading" | "typing" | "scoring" | "results" | "error";
   let phase = $state<Phase>("loading");
@@ -91,6 +109,7 @@
     if (!text) return;
     run++;
     session = new TypingSession(text, mode);
+    track = { offsets: [], bpms: new Set() };
     scored = null;
     phase = "typing";
     tick++;
@@ -154,13 +173,14 @@
       .catch((err) => console.warn("heatmap failed", err));
   }
 
-  async function finish(done: TypingSession) {
+  async function finish(done: TypingSession, measured: Track) {
     const id = ++run;
     phase = "scoring";
     try {
       // Wall-clock start: `performance.now()` stamps are relative to the page's time origin.
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
-      const result = await scoreSession(text, done.mode, done.events, startedAtMs);
+      const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
+      const result = await scoreSession(text, done.mode, done.events, startedAtMs, measured.offsets, bpm);
       if (id !== run) return;
       scored = result;
       weak = [];
@@ -168,7 +188,7 @@
       refreshModel(id);
     } catch (err) {
       if (id !== run) return;
-      retry = () => void finish(done);
+      retry = () => void finish(done, measured);
       message = `No se pudo calcular el resultado: ${String(err)}`;
       phase = "error";
     }
@@ -181,6 +201,10 @@
     if (phase !== "typing" || !session) return;
     const expected = session.chars[session.cursor];
     const first = session.firstT === null;
+    const beat = event.kind === "char" ? anchor : null;
+    // Epoch ms, like beat 0: `performance.now()` stamps are relative to the page's time origin.
+    track.offsets.push(beat && beatOffsetMs(performance.timeOrigin + event.tMs, beat.epochMs, beat.intervalMs));
+    if (beat) track.bpms.add(beat.bpm);
     if (!session.apply(event)) return;
     now = event.tMs;
     tick++;
@@ -189,7 +213,7 @@
       const code = keyForChar(layout, event.ch);
       if (code) flash = { code, ok: event.ch === expected };
     }
-    if (session.completed) void finish(session);
+    if (session.completed) void finish(session, track);
   }
 
   // Typed chars come only from text the field received; reading and clearing it makes the
@@ -282,6 +306,11 @@
     untrack(restart);
   });
 
+  $effect(() => {
+    const wish = metronome.enabled && phase === "typing" && visible ? toConfig(metronome) : null;
+    untrack(() => void controller.set(wish));
+  });
+
   // Live clock while a text is being typed.
   $effect(() => {
     if (!liveStats || phase !== "typing") return;
@@ -297,7 +326,10 @@
     getLayout(LAYOUT)
       .then((next) => (layout = next))
       .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
-    return () => setTypingField(null);
+    return () => {
+      setTypingField(null);
+      void controller.set(null);
+    };
   });
 
   // WebKit's `autocorrect` is missing from Svelte's textarea attribute types.
@@ -310,7 +342,7 @@
 </script>
 
 <svelte:window onkeydown={onKeydown} onclick={onWindowClick} />
-<svelte:document onfocusout={refocusIfLost} />
+<svelte:document onfocusout={refocusIfLost} onvisibilitychange={() => (visible = !document.hidden)} />
 
 <textarea
   bind:this={field}
@@ -326,13 +358,18 @@
 
 <main>
   <section class="practice">
-    {#if liveStats && view && phase === "typing"}
-      <dl class="live" aria-label="Estadísticas en vivo">
-        <div><dt>PPM</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
-        <div><dt>Pulsaciones/min</dt><dd>{formatWpm(view.stats.kpm)}</dd></div>
-        <div><dt>Precisión</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
-        <div><dt>Tiempo</dt><dd>{formatTime(elapsed)}</dd></div>
-      </dl>
+    {#if phase === "typing" && ((liveStats && view) || anchor)}
+      <div class="top">
+        {#if anchor}<BeatDot {anchor} />{/if}
+        {#if liveStats && view}
+          <dl class="live" aria-label="Estadísticas en vivo">
+            <div><dt>PPM</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
+            <div><dt>Pulsaciones/min</dt><dd>{formatWpm(view.stats.kpm)}</dd></div>
+            <div><dt>Precisión</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
+            <div><dt>Tiempo</dt><dd>{formatTime(elapsed)}</dd></div>
+          </dl>
+        {/if}
+      </div>
     {/if}
 
     {#if phase === "loading"}
@@ -353,6 +390,7 @@
         {/if}
       </p>
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
+      {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
       <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
       <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
             class="ch {view.states[i]}"
@@ -360,7 +398,7 @@
             class:cursor={i === view.cursor}>{c}</span
           >{/each}</p>
       <p class="hint">
-        {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · Esc reinicia{:else}Esc reinicia el texto{/if}
+        {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · Esc reinicia · F4 metrónomo{:else}Esc reinicia el texto · F4 metrónomo{/if}
       </p>
     {/if}
   </section>
@@ -405,6 +443,11 @@
     gap: 1.5rem;
     width: min(100%, 62rem);
     margin: 0 auto;
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
   .live {
     display: flex;

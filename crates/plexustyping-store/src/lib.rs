@@ -203,6 +203,9 @@ pub struct NewSession<'a> {
     pub bpm: Option<u32>,
     /// Keystroke records, in typing order.
     pub records: &'a [KeystrokeRecord],
+    /// Metronome offset of each record (ms after the nearest beat, negative = early);
+    /// empty when no metronome ran, else one entry per record.
+    pub metronome_offsets_ms: &'a [Option<f64>],
 }
 
 /// Summary of a stored session.
@@ -229,6 +232,8 @@ pub struct SessionSummary {
     pub accuracy: f64,
     /// Number of applied keystrokes.
     pub keystrokes: usize,
+    /// Metronome tempo, if one was used for the whole text.
+    pub bpm: Option<u32>,
 }
 
 /// Stored statistics for one character or bigram.
@@ -453,7 +458,7 @@ impl Store {
     pub fn recent_sessions(&self, profile_id: i64, limit: usize) -> Result<Vec<SessionSummary>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, started_at_ms, mode, language, layout, duration_ms,
-                 gross_wpm, net_wpm, accuracy, keystrokes
+                 gross_wpm, net_wpm, accuracy, keystrokes, bpm
              FROM sessions WHERE profile_id = ?1
              ORDER BY started_at_ms DESC, id DESC LIMIT ?2",
         )?;
@@ -470,6 +475,7 @@ impl Store {
                     net_wpm: r.get(7)?,
                     accuracy: r.get(8)?,
                     keystrokes: 0,
+                    bpm: r.get(10)?,
                 },
                 r.get::<_, i64>(9)?,
             ))
@@ -518,6 +524,25 @@ impl Store {
             })
         })
         .collect()
+    }
+
+    /// Metronome offset of each keystroke of a session in typing order (`None` where
+    /// none was measured); [`StoreError::NotFound`] if the session does not exist.
+    pub fn session_metronome_offsets(&self, session_id: i64) -> Result<Vec<Option<f64>>> {
+        let exists: Option<i64> = self
+            .conn
+            .query_row("SELECT 1 FROM sessions WHERE id = ?1", [session_id], |r| {
+                r.get(0)
+            })
+            .optional()?;
+        if exists.is_none() {
+            return Err(StoreError::NotFound);
+        }
+        let mut stmt = self.conn.prepare(
+            "SELECT metronome_offset_ms FROM keystrokes WHERE session_id = ?1 ORDER BY idx",
+        )?;
+        let rows = stmt.query_map([session_id], |r| r.get(0))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
 
     /// Statistics of `profile_id` in `mode`; empty when nothing is stored.
@@ -716,6 +741,14 @@ fn u64_to_i64(n: u64) -> Result<i64> {
 
 /// Inserts a session row and its keystrokes; the caller owns the transaction.
 fn insert_session(tx: &Connection, s: &NewSession) -> Result<i64> {
+    let offsets = s.metronome_offsets_ms;
+    if !offsets.is_empty() && offsets.len() != s.records.len() {
+        return Err(StoreError::InvalidData(format!(
+            "{} metronome offsets for {} keystrokes",
+            offsets.len(),
+            s.records.len()
+        )));
+    }
     tx.execute(
         "INSERT INTO sessions (profile_id, started_at_ms, mode, code_language,
              language, layout, error_mode, text, duration_ms, gross_wpm,
@@ -743,7 +776,7 @@ fn insert_session(tx: &Connection, s: &NewSession) -> Result<i64> {
         let mut stmt = tx.prepare(
             "INSERT INTO keystrokes (session_id, idx, position, expected, typed,
                  correct, ms_since_previous, metronome_offset_ms)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL)",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
         )?;
         for (idx, r) in s.records.iter().enumerate() {
             stmt.execute(params![
@@ -754,6 +787,7 @@ fn insert_session(tx: &Connection, s: &NewSession) -> Result<i64> {
                 r.typed.to_string(),
                 r.correct,
                 r.ms_since_previous,
+                offsets.get(idx).copied().flatten(),
             ])?;
         }
     }

@@ -2983,6 +2983,7 @@ dependencies = [
  "keyring",
  "keyring-core",
  "plexustyping-ai",
+ "plexustyping-audio",
  "plexustyping-core",
  "plexustyping-corpus",
  "plexustyping-layouts",

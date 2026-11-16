@@ -25,6 +25,7 @@ plexustyping-corpus.workspace = true
 plexustyping-layouts.workspace = true
 plexustyping-store.workspace = true
 plexustyping-ai.workspace = true
+plexustyping-audio.workspace = true
 tauri.workspace = true
 tokio.workspace = true
 keyring.workspace = true
