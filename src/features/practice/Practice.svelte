@@ -89,12 +89,15 @@
 
   function onKeydown(e: KeyboardEvent) {
     if (isFormControl(e.target)) return;
-    if (e.key === "Escape") {
+    // Escape restarts only a text being typed or reviewed; while a text loads or is scored,
+    // restarting would silently discard the pending result.
+    if (e.key === "Escape" && (phase === "typing" || phase === "results")) {
       e.preventDefault();
       restart();
       return;
     }
-    if (phase === "results" && e.key === "Enter") {
+    // Enter on a focused button keeps its native activation (e.g. "Repetir").
+    if (phase === "results" && e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) {
       e.preventDefault();
       loadNext();
       return;

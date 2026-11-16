@@ -24,8 +24,8 @@ Delivery: `chain_strategy=feature-branch-chain` (~400-line slices). Forecast: ~2
 | T3 | S5 | `plexustyping-layouts`: TOML loader, `es-qwerty.toml`, dead-key composition, allowed chars — writer B | done | 1c55b05 |
 | T4 | S6 | `plexustyping-corpus`: FrequencyWords import + attribution, diagnostic text, sentences, offline generator — writer C | done | baf0d5c |
 | T7 | S9 | Themes: same 57 schemes as PlexusTerm, role mapping, hot switching, notices — writer (L13) | done | bd1e0b0 |
-| T5 | S1, S3, S4, S8, S9 | App integration: Tauri commands, practice screen, live stats, results, error-mode selector — writer (L13) | pending | — |
-| T6 | S1–S8 | Close: full suite, builds, review assessment, report | pending | — |
+| T5 | S1, S3, S4, S8, S9 | App integration: Tauri commands, practice screen, live stats, results, error-mode selector — writer (L13) | done | 92e7144 |
+| T6 | S1–S8 | Close: full suite, builds, review assessment, report | done | this commit |
 
 ## Log
 
@@ -45,3 +45,7 @@ Delivery: `chain_strategy=feature-branch-chain` (~400-line slices). Forecast: ~2
 - **L14 (RDD):** assess on `3a21c74..baf0d5c` (committed-only): nativeRisk high, `reviewDue: true`, reason `high_risk` (`process_boundary` signal in `scripts/import-frequencywords.py`), 16 paths / 7,383 lines (mostly generated `words.txt`).
 - **L15 (review + fixes):** native review lineage `review-05c7423bdb19170c` (lenses risk, reliability) approved and acknowledged; 5 advisory findings. Fixed test-first in `c2d081c`: R1/R3-001 empty pools overflow (RED: "attempt to add with overflow" at corpus lib.rs:237) and R3-003 unsupported dead keys (`LayoutError::UnsupportedDeadKey`). Deferred: R3-002 non-monotonic timestamps (frontend uses `performance.now()`), R3-004 derive builtin ids.
 - **L16 (T7 evidence):** themes ported from PlexusTerm commit `790edbb75f38bbac8feb8f75fa03a2395638b996`: 57 themes, default `catppuccin-mocha`, `typingColors`/`applyTheme`/`loadThemeId`/`saveThemeId`; 17 vitest tests; script output verified identical against the committed generated file; `pnpm check` 0 errors, `pnpm build` ok.
+- **L17 (T5 evidence):** writer built `src-tauri/src/commands.rs` (`diagnostic_text`, `next_text` with empty-result retry, `score_session`; 8 tests), `src/features/practice` (TS replay mirror tested against the shared Rust fixture, `keyToEvent`, practice/results screens), `src/features/settings` (error mode, theme, live-stats toggle; persisted). Suite rerun by parent: Rust 8+6+13+18 passed, clippy/fmt clean, vitest 49 passed, svelte-check 0 errors, vite build ok. GUI not launched by the writer.
+- **L18 (review 2):** lineage `review-afc9ed8fcd22bafb` on `baf0d5c..92e7144` (risk, reliability, readability) approved and acknowledged; 12 advisory findings. Fixed: R3-001 (Escape during loading/scoring discarded the pending result → Escape only in typing/results) and R3-002 (Enter on a focused button loaded the next text → buttons keep native activation). Deferred to phase 1: R3-003 Enter/newline not typeable (no corpus text has newlines yet; needed for code mode), R3-004 no component tests for Practice.svelte, R2-002 silent fallback when targets yield no text, readability suggestions R2-001/003–007.
+- **L19 (T6):** `pnpm tauri build` refused mismatched `tauri` 2.11.6 vs `@tauri-apps/api` 2.12.4; cargo stays on 2.11 under `rust-version = 1.85` → pinned `@tauri-apps/api` to `~2.11.1`.
+- **L20 (T6 close):** `pnpm tauri build --no-bundle` ok; release binary `target/release/plexustyping` 11 MB (PRD: "binario < 20 MB"). Not measured: keystroke-to-paint latency, startup time, installers, manual GUI run (Windows/macOS untested).
