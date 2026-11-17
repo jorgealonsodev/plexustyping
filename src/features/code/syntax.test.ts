@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SYNTAX_CLASSES, type Token, codeKeyEvent, newlineMark, tokenClasses } from "./syntax";
-import { practiceKey, practiceMode } from "./api";
+import { isCodeMode, practiceKey, practiceMode } from "./api";
 
 describe("tokenClasses", () => {
   it("gives every char the class of the token covering it", () => {
@@ -70,5 +70,11 @@ describe("practice modes", () => {
     expect(practiceKey("prose")).toBe("prose");
     expect(practiceKey({ kind: "code", lang: "rust" })).toBe("code:rust");
     expect(practiceKey({ kind: "code", lang: "python" })).toBe("code:python");
+  });
+
+  it("treats words like prose except for its own key", () => {
+    expect(practiceMode("words", "rust")).toBe("words");
+    expect(practiceKey("words")).toBe("words");
+    expect([isCodeMode("prose"), isCodeMode("words"), isCodeMode({ kind: "code", lang: "rust" })]).toEqual([false, false, true]);
   });
 });

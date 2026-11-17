@@ -5,11 +5,12 @@
   import type { PracticeKind } from "./api";
   import { LANGUAGES } from "./languages.svelte";
 
-  // Prose / code switch and the code language, in the header (S1, S6).
+  // Prose / words / code switch and the code language, in the header (S1, S6).
   let { settings }: { settings: SettingsStore } = $props();
 
   const KINDS: { id: PracticeKind; label: string }[] = [
     { id: "prose", label: "Prosa" },
+    { id: "words", label: "Palabras" },
     { id: "code", label: "Código" },
   ];
 
@@ -69,12 +70,15 @@
     padding: 0 0.7rem;
     font-size: 0.85rem;
     color: var(--muted);
+    border-radius: 0;
+  }
+  .kinds button:not(:first-child) {
+    margin-left: -1px;
   }
   .kinds button:first-child {
     border-radius: 0.375rem 0 0 0.375rem;
   }
   .kinds button:last-child {
-    margin-left: -1px;
     border-radius: 0 0.375rem 0.375rem 0;
   }
   /* Inside the button: an outside ring would overlap the joined neighbours. */

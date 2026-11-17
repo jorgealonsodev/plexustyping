@@ -164,9 +164,11 @@ const CODE_LANGUAGE_KEY = "plexustyping.codeLanguage";
 const CODE_INDENT_KEY = "plexustyping.codeIndent";
 const CODE_LINES_KEY = "plexustyping.codeLines";
 
-/** Prose unless code was chosen (S1). */
-export const loadPracticeKind = (storage: Storage = localStorage): PracticeKind =>
-  storage.getItem(KIND_KEY) === "code" ? "code" : "prose";
+/** Words or code when chosen; prose for a missing or unknown value (S1). */
+export function loadPracticeKind(storage: Storage = localStorage): PracticeKind {
+  const kind = storage.getItem(KIND_KEY);
+  return kind === "code" || kind === "words" ? kind : "prose";
+}
 
 export const savePracticeKind = (kind: PracticeKind, storage: Storage = localStorage) => storage.setItem(KIND_KEY, kind);
 

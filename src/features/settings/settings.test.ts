@@ -217,6 +217,19 @@ describe("code settings", () => {
     expect(loadCodeLines(storage)).toBe(5);
   });
 
+  it("stores the words kind like the others", () => {
+    const storage = memoryStorage();
+    savePracticeKind("words", storage);
+    expect(storage.getItem("plexustyping.practiceKind")).toBe("words");
+    expect(loadPracticeKind(storage)).toBe("words");
+    savePracticeKind("prose", storage);
+    expect(loadPracticeKind(storage)).toBe("prose");
+    for (const bad of ["Words", "palabras", ""]) {
+      storage.setItem("plexustyping.practiceKind", bad);
+      expect(loadPracticeKind(storage), bad).toBe("prose");
+    }
+  });
+
   it("falls back to the defaults for invalid stored values", () => {
     const storage = memoryStorage({
       "plexustyping.practiceKind": "poetry",

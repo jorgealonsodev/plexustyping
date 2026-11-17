@@ -66,7 +66,7 @@ export class SettingsStore {
   targetCount = $state(loadTargetCount());
   textLength = $state(loadTextLength());
   metronome = $state.raw(loadMetronome());
-  /** Prose or code (S1), the code language, its indentation (S4) and snippet lines (S2). */
+  /** Prose, words or code (S1), the code language, its indentation (S4) and snippet lines (S2). */
   practiceKind = $state<PracticeKind>(loadPracticeKind());
   codeLanguage = $state(loadCodeLanguage());
   codeIndent = $state<IndentMode>(loadCodeIndent());
@@ -137,7 +137,7 @@ export class SettingsStore {
     saveLayout(id);
   }
 
-  /** Loads a new prose text in the language (the practice screen watches it). */
+  /** Loads a new prose or words text in the language (the practice screen watches it). */
   setLanguage(id: string) {
     this.language = id;
     saveLanguage(id);
@@ -166,7 +166,7 @@ export class SettingsStore {
     saveMetronome(this.metronome);
   }
 
-  /** Switching prose/code or the language loads a new text (the practice screen watches them). */
+  /** Switching prose/words/code or the language loads a new text (the practice screen watches them). */
   setPracticeKind(kind: PracticeKind) {
     this.practiceKind = kind;
     savePracticeKind(kind);

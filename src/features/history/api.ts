@@ -5,7 +5,7 @@ export interface SessionSummary {
   id: number;
   /** Start time, Unix epoch milliseconds. */
   startedAtMs: number;
-  mode: "prose" | "code" | string;
+  mode: "prose" | "words" | "code" | string;
   codeLanguage: string | null;
   language: string | null;
   layout: string | null;
@@ -25,7 +25,7 @@ export interface CsvExport {
 }
 
 /** Backend mode filter: `null` is every session. */
-export type ModeArg = "prose" | "code" | null;
+export type ModeArg = "prose" | "words" | "code" | null;
 
 /** Sessions of the active profile, newest first; `limit: null` returns them all. */
 export const sessionHistory = (mode: ModeArg, limit: number | null = null) =>

@@ -47,7 +47,7 @@ export interface StorageStatus {
 
 /**
  * `language` is the prose language; `layout` decides the chars a text may contain;
- * `mode` is prose or code; `maxLines` sizes code snippets.
+ * `mode` is prose, words or code; `maxLines` sizes code snippets.
  */
 export const firstText = (language: string, layout: string, mode: PracticeMode = "prose", maxLines = 12) =>
   invoke<PracticeText>("first_text", { language, layout, day: localDay(), mode, maxLines });
@@ -74,7 +74,7 @@ export const nextText = (
     maxLines,
   });
 
-/** How a text was typed: prose or code of a language, and the code indentation. */
+/** How a text was typed: prose, words or code of a language, and the code indentation. */
 export interface Practice {
   mode: PracticeMode;
   indent: IndentMode;
@@ -110,7 +110,7 @@ export const scoreSession = (
     language,
   });
 
-/** Of the statistics model of `mode` (prose and code are kept apart). */
+/** Of the statistics model of `mode` (prose and code are kept apart; words use prose). */
 export const weaknesses = (limit: number, mode: PracticeMode = "prose") => invoke<Weakness[]>("weaknesses", { limit, mode });
 
 export const heatmap = (mode: PracticeMode = "prose") => invoke<CharScore[]>("heatmap", { mode });

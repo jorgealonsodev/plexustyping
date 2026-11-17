@@ -1,4 +1,4 @@
-//! Code mode (phase 2): the practice mode switch, code text plans from the
+//! Code mode (phase 2): the practice mode switch (prose, words, code), code text plans from the
 //! code statistics model, the corpus snippet fallback and syntax tokens.
 
 use std::ops::Range;
@@ -12,6 +12,8 @@ use crate::commands::{NextText, STATS_MODE};
 
 /// Stats mode of every code session, whatever the language (S5).
 pub const CODE_STATS_MODE: &str = "code";
+/// `sessions.mode` of words sessions; their statistics are the prose ones.
+pub const WORDS_MODE: &str = "words";
 /// Snippet lines when the user has not chosen; clamped to 5..=20 (S2).
 pub const DEFAULT_MAX_LINES: usize = 12;
 /// Shortest accepted AI snippet, in chars (about 5 short lines).
@@ -19,13 +21,16 @@ pub const CODE_MIN_CHARS: usize = 80;
 /// Average chars per line used to size the AI snippet length.
 pub const CHARS_PER_LINE: usize = 40;
 
-/// What is practised: prose, or code of one language. In IPC it is
-/// `"prose"` or `{ "kind": "code", "lang": "<id>" }`.
+/// What is practised: prose, loose words of the prose language, or code of
+/// one language. In IPC it is `"prose"`, `"words"` or
+/// `{ "kind": "code", "lang": "<id>" }`.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize)]
 #[serde(try_from = "RawPracticeMode")]
 pub enum PracticeMode {
     #[default]
     Prose,
+    /// Loose lowercase words from the local corpus, never from the AI.
+    Words,
     Code {
         /// A [`code_languages`] id.
         lang: String,
@@ -45,6 +50,7 @@ impl TryFrom<RawPracticeMode> for PracticeMode {
     fn try_from(raw: RawPracticeMode) -> Result<Self, String> {
         match raw {
             RawPracticeMode::Name(name) if name == "prose" => Ok(PracticeMode::Prose),
+            RawPracticeMode::Name(name) if name == WORDS_MODE => Ok(PracticeMode::Words),
             RawPracticeMode::Tagged { kind, lang } if kind == "code" => PracticeMode::code(&lang),
             _ => Err("unknown practice mode".to_owned()),
         }
@@ -60,26 +66,36 @@ impl PracticeMode {
         })
     }
 
-    /// Mode of the statistics model and of `sessions.mode`.
+    /// Mode of the statistics model: words share the prose model.
     pub fn stats_mode(&self) -> &'static str {
         match self {
-            PracticeMode::Prose => STATS_MODE,
+            PracticeMode::Prose | PracticeMode::Words => STATS_MODE,
             PracticeMode::Code { .. } => CODE_STATS_MODE,
         }
     }
 
-    /// Mode of `text_cache` rows: code texts are cached per language.
+    /// Mode of `sessions.mode`: the stats mode, except `words` for words sessions.
+    pub fn session_mode(&self) -> &'static str {
+        match self {
+            PracticeMode::Words => WORDS_MODE,
+            other => other.stats_mode(),
+        }
+    }
+
+    /// Mode of `text_cache` rows: code texts are cached per language. Words
+    /// texts never come from the AI, so nothing is cached under `words`.
     pub fn cache_mode(&self) -> String {
         match self {
             PracticeMode::Prose => STATS_MODE.to_owned(),
+            PracticeMode::Words => WORDS_MODE.to_owned(),
             PracticeMode::Code { lang } => format!("{CODE_STATS_MODE}:{lang}"),
         }
     }
 
-    /// The code language, `None` for prose.
+    /// The code language, `None` for prose and words.
     pub fn code_language(&self) -> Option<&str> {
         match self {
-            PracticeMode::Prose => None,
+            PracticeMode::Prose | PracticeMode::Words => None,
             PracticeMode::Code { lang } => Some(lang),
         }
     }
@@ -234,6 +250,10 @@ mod tests {
             err.to_string().contains("unknown code language: cobol"),
             "{err}"
         );
+        assert_eq!(
+            parse(serde_json::json!("words")).unwrap(),
+            PracticeMode::Words
+        );
         assert!(parse(serde_json::json!("code")).is_err());
         assert!(parse(serde_json::json!({"kind": "prose", "lang": "rust"})).is_err());
     }
@@ -249,6 +269,16 @@ mod tests {
         assert_eq!(rust.cache_mode(), "code:rust");
         assert_eq!(rust.code_language(), Some("rust"));
         assert_eq!(PracticeMode::Prose.code_language(), None);
+    }
+
+    #[test]
+    fn words_mode_feeds_the_prose_model_but_stores_its_own_session_mode() {
+        let words = PracticeMode::Words;
+        assert_eq!(words.stats_mode(), "prose");
+        assert_eq!(words.session_mode(), "words");
+        assert_eq!(words.code_language(), None);
+        assert_eq!(PracticeMode::Prose.session_mode(), "prose");
+        assert_eq!(PracticeMode::code("rust").unwrap().session_mode(), "code");
     }
 
     #[test]

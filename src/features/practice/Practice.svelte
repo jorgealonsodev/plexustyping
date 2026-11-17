@@ -25,7 +25,7 @@
     keyAction,
     textToEvents,
   } from "./engine";
-  import { type PracticeMode, practiceKey } from "../code/api";
+  import { type PracticeMode, isCodeMode, practiceKey } from "../code/api";
   import CodeText from "../code/CodeText.svelte";
   import { LANGUAGES } from "../code/languages.svelte";
   import { type TokenClass, codeKeyEvent, tokenClasses } from "../code/syntax";
@@ -113,12 +113,12 @@
   // Practice mode of the current text, and the syntax class of each of its chars (code only).
   let textMode = $state.raw<PracticeMode>("prose");
   let classes = $state.raw<TokenClass[]>([]);
-  const isCode = $derived(textMode !== "prose");
+  const isCode = $derived(isCodeMode(textMode));
   const practiceId = $derived(practiceKey(practice));
   // Mode, layout and language of the latest requested text: a different one loads a new text.
-  // Code texts do not depend on the prose language (S1).
+  // Code texts do not depend on the prose language (S1); prose and words texts do.
   const requestKey = (p: PracticeMode, layoutOf: string, languageOf: string) =>
-    `${practiceKey(p)}|${layoutOf}|${p === "prose" ? languageOf : ""}`;
+    `${practiceKey(p)}|${layoutOf}|${isCodeMode(p) ? "" : languageOf}`;
   const wantedKey = $derived(requestKey(practice, layoutId, languageId));
   let requestedKey = untrack(() => requestKey(practice, layoutId, languageId));
   // Layout and language the current text was generated for; the scored session records them (S5).
@@ -127,7 +127,7 @@
   // The next text, requested in the background while this one is typed (S6).
   const prefetch = new Prefetcher<PracticeText>();
   const genKey = $derived(
-    generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId, practice === "prose" ? languageId : "es"),
+    generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId, isCodeMode(practice) ? "es" : languageId),
   );
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
@@ -167,7 +167,7 @@
   function restart() {
     if (!text) return;
     run++;
-    session = new TypingSession(text, mode, textMode === "prose" ? "manual" : indent);
+    session = new TypingSession(text, mode, isCodeMode(textMode) ? indent : "manual");
     track = { offsets: [], bpms: new Set(), switched: false };
     scored = null;
     phase = "typing";
@@ -256,7 +256,7 @@
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
       const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
       const typed = { mode: textMode, indent: done.indent };
-      const result = await scoreSession(textMode === "prose" ? textLanguage : null, textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
+      const result = await scoreSession(isCodeMode(textMode) ? null : textLanguage, textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
       tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
@@ -526,10 +526,10 @@
         <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
       </div>
     {:else if phase === "results" && scored}
-      <Results {scored} {weak} {tempo} language={textMode === "prose" ? null : LANGUAGES.name(textMode.lang)} onNext={loadNext} onRepeat={restart} />
+      <Results {scored} {weak} {tempo} language={isCodeMode(textMode) ? LANGUAGES.name(textMode.lang) : null} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
       <p class="kind">
-        {#if textMode !== "prose"}{LANGUAGES.name(textMode.lang)} ·{/if}
+        {#if isCodeMode(textMode)}{LANGUAGES.name(textMode.lang)} ·{/if}
         {source}
         {#if targets.length > 0}
           · Practicando:

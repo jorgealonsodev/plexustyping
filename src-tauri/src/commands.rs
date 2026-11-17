@@ -373,6 +373,24 @@ pub fn plan_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<TextPla
     })
 }
 
+/// Accepted length of an AI prose text for a chosen `length`: 80 % to 125 %
+/// of it, end exclusive (300 → 240..376). Corpus texts keep [`TextPlan::length`].
+pub fn ai_length(length: usize) -> Range<usize> {
+    length * 4 / 5..length * 5 / 4 + 1
+}
+
+/// Loose words of the plan's corpus for words mode (no AI, no cache).
+pub fn words_text(plan: &TextPlan, seed: u64) -> Result<NextText, String> {
+    generate_with_retry(&plan.targets, |targets| {
+        plan.corpus.generate_words(&GenerateOptions {
+            targets: targets.to_vec(),
+            length: plan.length.clone(),
+            allowed: Some(plan.allowed.clone()),
+            seed,
+        })
+    })
+}
+
 /// A corpus text for `plan`.
 pub fn corpus_text(plan: &TextPlan, seed: u64) -> Result<NextText, String> {
     generate_with_retry(&plan.targets, |targets| {
@@ -477,7 +495,7 @@ pub fn score_session_with_metronome(
 pub struct ScoreRequest<'a> {
     pub text: &'a str,
     pub mode: ErrorMode,
-    /// Prose or code: picks `sessions.mode`, `code_language` and the stats model (S5).
+    /// Prose, words or code: picks `sessions.mode`, `code_language` and the stats model (S5).
     pub practice: &'a PracticeMode,
     /// How indentation was typed (code only; prose is always manual).
     pub indent: IndentMode,
@@ -496,7 +514,7 @@ pub fn score_practice(store: &mut Store, profile: &Profile, req: &ScoreRequest) 
         ..
     } = *req;
     let indent = match req.practice {
-        PracticeMode::Prose => IndentMode::Manual,
+        PracticeMode::Prose | PracticeMode::Words => IndentMode::Manual,
         PracticeMode::Code { .. } => req.indent,
     };
     let result = replay_with(text, mode, indent, events);
@@ -555,7 +573,7 @@ fn persist(
     let session = NewSession {
         profile_id: profile.id,
         started_at_ms,
-        mode: stats_mode,
+        mode: saved.practice.session_mode(),
         code_language: saved.practice.code_language(),
         language: Some(&profile.language),
         layout: Some(&profile.layout),
@@ -1111,6 +1129,77 @@ mod tests {
             store.session_metronome_offsets(session.id).unwrap(),
             expected
         );
+    }
+
+    #[test]
+    fn words_sessions_are_stored_as_words_and_feed_the_prose_model() {
+        let (mut store, profile) = memory();
+        let events = typing("nino");
+        let req = ScoreRequest {
+            text: "niño",
+            mode: ErrorMode::AllowContinue,
+            practice: &PracticeMode::Words,
+            indent: IndentMode::Auto,
+            events: &events,
+            started_at_ms: 9,
+            metronome: &MetronomeTrack::default(),
+        };
+        let scored = score_practice(&mut store, &profile, &req);
+        assert!(scored.saved, "{:?}", scored.save_error);
+        let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+        assert_eq!(
+            (session.mode.as_str(), session.code_language.as_deref()),
+            ("words", None)
+        );
+        assert_eq!(session.language.as_deref(), Some(profile.language.as_str()));
+        let prose = store.load_stats(profile.id, "prose").unwrap();
+        assert!(prose.units.iter().any(|u| u.unit == "ñ"), "{prose:?}");
+        assert!(
+            store
+                .load_stats(profile.id, "words")
+                .unwrap()
+                .units
+                .is_empty()
+        );
+        assert!(
+            store
+                .load_stats(profile.id, "code")
+                .unwrap()
+                .units
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn the_corpus_length_range_stays_the_chosen_length_plus_a_fifth() {
+        let plan = plan_text(&WeaknessModel::new(), &request(1, 2, 300)).unwrap();
+        assert_eq!(plan.length, 300..361);
+    }
+
+    #[test]
+    fn the_ai_length_range_is_80_to_125_percent_of_the_chosen_length() {
+        assert_eq!(ai_length(300), 240..376);
+        assert_eq!(ai_length(50), 40..63);
+        assert_eq!(ai_length(600), 480..751);
+    }
+
+    #[test]
+    fn words_text_is_loose_lowercase_words_for_the_plan() {
+        let m = model(&[("ñ", 0.9)]);
+        let plan = plan_text(&m, &request(4, 2, 300)).unwrap();
+        let text = words_text(&plan, 4).unwrap();
+        assert_eq!(text.source, TextSource::Corpus);
+        assert_eq!(text.targets, vec!["ñ".to_owned()]);
+        let len = text.text.chars().count();
+        assert!(plan.length.contains(&len), "{len}: {}", text.text);
+        assert!(
+            text.text
+                .chars()
+                .all(|c| c == ' ' || (c.is_alphabetic() && !c.is_uppercase())),
+            "{}",
+            text.text
+        );
+        assert_eq!(words_text(&plan, 4), Ok(text));
     }
 
     #[test]

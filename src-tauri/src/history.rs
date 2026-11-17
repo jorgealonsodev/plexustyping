@@ -24,11 +24,12 @@ pub struct CsvExport {
     pub rows: u32,
 }
 
-/// The stored mode of a history filter: `None` (all), `"prose"` or `"code"`.
+/// The stored mode of a history filter: `None` (all), `"prose"`, `"words"` or `"code"`.
 pub fn parse_mode(mode: Option<&str>) -> Result<Option<&'static str>, String> {
     match mode {
         None => Ok(None),
         Some("prose") => Ok(Some("prose")),
+        Some("words") => Ok(Some("words")),
         Some("code") => Ok(Some("code")),
         Some(other) => Err(format!("Modo desconocido: {other}")),
     }
@@ -116,12 +117,20 @@ pub fn csv_field(value: &str) -> String {
     }
 }
 
+/// The CSV `modo` of a stored mode: `palabras` for words, others as stored.
+fn csv_mode(mode: &str) -> &str {
+    match mode {
+        "words" => "palabras",
+        other => other,
+    }
+}
+
 /// One CSV row of `s` (without the line end).
 fn csv_row(s: &SessionSummary, tz_offset_min: i32) -> String {
     let text = |v: &Option<String>| csv_field(v.as_deref().unwrap_or(""));
     let fields = [
         local_iso(s.started_at_ms, tz_offset_min),
-        csv_field(&s.mode),
+        csv_field(csv_mode(&s.mode)),
         text(&s.code_language),
         text(&s.language),
         text(&s.layout),
@@ -321,6 +330,7 @@ mod tests {
         assert_eq!(parse_mode(None), Ok(None));
         assert_eq!(parse_mode(Some("prose")), Ok(Some("prose")));
         assert_eq!(parse_mode(Some("code")), Ok(Some("code")));
+        assert_eq!(parse_mode(Some("words")), Ok(Some("words")));
         for bad in ["xx", "", "Prose"] {
             assert_eq!(
                 parse_mode(Some(bad)),
@@ -470,6 +480,21 @@ mod tests {
             ]
         );
         assert!(csv.ends_with(",\n") && !csv.contains('\r'));
+    }
+
+    #[test]
+    fn csv_writes_words_sessions_as_palabras() {
+        let words = SessionSummary {
+            mode: "words".into(),
+            ..summary()
+        };
+        let csv = sessions_csv(&[words], 60);
+        assert_eq!(
+            csv,
+            format!(
+                "{CSV_HEADER}\n2026-11-17T09:30:05+01:00,palabras,,es,es-qwerty,61.5,40.0,38.5,98.7,312,\n"
+            )
+        );
     }
 
     #[test]

@@ -1,12 +1,13 @@
 import { formatPercent, formatTime, formatWpm } from "../practice/format";
 import type { CsvExport, ModeArg, SessionSummary } from "./api";
 
-/** The history filter: every session, prose only or code only (S2). */
-export type HistoryFilter = "all" | "prose" | "code";
+/** The history filter: every session, or prose, words or code only (S2). */
+export type HistoryFilter = "all" | "prose" | "words" | "code";
 
 export const FILTERS: { id: HistoryFilter; label: string }[] = [
   { id: "all", label: "Todo" },
   { id: "prose", label: "Prosa" },
+  { id: "words", label: "Palabras" },
   { id: "code", label: "Código" },
 ];
 
@@ -67,7 +68,8 @@ export interface TableRow {
 
 /** One table row (S5); `languageName` turns a code language id into its display name. */
 export function tableRow(s: SessionSummary, languageName: (id: string) => string): TableRow {
-  const mode = s.mode === "code" ? (s.codeLanguage ? `Código · ${languageName(s.codeLanguage)}` : "Código") : "Prosa";
+  const code = s.codeLanguage ? `Código · ${languageName(s.codeLanguage)}` : "Código";
+  const mode = s.mode === "code" ? code : s.mode === "words" ? "Palabras" : "Prosa";
   return {
     id: s.id,
     date: formatDate(s.startedAtMs),

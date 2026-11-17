@@ -3,7 +3,8 @@
 //! Each language bundles a frequency-ordered word list, everyday sentences
 //! (original plus Mozilla Common Voice) and a diagnostic text, embedded at
 //! compile time. [`Corpus::generate`] builds practice text from them without
-//! any network or AI service. Code mode
+//! any network or AI service; [`Corpus::generate_words`] builds loose
+//! lowercase words for words mode. Code mode
 //! bundles original snippets per programming language; see [`generate_code`].
 
 mod code;
@@ -248,6 +249,93 @@ impl Corpus {
         };
         pools.text(min, max, &mut rng)
     }
+
+    /// Builds loose words for words mode; identical options always give identical text.
+    ///
+    /// Only words of [`Corpus::words`] made of lowercase letters that pass
+    /// `options.allowed`, joined by single spaces: no capitals, no punctuation.
+    /// With targets, at least half the words contain one of them (as in target
+    /// mode); otherwise frequent words are used. The length lies in
+    /// `options.length` whenever the word list allows it. It is empty only if
+    /// no word passes `options.allowed`.
+    pub fn generate_words(&self, options: &GenerateOptions) -> String {
+        let allowed = |c: char| options.allowed.as_ref().is_none_or(|set| set.contains(&c));
+        let loose = |w: &str| {
+            w.chars()
+                .all(|c| c.is_alphabetic() && !c.is_uppercase() && allowed(c))
+        };
+        let targets: Vec<String> = options
+            .targets
+            .iter()
+            .filter(|t| !t.is_empty())
+            .map(|t| t.to_lowercase())
+            .collect();
+        let words: Vec<&str> = self.words.iter().copied().filter(|w| loose(w)).collect();
+        if words.is_empty() {
+            return String::new();
+        }
+        let target_words: Vec<&str> = words
+            .iter()
+            .copied()
+            .filter(|w| targets.iter().any(|t| w.contains(t.as_str())))
+            .collect();
+        let filler: Vec<&str> = self.words[..FILLER_WORDS.min(self.words.len())]
+            .iter()
+            .copied()
+            .filter(|w| loose(w))
+            .collect();
+        let filler = if filler.is_empty() { &words } else { &filler };
+        let (min, max) = bounds(&options.length);
+        let mut rng = SplitMix64(options.seed);
+        let mut last = String::new();
+        for _ in 0..ATTEMPTS {
+            match loose_words(&target_words, filler, &words, min, max, &mut rng) {
+                Ok(text) => return text,
+                Err(partial) => last = partial,
+            }
+        }
+        last
+    }
+}
+
+/// One attempt at loose words within `min..=max` chars: the text, or the
+/// partial text when no word fits the remaining room.
+fn loose_words(
+    targets: &[&str],
+    filler: &[&str],
+    all: &[&str],
+    min: usize,
+    max: usize,
+    rng: &mut SplitMix64,
+) -> Result<String, String> {
+    let shortest = all.iter().map(|w| w.chars().count()).min().unwrap_or(1);
+    let mut text = String::new();
+    let (mut len, mut count, mut hits) = (0, 0, 0);
+    while len < min {
+        let sep = usize::from(len > 0);
+        // The word closes the text, or leaves room for one more shortest word.
+        let fits = |w: &str| {
+            let end = len + sep + w.chars().count();
+            (min..=max).contains(&end) || end + 1 + shortest <= max
+        };
+        let want_target = !targets.is_empty() && (hits * 2 <= count || rng.below(2) == 0);
+        let word = want_target
+            .then(|| pick(targets, rng, fits))
+            .flatten()
+            .or_else(|| pick(filler, rng, fits))
+            .or_else(|| pick(all, rng, fits));
+        let Some(word) = word else {
+            return Err(text);
+        };
+        if sep == 1 {
+            text.push(' ');
+        }
+        text.push_str(word);
+        len += sep + word.chars().count();
+        count += 1;
+        hits += usize::from(targets.contains(&word));
+    }
+    Ok(text)
 }
 
 /// Inclusive char bounds of a wanted length range, never below one char.

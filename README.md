@@ -60,7 +60,9 @@ hand), its API key ("Guardar clave" / "Borrar clave") and "Probar conexión".
 "Densidad" (2×–5×, default 3×) sets how much more often the targets appear in
 code mode and
 "Tema" an optional topic. Prose prompts only ask for a text in the language,
-with its length range and topic; the text must fit the length, use only
+with its length range and topic: from 80 % to 125 % of "Longitud del texto"
+(300 → 240–375 characters; local corpus texts keep their own range, the chosen
+length plus a fifth). The text must fit the length, use only
 characters the layout can type and contain no Markdown, but is not checked for
 the targets. Code prompts also name the targets and allowed characters, and
 each target must appear
@@ -94,9 +96,22 @@ today and in total, so you can watch your spending.
 - **Latency:** the next text is requested in the background as soon as you
   start typing the current one, so it is usually ready when you finish.
 
+### Words mode
+
+"Palabras" in the header switch practises loose words ("palabras sueltas"):
+real words of the chosen language from the local word list, all lowercase,
+separated by single spaces, with no punctuation and no capitals. At least half
+of them contain your weak units (the same targets as prose), only characters
+the chosen layout can type are used, and the length follows "Longitud del
+texto". These texts always come from the local corpus, never from the AI, even
+when it is enabled (no request, no cache). Words sessions feed the prose
+statistics (same language and layout), so results, weaknesses and the heatmap
+are the prose ones; the history shows them as "Palabras" (CSV `modo`
+`palabras`). Changing the language reloads the text, as in prose.
+
 ### Code mode
 
-The "Prosa / Código" switch in the header (next to the gear) changes what you
+The "Prosa / Palabras / Código" switch in the header (next to the gear) changes what you
 practise; in code mode a select next to it picks the language: Python,
 JavaScript, TypeScript, Java, C#, C++, C, Go, Rust, PHP, SQL, Bash, HTML/CSS,
 Kotlin or Swift. Switching loads a new text at once.
@@ -171,7 +186,7 @@ flashes on each beat (accented beats in another colour).
 ### History and CSV export
 
 The clock button in the header (next to the gear), or `Ctrl+H`, opens the
-"Historial" window. A filter "Todo / Prosa / Código" picks the sessions shown;
+"Historial" window. A filter "Todo / Prosa / Palabras / Código" picks the sessions shown;
 everything below follows it:
 
 - **Summary:** number of sessions, mean and best net WPM, and mean accuracy.
@@ -188,7 +203,7 @@ everything below follows it:
   ends, newest first, with the header
   `fecha,modo,lenguaje_codigo,idioma,layout,duracion_s,ppm_brutas,ppm_netas,precision,pulsaciones,bpm`.
   `fecha` is local ISO 8601 time with offset (`2026-11-17T09:30:05+01:00`),
-  `modo` is `prose` or `code`, durations, WPM and `precision` (0–100) have one
+  `modo` is `prose`, `palabras` or `code`, durations, WPM and `precision` (0–100) have one
   decimal, and `lenguaje_codigo` (prose) and `bpm` (no metronome) may be empty.
   With no sessions nothing is written and "No hay sesiones que exportar." is
   shown.

@@ -42,6 +42,8 @@ describe("generationKey", () => {
     expect(generationKey(3, 300, 0, "prose", 12, "us-qwerty")).not.toBe(base);
     expect(generationKey(3, 300, 0, "prose", 12, "es-qwerty", "es")).toBe(base);
     expect(generationKey(3, 300, 0, "prose", 12, "es-qwerty", "fr")).not.toBe(base);
+    expect(generationKey(3, 300, 0, "words", 12, "es-qwerty", "es")).not.toBe(base);
+    expect(generationKey(3, 300, 0, "words", 12, "es-qwerty", "fr")).not.toBe(generationKey(3, 300, 0, "words", 12, "es-qwerty", "es"));
   });
 });
 

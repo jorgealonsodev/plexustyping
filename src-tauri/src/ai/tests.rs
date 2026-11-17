@@ -695,7 +695,7 @@ async fn the_prose_request_only_asks_for_a_text_in_the_language_and_nothing_type
     let prompt = sent["messages"][0]["content"].as_str().unwrap();
     // "dile que genere solo un texto en mi idioma" (S9): language, length and topic only.
     assert!(
-        prompt.starts_with("Escribe un texto en español de 50–60 caracteres.\nTema: comida.\n"),
+        prompt.starts_with("Escribe un texto en español de 40–62 caracteres.\nTema: comida.\n"),
         "{prompt}"
     );
     for absent in ["Caracteres objetivo", "Usa solo"] {
@@ -952,6 +952,129 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
         )
         .await
         .is_err()
+    );
+}
+
+// ---- words mode ----
+
+fn words_params(seed: u64) -> TextParams {
+    TextParams {
+        mode: PracticeMode::Words,
+        length: 300,
+        ..params(seed)
+    }
+}
+
+/// The words text the corpus gives for `p` with the prose model.
+fn words_expected(state: &AppState, p: &TextParams) -> NextText {
+    let store = lock_store(&state.store);
+    let model = commands::load_model(&store, &state.profile).unwrap();
+    let req = NextTextRequest {
+        language: &p.language,
+        layout: &p.layout,
+        seed: p.seed,
+        target_count: p.target_count,
+        length: p.length,
+        fallback: &p.fallback,
+    };
+    commands::words_text(&commands::plan_text(&model, &req).unwrap(), p.seed).unwrap()
+}
+
+#[tokio::test]
+async fn words_mode_never_asks_the_ai_nor_the_cache_even_when_enabled() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    cache_unused(&state, "prose", "texto de prosa guardado", 1);
+    cache_unused(&state, "words", "palabras guardadas", 2);
+    let p = words_params(4);
+    let got = next_text(&state, &p).await.unwrap();
+    assert_eq!(got, words_expected(&state, &p));
+    assert_eq!((got.source, got.notice.clone()), (TextSource::Corpus, None));
+    assert_eq!(got.targets, vec!["ñ".to_owned()], "prose model targets");
+    assert!(
+        got.text
+            .chars()
+            .all(|c| c == ' ' || (c.is_alphabetic() && !c.is_uppercase())),
+        "{}",
+        got.text
+    );
+    assert!(srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
+    // Neither cached text was taken.
+    let store = lock_store(&state.store);
+    assert!(
+        store
+            .take_unused_cached_text("es", "prose", &[])
+            .unwrap()
+            .is_some()
+    );
+    assert!(
+        store
+            .take_unused_cached_text("es", "words", &[])
+            .unwrap()
+            .is_some()
+    );
+}
+
+#[tokio::test]
+async fn first_text_in_words_mode_skips_the_diagnostic_and_the_ai() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let first = first_text(
+        &state,
+        "es",
+        "es-qwerty",
+        &PracticeMode::Words,
+        DEFAULT_MAX_LINES,
+        1,
+        DAY,
+    )
+    .await
+    .unwrap();
+    assert!(!first.diagnostic);
+    let p = TextParams {
+        target_count: DEFAULT_TARGETS,
+        length: DEFAULT_LENGTH,
+        ..words_params(1)
+    };
+    assert_eq!(first.text, words_expected(&state, &p));
+    assert!(srv.requests().is_empty());
+}
+
+// ---- AI length margin (S5) ----
+
+#[test]
+fn a_300_char_setting_accepts_ai_texts_from_240_to_375_chars() {
+    let req = NextTextRequest {
+        language: "es",
+        layout: "es-qwerty",
+        seed: 1,
+        target_count: 2,
+        length: 300,
+        fallback: &[],
+    };
+    let model = plexustyping_core::adaptive::WeaknessModel::new();
+    let plan = Plan::Prose(commands::plan_text(&model, &req).unwrap());
+    let request = plan.request("es", &AiSettings::default()).unwrap();
+    for (len, ok) in [(239, false), (240, true), (375, true), (376, false)] {
+        let text = "a".repeat(len);
+        assert_eq!(
+            plexustyping_ai::validate(&text, &request).is_ok(),
+            ok,
+            "{len} chars"
+        );
+    }
+    let prompt = plexustyping_ai::build_prompt(&request);
+    assert!(
+        prompt.starts_with("Escribe un texto en español de 240–375 caracteres."),
+        "{prompt}"
     );
 }
 

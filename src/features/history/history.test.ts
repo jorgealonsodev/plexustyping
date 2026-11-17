@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { SessionSummary } from "./api";
 import {
   CHART_LIMIT,
+  FILTERS,
   chartCaption,
   chartGeometry,
   exportNotice,
@@ -39,7 +40,11 @@ const key = (over: Partial<KeyboardEvent>) =>
 
 describe("history filter", () => {
   it("maps the filter to the backend mode argument", () => {
-    expect([modeArg("all"), modeArg("prose"), modeArg("code")]).toEqual([null, "prose", "code"]);
+    expect([modeArg("all"), modeArg("prose"), modeArg("words"), modeArg("code")]).toEqual([null, "prose", "words", "code"]);
+  });
+
+  it("lists the filters in the header order", () => {
+    expect(FILTERS.map((f) => f.label)).toEqual(["Todo", "Prosa", "Palabras", "Código"]);
   });
 });
 
@@ -100,6 +105,11 @@ describe("history table", () => {
     expect(row.mode).toBe("Código · Python");
     expect(row.bpm).toBe("90");
     expect(row.id).toBe(7);
+  });
+
+  it("shows a words row as Palabras", () => {
+    expect(tableRow(session({ mode: "words" }), (id) => id).mode).toBe("Palabras");
+    expect(tableRow(session({ mode: "prose" }), (id) => id).mode).toBe("Prosa");
   });
 
   it("shows a code row without a language as plain code", () => {

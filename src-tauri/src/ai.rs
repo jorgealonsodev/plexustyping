@@ -511,7 +511,8 @@ impl Plan {
         let (mode, length, allowed_chars, frequencies) = match self {
             Plan::Prose(plan) => (
                 Mode::Prose,
-                plan.length.clone(),
+                // A wider margin than the corpus range: AI texts often run long (S5).
+                commands::ai_length(plan.length.start),
                 plan.allowed.iter().filter(|c| **c != '\n').collect(),
                 targets.iter().map(|t| plan.corpus.frequency(t)).collect(),
             ),
@@ -552,6 +553,8 @@ impl Plan {
 /// text, else the corpus; `notice` says why the AI was not used. With the AI
 /// disabled, a rotating cached text (no notice), else the corpus. Code texts
 /// use the code model, are cached per language and come with syntax tokens.
+/// Words texts always come from the corpus with the prose model: no AI
+/// request and no cache, even with the AI enabled.
 pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, String> {
     let (model, settings) = {
         let store = lock_store(&state.store);
@@ -560,18 +563,20 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
             load_settings(&store),
         )
     };
+    let prose_request = || NextTextRequest {
+        language: &p.language,
+        layout: &p.layout,
+        seed: p.seed,
+        target_count: p.target_count,
+        length: p.length,
+        fallback: &p.fallback,
+    };
     let plan = match &p.mode {
-        PracticeMode::Prose => {
-            let req = NextTextRequest {
-                language: &p.language,
-                layout: &p.layout,
-                seed: p.seed,
-                target_count: p.target_count,
-                length: p.length,
-                fallback: &p.fallback,
-            };
-            Plan::Prose(commands::plan_text(&model, &req)?)
+        PracticeMode::Words => {
+            let plan = commands::plan_text(&model, &prose_request())?;
+            return commands::words_text(&plan, p.seed);
         }
+        PracticeMode::Prose => Plan::Prose(commands::plan_text(&model, &prose_request())?),
         PracticeMode::Code { lang } => Plan::Code(code::plan_code(
             &model,
             lang,
@@ -694,7 +699,8 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
 }
 
 /// The diagnostic text for a new profile practising prose on a `layout` that
-/// can type it, otherwise like [`next_text`] with the default target count and length.
+/// can type it, otherwise like [`next_text`] with the default target count and
+/// length. Words mode never shows the diagnostic (it has capitals and signs).
 pub async fn first_text(
     state: &AppState,
     language: &str,

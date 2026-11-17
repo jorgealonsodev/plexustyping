@@ -46,7 +46,7 @@ fn code_languages() -> Vec<CodeLanguage> {
     plexustyping_corpus::code_languages().to_vec()
 }
 
-/// `mode` is `"prose"` (default) or `{ kind: "code", lang }`; `layout` defaults to the profile's.
+/// `mode` is `"prose"` (default), `"words"` or `{ kind: "code", lang }`; `layout` defaults to the profile's.
 #[tauri::command]
 async fn first_text(
     state: State<'_, AppState>,
@@ -99,7 +99,7 @@ async fn next_text(
     ai::next_text(&state, &params).await
 }
 
-/// `mode` is the error mode; `practice` is prose (default) or the code language;
+/// `mode` is the error mode; `practice` is prose (default), words or the code language;
 /// `layout` and `language` are the layout typed with and the language of the text,
 /// recorded with the session (default: the profile's).
 #[allow(clippy::too_many_arguments)]
@@ -168,7 +168,7 @@ async fn metronome_stop(state: State<'_, MetronomeState>) -> Result<(), String> 
     .await
 }
 
-/// Of the prose model, or of the code model when `mode` is code (S5).
+/// Of the prose model (also for words), or of the code model when `mode` is code (S5).
 #[tauri::command]
 fn weaknesses(
     state: State<AppState>,
@@ -180,7 +180,7 @@ fn weaknesses(
     Ok(commands::weaknesses(&model, limit))
 }
 
-/// Of the prose model, or of the code model when `mode` is code (S5).
+/// Of the prose model (also for words), or of the code model when `mode` is code (S5).
 #[tauri::command]
 fn heatmap(state: State<AppState>, mode: Option<PracticeMode>) -> Result<Vec<HeatScore>, String> {
     let stats_mode = mode.unwrap_or_default().stats_mode();
@@ -193,7 +193,7 @@ fn recent_sessions(state: State<AppState>, limit: usize) -> Result<Vec<SessionSu
     commands::recent_sessions(&store(&state), &state.profile, limit)
 }
 
-/// `mode`: `"prose"` | `"code"` | none (all); newest first; empty in temporary mode (S6).
+/// `mode`: `"prose"` | `"words"` | `"code"` | none (all); newest first; empty in temporary mode (S6).
 #[tauri::command]
 fn session_history(
     state: State<AppState>,
