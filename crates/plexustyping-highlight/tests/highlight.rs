@@ -174,6 +174,31 @@ fn php_without_open_tag_is_code() {
 }
 
 #[test]
+fn php_starting_with_an_open_tag_is_code() {
+    for code in [
+        "<?php\nfunction f() { return 1; }\n",
+        "\n  <?php function f() { return 1; }",
+    ] {
+        let t = tokens("php", code);
+        assert_eq!(
+            class_of(code, &t, "function"),
+            TokenClass::Keyword,
+            "{code:?}"
+        );
+        assert_eq!(class_of(code, &t, "1"), TokenClass::Number, "{code:?}");
+    }
+}
+
+#[test]
+fn php_open_tag_inside_bare_code_keeps_the_source_grammar() {
+    let code = "function f() { return \"<?xml\"; } // <?\n";
+    let t = tokens("php", code);
+    assert_eq!(class_of(code, &t, "function"), TokenClass::Keyword);
+    assert_eq!(class_of(code, &t, "return"), TokenClass::Keyword);
+    assert_eq!(class_of(code, &t, "\"<?xml\""), TokenClass::String);
+}
+
+#[test]
 fn indices_are_chars_not_bytes() {
     let code = "let s = \"ñandú\"; // ü\nlet n = 7;";
     let t = tokens("rust", code);
@@ -236,6 +261,7 @@ fn tokens_serialize_for_the_frontend() {
 }
 
 #[test]
+#[ignore = "wall-clock bound; run explicitly with --ignored on an idle machine"]
 fn twenty_line_snippet_is_fast_after_warm_up() {
     let code = sample("rust").repeat(5);
     assert_eq!(code.lines().count(), 20);

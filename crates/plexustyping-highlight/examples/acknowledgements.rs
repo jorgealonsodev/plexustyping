@@ -1,5 +1,5 @@
 //! Prints the licence notices that the embedded `two-face` syntax definitions
-//! require, as Markdown for `THIRD_PARTY_NOTICES.md`.
+//! require, as Markdown for `SYNTAX_LICENSES.md`.
 //!
 //! Run with `cargo run -p plexustyping-highlight --example acknowledgements`.
 

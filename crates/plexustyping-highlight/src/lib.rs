@@ -261,10 +261,12 @@ pub fn highlight(syntax: &str, code: &str) -> Option<Vec<Token>> {
 }
 
 /// Finds the grammar for `id`. PHP snippets are usually bare code, so they use
-/// the embedded `PHP Source` grammar unless they open a `<?` tag.
+/// the embedded `PHP Source` grammar unless they start (after leading
+/// whitespace) with a `<?` open tag; a `<?` elsewhere, such as inside a string
+/// or comment, does not count.
 fn resolve<'a>(set: &'a SyntaxSet, id: &str, code: &str) -> Option<&'a SyntaxReference> {
     let (_, name) = SYNTAXES.iter().find(|(known, _)| *known == id)?;
-    let name = if id == "php" && code.contains("<?") {
+    let name = if id == "php" && code.trim_start().starts_with("<?") {
         "PHP"
     } else {
         name
