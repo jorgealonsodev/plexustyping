@@ -141,11 +141,12 @@ pub fn plan_code(
         model.mean_interval_ms(),
     );
     let mut targets = symbols.select_targets(count, seed);
+    // Selection may also draw on confusions, which are not pre-filtered;
+    // filtering before the emptiness check keeps the fallback reachable.
+    targets.retain(|t| eligible(t));
     if targets.is_empty() {
         targets = fallback.iter().filter(|t| eligible(t)).cloned().collect();
     }
-    // Selection may also draw on confusions, which are not pre-filtered.
-    targets.retain(|t| eligible(t));
     targets.truncate(count);
     Ok(CodePlan {
         lang: lang.to_owned(),
