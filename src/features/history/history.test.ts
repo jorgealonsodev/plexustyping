@@ -167,7 +167,7 @@ describe("export notice", () => {
     );
   });
 
-  it("keeps the spec wording for any count", () => {
-    expect(exportNotice({ path: "/tmp/a.csv", rows: 1 })).toBe("Exportado: /tmp/a.csv (1 sesiones)");
+  it("uses the singular for one session", () => {
+    expect(exportNotice({ path: "/tmp/a.csv", rows: 1 })).toBe("Exportado: /tmp/a.csv (1 sesión)");
   });
 });

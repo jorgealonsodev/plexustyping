@@ -138,4 +138,5 @@ export function chartGeometry(sessions: SessionSummary[], box: ChartBox): ChartG
 }
 
 /** Success notice of the CSV export (S7). */
-export const exportNotice = (r: CsvExport) => `Exportado: ${r.path} (${r.rows} sesiones)`;
+export const exportNotice = (r: CsvExport) =>
+  `Exportado: ${r.path} (${r.rows} ${r.rows === 1 ? "sesión" : "sesiones"})`;
