@@ -1025,6 +1025,63 @@ mod tests {
     }
 
     #[test]
+    fn auto_indent_code_sessions_pair_offsets_with_the_typed_records_only() {
+        let (mut store, profile) = memory();
+        let rust = PracticeMode::code("rust").unwrap();
+        // The 4 spaces after each newline are auto-filled: no record, no event.
+        let text = "{\n    x;\n    y\n}";
+        let mut events = typing("{\nx;\nq");
+        events.push(
+            serde_json::from_value(serde_json::json!({ "kind": "backspace", "tMs": 900.0 }))
+                .unwrap(),
+        );
+        events.extend(typing("y\n}"));
+        let offsets: Vec<Option<f64>> = (0..events.len()).map(|i| Some(i as f64)).collect();
+        let req = ScoreRequest {
+            text,
+            mode: ErrorMode::BackspaceCorrect,
+            practice: &rust,
+            indent: IndentMode::Auto,
+            events: &events,
+            started_at_ms: 7,
+            metronome: &track(Some(90), &offsets),
+        };
+        let scored = score_practice(&mut store, &profile, &req);
+        assert!(scored.saved, "{:?}", scored.save_error);
+        let typed: Vec<(char, usize)> = scored
+            .result
+            .records
+            .iter()
+            .map(|r| (r.typed, r.index))
+            .collect();
+        assert_eq!(
+            typed,
+            vec![
+                ('{', 0),
+                ('\n', 1),
+                ('x', 6),
+                (';', 7),
+                ('\n', 8),
+                ('q', 13),
+                ('y', 13),
+                ('\n', 14),
+                ('}', 15),
+            ]
+        );
+        // Event 6 is the backspace: every record keeps its own keystroke's offset.
+        let expected = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0, 8.0, 9.0]
+            .map(Some)
+            .to_vec();
+        assert_eq!(scored.offsets_ms, expected);
+        let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+        assert_eq!(session.bpm, Some(90));
+        assert_eq!(
+            store.session_metronome_offsets(session.id).unwrap(),
+            expected
+        );
+    }
+
+    #[test]
     fn score_session_drops_the_bpm_unless_every_keystroke_has_an_in_range_offset() {
         let (mut store, profile) = memory();
         let events = typing("hola");

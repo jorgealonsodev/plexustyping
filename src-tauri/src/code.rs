@@ -132,11 +132,18 @@ pub fn plan_code(
 ) -> Result<CodePlan, String> {
     language(lang)?;
     let count = target_count.clamp(3, 5);
-    let mut targets = model.select_targets(count, seed);
+    let eligible = |t: &str| !t.is_empty() && t.chars().all(|c| c.is_ascii_graphic());
+    // Ineligible units are dropped before selecting, so they never take a slot.
+    let units = model.units().into_iter().filter(|(u, _)| eligible(u));
+    let symbols = WeaknessModel::from_parts(
+        units.collect(),
+        model.confusions(),
+        model.mean_interval_ms(),
+    );
+    let mut targets = symbols.select_targets(count, seed);
     if targets.is_empty() {
-        targets = fallback.to_vec();
+        targets = fallback.iter().filter(|t| eligible(t)).cloned().collect();
     }
-    targets.retain(|t| !t.is_empty() && t.chars().all(|c| c.is_ascii_graphic()));
     targets.truncate(count);
     Ok(CodePlan {
         lang: lang.to_owned(),
@@ -256,13 +263,26 @@ mod tests {
 
     #[test]
     fn plan_code_targets_the_weakest_symbols_and_drops_whitespace() {
-        let m = model(&[("{", 0.9), (" ", 0.95), ("\n", 0.85), ("=>", 0.8)]);
+        let m = model(&[
+            ("{", 0.9),
+            (" ", 0.95),
+            ("\n", 0.85),
+            ("=>", 0.8),
+            (";", 0.7),
+        ]);
+        // Whitespace is dropped before selecting, so the plan keeps 3 targets.
         let plan = plan_code(&m, "rust", 3, 12, 1, &[]).unwrap();
-        assert_eq!(plan.targets, vec!["{".to_owned(), "=>".to_owned()]);
+        assert_eq!(
+            plan.targets,
+            vec!["{".to_owned(), "=>".to_owned(), ";".to_owned()]
+        );
         assert_eq!(plan.max_lines, 12);
         let fallback = vec![";".to_owned(), "ñ".to_owned()];
         let empty = plan_code(&WeaknessModel::new(), "python", 9, 50, 1, &fallback).unwrap();
         assert_eq!((empty.targets, empty.max_lines), (vec![";".to_owned()], 20));
+        let blank = model(&[(" ", 0.95), ("\n", 0.85), ("ñ", 0.8)]);
+        let all_filtered = plan_code(&blank, "rust", 3, 12, 1, &fallback).unwrap();
+        assert_eq!(all_filtered.targets, vec![";".to_owned()]);
         assert_eq!(
             plan_code(&m, "cobol", 3, 12, 1, &[]),
             Err("unknown code language: cobol".to_owned())
