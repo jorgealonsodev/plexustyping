@@ -77,6 +77,15 @@
     margin-left: -1px;
     border-radius: 0 0.375rem 0.375rem 0;
   }
+  /* Inside the button: an outside ring would overlap the joined neighbours. */
+  .kinds button:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline-offset: -3px;
+  }
+  .kinds button.active:focus-visible {
+    outline-color: var(--on-accent);
+  }
   .kinds .active {
     color: var(--on-accent);
     background: var(--accent);

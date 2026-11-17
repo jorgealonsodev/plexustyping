@@ -263,6 +263,15 @@
   .filters button:last-child {
     border-radius: 0 0.375rem 0.375rem 0;
   }
+  /* Inside the button: an outside ring would overlap the joined neighbours. */
+  .filters button:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline-offset: -3px;
+  }
+  .filters button.active:focus-visible {
+    outline-color: var(--on-accent);
+  }
   .filters .active {
     color: var(--on-accent);
     background: var(--accent);
