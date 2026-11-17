@@ -347,13 +347,16 @@ fn over_the_limit_the_least_recently_used_used_text_goes_first() {
 }
 
 #[test]
-fn unused_texts_outlive_a_newer_used_one() {
+fn the_text_just_cached_is_never_evicted() {
+    // Every other text is unused, so a used one would sort first for eviction.
     let store = Store::open_in_memory().unwrap();
     cache(&store, "de", &["z"], "oldest unused", false);
     fill(&store, TEXT_CACHE_LIMIT - 1);
-    cache(&store, "en", &["z"], "newest used", true);
-    assert_eq!(take_in(&store, "en"), None);
-    assert_eq!(take_in(&store, "de").as_deref(), Some("oldest unused"));
+    let id = cache(&store, "en", &["z"], "newest used", true);
+    assert_eq!(take_in(&store, "de"), None, "the oldest other text goes");
+    let kept = store.take_cached_text("en", "prose", &[]).unwrap().unwrap();
+    assert_eq!((kept.id, kept.text.as_str()), (id, "newest used"));
+    assert_eq!(take_in(&store, "es").as_deref(), Some("filler 0"));
 }
 
 #[test]

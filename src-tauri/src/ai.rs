@@ -14,9 +14,10 @@ use plexustyping_ai::{
 use plexustyping_store::{NewCachedText, Store, UsageRow};
 use serde::{Deserialize, Serialize};
 
+use crate::code::{self, PracticeMode};
 use crate::commands::{
     self, AppState, DEFAULT_LENGTH, DEFAULT_TARGETS, FirstText, NextText, NextTextRequest,
-    STATS_MODE, TextSource, lock_store,
+    TextSource, lock_store,
 };
 use crate::secrets::{self, SecretError, SharedSecrets};
 
@@ -366,6 +367,10 @@ pub struct TextParams {
     pub fallback: Vec<String>,
     /// The user's local day, `YYYY-MM-DD`, for the usage counters.
     pub day: String,
+    /// Prose or code of one language.
+    pub mode: PracticeMode,
+    /// Longest code snippet in lines (code only), clamped to 5..=20.
+    pub max_lines: usize,
 }
 
 /// `day` when it looks like `YYYY-MM-DD`, else today in UTC.
@@ -439,41 +444,104 @@ async fn usable_chain(
     (configs, reason)
 }
 
+/// What the next text practises, by practice mode.
+enum Plan {
+    Prose(commands::TextPlan),
+    Code(code::CodePlan),
+}
+
+impl Plan {
+    fn targets(&self) -> &[String] {
+        match self {
+            Plan::Prose(plan) => &plan.targets,
+            Plan::Code(plan) => &plan.targets,
+        }
+    }
+
+    fn corpus(&self, seed: u64) -> Result<NextText, String> {
+        match self {
+            Plan::Prose(plan) => commands::corpus_text(plan, seed),
+            Plan::Code(plan) => code::corpus_code(plan, seed),
+        }
+    }
+
+    /// The generation request: only targets, language, length, allowed chars and topic (S5).
+    fn request(&self, language: &str, settings: &AiSettings) -> Result<GenerationRequest, String> {
+        let (mode, length, allowed_chars) = match self {
+            Plan::Prose(plan) => (
+                Mode::Prose,
+                plan.length.clone(),
+                plan.allowed.iter().filter(|c| **c != '\n').collect(),
+            ),
+            Plan::Code(plan) => (
+                Mode::Code {
+                    lang: code::language(&plan.lang)?.name.to_owned(),
+                },
+                code::code_length(plan.max_lines),
+                code::code_allowed_chars(),
+            ),
+        };
+        Ok(GenerationRequest {
+            language: language.to_owned(),
+            mode,
+            targets: self.targets().to_vec(),
+            density: settings.density,
+            length,
+            allowed_chars,
+            topic: settings.topic.clone(),
+        })
+    }
+
+    /// A generated or cached text with its syntax tokens in code mode.
+    fn finish(&self, text: NextText) -> NextText {
+        match self {
+            Plan::Prose(_) => text,
+            Plan::Code(plan) => code::with_syntax(text, code::default_syntax(&plan.lang)),
+        }
+    }
+}
+
 /// The next practice text: AI when enabled and usable, else a cached AI
-/// text, else the corpus; `notice` says why the AI was not used.
+/// text, else the corpus; `notice` says why the AI was not used. Code texts
+/// use the code model, are cached per language and come with syntax tokens.
 pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, String> {
-    let req = NextTextRequest {
-        language: &p.language,
-        layout: &p.layout,
-        seed: p.seed,
-        target_count: p.target_count,
-        length: p.length,
-        fallback: &p.fallback,
-    };
     let (model, settings) = {
         let store = lock_store(&state.store);
         (
-            commands::load_model(&store, &state.profile)?,
+            commands::load_model_for(&store, &state.profile, p.mode.stats_mode())?,
             load_settings(&store),
         )
     };
-    let plan = commands::plan_text(&model, &req)?;
+    let plan = match &p.mode {
+        PracticeMode::Prose => {
+            let req = NextTextRequest {
+                language: &p.language,
+                layout: &p.layout,
+                seed: p.seed,
+                target_count: p.target_count,
+                length: p.length,
+                fallback: &p.fallback,
+            };
+            Plan::Prose(commands::plan_text(&model, &req)?)
+        }
+        PracticeMode::Code { lang } => Plan::Code(code::plan_code(
+            &model,
+            lang,
+            p.target_count,
+            p.max_lines,
+            p.seed,
+            &p.fallback,
+        )?),
+    };
     if !settings.enabled {
-        return commands::corpus_text(&plan, p.seed);
+        return plan.corpus(p.seed);
     }
+    let cache_mode = p.mode.cache_mode();
     let (chain, missing) = usable_chain(&state.secrets, &settings).await;
     let reason = if chain.is_empty() {
         missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned())
     } else {
-        let request = GenerationRequest {
-            language: p.language.clone(),
-            mode: Mode::Prose,
-            targets: plan.targets.clone(),
-            density: settings.density,
-            length: plan.length.clone(),
-            allowed_chars: plan.allowed.iter().filter(|c| **c != '\n').collect(),
-            topic: settings.topic.clone(),
-        };
+        let request = plan.request(&p.language, &settings)?;
         match state.ai.generate_with_fallback(&chain, &request).await {
             Ok(generated) => {
                 let provider = slug(generated.provider);
@@ -482,8 +550,8 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
                     provider,
                     model: &generated.model,
                     language: &p.language,
-                    mode: STATS_MODE,
-                    targets: &plan.targets,
+                    mode: &cache_mode,
+                    targets: plan.targets(),
                     text: &generated.text,
                     created_at_ms: now_ms(),
                     used: true,
@@ -498,14 +566,12 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
                 if let Err(e) = cached.and(counted) {
                     eprintln!("PlexusTyping: could not store the AI text or its usage: {e}");
                 }
-                return Ok(NextText {
-                    text: generated.text,
-                    targets: plan.targets,
+                return Ok(plan.finish(NextText {
                     source: TextSource::Ai,
                     provider: Some(provider.to_owned()),
                     model: Some(generated.model),
-                    notice: None,
-                });
+                    ..NextText::corpus(generated.text, plan.targets().to_vec())
+                }));
             }
             Err(errors) => errors
                 .first()
@@ -515,41 +581,44 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     };
     let cached = {
         let store = lock_store(&state.store);
-        store.take_cached_text(&p.language, STATS_MODE, &plan.targets)
+        store.take_cached_text(&p.language, &cache_mode, plan.targets())
     };
     match cached {
         Ok(Some(c)) => {
-            return Ok(NextText {
-                text: c.text,
-                targets: c.targets,
+            return Ok(plan.finish(NextText {
                 source: TextSource::Cache,
                 provider: Some(c.provider),
                 model: Some(c.model),
                 notice: Some(format!("{reason}: texto del caché")),
-            });
+                ..NextText::corpus(c.text, c.targets)
+            }));
         }
         Ok(None) => {}
         Err(e) => eprintln!("PlexusTyping: could not read the text cache: {e}"),
     }
-    let mut text = commands::corpus_text(&plan, p.seed)?;
+    let mut text = plan.corpus(p.seed)?;
     text.notice = Some(format!("{reason}: texto del corpus local"));
     Ok(text)
 }
 
-/// The diagnostic text for a new profile, otherwise like [`next_text`] with
-/// the default target count and length.
+/// The diagnostic text for a new profile practising prose, otherwise like
+/// [`next_text`] with the default target count and length.
 pub async fn first_text(
     state: &AppState,
     language: &str,
+    mode: &PracticeMode,
+    max_lines: usize,
     seed: u64,
     day: &str,
 ) -> Result<FirstText, String> {
-    let diagnostic = {
-        let store = lock_store(&state.store);
-        commands::diagnostic_for_new_profile(&store, &state.profile, language)?
-    };
-    if let Some(first) = diagnostic {
-        return Ok(first);
+    if *mode == PracticeMode::Prose {
+        let diagnostic = {
+            let store = lock_store(&state.store);
+            commands::diagnostic_for_new_profile(&store, &state.profile, language)?
+        };
+        if let Some(first) = diagnostic {
+            return Ok(first);
+        }
     }
     let params = TextParams {
         language: language.to_owned(),
@@ -559,6 +628,8 @@ pub async fn first_text(
         length: DEFAULT_LENGTH,
         fallback: Vec::new(),
         day: day.to_owned(),
+        mode: mode.clone(),
+        max_lines,
     };
     Ok(FirstText {
         text: next_text(state, &params).await?,

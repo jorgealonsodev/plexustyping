@@ -10,7 +10,8 @@ use serde_json::json;
 
 use super::mock::{Mock, mock};
 use super::*;
-use crate::commands::{StorageStatus, score_session};
+use crate::code::{DEFAULT_MAX_LINES, PracticeMode};
+use crate::commands::{STATS_MODE, StorageStatus, score_session};
 use crate::secrets::{MemoryStore, NoStore, SecretStore};
 
 const KEY: &str = "sk-test-SECRET-123";
@@ -97,6 +98,8 @@ fn params(seed: u64) -> TextParams {
         length: 50,
         fallback: vec![],
         day: DAY.into(),
+        mode: PracticeMode::Prose,
+        max_lines: DEFAULT_MAX_LINES,
     }
 }
 
@@ -508,6 +511,8 @@ async fn ai_success_is_returned_cached_as_used_and_counted() {
             provider: Some("openai".into()),
             model: Some("gpt-5-mini".into()),
             notice: None,
+            syntax: None,
+            tokens: None,
         }
     );
     assert_eq!(
@@ -662,6 +667,8 @@ async fn an_ai_failure_uses_a_cached_text_then_the_corpus() {
             provider: Some("claude".into()),
             model: Some("claude-haiku-5-5".into()),
             notice: Some("Sin conexión con la IA: texto del caché".into()),
+            syntax: None,
+            tokens: None,
         }
     );
     // An empty cache: the corpus comes next.
@@ -732,7 +739,16 @@ async fn a_missing_key_or_model_or_keychain_falls_back_with_a_notice() {
 #[tokio::test]
 async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
     let state = state(MemoryStore::shared(), offline());
-    let first = first_text(&state, "es", 1, DAY).await.unwrap();
+    let first = first_text(
+        &state,
+        "es",
+        &PracticeMode::Prose,
+        DEFAULT_MAX_LINES,
+        1,
+        DAY,
+    )
+    .await
+    .unwrap();
     assert!(first.diagnostic);
     assert_eq!(
         first.text,
@@ -756,7 +772,16 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
         );
         assert!(scored.saved);
     }
-    let next = first_text(&state, "es", 1, DAY).await.unwrap();
+    let next = first_text(
+        &state,
+        "es",
+        &PracticeMode::Prose,
+        DEFAULT_MAX_LINES,
+        1,
+        DAY,
+    )
+    .await
+    .unwrap();
     assert!(!next.diagnostic);
     let p = TextParams {
         target_count: DEFAULT_TARGETS,
@@ -764,7 +789,204 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
         ..params(1)
     };
     assert_eq!(next.text, next_text(&state, &p).await.unwrap());
-    assert!(first_text(&state, "xx", 1, DAY).await.is_err());
+    assert!(
+        first_text(
+            &state,
+            "xx",
+            &PracticeMode::Prose,
+            DEFAULT_MAX_LINES,
+            1,
+            DAY
+        )
+        .await
+        .is_err()
+    );
+}
+
+// ---- code mode ----
+
+/// 99 chars, 10 × `{`: valid for target `{` at 3× over 80..481 chars.
+const AI_CODE: &str = "fn a() { b({ c }) }\nfn d() { e({ f }) }\nfn g() { h({ i }) }\nfn j() { k({ l }) }\nfn m() { n({ o }) }";
+
+fn rust() -> PracticeMode {
+    PracticeMode::code("rust").unwrap()
+}
+
+fn code_params(seed: u64) -> TextParams {
+    TextParams {
+        mode: rust(),
+        ..params(seed)
+    }
+}
+
+/// The code model practises only `{`; the prose model only ñ.
+fn weak_in_brace(state: &AppState) {
+    weak_in_n(state);
+    let snapshot = StatsSnapshot {
+        units: vec![UnitStatRow {
+            unit: "{".into(),
+            ema_error: 0.9,
+            ema_slowness: 0.0,
+            samples: 5,
+            slowness_samples: 0,
+        }],
+        confusions: vec![],
+        mean_interval_ms: Some(150.0),
+    };
+    let mut store = lock_store(&state.store);
+    store
+        .save_stats(state.profile.id, "code", &snapshot)
+        .unwrap();
+}
+
+fn assert_contiguous(text: &NextText) {
+    let tokens = text.tokens.as_deref().expect("code texts carry tokens");
+    let mut at = 0;
+    for t in tokens {
+        assert_eq!(t.start, at, "{tokens:?}");
+        at = t.end;
+    }
+    assert_eq!(at, text.text.chars().count());
+}
+
+#[tokio::test]
+async fn code_mode_without_ai_gives_a_snippet_for_the_code_model_with_tokens() {
+    let state = state(MemoryStore::shared(), offline());
+    weak_in_brace(&state);
+    let got = next_text(&state, &code_params(5)).await.unwrap();
+    let snippets = plexustyping_corpus::code_snippets("rust").unwrap();
+    assert!(snippets.iter().any(|s| s.code == got.text), "{}", got.text);
+    assert_eq!(got.source, TextSource::Corpus);
+    assert_eq!(got.targets, vec!["{".to_owned()], "code model, not ñ");
+    assert_eq!(got.syntax.as_deref(), Some("rust"));
+    assert_contiguous(&got);
+    let json = serde_json::to_value(&got).unwrap();
+    assert_eq!(json["syntax"], "rust");
+    assert_eq!(json["tokens"][0]["start"], 0);
+    assert!(json["tokens"][0]["class"].is_string());
+    // Prose texts stay as before: no syntax, no tokens.
+    let prose = next_text(&state, &params(5)).await.unwrap();
+    assert_eq!(prose, corpus_expected(&state, 5));
+    let json = serde_json::to_value(&prose).unwrap();
+    assert!(json.get("syntax").is_none() && json.get("tokens").is_none());
+}
+
+#[tokio::test]
+async fn code_mode_asks_the_ai_for_code_and_caches_it_per_language() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(AI_CODE))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_brace(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let got = next_text(&state, &code_params(4)).await.unwrap();
+    assert_eq!(
+        (got.text.as_str(), got.source, got.targets.clone()),
+        (AI_CODE, TextSource::Ai, vec!["{".to_owned()])
+    );
+    assert_eq!(got.syntax.as_deref(), Some("rust"));
+    assert_contiguous(&got);
+    let requests = srv.requests();
+    assert_eq!(requests.len(), 1);
+    let sent: serde_json::Value = serde_json::from_str(&requests[0].body).unwrap();
+    let prompt = sent["messages"][0]["content"].as_str().unwrap();
+    assert!(prompt.contains("fragmento de código en Rust"), "{prompt}");
+    assert!(prompt.contains("Caracteres objetivo: {."), "{prompt}");
+    assert!(prompt.contains("Longitud: 80–480 caracteres."), "{prompt}");
+    let (_, listed) = prompt.split_once("Usa solo estos caracteres: ").unwrap();
+    for ch in ['{', '}', '~', '|', '&', '$', '#', '"', '\''] {
+        assert!(listed.contains(ch), "allowed {ch:?} missing: {prompt}");
+    }
+    assert!(!listed.contains('ñ'), "only ASCII in code: {prompt}");
+    let store = lock_store(&state.store);
+    assert_eq!(store.take_cached_text("es", "prose", &[]).unwrap(), None);
+    let cached = store
+        .take_cached_text("es", "code:rust", &[])
+        .unwrap()
+        .unwrap();
+    assert_eq!(cached.text, AI_CODE);
+}
+
+#[tokio::test]
+async fn code_mode_falls_back_to_its_own_language_cache_then_the_corpus() {
+    let srv = server(vec![(OPENAI, 500, "{}".into()), (OPENAI, 500, "{}".into())]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_brace(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let cache = |mode: &str, text: &str| {
+        lock_store(&state.store)
+            .cache_text(&NewCachedText {
+                provider: "claude",
+                model: "claude-haiku-5-5",
+                language: "es",
+                mode,
+                targets: &[],
+                text,
+                created_at_ms: 1,
+                used: false,
+            })
+            .unwrap();
+    };
+    cache("prose", "texto de prosa");
+    cache("code:python", "print(1)");
+    let got = next_text(&state, &code_params(4)).await.unwrap();
+    assert_eq!(got.source, TextSource::Corpus);
+    assert_eq!(
+        got.notice.as_deref(),
+        Some("Sin conexión con la IA: texto del corpus local")
+    );
+    assert_eq!(got.syntax.as_deref(), Some("rust"));
+    cache("code:rust", "let x = 1;");
+    let got = next_text(&state, &code_params(4)).await.unwrap();
+    assert_eq!(
+        (got.text.as_str(), got.source),
+        ("let x = 1;", TextSource::Cache)
+    );
+    assert_eq!(got.syntax.as_deref(), Some("rust"));
+    assert_contiguous(&got);
+}
+
+#[tokio::test]
+async fn html_css_ai_texts_are_highlighted_as_html() {
+    let state = state(MemoryStore::shared(), offline());
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    lock_store(&state.store)
+        .cache_text(&NewCachedText {
+            provider: "claude",
+            model: "m",
+            language: "es",
+            mode: "code:html-css",
+            targets: &[],
+            text: "<p class=\"a\">hola</p>",
+            created_at_ms: 1,
+            used: false,
+        })
+        .unwrap();
+    let p = TextParams {
+        mode: PracticeMode::code("html-css").unwrap(),
+        ..params(1)
+    };
+    let got = next_text(&state, &p).await.unwrap();
+    assert_eq!(got.source, TextSource::Cache);
+    assert_eq!(got.syntax.as_deref(), Some("html"));
+    assert_contiguous(&got);
+}
+
+#[tokio::test]
+async fn first_text_in_code_mode_skips_the_prose_diagnostic() {
+    let state = state(MemoryStore::shared(), offline());
+    let first = first_text(&state, "es", &rust(), 5, 1, DAY).await.unwrap();
+    assert!(!first.diagnostic);
+    assert_eq!(first.text.syntax.as_deref(), Some("rust"));
+    let p = TextParams {
+        target_count: DEFAULT_TARGETS,
+        length: DEFAULT_LENGTH,
+        max_lines: 5,
+        ..code_params(1)
+    };
+    assert_eq!(first.text, next_text(&state, &p).await.unwrap());
 }
 
 /// Tauri needs `Send` command futures; a `std::sync::MutexGuard` held across an
@@ -775,7 +997,14 @@ fn generation_futures_hold_no_store_lock_across_await() {
     let state = state(MemoryStore::shared(), offline());
     let p = params(1);
     assert_send(next_text(&state, &p));
-    assert_send(first_text(&state, "es", 1, DAY));
+    assert_send(first_text(
+        &state,
+        "es",
+        &PracticeMode::Prose,
+        DEFAULT_MAX_LINES,
+        1,
+        DAY,
+    ));
     assert_send(models(&state.ai, &state.secrets, ProviderId::Claude));
     assert_send(test_connection(
         &state.ai,

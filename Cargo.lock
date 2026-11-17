@@ -3007,6 +3007,7 @@ dependencies = [
  "plexustyping-audio",
  "plexustyping-core",
  "plexustyping-corpus",
+ "plexustyping-highlight",
  "plexustyping-layouts",
  "plexustyping-store",
  "rusqlite",

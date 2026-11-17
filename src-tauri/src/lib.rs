@@ -1,4 +1,5 @@
 pub mod ai;
+pub mod code;
 pub mod commands;
 pub mod metronome;
 pub mod secrets;
@@ -6,14 +7,16 @@ pub mod secrets;
 use std::sync::{Arc, MutexGuard};
 
 use ai::{AiFailure, AiSettings, ProviderInfo, TextParams};
+use code::PracticeMode;
 use commands::{
-    AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoredSession, StorageStatus,
-    Weakness, lock_store,
+    AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoreRequest, ScoredSession,
+    StorageStatus, Weakness, lock_store,
 };
 use metronome::{MetronomeStarted, MetronomeState};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
 use plexustyping_audio::MetronomeConfig;
-use plexustyping_core::{ErrorMode, InputEvent};
+use plexustyping_core::{ErrorMode, IndentMode, InputEvent};
+use plexustyping_corpus::CodeLanguage;
 use plexustyping_layouts::{KeyPress, Layout};
 use plexustyping_store::{SessionSummary, Store, UsageRow};
 use secrets::KeyringStore;
@@ -35,13 +38,24 @@ fn diagnostic_text(language: String) -> Result<String, String> {
     commands::diagnostic_text(&language)
 }
 
+/// Every bundled code language, in display order (S1).
+#[tauri::command]
+fn code_languages() -> Vec<CodeLanguage> {
+    plexustyping_corpus::code_languages().to_vec()
+}
+
+/// `mode` is `"prose"` (default) or `{ kind: "code", lang }`.
 #[tauri::command]
 async fn first_text(
     state: State<'_, AppState>,
     language: String,
     day: String,
+    mode: Option<PracticeMode>,
+    max_lines: Option<usize>,
 ) -> Result<FirstText, String> {
-    ai::first_text(&state, &language, time_seed(), &day).await
+    let mode = mode.unwrap_or_default();
+    let max_lines = max_lines.unwrap_or(code::DEFAULT_MAX_LINES);
+    ai::first_text(&state, &language, &mode, max_lines, time_seed(), &day).await
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -55,6 +69,8 @@ async fn next_text(
     length: usize,
     fallback: Vec<String>,
     day: String,
+    mode: Option<PracticeMode>,
+    max_lines: Option<usize>,
 ) -> Result<NextText, String> {
     let params = TextParams {
         language,
@@ -64,10 +80,14 @@ async fn next_text(
         length,
         fallback,
         day,
+        mode: mode.unwrap_or_default(),
+        max_lines: max_lines.unwrap_or(code::DEFAULT_MAX_LINES),
     };
     ai::next_text(&state, &params).await
 }
 
+/// `mode` is the error mode; `practice` is prose (default) or the code language.
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
 fn score_session(
     state: State<AppState>,
@@ -77,18 +97,22 @@ fn score_session(
     started_at_ms: i64,
     offsets_ms: Option<Vec<Option<f64>>>,
     bpm: Option<u32>,
+    practice: Option<PracticeMode>,
+    indent: Option<IndentMode>,
 ) -> ScoredSession {
     let mut store = store(&state);
     let metronome = MetronomeTrack { bpm, offsets_ms };
-    commands::score_session_with_metronome(
-        &mut store,
-        &state.profile,
-        &text,
+    let practice = practice.unwrap_or_default();
+    let req = ScoreRequest {
+        text: &text,
         mode,
-        &events,
+        practice: &practice,
+        indent: indent.unwrap_or_default(),
+        events: &events,
         started_at_ms,
-        &metronome,
-    )
+        metronome: &metronome,
+    };
+    commands::score_practice(&mut store, &state.profile, &req)
 }
 
 /// Runs a metronome call off the main thread: opening the device blocks.
@@ -126,15 +150,23 @@ async fn metronome_stop(state: State<'_, MetronomeState>) -> Result<(), String> 
     .await
 }
 
+/// Of the prose model, or of the code model when `mode` is code (S5).
 #[tauri::command]
-fn weaknesses(state: State<AppState>, limit: usize) -> Result<Vec<Weakness>, String> {
-    let model = commands::load_model(&store(&state), &state.profile)?;
+fn weaknesses(
+    state: State<AppState>,
+    limit: usize,
+    mode: Option<PracticeMode>,
+) -> Result<Vec<Weakness>, String> {
+    let stats_mode = mode.unwrap_or_default().stats_mode();
+    let model = commands::load_model_for(&store(&state), &state.profile, stats_mode)?;
     Ok(commands::weaknesses(&model, limit))
 }
 
+/// Of the prose model, or of the code model when `mode` is code (S5).
 #[tauri::command]
-fn heatmap(state: State<AppState>) -> Result<Vec<HeatScore>, String> {
-    let model = commands::load_model(&store(&state), &state.profile)?;
+fn heatmap(state: State<AppState>, mode: Option<PracticeMode>) -> Result<Vec<HeatScore>, String> {
+    let stats_mode = mode.unwrap_or_default().stats_mode();
+    let model = commands::load_model_for(&store(&state), &state.profile, stats_mode)?;
     Ok(commands::heatmap(&model))
 }
 
@@ -233,6 +265,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             diagnostic_text,
+            code_languages,
             first_text,
             next_text,
             score_session,

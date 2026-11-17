@@ -221,6 +221,8 @@ pub struct SessionSummary {
     pub started_at_ms: i64,
     /// Practice mode.
     pub mode: String,
+    /// Programming language of a code session.
+    pub code_language: Option<String>,
     /// Natural language of the text, if recorded.
     pub language: Option<String>,
     /// Keyboard layout id, if recorded.
@@ -461,7 +463,7 @@ impl Store {
     pub fn recent_sessions(&self, profile_id: i64, limit: usize) -> Result<Vec<SessionSummary>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, started_at_ms, mode, language, layout, duration_ms,
-                 gross_wpm, net_wpm, accuracy, keystrokes, bpm
+                 gross_wpm, net_wpm, accuracy, keystrokes, bpm, code_language
              FROM sessions WHERE profile_id = ?1
              ORDER BY started_at_ms DESC, id DESC LIMIT ?2",
         )?;
@@ -479,6 +481,7 @@ impl Store {
                     accuracy: r.get(8)?,
                     keystrokes: 0,
                     bpm: r.get(10)?,
+                    code_language: r.get(11)?,
                 },
                 r.get::<_, i64>(9)?,
             ))
@@ -587,7 +590,7 @@ impl Store {
     /// Stores a generated text and returns its id; a `used` text gets the
     /// most recent use. Then keeps at most [`TEXT_CACHE_LIMIT`] rows: the
     /// least recently used used texts go first, unused ones (oldest first)
-    /// only when no used text is left.
+    /// only when no used text is left. The text just stored is never evicted.
     pub fn cache_text(&self, t: &NewCachedText) -> Result<i64> {
         let targets =
             serde_json::to_string(t.targets).map_err(|e| StoreError::InvalidData(e.to_string()))?;
@@ -611,9 +614,9 @@ impl Store {
         let id = tx.last_insert_rowid();
         tx.execute(
             "DELETE FROM text_cache WHERE id IN (
-                 SELECT id FROM text_cache ORDER BY used DESC, last_used, id
+                 SELECT id FROM text_cache WHERE id != ?2 ORDER BY used DESC, last_used, id
                  LIMIT MAX(0, (SELECT COUNT(*) FROM text_cache) - ?1))",
-            [TEXT_CACHE_LIMIT as i64],
+            [TEXT_CACHE_LIMIT as i64, id],
         )?;
         tx.commit()?;
         Ok(id)

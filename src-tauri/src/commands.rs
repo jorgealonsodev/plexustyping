@@ -8,8 +8,11 @@ use std::sync::{Mutex, MutexGuard};
 use plexustyping_ai::AiClient;
 use plexustyping_audio::{MAX_BPM, MIN_BPM};
 use plexustyping_core::adaptive::{Confusion, UnitStat, WeaknessModel};
-use plexustyping_core::{ErrorMode, InputEvent, SessionResult, failed_chars, replay};
+use plexustyping_core::{
+    ErrorMode, IndentMode, InputEvent, SessionResult, failed_chars, replay_with,
+};
 use plexustyping_corpus::{Corpus, GenerateOptions, corpus};
+use plexustyping_highlight::Token;
 use plexustyping_layouts::{KeyPress, Layout};
 use plexustyping_store::{
     ConfusionRow, NewSession, Profile, SessionSummary, StatsSnapshot, Store, StoreError,
@@ -17,6 +20,7 @@ use plexustyping_store::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::code::PracticeMode;
 use crate::secrets::SharedSecrets;
 
 /// Mode of practice sessions and of their statistics.
@@ -80,15 +84,15 @@ pub struct MetronomeTrack {
 }
 
 impl MetronomeTrack {
-    /// The offsets of the records: records are the char events before the end
-    /// of the text, in order. Empty when the offsets do not match the events.
+    /// The offsets of the records: records are the char and Tab events before
+    /// the end of the text, in order. Empty when the offsets do not match the events.
     fn record_offsets(&self, events: &[InputEvent], records: usize) -> Vec<Option<f64>> {
         let Some(offsets) = self.offsets_ms.as_ref().filter(|o| o.len() == events.len()) else {
             return Vec::new();
         };
         let chars = events.iter().zip(offsets);
         chars
-            .filter(|(e, _)| matches!(e, InputEvent::Char { .. }))
+            .filter(|(e, _)| matches!(e, InputEvent::Char { .. } | InputEvent::Tab { .. }))
             .map(|(_, offset)| *offset)
             .take(records)
             .collect()
@@ -129,6 +133,12 @@ pub struct NextText {
     /// Why the AI was not used although it is enabled (Spanish, for the user).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notice: Option<String>,
+    /// Highlighter syntax id (code texts only).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub syntax: Option<String>,
+    /// Contiguous syntax tokens over the text's chars (code texts only).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tokens: Option<Vec<Token>>,
 }
 
 impl NextText {
@@ -141,6 +151,8 @@ impl NextText {
             provider: None,
             model: None,
             notice: None,
+            syntax: None,
+            tokens: None,
         }
     }
 }
@@ -273,10 +285,19 @@ pub fn snapshot_from_model(model: &WeaknessModel) -> StatsSnapshot {
     }
 }
 
-/// The stored model of `profile`.
+/// The stored prose model of `profile`.
 pub fn load_model(store: &Store, profile: &Profile) -> Result<WeaknessModel, String> {
+    load_model_for(store, profile, STATS_MODE)
+}
+
+/// The stored model of `profile` for the stats mode `mode` (`prose`, `code`).
+pub fn load_model_for(
+    store: &Store,
+    profile: &Profile,
+    mode: &str,
+) -> Result<WeaknessModel, String> {
     store
-        .load_stats(profile.id, STATS_MODE)
+        .load_stats(profile.id, mode)
         .map(model_from_snapshot)
         .map_err(|e| e.to_string())
 }
@@ -407,13 +428,53 @@ pub fn score_session_with_metronome(
     started_at_ms: i64,
     metronome: &MetronomeTrack,
 ) -> ScoredSession {
-    let result = replay(text, mode, events);
+    let req = ScoreRequest {
+        text,
+        mode,
+        practice: &PracticeMode::Prose,
+        indent: IndentMode::Manual,
+        events,
+        started_at_ms,
+        metronome,
+    };
+    score_practice(store, profile, &req)
+}
+
+/// A finished session to score.
+#[derive(Clone, Copy, Debug)]
+pub struct ScoreRequest<'a> {
+    pub text: &'a str,
+    pub mode: ErrorMode,
+    /// Prose or code: picks `sessions.mode`, `code_language` and the stats model (S5).
+    pub practice: &'a PracticeMode,
+    /// How indentation was typed (code only; prose is always manual).
+    pub indent: IndentMode,
+    pub events: &'a [InputEvent],
+    pub started_at_ms: i64,
+    pub metronome: &'a MetronomeTrack,
+}
+
+/// [`score_session_with_metronome`] for any practice mode and indentation.
+pub fn score_practice(store: &mut Store, profile: &Profile, req: &ScoreRequest) -> ScoredSession {
+    let ScoreRequest {
+        text,
+        mode,
+        events,
+        metronome,
+        ..
+    } = *req;
+    let indent = match req.practice {
+        PracticeMode::Prose => IndentMode::Manual,
+        PracticeMode::Code { .. } => req.indent,
+    };
+    let result = replay_with(text, mode, indent, events);
     let failed_chars = failed_chars(&result);
     let offsets_ms = metronome.record_offsets(events, result.records.len());
     let saved_session = SavedSession {
         text,
         mode,
-        started_at_ms,
+        practice: req.practice,
+        started_at_ms: req.started_at_ms,
         bpm: metronome.session_bpm(&offsets_ms),
         offsets_ms: &offsets_ms,
     };
@@ -438,6 +499,7 @@ pub fn score_session_with_metronome(
 struct SavedSession<'a> {
     text: &'a str,
     mode: ErrorMode,
+    practice: &'a PracticeMode,
     started_at_ms: i64,
     bpm: Option<u32>,
     offsets_ms: &'a [Option<f64>],
@@ -457,11 +519,12 @@ fn persist(
         ..
     } = *saved;
     let stats = &result.stats;
+    let stats_mode = saved.practice.stats_mode();
     let session = NewSession {
         profile_id: profile.id,
         started_at_ms,
-        mode: STATS_MODE,
-        code_language: None,
+        mode: stats_mode,
+        code_language: saved.practice.code_language(),
         language: Some(&profile.language),
         layout: Some(&profile.layout),
         error_mode: mode,
@@ -475,7 +538,7 @@ fn persist(
         records: &result.records,
         metronome_offsets_ms: saved.offsets_ms,
     };
-    store.save_session_with_stats(&session, STATS_MODE, |snapshot| {
+    store.save_session_with_stats(&session, stats_mode, |snapshot| {
         let mut model = model_from_snapshot(snapshot);
         model.update(text, result);
         snapshot_from_model(&model)
@@ -511,6 +574,7 @@ pub fn recent_sessions(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use plexustyping_core::replay;
     use plexustyping_layouts::{KeyPress, Layer};
     use std::cell::RefCell;
 
@@ -821,6 +885,142 @@ mod tests {
         assert_eq!(
             store.session_metronome_offsets(session.id).unwrap(),
             expected
+        );
+    }
+
+    fn score_code(
+        store: &mut Store,
+        profile: &Profile,
+        practice: &PracticeMode,
+        indent: IndentMode,
+        text: &str,
+        typed: &str,
+    ) -> ScoredSession {
+        let events = typing(typed);
+        let req = ScoreRequest {
+            text,
+            mode: ErrorMode::AllowContinue,
+            practice,
+            indent,
+            events: &events,
+            started_at_ms: 7,
+            metronome: &MetronomeTrack::default(),
+        };
+        score_practice(store, profile, &req)
+    }
+
+    #[test]
+    fn code_sessions_store_their_language_and_code_stats_without_touching_prose() {
+        let (mut store, profile) = memory();
+        let prose = score_session(
+            &mut store,
+            &profile,
+            "hola",
+            ErrorMode::AllowContinue,
+            &typing("hxla"),
+            1,
+        );
+        assert!(prose.saved);
+        let prose_model = load_model(&store, &profile).unwrap();
+        let rust = PracticeMode::code("rust").unwrap();
+        let text = "fn f() {\n    x;\n}";
+        // Auto indent: the 4 spaces after the first newline are filled, not typed.
+        let scored = score_code(
+            &mut store,
+            &profile,
+            &rust,
+            IndentMode::Auto,
+            text,
+            "fn f() [\nx;\n}",
+        );
+        assert_eq!(
+            scored.result,
+            replay_with(
+                text,
+                ErrorMode::AllowContinue,
+                IndentMode::Auto,
+                &typing("fn f() [\nx;\n}")
+            )
+        );
+        assert!(
+            scored.result.completed && scored.saved,
+            "{:?}",
+            scored.save_error
+        );
+        assert_eq!(scored.failed_chars, vec!['{']);
+        let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+        assert_eq!(
+            (
+                session.mode.as_str(),
+                session.code_language.as_deref(),
+                session.started_at_ms
+            ),
+            ("code", Some("rust"), 7)
+        );
+        let mut code_model = WeaknessModel::new();
+        code_model.update(text, &scored.result);
+        assert_eq!(load_model_for(&store, &profile, "code"), Ok(code_model));
+        assert_eq!(
+            load_model(&store, &profile),
+            Ok(prose_model),
+            "prose stats untouched"
+        );
+        assert!(load_model(&store, &profile).unwrap().score("{").is_none());
+    }
+
+    #[test]
+    fn prose_sessions_ignore_the_indent_mode() {
+        let (mut store, profile) = memory();
+        let text = "a\n  b";
+        let scored = score_code(
+            &mut store,
+            &profile,
+            &PracticeMode::Prose,
+            IndentMode::Auto,
+            text,
+            "a\nb",
+        );
+        assert!(!scored.result.completed, "manual: the spaces must be typed");
+        let manual = score_code(
+            &mut store,
+            &profile,
+            &PracticeMode::Prose,
+            IndentMode::Manual,
+            text,
+            "a\nb",
+        );
+        assert_eq!(scored, manual);
+    }
+
+    #[test]
+    fn score_session_pairs_offsets_with_tab_records_too() {
+        let (mut store, profile) = memory();
+        let event = |v: serde_json::Value| serde_json::from_value::<InputEvent>(v).unwrap();
+        // "a\tb": a, Tab (a record), a backspace (no record), b.
+        let events = vec![
+            event(serde_json::json!({ "kind": "char", "ch": "a", "tMs": 0.0 })),
+            event(serde_json::json!({ "kind": "tab", "tMs": 100.0 })),
+            event(serde_json::json!({ "kind": "backspace", "tMs": 150.0 })),
+            event(serde_json::json!({ "kind": "char", "ch": "b", "tMs": 200.0 })),
+        ];
+        let offsets = [Some(1.0), Some(2.0), None, Some(3.0)];
+        let scored = score_session_with_metronome(
+            &mut store,
+            &profile,
+            "a\tb",
+            ErrorMode::AllowContinue,
+            &events,
+            1,
+            &track(Some(60), &offsets),
+        );
+        assert!(scored.saved, "{:?}", scored.save_error);
+        assert_eq!(scored.result.records.len(), 3);
+        assert_eq!(scored.offsets_ms, vec![Some(1.0), Some(2.0), Some(3.0)]);
+        let session = &store.recent_sessions(profile.id, 1).unwrap()[0];
+        assert_eq!(session.bpm, Some(60));
+        assert_eq!(
+            store.session_metronome_offsets(session.id).unwrap(),
+            scored.offsets_ms
         );
     }
 
