@@ -361,7 +361,7 @@ mod tests {
 
     #[test]
     fn the_default_deadline_bounds_the_whole_chain() {
-        assert_eq!(DEFAULT_DEADLINE, Duration::from_secs(15));
+        assert_eq!(DEFAULT_DEADLINE, Duration::from_secs(60));
         let client = AiClient::new(Endpoints::production());
         assert_eq!(client.deadline(), DEFAULT_DEADLINE);
         let short = client.with_deadline(Duration::from_millis(5));

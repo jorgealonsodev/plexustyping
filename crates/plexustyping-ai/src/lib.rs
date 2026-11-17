@@ -30,13 +30,14 @@ pub use parse::parse_text_json;
 pub use prompt::build_prompt;
 pub use validate::{ValidationIssue, min_count, validate};
 
-/// Default per-request timeout (PRD RF2: 10 s).
-pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
+/// Default per-request timeout: 30 s (reasoning models such as GLM on OpenCode Go
+/// often needed more than the PRD's 10 s and timed out).
+pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// Default total time for one [`AiClient::generate_with_fallback`] call
 /// across the whole chain; afterwards the caller falls back to the local
 /// cache and corpus (PRD §2: next text in under 2 s with background preload).
-pub const DEFAULT_DEADLINE: Duration = Duration::from_secs(15);
+pub const DEFAULT_DEADLINE: Duration = Duration::from_secs(60);
 
 /// Supported text providers.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -430,7 +431,7 @@ mod tests {
         let shown = format!("{cfg:?} {cfg:#?}");
         assert!(!shown.contains("SECRET"), "{shown}");
         assert!(shown.contains("ApiKey(***)"));
-        assert_eq!(cfg.timeout, Duration::from_secs(10));
+        assert_eq!(cfg.timeout, Duration::from_secs(30));
         assert_eq!(cfg.model, "claude-haiku-5-5");
     }
 

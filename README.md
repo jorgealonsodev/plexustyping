@@ -75,7 +75,7 @@ today and in total, so you can watch your spending.
 - **Privacy:** only the target characters, the language, the length, the
   allowed characters and the topic are sent. Nothing you type ever leaves
   this machine. Requests go from Rust to the provider hosts only.
-- **Fallback:** each request has a 10 s timeout; a provider whose text fails
+- **Fallback:** each request has a 30 s timeout (60 s for the whole chain); a provider whose text fails
   validation gets one retry, then the next provider is tried. If all fail (or
   no key is set), a previously generated text from the local cache is used,
   and then the local corpus. A short note above the text says why, and the
