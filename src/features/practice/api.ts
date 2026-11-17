@@ -86,7 +86,8 @@ export interface Practice {
  * every session records the `language` of its text and the `layout` it was typed with (S5).
  */
 export const scoreSession = (
-  language: string,
+  /** `null` (code texts) records the profile's language. */
+  language: string | null,
   layout: string,
   text: string,
   mode: ErrorMode,

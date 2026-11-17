@@ -124,7 +124,7 @@
   // The next text, requested in the background while this one is typed (S6).
   const prefetch = new Prefetcher<PracticeText>();
   const genKey = $derived(
-    generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId, languageId),
+    generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId, practice === "prose" ? languageId : "es"),
   );
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
@@ -253,7 +253,7 @@
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
       const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
       const typed = { mode: textMode, indent: done.indent };
-      const result = await scoreSession(textLanguage, textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
+      const result = await scoreSession(textMode === "prose" ? textLanguage : null, textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
       tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
