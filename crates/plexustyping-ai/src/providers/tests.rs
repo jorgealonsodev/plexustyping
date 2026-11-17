@@ -167,6 +167,23 @@ fn gemini_build() {
 }
 
 #[test]
+fn gemma_models_on_gemini_skip_json_mode() {
+    // "JSON mode is not enabled for this model" (HTTP 400) for Gemma on the Gemini API.
+    for model in ["gemma-3-27b-it", "models/gemma-4-12b-it"] {
+        let call = built(ProviderId::Gemini, model, Wire::Chat);
+        let config = &call.body["generationConfig"];
+        assert_eq!(config["maxOutputTokens"], MAX_TOKENS, "{model}");
+        assert!(config.get("responseMimeType").is_none(), "{model}");
+        assert!(config.get("responseSchema").is_none(), "{model}");
+    }
+    let gemini = built(ProviderId::Gemini, "gemini-3.5-flash-lite", Wire::Chat);
+    assert_eq!(
+        gemini.body["generationConfig"]["responseMimeType"],
+        "application/json"
+    );
+}
+
+#[test]
 fn opencode_chat_build() {
     let call = built(ProviderId::OpencodeGo, "kimi-k2.6", Wire::Chat);
     assert_eq!(

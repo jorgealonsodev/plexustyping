@@ -116,6 +116,13 @@ fn claude_supports_output_config(model: &str) -> bool {
     !LEGACY.iter().any(|prefix| model.starts_with(prefix))
 }
 
+/// Gemma models served by the Gemini API reject JSON mode ("JSON mode is not
+/// enabled for this model"); the prompt still asks for `{"text": ...}`, which
+/// the reply parser reads from plain text too.
+fn gemini_supports_json_mode(model: &str) -> bool {
+    !model.starts_with("gemma")
+}
+
 /// Gemini puts the model in the URL path, so only plain model codes pass.
 fn gemini_model(model: &str) -> Result<&str, ProviderError> {
     let model = model.strip_prefix("models/").unwrap_or(model);
@@ -202,20 +209,21 @@ pub(crate) fn build(
         },
         ProviderId::Gemini => {
             let model = gemini_model(model)?;
+            let mut config = json!({"maxOutputTokens": MAX_TOKENS});
+            if gemini_supports_json_mode(model) {
+                config["responseMimeType"] = json!("application/json");
+                config["responseSchema"] = json!({
+                    "type": "OBJECT",
+                    "properties": {"text": {"type": "STRING"}},
+                    "required": ["text"]
+                });
+            }
             Call {
                 url: format!("{}/models/{model}:generateContent", endpoints.gemini),
                 headers: vec![("x-goog-api-key", key.expose().to_string())],
                 body: json!({
                     "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                    "generationConfig": {
-                        "maxOutputTokens": MAX_TOKENS,
-                        "responseMimeType": "application/json",
-                        "responseSchema": {
-                            "type": "OBJECT",
-                            "properties": {"text": {"type": "STRING"}},
-                            "required": ["text"]
-                        }
-                    }
+                    "generationConfig": config
                 }),
                 shape: Shape {
                     provider,
