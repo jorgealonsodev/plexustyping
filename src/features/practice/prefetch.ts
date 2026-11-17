@@ -25,9 +25,17 @@ export function sourceLabel(t: Pick<PracticeText, "source" | "provider" | "model
   }
 }
 
-/** Identifies the settings a next text depends on; a prefetch made under another key is stale. */
-export const generationKey = (targetCount: number, textLength: number, aiRevision: number) =>
-  `${targetCount}|${textLength}|${aiRevision}`;
+/**
+ * Identifies the settings a next text depends on; a prefetch made under another key is stale.
+ * `practice` is a `practiceKey` (`prose` or `code:<lang>`), `codeLines` the snippet size.
+ */
+export const generationKey = (
+  targetCount: number,
+  textLength: number,
+  aiRevision: number,
+  practice = "prose",
+  codeLines = 12,
+) => `${targetCount}|${textLength}|${aiRevision}|${practice}|${codeLines}`;
 
 /** Holds at most one background request, tagged with the generation key it was made for. */
 export class Prefetcher<T> {

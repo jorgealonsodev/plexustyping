@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { PracticeMode } from "../code/api";
+import type { Token } from "../code/syntax";
 import type { CharScore } from "../keyboard/heat";
-import type { ErrorMode, InputEvent, SessionResult } from "./engine";
+import type { ErrorMode, IndentMode, InputEvent, SessionResult } from "./engine";
 import { localDay } from "./prefetch";
 
 /** `plexustyping-app` `ScoredSession`: authoritative replay, chars to practise and storage outcome. */
@@ -28,6 +30,9 @@ export interface PracticeText {
   notice?: string;
   /** The fixed diagnostic text, shown before any session is saved. */
   diagnostic?: boolean;
+  /** Code texts: highlighter syntax id and contiguous tokens over the chars. */
+  syntax?: string;
+  tokens?: Token[];
 }
 
 export interface Weakness {
@@ -43,9 +48,18 @@ export interface StorageStatus {
 export const LANGUAGE = "es";
 export const LAYOUT = "es-qwerty";
 
-export const firstText = () => invoke<PracticeText>("first_text", { language: LANGUAGE, day: localDay() });
+/** `mode` is prose or code of a language; `maxLines` sizes code snippets. */
+export const firstText = (mode: PracticeMode = "prose", maxLines = 12) =>
+  invoke<PracticeText>("first_text", { language: LANGUAGE, day: localDay(), mode, maxLines });
 
-export const nextText = (seed: number, targetCount: number, length: number, fallback: string[]) =>
+export const nextText = (
+  seed: number,
+  targetCount: number,
+  length: number,
+  fallback: string[],
+  mode: PracticeMode = "prose",
+  maxLines = 12,
+) =>
   invoke<PracticeText>("next_text", {
     language: LANGUAGE,
     layout: LAYOUT,
@@ -54,9 +68,20 @@ export const nextText = (seed: number, targetCount: number, length: number, fall
     length,
     fallback,
     day: localDay(),
+    mode,
+    maxLines,
   });
 
-/** `offsetsMs` has one entry per event; `bpm` is the one metronome tempo of the text, if any. */
+/** How a text was typed: prose or code of a language, and the code indentation. */
+export interface Practice {
+  mode: PracticeMode;
+  indent: IndentMode;
+}
+
+/**
+ * `offsetsMs` has one entry per event; `bpm` is the one metronome tempo of the text, if any.
+ * Code sessions are stored with their language and folded into the code statistics (S5).
+ */
 export const scoreSession = (
   text: string,
   mode: ErrorMode,
@@ -64,10 +89,22 @@ export const scoreSession = (
   startedAtMs: number,
   offsetsMs: (number | null)[] | null = null,
   bpm: number | null = null,
-) => invoke<ScoredSession>("score_session", { text, mode, events, startedAtMs, offsetsMs, bpm });
+  practice: Practice = { mode: "prose", indent: "manual" },
+) =>
+  invoke<ScoredSession>("score_session", {
+    text,
+    mode,
+    events,
+    startedAtMs,
+    offsetsMs,
+    bpm,
+    practice: practice.mode,
+    indent: practice.indent,
+  });
 
-export const weaknesses = (limit: number) => invoke<Weakness[]>("weaknesses", { limit });
+/** Of the statistics model of `mode` (prose and code are kept apart). */
+export const weaknesses = (limit: number, mode: PracticeMode = "prose") => invoke<Weakness[]>("weaknesses", { limit, mode });
 
-export const heatmap = () => invoke<CharScore[]>("heatmap");
+export const heatmap = (mode: PracticeMode = "prose") => invoke<CharScore[]>("heatmap", { mode });
 
 export const storageStatus = () => invoke<StorageStatus>("storage_status");

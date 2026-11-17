@@ -2,7 +2,7 @@
 
 *Del cerebro a los dedos.* An adaptive typing tutor built with Rust and Tauri 2.
 
-Status: phase 1B in progress (AI texts, metronome). See `PRD-PlexusTyping.v0.1.md` for the product plan.
+Status: phase 2 in progress (code mode). See `PRD-PlexusTyping.v0.1.md` for the product plan.
 
 Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 
@@ -65,6 +65,34 @@ today and in total, so you can watch your spending.
 - **Latency:** the next text is requested in the background as soon as you
   start typing the current one, so it is usually ready when you finish.
 
+### Code mode
+
+The "Prosa / Código" switch in the header (next to the gear) changes what you
+practise; in code mode a select next to it picks the language: Python,
+JavaScript, TypeScript, Java, C#, C++, C, Go, Rust, PHP, SQL, Bash, HTML/CSS,
+Kotlin or Swift. Switching loads a new text at once.
+
+- **Snippets:** 5–20 lines (Ajustes → Código → "Líneas máximas", default 12)
+  from the bundled original snippets, chosen by how often they use your weak
+  symbols (`{} [] () <> ; : = -> => && || " ' _ # $`…). With AI on, the
+  fallback chain is asked for a snippet in that language first (printable
+  ASCII only, newlines and indentation kept), then the cache of earlier AI
+  snippets of the same language, then the bundled ones.
+- **Highlighting:** the text keeps its lines and indentation and is coloured by
+  syntax (`syntect` grammars, tokenized once per text in Rust) with the active
+  theme's syntax colours; characters still to type are dimmed, typed ones take
+  their full colour, errors show as in prose. A `↵` marks a newline at the
+  cursor or typed wrong; the block scrolls to keep the cursor line in view.
+- **Keys:** `Enter` types the newline and `Tab` types a tab or skips the
+  spaces up to the next tab stop; both are measured keystrokes. "Sangría":
+  "Automática al pulsar Enter" (default: after a correct newline the next
+  line's indentation is filled in and not measured) or "Manual" (every space
+  is typed). Changing it restarts the text.
+- **Separate statistics:** code sessions are stored with their language and
+  feed their own weakness model (mode `code`, shared by every language), so
+  symbols never touch the prose metrics. Results, weaknesses and the keyboard
+  heatmap in code mode come from that model.
+
 ### Metronome
 
 In "Ajustes → Metrónomo" (or with `F4` from anywhere), turn on the fixed
@@ -105,6 +133,7 @@ stay in the webview's local storage.
 | `crates/plexustyping-store` | Local SQLite store: profiles, sessions, keystrokes, statistics, AI text cache and usage |
 | `crates/plexustyping-ai` | AI providers, prompt, validation and fallback chain |
 | `crates/plexustyping-audio` | Metronome audio |
+| `crates/plexustyping-highlight` | Syntax highlighting of code snippets (semantic token classes) |
 | `src-tauri` | Tauri app (`plexustyping-app`, binary `plexustyping`) |
 | `src` | Svelte 5 frontend |
 

@@ -17,7 +17,19 @@
     scoreSession,
     weaknesses,
   } from "./api";
-  import { type ErrorMode, type InputEvent as TypingEvent, TypingSession, acceptsInput, keyAction, textToEvents } from "./engine";
+  import {
+    type ErrorMode,
+    type IndentMode,
+    type InputEvent as TypingEvent,
+    TypingSession,
+    acceptsInput,
+    keyAction,
+    textToEvents,
+  } from "./engine";
+  import { type PracticeMode, practiceKey } from "../code/api";
+  import CodeText from "../code/CodeText.svelte";
+  import { LANGUAGES } from "../code/languages.svelte";
+  import { type TokenClass, codeKeyEvent, tokenClasses } from "../code/syntax";
   import { focusTyping, setTypingField } from "./focus";
   import { Prefetcher, generationKey, provisionalFailedChars, sourceLabel } from "./prefetch";
   import Results from "./Results.svelte";
@@ -36,6 +48,9 @@
     textLength,
     aiRevision,
     metronome,
+    practice,
+    indent,
+    codeLines,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -47,6 +62,12 @@
     /** Changes when AI settings or keys change. */
     aiRevision: number;
     metronome: MetronomeSettings;
+    /** Prose or code of a language (S1); a change loads a new text. */
+    practice: PracticeMode;
+    /** Code indentation (S4); a change restarts a code text. */
+    indent: IndentMode;
+    /** Lines per code snippet, from the next text. */
+    codeLines: number;
   } = $props();
 
   // The metronome plays only while a text is ready or being typed and the window is visible (S7).
@@ -71,9 +92,16 @@
   let source = $state("");
   let notice = $state<string | null>(null);
   let loadingLabel = $state("Cargando texto…");
+  // Practice mode of the current text, and the syntax class of each of its chars (code only).
+  let textMode = $state.raw<PracticeMode>("prose");
+  let classes = $state.raw<TokenClass[]>([]);
+  const isCode = $derived(textMode !== "prose");
+  const practiceId = $derived(practiceKey(practice));
+  // Mode of the latest requested text: a different `practice` loads a new one.
+  let requestedKey = untrack(() => practiceKey(practice));
   // The next text, requested in the background while this one is typed (S6).
   const prefetch = new Prefetcher<PracticeText>();
-  const genKey = $derived(generationKey(targetCount, textLength, aiRevision));
+  const genKey = $derived(generationKey(targetCount, textLength, aiRevision, practiceId, codeLines));
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
   let session = $state.raw<TypingSession | null>(null);
@@ -108,20 +136,28 @@
   function restart() {
     if (!text) return;
     run++;
-    session = new TypingSession(text, mode);
+    session = new TypingSession(text, mode, textMode === "prose" ? "manual" : indent);
     track = { offsets: [], bpms: new Set() };
     scored = null;
     phase = "typing";
     tick++;
   }
 
-  async function load(fetch: () => Promise<PracticeText>, again: () => void, label = "Cargando texto…") {
+  async function load(
+    fetch: () => Promise<PracticeText>,
+    again: () => void,
+    label = "Cargando texto…",
+    textPractice: PracticeMode = practice,
+  ) {
     const id = ++run;
+    requestedKey = practiceKey(textPractice);
     loadingLabel = label;
     phase = "loading";
     try {
       const next = await fetch();
       if (id !== run) return;
+      textMode = textPractice;
+      classes = tokenClasses([...next.text].length, next.tokens);
       text = next.text;
       targets = next.targets;
       diagnostic = next.diagnostic ?? false;
@@ -137,7 +173,8 @@
   }
 
   function loadFirst() {
-    void load(firstText, loadFirst);
+    const [chosen, lines] = [practice, codeLines];
+    void load(() => firstText(chosen, lines), loadFirst, "Cargando texto…", chosen);
   }
 
   const randomSeed = () => Math.floor(Math.random() * 2 ** 32);
@@ -145,13 +182,14 @@
   // Settings are read here, so a change affects the next text only. A prefetched text made
   // with the same settings is used (awaited if still pending); otherwise one is requested now.
   function loadNext() {
-    const fallback = scored?.failedChars ?? [];
+    // Failed chars of a text in another mode say nothing about this one.
+    const fallback = practiceKey(textMode) === practiceId ? (scored?.failedChars ?? []) : [];
     const seed = randomSeed();
-    const [count, length] = [targetCount, textLength];
-    const fresh = () => nextText(seed, count, length, fallback);
-    const again = () => void load(fresh, again, "Generando texto…");
+    const [count, length, chosen, lines] = [targetCount, textLength, practice, codeLines];
+    const fresh = () => nextText(seed, count, length, fallback, chosen, lines);
+    const again = () => void load(fresh, again, "Generando texto…", chosen);
     const ready = prefetch.take(genKey);
-    if (ready) void load(() => ready.catch(fresh), again, "Generando texto…");
+    if (ready) void load(() => ready.catch(fresh), again, "Generando texto…", chosen);
     else again();
   }
 
@@ -159,16 +197,17 @@
   function startPrefetch() {
     if (!session || diagnostic) return;
     const fallback = provisionalFailedChars(session.result().records);
-    const [count, length] = [targetCount, textLength];
-    prefetch.start(genKey, () => nextText(randomSeed(), count, length, fallback));
+    const [count, length, chosen, lines] = [targetCount, textLength, practice, codeLines];
+    prefetch.start(genKey, () => nextText(randomSeed(), count, length, fallback, chosen, lines));
   }
 
   // Weaknesses and heatmap scores from the stored model; missing ones only hide those views.
-  function refreshModel(id = run) {
-    weaknesses(5)
+  // Of the model of `of`: prose and code statistics are kept apart (S5).
+  function refreshModel(id = run, of: PracticeMode = textMode) {
+    weaknesses(5, of)
       .then((next) => id === run && (weak = next))
       .catch((err) => console.warn("weaknesses failed", err));
-    fetchHeatmap()
+    fetchHeatmap(of)
       .then((next) => (charScores = next))
       .catch((err) => console.warn("heatmap failed", err));
   }
@@ -180,7 +219,8 @@
       // Wall-clock start: `performance.now()` stamps are relative to the page's time origin.
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
       const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
-      const result = await scoreSession(text, done.mode, done.events, startedAtMs, measured.offsets, bpm);
+      const typed = { mode: textMode, indent: done.indent };
+      const result = await scoreSession(text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
       weak = [];
@@ -201,7 +241,8 @@
     if (phase !== "typing" || !session) return;
     const expected = session.chars[session.cursor];
     const first = session.firstT === null;
-    const beat = event.kind === "char" ? anchor : null;
+    // Chars and Tabs are measured keystrokes (records); backspaces are not.
+    const beat = event.kind === "backspace" ? null : anchor;
     // Epoch ms, like beat 0: `performance.now()` stamps are relative to the page's time origin.
     track.offsets.push(beat && beatOffsetMs(performance.timeOrigin + event.tMs, beat.epochMs, beat.intervalMs));
     if (beat) track.bpms.add(beat.bpm);
@@ -248,13 +289,19 @@
         e.preventDefault();
         loadNext();
       } else if (e.target === field) {
-        // Not typeable yet: no practice text contains a newline.
+        // In code, Enter types a measured newline (S4); prose texts have none.
         e.preventDefault();
+        const event = phase === "typing" ? codeKeyEvent(action, isCode, performance.now()) : null;
+        if (event) applyEvent(event);
       }
       return;
     }
     if (e.target !== field) return;
-    if (action === "tab" && phase === "typing") e.preventDefault();
+    if (action === "tab" && phase === "typing") {
+      e.preventDefault();
+      const event = codeKeyEvent(action, isCode, performance.now());
+      if (event) applyEvent(event);
+    }
     if (action === "backspace") {
       e.preventDefault();
       applyEvent({ kind: "backspace", tMs: performance.now() });
@@ -296,6 +343,8 @@
   $effect(() => {
     void genKey;
     untrack(() => {
+      // A practice switch loads a new text instead: no request for the old one.
+      if (practiceId !== requestedKey) return;
       if (phase === "typing" && session?.firstT != null) startPrefetch();
     });
   });
@@ -304,6 +353,26 @@
   $effect(() => {
     void mode;
     untrack(restart);
+  });
+
+  // Changing the code indentation restarts a code text.
+  $effect(() => {
+    void indent;
+    untrack(() => isCode && restart());
+  });
+
+  // Switching prose/code or the language drops the prefetch and loads a text of the new mode.
+  $effect(() => {
+    const key = practiceId;
+    untrack(() => {
+      if (key === requestedKey) return;
+      prefetch.clear();
+      const [count, length, chosen, lines] = [targetCount, textLength, practice, codeLines];
+      const fresh = () => nextText(randomSeed(), count, length, [], chosen, lines);
+      const again = () => void load(fresh, again, "Generando texto…", chosen);
+      again();
+      refreshModel(run, chosen);
+    });
   });
 
   $effect(() => {
@@ -322,7 +391,8 @@
     setTypingField(field ?? null);
     focusTyping();
     loadFirst();
-    refreshModel();
+    refreshModel(run, practice);
+    void LANGUAGES.load();
     getLayout(LAYOUT)
       .then((next) => (layout = next))
       .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
@@ -380,9 +450,10 @@
         <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
       </div>
     {:else if phase === "results" && scored}
-      <Results {scored} {weak} onNext={loadNext} onRepeat={restart} />
+      <Results {scored} {weak} language={textMode === "prose" ? null : LANGUAGES.name(textMode.lang)} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
       <p class="kind">
+        {#if textMode !== "prose"}{LANGUAGES.name(textMode.lang)} ·{/if}
         {source}
         {#if targets.length > 0}
           · Practicando:
@@ -391,14 +462,18 @@
       </p>
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
       {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
-      <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
-      <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
-            class="ch {view.states[i]}"
-            class:space={c === " "}
-            class:cursor={i === view.cursor}>{c}</span
-          >{/each}</p>
+      {#if isCode}
+        <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} />
+      {:else}
+        <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
+        <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
+              class="ch {view.states[i]}"
+              class:space={c === " "}
+              class:cursor={i === view.cursor}>{c}</span
+            >{/each}</p>
+      {/if}
       <p class="hint">
-        {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · Esc reinicia · F4 metrónomo{:else}Esc reinicia el texto · F4 metrónomo{/if}
+        {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · {#if isCode}Intro = salto de línea · Tab = sangría · {/if}Esc reinicia · F4 metrónomo{:else}Esc reinicia el texto · F4 metrónomo{/if}
       </p>
     {/if}
   </section>

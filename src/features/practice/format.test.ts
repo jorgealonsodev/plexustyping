@@ -27,4 +27,8 @@ describe("result formatting", () => {
   it("shows a space as a visible symbol", () => {
     expect([charLabel(" "), charLabel("ñ")]).toEqual(["␣", "ñ"]);
   });
+
+  it("shows a newline and a tab as visible symbols", () => {
+    expect([charLabel("\n"), charLabel("\t"), charLabel("{")]).toEqual(["↵", "⇥", "{"]);
+  });
 });

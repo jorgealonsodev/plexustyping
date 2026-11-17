@@ -8,9 +8,17 @@
   let {
     scored,
     weak,
+    language = null,
     onNext,
     onRepeat,
-  }: { scored: ScoredSession; weak: Weakness[]; onNext: () => void; onRepeat: () => void } = $props();
+  }: {
+    scored: ScoredSession;
+    weak: Weakness[];
+    /** Name of the code language; `null` for prose. */
+    language?: string | null;
+    onNext: () => void;
+    onRepeat: () => void;
+  } = $props();
   const stats = $derived(scored.result.stats);
   const rhythm = $derived(rhythmSummary(scored.offsetsMs ?? []));
 
@@ -21,7 +29,7 @@
 </script>
 
 <section class="results" aria-labelledby="results-title">
-  <h2 id="results-title">Resultado</h2>
+  <h2 id="results-title">Resultado{#if language}<span class="lang"> · Código · {language}</span>{/if}</h2>
   <dl class="figures">
     <div class="main"><dt>PPM netas</dt><dd>{formatWpm(stats.netWpm)}</dd></div>
     <div><dt>PPM brutas</dt><dd>{formatWpm(stats.grossWpm)}</dd></div>
@@ -45,7 +53,7 @@
   {/if}
   {#if weak.length > 0}
     <div class="weak">
-      <h3>Tus puntos débiles</h3>
+      <h3>{language ? "Tus puntos débiles en código" : "Tus puntos débiles"}</h3>
       <ol>
         {#each weak as w (w.unit)}
           <li><kbd>{charLabel(w.unit)}</kbd><span class="bar"><span class="fill fill-{heatLevel(w.score)}"></span></span></li>
@@ -96,6 +104,9 @@
     font-size: 3.5rem;
     line-height: 1;
     color: var(--accent);
+  }
+  .lang {
+    font-weight: 400;
   }
   .failed,
   .rhythm,

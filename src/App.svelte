@@ -2,12 +2,15 @@
   import { onMount } from "svelte";
   import { storageStatus } from "./features/practice/api";
   import Practice from "./features/practice/Practice.svelte";
+  import { practiceMode } from "./features/code/api";
+  import ModeSwitch from "./features/code/ModeSwitch.svelte";
   import { isMetronomeShortcut } from "./features/metronome/beat";
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
 
   const settings = new SettingsStore();
+  const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
   let modal: SettingsModal | undefined = $state();
   // Why sessions are not kept on disk; `null` while persistent or unknown.
   let storageError = $state<string | null>(null);
@@ -47,6 +50,7 @@
       <strong class="temporary" title={storageError}>Sin guardar: modo temporal</strong>
     {/if}
   </div>
+  <ModeSwitch {settings} />
   <button type="button" class="gear" aria-label="Ajustes" title="Ajustes" onclick={() => modal?.open()}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.4" stroke-width="3" stroke-dasharray="3.3 3.3" />
@@ -65,6 +69,9 @@
   textLength={settings.textLength}
   aiRevision={settings.aiRevision}
   metronome={settings.metronome}
+  {practice}
+  indent={settings.codeIndent}
+  codeLines={settings.codeLines}
 />
 
 <SettingsModal bind:this={modal} {settings} />

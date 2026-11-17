@@ -33,6 +33,11 @@ describe("generationKey", () => {
     expect(generationKey(4, 300, 0)).not.toBe(base);
     expect(generationKey(3, 450, 0)).not.toBe(base);
     expect(generationKey(3, 300, 1)).not.toBe(base);
+    expect(generationKey(3, 300, 0, "prose", 12)).toBe(base);
+    const rust = generationKey(3, 300, 0, "code:rust", 12);
+    expect(rust).not.toBe(base);
+    expect(generationKey(3, 300, 0, "code:python", 12)).not.toBe(rust);
+    expect(generationKey(3, 300, 0, "code:rust", 20)).not.toBe(rust);
   });
 });
 
