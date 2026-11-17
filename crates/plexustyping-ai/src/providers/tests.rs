@@ -25,7 +25,25 @@ fn header<'a>(call: &'a Call, name: &str) -> Option<&'a str> {
 }
 
 fn built(id: ProviderId, model: &str, wire: Wire) -> Call {
-    build(&cfg(id, model), &Endpoints::production(), PROMPT, wire).unwrap()
+    build(
+        &cfg(id, model),
+        &Endpoints::production(),
+        PROMPT,
+        wire,
+        None,
+    )
+    .unwrap()
+}
+
+fn built_low(id: ProviderId, model: &str, wire: Wire) -> Call {
+    build(
+        &cfg(id, model),
+        &Endpoints::production(),
+        PROMPT,
+        wire,
+        Some("low"),
+    )
+    .unwrap()
 }
 
 fn text_schema() -> Value {
@@ -143,6 +161,7 @@ fn gemini_build() {
         &Endpoints::production(),
         PROMPT,
         Wire::Gemini,
+        None,
     );
     assert!(matches!(bad, Err(ProviderError::Config { .. })), "{bad:?}");
 }
@@ -211,15 +230,67 @@ fn opencode_responses_build() {
 }
 
 #[test]
+fn opencode_low_effort_goes_in_the_field_of_each_wire() {
+    let chat = built_low(ProviderId::OpencodeGo, "glm-5.3-flash", Wire::Chat);
+    assert_eq!(
+        chat.body,
+        json!({
+            "model": "glm-5.3-flash",
+            "messages": [{"role": "user", "content": PROMPT}],
+            "max_tokens": MAX_TOKENS,
+            "reasoning_effort": "low"
+        })
+    );
+    let responses = build(
+        &cfg(ProviderId::OpencodeGo, "gpt-oss"),
+        &Endpoints::production(),
+        PROMPT,
+        Wire::Responses,
+        Some("minimal"),
+    )
+    .unwrap();
+    assert_eq!(
+        responses.body,
+        json!({
+            "model": "gpt-oss",
+            "input": PROMPT,
+            "max_output_tokens": MAX_TOKENS,
+            "store": false,
+            "reasoning": {"effort": "minimal"}
+        })
+    );
+    let messages = built_low(ProviderId::OpencodeGo, "minimax-m3", Wire::Messages);
+    let plain = built(ProviderId::OpencodeGo, "minimax-m3", Wire::Messages);
+    assert_eq!(messages.body.to_string(), plain.body.to_string());
+    assert_eq!(messages.url, plain.url);
+}
+
+#[test]
+fn low_effort_never_reaches_the_other_providers() {
+    for (id, model) in [
+        (ProviderId::Claude, "claude-haiku-5-5"),
+        (ProviderId::Openai, "gpt-5-mini"),
+        (ProviderId::Gemini, "gemini-3.5-flash-lite"),
+    ] {
+        for wire in [Wire::Chat, Wire::Responses, Wire::Messages] {
+            let low = built_low(id, model, wire);
+            let plain = built(id, model, wire);
+            assert_eq!(low.body.to_string(), plain.body.to_string(), "{id:?}");
+            assert_eq!(low.url, plain.url, "{id:?}");
+        }
+    }
+}
+
+#[test]
 fn opencode_session_is_generated_when_missing_and_validated_when_given() {
     let mut c = cfg(ProviderId::OpencodeGo, "m");
     c.session_id = None;
-    let call = build(&c, &Endpoints::production(), PROMPT, Wire::Chat).unwrap();
+    let call = build(&c, &Endpoints::production(), PROMPT, Wire::Chat, None).unwrap();
     let id = header(&call, "x-opencode-session").unwrap();
     assert!(valid_session(id), "{id}");
     for bad in ["", "has space", "ñ", &"a".repeat(129)] {
         c.session_id = Some(bad.to_string());
-        let got = build(&c, &Endpoints::production(), PROMPT, Wire::Chat);
+        let got = build(&c, &Endpoints::production(), PROMPT, Wire::Chat, None);
         assert!(matches!(got, Err(ProviderError::Config { .. })), "{bad:?}");
     }
     let got = build(
@@ -227,6 +298,7 @@ fn opencode_session_is_generated_when_missing_and_validated_when_given() {
         &Endpoints::production(),
         PROMPT,
         Wire::Gemini,
+        None,
     );
     assert!(matches!(got, Err(ProviderError::Config { .. })), "{got:?}");
 }
@@ -234,7 +306,13 @@ fn opencode_session_is_generated_when_missing_and_validated_when_given() {
 #[test]
 fn empty_model_is_config_for_every_provider() {
     for id in ProviderId::ALL {
-        let got = build(&cfg(id, "  "), &Endpoints::production(), PROMPT, Wire::Chat);
+        let got = build(
+            &cfg(id, "  "),
+            &Endpoints::production(),
+            PROMPT,
+            Wire::Chat,
+            None,
+        );
         assert!(matches!(got, Err(ProviderError::Config { .. })), "{id:?}");
     }
 }

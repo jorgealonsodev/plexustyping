@@ -25,7 +25,11 @@ fn models_dev() -> Reply {
     Reply::ok(json!({"opencode-go": {"models": {
         "minimax-m3": {"provider": {"npm": "@ai-sdk/anthropic"}},
         "gpt-oss": {"provider": {"npm": "@ai-sdk/openai"}},
-        "kimi-k2.6": {}
+        "kimi-k2.6": {},
+        "glm-5.3-flash": {
+            "reasoning": true,
+            "reasoning_options": [{"type": "effort", "values": ["low", "high", "max"]}]
+        }
     }}}))
 }
 
@@ -202,6 +206,57 @@ async fn opencode_go_picks_the_format_from_models_dev_once() {
             "one session per client"
         );
     }
+}
+
+#[tokio::test]
+async fn opencode_go_asks_reasoning_models_for_low_effort_on_generation_only() {
+    let server = mock(vec![
+        ("/api.json", models_dev()),
+        (
+            "/inference/go/v1/chat/completions",
+            chat_reply(&text_json(TEXT)),
+        ),
+        (
+            "/inference/go/v1/chat/completions",
+            chat_reply(&text_json(TEXT)),
+        ),
+        (
+            "/inference/go/v1/chat/completions",
+            chat_reply(&text_json("ok")),
+        ),
+    ])
+    .await;
+    let client = server.client();
+    let req = small_request();
+
+    for model in ["glm-5.3-flash", "kimi-k2.6"] {
+        let got = client
+            .generate(&config(ProviderId::OpencodeGo, model), &req)
+            .await
+            .unwrap();
+        assert_eq!(got.text, NORMALIZED, "{model}");
+    }
+    let glm = config(ProviderId::OpencodeGo, "glm-5.3-flash");
+    assert_eq!(client.test_connection(&glm).await, Ok(()));
+
+    let bodies: Vec<_> = server
+        .requests()
+        .into_iter()
+        .filter(|r| r.path == "/inference/go/v1/chat/completions")
+        .map(|r| r.json())
+        .collect();
+    assert_eq!(bodies.len(), 3);
+    assert_eq!(bodies[0]["model"], "glm-5.3-flash");
+    assert_eq!(bodies[0]["reasoning_effort"], "low");
+    assert_eq!(bodies[1]["model"], "kimi-k2.6");
+    assert!(bodies[1].get("reasoning_effort").is_none(), "{}", bodies[1]);
+    assert_eq!(bodies[2]["model"], "glm-5.3-flash");
+    assert!(
+        bodies[2].get("reasoning_effort").is_none(),
+        "connection test unchanged: {}",
+        bodies[2]
+    );
+    assert_eq!(server.hits("/api.json"), 1);
 }
 
 #[tokio::test]

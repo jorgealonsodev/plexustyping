@@ -2,8 +2,8 @@
 
 use std::time::{Duration, Instant};
 
-use crate::opencode::{Catalog, MAX_CATALOGUE_BYTES, formats_from_models_dev};
-use crate::providers::{Wire, build, list_request, new_session_id, parse, parse_models};
+use crate::opencode::{Catalog, MAX_CATALOGUE_BYTES, ModelInfo, models_from_models_dev};
+use crate::providers::{build, list_request, new_session_id, parse, parse_models};
 use crate::{
     ApiKey, DEFAULT_DEADLINE, DEFAULT_TIMEOUT, Endpoints, Generated, GenerationRequest,
     ProviderConfig, ProviderError, ProviderId, Usage, build_prompt, parse_text_json, validate,
@@ -91,7 +91,7 @@ impl AiClient {
         cfg: &ProviderConfig,
         req: &GenerationRequest,
     ) -> Result<Generated, ProviderError> {
-        let (raw, usage) = self.complete(cfg, &build_prompt(req)).await?;
+        let (raw, usage) = self.complete(cfg, &build_prompt(req), true).await?;
         let text = parse_text_json(&raw)?;
         let text = validate(&text, req).map_err(|issues| ProviderError::Invalid { issues })?;
         Ok(Generated {
@@ -132,7 +132,7 @@ impl AiClient {
     /// OpenCode Go, whose model list is public.
     pub async fn test_connection(&self, cfg: &ProviderConfig) -> Result<(), ProviderError> {
         match cfg.id {
-            ProviderId::OpencodeGo => self.complete(cfg, PING_PROMPT).await.map(|_| ()),
+            ProviderId::OpencodeGo => self.complete(cfg, PING_PROMPT, false).await.map(|_| ()),
             id => self.list_models(id, Some(&cfg.api_key)).await.map(|_| ()),
         }
     }
@@ -201,15 +201,18 @@ impl AiClient {
             .map_err(|err| ProviderError::config(format!("The HTTP client could not start: {err}")))
     }
 
-    /// Sends `prompt` and returns the model's raw text with the usage. Every
-    /// error is masked with the key.
+    /// Sends `prompt` and returns the model's raw text with the usage. With
+    /// `generation`, an OpenCode Go reasoning model is asked for its lowest
+    /// effort (the connection test sends the plain request). Every error is
+    /// masked with the key.
     async fn complete(
         &self,
         cfg: &ProviderConfig,
         prompt: &str,
+        generation: bool,
     ) -> Result<(String, Usage), ProviderError> {
         let key = cfg.api_key.expose();
-        let mut format = Wire::Chat;
+        let mut format = ModelInfo::default();
         let mut with_session;
         let mut cfg = cfg;
         if cfg.id == ProviderId::OpencodeGo && !cfg.model.trim().is_empty() {
@@ -220,7 +223,9 @@ impl AiClient {
                 cfg = &with_session;
             }
         }
-        let call = build(cfg, &self.endpoints, prompt, format).map_err(|e| e.masked(key))?;
+        let low_effort = format.low_effort.filter(|_| generation);
+        let call = build(cfg, &self.endpoints, prompt, format.wire, low_effort)
+            .map_err(|e| e.masked(key))?;
         let mut request = self.http()?.post(&call.url).json(&call.body);
         for (name, value) in &call.headers {
             request = request.header(*name, value);
@@ -231,24 +236,25 @@ impl AiClient {
         parse(call.shape, status, &body).map_err(|e| e.masked(key))
     }
 
-    /// The OpenCode Go API format of `cfg.model`, fetching models.dev when the
-    /// cache is empty or stale; chat completions when it cannot be read.
-    async fn opencode_format(&self, cfg: &ProviderConfig) -> Wire {
+    /// The OpenCode Go API format and lowest effort of `cfg.model`, fetching
+    /// models.dev when the cache is empty or stale; chat completions without an
+    /// effort when it cannot be read.
+    async fn opencode_format(&self, cfg: &ProviderConfig) -> ModelInfo {
         let model = cfg.model.trim();
-        if let Some(wire) = self.catalog.lookup(model, Instant::now()) {
-            return wire;
+        if let Some(info) = self.catalog.lookup(model, Instant::now()) {
+            return info;
         }
-        let formats = match self.http() {
+        let models = match self.http() {
             Ok(http) => {
                 let request = http.get(&self.endpoints.models_dev);
                 match fetch(request, cfg.timeout, cfg.id, MAX_CATALOGUE_BYTES).await {
-                    Ok((200..=299, body)) => formats_from_models_dev(body.as_bytes()),
+                    Ok((200..=299, body)) => models_from_models_dev(body.as_bytes()),
                     _ => None,
                 }
             }
             Err(_) => None,
         };
-        self.catalog.store(formats, model, Instant::now())
+        self.catalog.store(models, model, Instant::now())
     }
 }
 

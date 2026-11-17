@@ -32,8 +32,8 @@ pub fn min_count(density: f32, frequency: f64, len: usize) -> usize {
 
 impl GenerationRequest {
     /// Each non-empty target with the [`min_count`] it needs in a text of
-    /// `len` chars. [`validate`] checks these; the prompt states them for the
-    /// longest accepted length.
+    /// `len` chars. [`validate`] checks these in code mode; the code prompt
+    /// states them for the longest accepted length.
     pub fn min_counts(&self, len: usize) -> Vec<(&str, usize)> {
         self.targets
             .iter()
@@ -63,7 +63,7 @@ pub enum ValidationIssue {
     },
     /// Markdown formatting (`**`, a heading, a code fence or a list item).
     Markdown,
-    /// A target appears fewer times than the density asks for.
+    /// A target appears fewer times than the density asks for (code only).
     LowDensity {
         /// The target.
         target: String,
@@ -87,8 +87,9 @@ pub enum ValidationIssue {
 ///
 /// Issues, in this order: [`ValidationIssue::Empty`] alone for an empty text;
 /// otherwise `Length`, each distinct `CharNotAllowed` (space always allowed),
-/// `Markdown`, and `LowDensity` per target below its
-/// [`GenerationRequest::min_counts`] for the text's length.
+/// `Markdown`, and, in [`Mode::Code`] only, `LowDensity` per target below its
+/// [`GenerationRequest::min_counts`] for the text's length (the prose prompt
+/// names no targets, so prose is not checked for them).
 pub fn validate(text: &str, req: &GenerationRequest) -> Result<String, Vec<ValidationIssue>> {
     let code = matches!(req.mode, Mode::Code { .. });
     let plain = plain_chars(text);
@@ -132,7 +133,12 @@ pub fn validate(text: &str, req: &GenerationRequest) -> Result<String, Vec<Valid
     }
 
     let lower = normalized.to_lowercase();
-    for (target, needed) in req.min_counts(len) {
+    let checked = if code {
+        req.min_counts(len)
+    } else {
+        Vec::new()
+    };
+    for (target, needed) in checked {
         let needle: String = target.nfc().collect::<String>().to_lowercase();
         let found = lower.matches(needle.as_str()).count();
         if found < needed {
@@ -343,8 +349,29 @@ mod tests {
     }
 
     #[test]
-    fn low_density_per_target_case_insensitive() {
+    fn prose_has_no_density_check() {
+        // S9: the prose prompt names no targets, so prose is not checked for them.
         let mut r = req();
+        r.targets = vec!["z".into(), "ci".into()];
+        r.frequencies = vec![0.02, 0.02];
+        r.density = 5.0;
+        assert_eq!(
+            validate("hola casa bonita.", &r).as_deref(),
+            Ok("hola casa bonita.")
+        );
+        // The other checks still apply.
+        assert_eq!(
+            validate("hola!", &r),
+            Err(vec![ValidationIssue::CharNotAllowed { ch: '!' }])
+        );
+    }
+
+    #[test]
+    fn low_density_per_target_case_insensitive_in_code() {
+        let mut r = req();
+        r.mode = Mode::Code {
+            lang: "rust".into(),
+        };
         r.targets = vec!["z".into(), "ci".into()];
         r.frequencies = vec![0.02, 0.02];
         r.density = 5.0;
@@ -382,6 +409,20 @@ mod tests {
             Err(vec![
                 ValidationIssue::Length { len: 4 },
                 ValidationIssue::CharNotAllowed { ch: '*' },
+                ValidationIssue::CharNotAllowed { ch: '!' },
+                ValidationIssue::Markdown,
+            ])
+        );
+        let mut r = req();
+        r.mode = Mode::Code {
+            lang: "rust".into(),
+        };
+        r.allowed_chars.push('`');
+        r.length = 10..60;
+        assert_eq!(
+            validate("```\na!", &r),
+            Err(vec![
+                ValidationIssue::Length { len: 6 },
                 ValidationIssue::CharNotAllowed { ch: '!' },
                 ValidationIssue::Markdown,
                 ValidationIssue::LowDensity {

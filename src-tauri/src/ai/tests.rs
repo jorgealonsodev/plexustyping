@@ -560,7 +560,7 @@ async fn ai_success_is_returned_cached_as_used_and_counted() {
 }
 
 #[tokio::test]
-async fn the_request_carries_targets_allowed_chars_and_topic_but_nothing_typed() {
+async fn the_prose_request_only_asks_for_a_text_in_the_language_and_nothing_typed() {
     let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
     let memory = MemoryStore::shared();
     with_key(&memory, ProviderId::Openai).await;
@@ -587,21 +587,13 @@ async fn the_request_carries_targets_allowed_chars_and_topic_but_nothing_typed()
     let body = &requests[0].body;
     let sent: serde_json::Value = serde_json::from_str(body).unwrap();
     let prompt = sent["messages"][0]["content"].as_str().unwrap();
-    // ñ: ceil(3 × es frequency × 60) = 1.
+    // "dile que genere solo un texto en mi idioma" (S9): language, length and topic only.
     assert!(
-        prompt.contains("Caracteres objetivo: ñ (al menos 1 vez)."),
+        prompt.starts_with("Escribe un texto en español de 50–60 caracteres.\nTema: comida.\n"),
         "{prompt}"
     );
-    assert!(prompt.contains("Tema: comida."), "{prompt}");
-    assert!(prompt.contains("Longitud: 50–60 caracteres."), "{prompt}");
-    let (_, listed) = prompt.split_once("Usa solo estos caracteres: ").unwrap();
-    let layout = commands::get_layout("es-qwerty").unwrap();
-    for ch in layout
-        .allowed_chars()
-        .into_iter()
-        .filter(|c| *c != '\n' && *c != ' ')
-    {
-        assert!(listed.contains(ch), "allowed {ch:?} missing: {prompt}");
+    for absent in ["Caracteres objetivo", "Usa solo"] {
+        assert!(!prompt.contains(absent), "{absent:?} in {prompt}");
     }
     for typed in ["hqlz", "mxndo", "hola mundo"] {
         assert!(!body.contains(typed), "typed text {typed:?} leaked: {body}");
@@ -709,11 +701,13 @@ async fn an_invalid_ai_text_is_retried_once_then_the_corpus_is_used() {
 }
 
 #[tokio::test]
-async fn a_text_without_the_targets_is_retried_as_any_text_and_practises_none() {
+async fn an_invalid_prose_text_is_retried_as_any_text_and_practises_none() {
     // "si no hay letras suficientes o no hay una respuesta valida pide un texto cualquiera"
     const NO_N: &str = "La casa del lago tiene una puerta roja y dos ventanas.";
+    // The layout cannot type the emoji, so the first text is invalid.
+    let untypeable = format!("{} \u{1F642}", NO_N.trim_end_matches('.'));
     let srv = server(vec![
-        (OPENAI, 200, chat_reply(NO_N)),
+        (OPENAI, 200, chat_reply(&untypeable)),
         (OPENAI, 200, chat_reply(NO_N)),
     ])
     .await;
@@ -729,8 +723,9 @@ async fn a_text_without_the_targets_is_retried_as_any_text_and_practises_none() 
         let sent: serde_json::Value = serde_json::from_str(&requests[i].body).unwrap();
         sent["messages"][0]["content"].as_str().unwrap().to_owned()
     };
-    assert!(prompt(0).contains("Caracteres objetivo"), "{}", prompt(0));
-    assert!(!prompt(1).contains("Caracteres objetivo"), "{}", prompt(1));
+    // Prose never states targets (S9), so both attempts ask for the same thing.
+    assert_eq!(prompt(0), prompt(1));
+    assert!(!prompt(0).contains("Caracteres objetivo"), "{}", prompt(0));
     assert_eq!(
         (got.source, got.text.as_str(), got.targets.len()),
         (TextSource::Ai, NO_N, 0)

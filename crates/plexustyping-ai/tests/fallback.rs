@@ -24,17 +24,15 @@ fn chain() -> Vec<plexustyping_ai::ProviderConfig> {
     ]
 }
 
+/// Prose is not checked for targets (S9); a character the layout cannot type
+/// still rejects it.
 fn invalid() -> Reply {
-    chat_reply(&text_json("sin la letra"))
+    chat_reply(&text_json("sin la letra!"))
 }
 
-fn low_density() -> ProviderError {
+fn not_typeable() -> ProviderError {
     ProviderError::Invalid {
-        issues: vec![ValidationIssue::LowDensity {
-            target: "z".into(),
-            found: 0,
-            needed: 1,
-        }],
+        issues: vec![ValidationIssue::CharNotAllowed { ch: '!' }],
     }
 }
 
@@ -67,7 +65,7 @@ async fn a_rejected_text_is_retried_once_without_targets() {
     // "si no hay letras suficientes o no hay una respuesta valida pide un texto cualquiera"
     let server = mock(vec![
         (OPENAI, invalid()),
-        (OPENAI, invalid()),
+        (OPENAI, chat_reply(&text_json("sin la letra"))),
         (GEMINI, gemini_reply("Zorro veloz")),
     ])
     .await;
@@ -78,7 +76,7 @@ async fn a_rejected_text_is_retried_once_without_targets() {
         .await
         .unwrap();
 
-    // The second answer lacks the target too, but the retry asked for any text.
+    // The retry asked for any text, so it practises no target.
     assert_eq!(
         (got.provider, got.text.as_str()),
         (ProviderId::Openai, "sin la letra")
@@ -86,7 +84,7 @@ async fn a_rejected_text_is_retried_once_without_targets() {
     assert!(got.free_text, "the retry drops the targets");
     assert_eq!(
         got.failed_attempts,
-        vec![(ProviderId::Openai, low_density())]
+        vec![(ProviderId::Openai, not_typeable())]
     );
     assert_eq!(server.hits(GEMINI), 0);
 }
@@ -100,6 +98,24 @@ async fn a_first_answer_that_passes_keeps_its_targets() {
         .await
         .unwrap();
     assert!(!got.free_text);
+}
+
+#[tokio::test]
+async fn a_prose_text_without_the_targets_passes_the_first_time() {
+    // S9: the prose prompt names no targets and prose has no density check.
+    let server = mock(vec![(OPENAI, chat_reply(&text_json("sin la letra")))]).await;
+    let got = server
+        .client()
+        .generate_with_fallback(&chain(), &small_request())
+        .await
+        .unwrap();
+    assert_eq!(
+        (got.provider, got.text.as_str()),
+        (ProviderId::Openai, "sin la letra")
+    );
+    assert!(!got.free_text);
+    assert!(got.failed_attempts.is_empty());
+    assert_eq!(server.hits(OPENAI), 1);
 }
 
 #[tokio::test]
@@ -123,7 +139,7 @@ async fn invalid_text_is_retried_once_then_next_provider() {
     assert_eq!(server.hits(OPENAI), 2, "one retry only");
     // The rejected attempts that came before are kept, so the app can log why.
     assert_eq!(got.failed_attempts.len(), 2);
-    assert_eq!(got.failed_attempts[0], (ProviderId::Openai, low_density()));
+    assert_eq!(got.failed_attempts[0], (ProviderId::Openai, not_typeable()));
     assert!(matches!(
         &got.failed_attempts[1],
         (ProviderId::Openai, ProviderError::Invalid { issues }) if issues.contains(&ValidationIssue::Markdown)
@@ -184,7 +200,7 @@ async fn every_error_is_returned_in_order_when_all_fail() {
         .unwrap_err();
 
     assert_eq!(errors.len(), 3, "{errors:?}");
-    assert_eq!(errors[0], (ProviderId::Openai, low_density()));
+    assert_eq!(errors[0], (ProviderId::Openai, not_typeable()));
     assert!(matches!(
         &errors[1],
         (ProviderId::Openai, ProviderError::Invalid { issues }) if issues.contains(&ValidationIssue::Markdown)

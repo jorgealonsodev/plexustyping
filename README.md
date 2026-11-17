@@ -53,18 +53,22 @@ In "Ajustes → IA", turn on "Usar IA para generar textos" and build the fallbac
 chain: up to four providers (Claude, OpenAI, Google Gemini, OpenCode Go), tried
 in order, each with its model (picked from the provider's list, or typed by
 hand), its API key ("Guardar clave" / "Borrar clave") and "Probar conexión".
-"Densidad" (2×–5×, default 3×) sets how much more often the targets appear and
-"Tema" an optional topic. Each target must appear at least
+"Densidad" (2×–5×, default 3×) sets how much more often the targets appear in
+code mode and
+"Tema" an optional topic. Prose prompts only ask for a text in the language,
+with its length range and topic; the text must fit the length, use only
+characters the layout can type and contain no Markdown, but is not checked for
+the targets. Code prompts also name the targets and allowed characters, and
+each target must appear
 `max(1, ceil(min(density × natural frequency, natural frequency + 5 %) × length))`
-times, where the natural
-frequency is how often it occurs per character in the bundled sentences of the
-language (or the bundled snippets in code mode), case-insensitively; the prompt
-states that count for the longest allowed length. When sensible sentences
-cannot reach the counts, the prompt lets the model finish with a run of real
-words that contain the targets. If a provider's text is rejected (too few
-targets or otherwise invalid), its retry asks for any text in the language,
-without targets; such a text practises no particular unit. A rejected text
-logs its validation issues to stderr (never the key). The usage table counts calls and tokens per provider,
+times, where the natural frequency is how often it occurs per character in the
+bundled snippets, case-insensitively; the prompt states that count for the
+longest allowed length. If a provider's text is rejected, its retry asks for
+any text in the language, without targets; such a text practises no particular
+unit. Every failed attempt (rejected text with its validation issues, timeout,
+provider error) is logged to stderr, never the key. OpenCode Go reasoning
+models are asked for their lowest reasoning effort so short practice texts
+come back quickly. The usage table counts calls and tokens per provider,
 today and in total, so you can watch your spending.
 
 - **Keys** are stored only in the system keychain (Keychain on macOS,
@@ -72,8 +76,8 @@ today and in total, so you can watch your spending.
   `com.plexustyping.app`, account `ai:<provider>`), never in plain text, never
   in the database, and never sent back to the interface. Without a working
   keychain no key can be saved.
-- **Privacy:** only the target characters, the language, the length, the
-  allowed characters and the topic are sent. Nothing you type ever leaves
+- **Privacy:** only the language, the length and the topic are sent (in code
+  mode also the target characters and the allowed characters). Nothing you type ever leaves
   this machine. Requests go from Rust to the provider hosts only.
 - **Fallback:** each request has a 30 s timeout (60 s for the whole chain); a provider whose text fails
   validation gets one retry, then the next provider is tried. If all fail (or

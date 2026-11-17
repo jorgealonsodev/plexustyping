@@ -3,39 +3,43 @@
 use crate::{GenerationRequest, Mode};
 
 /// Builds the Spanish prompt for `req`. Only the request's own fields go into
-/// it (targets with their minimum counts, language, mode, length, allowed
-/// characters, topic).
+/// it.
 ///
-/// Each target's count is [`GenerationRequest::min_counts`] at the longest
-/// accepted length, so a text that meets it always meets [`crate::validate`].
-/// Prose may end with a run of real words holding the targets when sensible
-/// sentences cannot reach the counts (like the offline corpus).
+/// Prose asks only for a text in the language, its length range and topic
+/// (no targets or allowed characters; [`crate::validate`] checks no density
+/// for prose). Code also names the language, the targets with their minimum
+/// counts and the allowed characters; each count is
+/// [`GenerationRequest::min_counts`] at the longest accepted length, so a
+/// snippet that meets it always meets [`crate::validate`].
 pub fn build_prompt(req: &GenerationRequest) -> String {
+    const ANSWER: &str = "Responde solo con JSON: {\"text\": \"...\"}";
     let language = language_name(&req.language);
     let longest = req.length.end.saturating_sub(1).max(req.length.start);
-    let length = format!("Longitud: {}–{longest} caracteres.", req.length.start);
     let topic = req
         .topic
         .as_deref()
         .map(|t| t.split_whitespace().collect::<Vec<_>>().join(" "))
         .filter(|t| !t.is_empty())
         .unwrap_or_else(|| "libre".into());
-    let mut lines = Vec::new();
-    match &req.mode {
-        Mode::Prose => {
-            lines.push(format!(
-                "Escribe un texto en {language} para practicar mecanografía."
-            ));
-            lines.push(format!("{length} Tema: {topic}."));
-        }
-        Mode::Code { lang } => {
-            lines.push("Eres un generador de código para practicar mecanografía.".to_string());
-            lines.push(format!(
-                "Escribe un fragmento de código en {} de 5 a 20 líneas, con comentarios en {language}. {length} Tema: {topic}.",
-                lang.trim()
-            ));
-        }
-    }
+    let Mode::Code { lang } = &req.mode else {
+        return [
+            format!(
+                "Escribe un texto en {language} de {}–{longest} caracteres.",
+                req.length.start
+            ),
+            format!("Tema: {topic}."),
+            ANSWER.to_string(),
+        ]
+        .join("\n");
+    };
+    let length = format!("Longitud: {}–{longest} caracteres.", req.length.start);
+    let mut lines = vec![
+        "Eres un generador de código para practicar mecanografía.".to_string(),
+        format!(
+            "Escribe un fragmento de código en {} de 5 a 20 líneas, con comentarios en {language}. {length} Tema: {topic}.",
+            lang.trim()
+        ),
+    ];
     let targets: Vec<String> = req
         .min_counts(longest)
         .into_iter()
@@ -51,13 +55,6 @@ pub fn build_prompt(req: &GenerationRequest) -> String {
         .collect();
     if !targets.is_empty() {
         lines.push(format!("Caracteres objetivo: {}.", targets.join(", ")));
-        if req.mode == Mode::Prose {
-            lines.push(format!(
-                "Empieza con frases naturales. Si con frases con sentido no llegas a esas cantidades, \
-                 completa el resto con palabras reales del {language} que contengan los caracteres objetivo, \
-                 separadas por espacios y con un punto al final."
-            ));
-        }
     }
     let mut allowed: Vec<String> = Vec::new();
     for ch in req.allowed_chars.chars().filter(|c| !c.is_whitespace()) {
@@ -66,22 +63,12 @@ pub fn build_prompt(req: &GenerationRequest) -> String {
             allowed.push(ch);
         }
     }
-    let space = match req.mode {
-        Mode::Prose => "(y el espacio)",
-        Mode::Code { .. } => "(y el espacio y los saltos de línea)",
-    };
     lines.push(format!(
-        "Usa solo estos caracteres: {} {space}.",
+        "Usa solo estos caracteres: {} (y el espacio y los saltos de línea).",
         allowed.join(" ")
     ));
-    lines.push(match req.mode {
-        Mode::Prose => {
-            "Texto plano en una sola línea: sin listas, sin markdown, sin comillas tipográficas."
-                .to_string()
-        }
-        Mode::Code { .. } => "Sin markdown ni bloques ```, sin comillas tipográficas.".to_string(),
-    });
-    lines.push("Responde solo con JSON: {\"text\": \"...\"}".to_string());
+    lines.push("Sin markdown ni bloques ```, sin comillas tipográficas.".to_string());
+    lines.push(ANSWER.to_string());
     lines.join("\n")
 }
 
@@ -134,25 +121,27 @@ mod tests {
         }
     }
 
+    fn code(mut req: GenerationRequest) -> GenerationRequest {
+        req.mode = Mode::Code {
+            lang: "rust".into(),
+        };
+        req
+    }
+
     #[test]
-    fn prose_prompt_is_short_with_counts_and_the_word_run_fallback() {
+    fn prose_prompt_only_asks_for_a_text_in_the_language() {
+        // S9: no targets, counts, word-run fallback or allowed characters.
         assert_eq!(
             build_prompt(&prd()),
-            "Escribe un texto en español para practicar mecanografía.\n\
-             Longitud: 250–300 caracteres. Tema: viajes.\n\
-             Caracteres objetivo: ñ (al menos 4 veces), z (al menos 2 veces), \"ci\" (al menos 8 veces).\n\
-             Empieza con frases naturales. Si con frases con sentido no llegas a esas cantidades, \
-             completa el resto con palabras reales del español que contengan los caracteres objetivo, \
-             separadas por espacios y con un punto al final.\n\
-             Usa solo estos caracteres: a b c ñ . , (y el espacio).\n\
-             Texto plano en una sola línea: sin listas, sin markdown, sin comillas tipográficas.\n\
+            "Escribe un texto en español de 250–300 caracteres.\n\
+             Tema: viajes.\n\
              Responde solo con JSON: {\"text\": \"...\"}"
         );
     }
 
     #[test]
-    fn the_prompt_counts_are_the_validator_counts_at_the_longest_length() {
-        let req = prd();
+    fn the_code_prompt_counts_are_the_validator_counts_at_the_longest_length() {
+        let req = code(prd());
         let shown: Vec<String> = req
             .min_counts(300)
             .into_iter()
@@ -167,7 +156,7 @@ mod tests {
             .collect();
         assert!(build_prompt(&req).contains(&shown.join(", ")));
         // One occurrence is singular; a target without frequency needs one.
-        let mut req = prd();
+        let mut req = code(prd());
         req.targets = vec!["ntr".into()];
         req.frequencies = Vec::new();
         assert!(
@@ -188,28 +177,32 @@ mod tests {
             ("es", "español"),
             ("nl", "nl"),
         ];
-        for (code, name) in names {
+        for (code_name, name) in names {
             let mut req = prd();
-            req.language = code.into();
-            let p = build_prompt(&req);
+            req.language = code_name.into();
             assert!(
-                p.starts_with(&format!("Escribe un texto en {name} para")),
-                "{code}"
+                build_prompt(&req).starts_with(&format!("Escribe un texto en {name} de 250–300")),
+                "{code_name}"
             );
+            req = code(req);
             assert!(
-                p.contains(&format!("palabras reales del {name} que")),
-                "{code}"
+                build_prompt(&req).contains(&format!("comentarios en {name}.")),
+                "{code_name}"
             );
         }
         let mut req = prd();
         req.topic = None;
-        assert!(build_prompt(&req).contains("Tema: libre."));
+        assert!(build_prompt(&req).contains("\nTema: libre.\n"));
         req.topic = Some("  \n ".into());
-        assert!(build_prompt(&req).contains("Tema: libre."));
+        assert!(build_prompt(&req).contains("\nTema: libre.\n"));
         req.topic = Some("la\nmar".into());
-        assert!(build_prompt(&req).contains("Tema: la mar."));
-        // The density (clamped to 2..=5, 3 when not a number) scales the count:
-        // ceil(d × 0.01 × 300).
+        assert!(build_prompt(&req).contains("\nTema: la mar.\n"));
+        // A one-length range shows the same bound twice.
+        req.length = 40..41;
+        assert!(build_prompt(&req).starts_with("Escribe un texto en español de 40–40 caracteres."));
+        // In code, the density (clamped to 2..=5, 3 when not a number) scales
+        // the count: ceil(d × 0.01 × 300).
+        let mut req = code(prd());
         req.targets = vec!["ñ".into()];
         req.frequencies = vec![0.01];
         for (density, shown) in [(1.0, "6"), (9.0, "15"), (2.5, "8"), (f32::NAN, "9")] {
@@ -222,10 +215,13 @@ mod tests {
     }
 
     #[test]
-    fn allowed_chars_are_deduplicated_without_whitespace() {
-        let mut req = prd();
+    fn code_allowed_chars_are_deduplicated_without_whitespace() {
+        let mut req = code(prd());
         req.allowed_chars = "aa b\tc".into();
-        assert!(build_prompt(&req).contains("Usa solo estos caracteres: a b c (y el espacio)."));
+        assert!(
+            build_prompt(&req)
+                .contains("Usa solo estos caracteres: a b c (y el espacio y los saltos de línea).")
+        );
     }
 
     #[test]

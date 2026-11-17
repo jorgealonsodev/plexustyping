@@ -36,7 +36,8 @@ pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// Default total time for one [`AiClient::generate_with_fallback`] call
 /// across the whole chain; afterwards the caller falls back to the local
-/// cache and corpus (PRD §2: next text in under 2 s with background preload).
+/// cache and corpus. The next text is preloaded in the background, so this
+/// bound is rarely felt while typing.
 pub const DEFAULT_DEADLINE: Duration = Duration::from_secs(60);
 
 /// Supported text providers.
@@ -144,12 +145,12 @@ pub struct Generated {
     pub model: String,
     /// Tokens consumed by this call.
     pub usage: Usage,
-    /// Attempts of the fallback chain that failed before this one, in order
-    /// (empty for a single [`AiClient::generate`]).
     /// The text answers the retry without targets (any text in the language,
     /// length and characters asked), so it practises no particular unit.
     #[serde(skip)]
     pub free_text: bool,
+    /// Attempts of the fallback chain that failed before this one, in order
+    /// (empty for a single [`AiClient::generate`]).
     #[serde(skip)]
     pub failed_attempts: Vec<(ProviderId, ProviderError)>,
 }

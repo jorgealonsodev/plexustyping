@@ -11,13 +11,15 @@ Branch `fix/ai-target-density`. Runners: `cargo test --workspace`, `pnpm test`, 
 - **S5 — Simpler prompt with a word-run fallback.** The prose prompt is shorter and easier to satisfy (a few plain Spanish instructions). It allows: natural sentences first and, when the targets cannot be reached with sentences that make sense, the rest may be a run of real words of the language containing the targets, separated by spaces (like the corpus pseudo-sentences). Such a text passes validation.
 - **S6 — Fewer targets.** Each text practises the 2 or 3 worst units (setting "Objetivos por texto": 2 or 3, default 2; earlier stored 4 or 5 load as 2; backend clamps to 2..=3).
 - **S7 — Any text on retry.** When a provider's first text is rejected or malformed, its retry asks for any text: same language, length and allowed characters, no targets. A text accepted that way is shown and cached with no targets (no "Practicando").
+- **S8 — Low reasoning effort.** For OpenCode Go models that the models.dev catalogue marks as reasoning models with a `low` effort option (e.g. `glm-5.3-flash`: `reasoning_options: [{type: effort, values: [low, high, max]}]`), each generation request asks for the lowest effort offered, preferring `none`, then `minimal`, then `low`, in the field the model's wire format uses (chat: `reasoning_effort: "low"`; responses: `reasoning: {effort: "low"}`; messages: none unless the catalogue/format supports it). Models without that option get no extra field. Connection tests and model lists are unchanged.
+- **S9 — Minimal prose prompt.** The prose prompt only asks for a text in the chosen language with the length range and topic, plus the JSON answer line: no target counts, no word-run sentence, no allowed-characters list. Prose validation no longer checks target density; it still checks emptiness, length, characters the layout cannot type and Markdown. Code keeps its prompt and density check.
 - **S4 — Code mode** keeps working (code targets use the code corpus or, if none applies, a minimum of 1 per target); no regression in existing AI tests.
 
 ## Tasks
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S7 | Natural-frequency requirement shared by prompt and validator, stderr reason, tests | worker (context backstop) | pending | |
+| T1 | S1–S9 | Natural-frequency requirement shared by prompt and validator, stderr reason, tests | worker (context backstop) | pending | |
 
 ## Log
 
@@ -30,3 +32,9 @@ Branch `fix/ai-target-density`. Runners: `cargo test --workspace`, `pnpm test`, 
 - **L7 (native review, 2026-11-17):** lineage `review-288fec47f6804dcb` over `37adfe3` approved (reliability + resilience), four advisory findings. Fixed: rejected attempts are now also logged when a later provider succeeds (`Generated.failed_attempts`, test in `tests/fallback.rs`). Kept by design: a frequent-letter target (e.g. `a`) needs its natural share + 5 points (58 of 340 chars instead of the old 21); the prompt's word-run fallback makes that reachable.
 - **L8 (verify, 2026-11-17):** independent verification of `8677a33`: S1–S6 met; cargo 330, vitest 201, check 0; probes of the formula grid, the Log example, prompt = validator counts, word run and serde default all passed.
 - **L9 (user, verbatim, 2026-11-17):** "si no hay letras suficientes o no hay una respuesta valida pide un texto cualquiera" → S7: the retry drops the targets (`Generated.free_text`); tests in `tests/fallback.rs` and `ai/tests.rs`.
+- **L10 (evidence, 2026-11-17):** with every failed attempt logged, the dev app showed "PlexusTyping: AI attempt with OpenCode Go failed: the provider did not answer in time" repeatedly, also after raising the timeouts to 30 s / 60 s (`36a87b6`). OpenCode Go `/models` answers in 0.3 s and lists `glm-5.3-flash`; models.dev answers in 0.9 s and marks it `reasoning: true` with effort options low/high/max.
+- **L11 (user, verbatim, 2026-11-17):** "el codigo lo genera con ia" — code texts do come from the AI with the same model, so the prose prompt's constraints make the reasoning model think too long → S8.
+- **L12 (verify, 2026-11-17):** independent verification of `7aa3c0e`, `ea928ee`, `36a87b6`: S3, S7 and the timeouts met; cargo 333, vitest 201, check 0; advisories: misplaced `free_text`/`failed_attempts` doc comments, README says only rejected texts are logged, stale `DEFAULT_DEADLINE` comment (fixed with S9).
+- **L13 (user, verbatim, 2026-11-17):** screenshot "OpenCode Go no respondió a tiempo: texto del caché", then "dile que genere solo un texto en mi idioma" → S9 (sent to the running worker with S8).
+- **L14 (evidence, 2026-11-17):** worker implemented S8 (lowest effort none > minimal > low from models.dev, chat `reasoning_effort` / responses `reasoning.effort`, not on connection tests) and S9 (3-line prose prompt, no prose density check); parent updated the two app tests. `cargo test --workspace` 339 passed, vitest 201, fmt clean. Not checked against the live OpenCode Go service (needs the user's key).
+- **L15 (user, verbatim, 2026-11-17):** "ahora funciona bien, es posible que fuera opencode go" / "que era muy lento" — with Gemini the app generates prose; Gemini logs show some HTTP 503 and texts rejected for length 295 and 371 (accepted range 300–360 for length 300).

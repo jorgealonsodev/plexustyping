@@ -5,13 +5,14 @@ use serde_json::{Value, json};
 use crate::{ApiKey, Endpoints, ProviderConfig, ProviderError, ProviderId, Usage};
 
 /// The wire format of a request and its reply.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) enum Wire {
     /// Anthropic Messages (`/messages`).
     Messages,
     /// Gemini `generateContent`.
     Gemini,
     /// OpenAI Chat Completions (`/chat/completions`).
+    #[default]
     Chat,
     /// OpenAI Responses (`/responses`).
     Responses,
@@ -138,13 +139,15 @@ fn bearer(key: &ApiKey) -> (&'static str, String) {
     ("authorization", format!("Bearer {}", key.expose()))
 }
 
-/// Builds the generation request. `format` only matters to OpenCode Go (its
-/// per-model API); the other providers always use their own API.
+/// Builds the generation request. `format` and `low_effort` (the reasoning
+/// effort to ask for) only matter to OpenCode Go (its per-model API); the other
+/// providers always use their own API and body.
 pub(crate) fn build(
     cfg: &ProviderConfig,
     endpoints: &Endpoints,
     prompt: &str,
     format: Wire,
+    low_effort: Option<&str>,
 ) -> Result<Call, ProviderError> {
     let model = cfg.model.trim();
     if model.is_empty() {
@@ -220,18 +223,22 @@ pub(crate) fn build(
                 },
             }
         }
-        ProviderId::OpencodeGo => opencode_go(cfg, endpoints, prompt, format)?,
+        ProviderId::OpencodeGo => opencode_go(cfg, endpoints, prompt, format, low_effort)?,
     };
     Ok(call)
 }
 
 /// OpenCode Go: Bearer key and session header, body in the model's own format.
-/// Only portable fields are sent (no structured-output schema).
+/// Only portable fields are sent (no structured-output schema). `low_effort`
+/// goes in the effort field of chat (`reasoning_effort`) and responses
+/// (`reasoning.effort`); Anthropic Messages has no effort field matching the
+/// catalogue's values (thinking is set with a token budget), so it gets none.
 fn opencode_go(
     cfg: &ProviderConfig,
     endpoints: &Endpoints,
     prompt: &str,
     format: Wire,
+    low_effort: Option<&str>,
 ) -> Result<Call, ProviderError> {
     let model = cfg.model.trim();
     let session = match &cfg.session_id {
@@ -246,10 +253,14 @@ fn opencode_go(
     let base = &endpoints.opencode_go;
     let mut headers = vec![(SESSION_HEADER, session), bearer(&cfg.api_key)];
     let (url, body) = match format {
-        Wire::Chat => (
-            format!("{base}/chat/completions"),
-            json!({"model": model, "messages": user_message(prompt), "max_tokens": MAX_TOKENS}),
-        ),
+        Wire::Chat => {
+            let mut body =
+                json!({"model": model, "messages": user_message(prompt), "max_tokens": MAX_TOKENS});
+            if let Some(effort) = low_effort {
+                body["reasoning_effort"] = json!(effort);
+            }
+            (format!("{base}/chat/completions"), body)
+        }
         Wire::Messages => {
             // OpenCode's own Anthropic client also sends the key as `x-api-key`.
             headers.push(("x-api-key", cfg.api_key.expose().to_string()));
@@ -259,10 +270,13 @@ fn opencode_go(
                 json!({"model": model, "max_tokens": MAX_TOKENS, "messages": user_message(prompt)}),
             )
         }
-        Wire::Responses => (
-            format!("{base}/responses"),
-            json!({"model": model, "input": prompt, "max_output_tokens": MAX_TOKENS, "store": false}),
-        ),
+        Wire::Responses => {
+            let mut body = json!({"model": model, "input": prompt, "max_output_tokens": MAX_TOKENS, "store": false});
+            if let Some(effort) = low_effort {
+                body["reasoning"] = json!({"effort": effort});
+            }
+            (format!("{base}/responses"), body)
+        }
         Wire::Gemini => {
             return Err(ProviderError::config(format!(
                 "The API of the OpenCode Go model \"{model}\" is not supported."
