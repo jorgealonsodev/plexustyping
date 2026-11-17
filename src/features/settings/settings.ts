@@ -1,5 +1,6 @@
 import { MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS } from "../metronome/beat";
-import type { ErrorMode } from "../practice/engine";
+import type { PracticeKind } from "../code/api";
+import type { ErrorMode, IndentMode } from "../practice/engine";
 
 const MODE_KEY = "plexustyping.errorMode";
 const LIVE_KEY = "plexustyping.liveStats";
@@ -114,3 +115,53 @@ export function checkMetronome(
 
 export const saveMetronome = (settings: MetronomeSettings, storage: Storage = localStorage) =>
   storage.setItem(METRONOME_KEY, JSON.stringify(settings));
+
+const KIND_KEY = "plexustyping.practiceKind";
+const CODE_LANGUAGE_KEY = "plexustyping.codeLanguage";
+const CODE_INDENT_KEY = "plexustyping.codeIndent";
+const CODE_LINES_KEY = "plexustyping.codeLines";
+
+/** Prose unless code was chosen (S1). */
+export const loadPracticeKind = (storage: Storage = localStorage): PracticeKind =>
+  storage.getItem(KIND_KEY) === "code" ? "code" : "prose";
+
+export const savePracticeKind = (kind: PracticeKind, storage: Storage = localStorage) => storage.setItem(KIND_KEY, kind);
+
+/** Default code language; the backend list decides which ids exist. */
+export const DEFAULT_CODE_LANGUAGE = "python";
+
+/** The stored language id if it looks like one (`rust`, `html-css`), else Python. */
+export function loadCodeLanguage(storage: Storage = localStorage): string {
+  const id = storage.getItem(CODE_LANGUAGE_KEY) ?? "";
+  return /^[a-z][a-z-]*$/.test(id) ? id : DEFAULT_CODE_LANGUAGE;
+}
+
+export const saveCodeLanguage = (id: string, storage: Storage = localStorage) => storage.setItem(CODE_LANGUAGE_KEY, id);
+
+/** Indentation modes in display order; the first is the default (S4). */
+export const CODE_INDENTS: { id: IndentMode; label: string }[] = [
+  { id: "auto", label: "Automática al pulsar Enter" },
+  { id: "manual", label: "Manual" },
+];
+
+export function loadCodeIndent(storage: Storage = localStorage): IndentMode {
+  const id = storage.getItem(CODE_INDENT_KEY);
+  return CODE_INDENTS.find((m) => m.id === id)?.id ?? CODE_INDENTS[0].id;
+}
+
+export const saveCodeIndent = (indent: IndentMode, storage: Storage = localStorage) =>
+  storage.setItem(CODE_INDENT_KEY, indent);
+
+/** Snippet size in lines (S2: 5–20); 12 is the default. */
+export const MIN_CODE_LINES = 5;
+export const MAX_CODE_LINES = 20;
+export const DEFAULT_CODE_LINES = 12;
+
+export function loadCodeLines(storage: Storage = localStorage): number {
+  const raw = storage.getItem(CODE_LINES_KEY);
+  const value = raw === null || raw === "" ? NaN : Number(raw);
+  return intIn(value, MIN_CODE_LINES, MAX_CODE_LINES) ? value : DEFAULT_CODE_LINES;
+}
+
+export const saveCodeLines = (lines: number, storage: Storage = localStorage) =>
+  storage.setItem(CODE_LINES_KEY, String(lines));

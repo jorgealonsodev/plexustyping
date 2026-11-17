@@ -32,6 +32,20 @@ const KEYS = [
   "--finger-r-ring",
   "--finger-r-pinky",
   "--finger-thumb",
+  "--syntax-plain",
+  "--syntax-keyword",
+  "--syntax-string",
+  "--syntax-number",
+  "--syntax-comment",
+  "--syntax-function",
+  "--syntax-type",
+  "--syntax-variable",
+  "--syntax-constant",
+  "--syntax-operator",
+  "--syntax-punctuation",
+  "--syntax-tag",
+  "--syntax-attribute",
+  "--syntax-property",
   "color-scheme",
 ];
 
@@ -99,6 +113,20 @@ describe("typingColors", () => {
       "--finger-r-ring": "#aeccfc",
       "--finger-r-pinky": "#f398da",
       "--finger-thumb": "#bac2de",
+      "--syntax-plain": "#cdd6f4",
+      "--syntax-keyword": "#f5c2e7",
+      "--syntax-string": "#a6e3a1",
+      "--syntax-number": "#f9e2af",
+      "--syntax-comment": "#878ca5",
+      "--syntax-function": "#89b4fa",
+      "--syntax-type": "#94e2d5",
+      "--syntax-variable": "#b1eae1",
+      "--syntax-constant": "#fcd682",
+      "--syntax-operator": "#f398da",
+      "--syntax-punctuation": "#a1a8c3",
+      "--syntax-tag": "#f38ba8",
+      "--syntax-attribute": "#f9e2af",
+      "--syntax-property": "#aeccfc",
       "color-scheme": "dark",
     });
   });
@@ -115,6 +143,14 @@ describe("typingColors", () => {
       expect(colors["--finger-r-index"]).toBe(entry.palette.yellow);
       expect(colors["--finger-thumb"]).toBe(entry.dark ? entry.palette.white : entry.palette.black);
       expect(colors["color-scheme"]).toBe(entry.dark ? "dark" : "light");
+      // Code mode (S3): syntax colours from the ANSI palette, as PlexusTerm colours code.
+      expect(colors["--syntax-plain"]).toBe(fg);
+      expect(colors["--syntax-keyword"]).toBe(entry.palette.magenta);
+      expect(colors["--syntax-string"]).toBe(entry.palette.green);
+      expect(colors["--syntax-function"]).toBe(entry.palette.blue);
+      expect(colors["--syntax-tag"]).toBe(red);
+      expect(colors["--syntax-comment"]).toBe(mix(bg, fg, 0.6));
+      expect(colors["--syntax-punctuation"]).toBe(mix(bg, fg, 0.75));
     }
   });
 

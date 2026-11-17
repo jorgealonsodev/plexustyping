@@ -1,0 +1,87 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { focusTyping } from "../practice/focus";
+  import type { SettingsStore } from "../settings/store.svelte";
+  import type { PracticeKind } from "./api";
+  import { LANGUAGES } from "./languages.svelte";
+
+  // Prose / code switch and the code language, in the header (S1, S6).
+  let { settings }: { settings: SettingsStore } = $props();
+
+  const KINDS: { id: PracticeKind; label: string }[] = [
+    { id: "prose", label: "Prosa" },
+    { id: "code", label: "Código" },
+  ];
+
+  onMount(() => void LANGUAGES.load());
+
+  // A stored language that is no longer bundled falls back to the first one.
+  $effect(() => {
+    const list = LANGUAGES.list;
+    if (list.length > 0 && !list.some((l) => l.id === settings.codeLanguage)) settings.setCodeLanguage(list[0].id);
+  });
+
+  function choose(e: Event & { currentTarget: HTMLSelectElement }) {
+    settings.setCodeLanguage(e.currentTarget.value);
+    focusTyping();
+  }
+</script>
+
+<div class="mode">
+  <div class="kinds" role="group" aria-label="Modo de práctica">
+    {#each KINDS as k (k.id)}
+      <button
+        type="button"
+        aria-pressed={settings.practiceKind === k.id}
+        class:active={settings.practiceKind === k.id}
+        onclick={() => settings.setPracticeKind(k.id)}>{k.label}</button
+      >
+    {/each}
+  </div>
+  {#if settings.practiceKind === "code"}
+    <select aria-label="Lenguaje de programación" onchange={choose}>
+      {#each LANGUAGES.list as l (l.id)}
+        <option value={l.id} selected={l.id === settings.codeLanguage}>{l.name}</option>
+      {/each}
+    </select>
+  {/if}
+</div>
+
+<style>
+  .mode {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .kinds {
+    display: flex;
+  }
+  .kinds button {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .kinds button:first-child {
+    border-radius: 0.375rem 0 0 0.375rem;
+  }
+  .kinds button:last-child {
+    margin-left: -1px;
+    border-radius: 0 0.375rem 0.375rem 0;
+  }
+  .kinds .active {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  select {
+    max-width: 9rem;
+    padding: 0.3rem 0.4rem;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+  }
+</style>

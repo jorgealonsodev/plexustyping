@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  CODE_INDENTS,
   ERROR_MODES,
+  MAX_CODE_LINES,
+  MIN_CODE_LINES,
   checkMetronome,
+  loadCodeIndent,
+  loadCodeLanguage,
+  loadCodeLines,
+  loadPracticeKind,
+  saveCodeIndent,
+  saveCodeLanguage,
+  saveCodeLines,
+  savePracticeKind,
   TARGET_COUNTS,
   TEXT_LENGTHS,
   loadErrorMode,
@@ -165,5 +176,52 @@ describe("settings", () => {
     expect(loadMetronome(memoryStorage({ "plexustyping.metronome": "{nope" }))).toEqual(load({}));
     const current = { enabled: true, bpm: 90, sound: "wood" as const, volume: 30, accentEvery: 3 };
     expect(checkMetronome({ ...current, bpm: Number.NaN, volume: 50 }, current)).toEqual({ ...current, volume: 50 });
+  });
+});
+
+describe("code settings", () => {
+  it("defaults to prose, Python, auto indent on Enter and 12 lines", () => {
+    const storage = memoryStorage();
+    expect(loadPracticeKind(storage)).toBe("prose");
+    expect(loadCodeLanguage(storage)).toBe("python");
+    expect(loadCodeIndent(storage)).toBe("auto");
+    expect(loadCodeLines(storage)).toBe(12);
+    expect(CODE_INDENTS.map((i) => i.label)).toEqual(["Automática al pulsar Enter", "Manual"]);
+    expect([MIN_CODE_LINES, MAX_CODE_LINES]).toEqual([5, 20]);
+  });
+
+  it("round-trips every code setting", () => {
+    const storage = memoryStorage();
+    savePracticeKind("code", storage);
+    saveCodeLanguage("rust", storage);
+    saveCodeIndent("manual", storage);
+    saveCodeLines(20, storage);
+    expect([loadPracticeKind(storage), loadCodeLanguage(storage), loadCodeIndent(storage), loadCodeLines(storage)]).toEqual([
+      "code",
+      "rust",
+      "manual",
+      20,
+    ]);
+    saveCodeLines(5, storage);
+    expect(loadCodeLines(storage)).toBe(5);
+  });
+
+  it("falls back to the defaults for invalid stored values", () => {
+    const storage = memoryStorage({
+      "plexustyping.practiceKind": "poetry",
+      "plexustyping.codeLanguage": "Not An Id!",
+      "plexustyping.codeIndent": "tabs",
+      "plexustyping.codeLines": "21",
+    });
+    expect([loadPracticeKind(storage), loadCodeLanguage(storage), loadCodeIndent(storage), loadCodeLines(storage)]).toEqual([
+      "prose",
+      "python",
+      "auto",
+      12,
+    ]);
+    for (const bad of ["4", "12.5", "x", ""]) {
+      storage.setItem("plexustyping.codeLines", bad);
+      expect(loadCodeLines(storage), bad).toBe(12);
+    }
   });
 });

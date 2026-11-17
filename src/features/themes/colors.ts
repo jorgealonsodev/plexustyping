@@ -36,7 +36,7 @@ export function contrastRatio(a: string, b: string): number {
 
 /**
  * CSS custom properties of the app for a colour scheme, mapped to the typing roles
- * (background, pending text, correct text, error, cursor, keyboard). Panels and borders
+ * (background, pending text, correct text, error, cursor, keyboard, code syntax). Panels and borders
  * are layered from the background towards the text; status colours come from the ANSI palette.
  */
 export function typingColors({ dark, palette }: ThemeEntry): Record<string, string> {
@@ -77,6 +77,21 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
     "--finger-r-ring": palette.brightBlue,
     "--finger-r-pinky": palette.brightMagenta,
     "--finger-thumb": dark ? palette.white : palette.black,
+    // Code mode (S3): one colour per highlight class, from the ANSI palette as PlexusTerm colours code.
+    "--syntax-plain": fg,
+    "--syntax-keyword": palette.magenta,
+    "--syntax-string": palette.green,
+    "--syntax-number": palette.yellow,
+    "--syntax-comment": mix(bg, fg, 0.6),
+    "--syntax-function": palette.blue,
+    "--syntax-type": palette.cyan,
+    "--syntax-variable": palette.brightCyan,
+    "--syntax-constant": palette.brightYellow,
+    "--syntax-operator": palette.brightMagenta,
+    "--syntax-punctuation": mix(bg, fg, 0.75),
+    "--syntax-tag": palette.red,
+    "--syntax-attribute": palette.yellow,
+    "--syntax-property": palette.brightBlue,
     "color-scheme": dark ? "dark" : "light",
   };
 }
