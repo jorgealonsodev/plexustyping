@@ -1181,9 +1181,20 @@ fn rejections_are_one_line_per_invalid_attempt_without_the_key() {
             "PlexusTyping: AI text from OpenAI rejected: length 412; char not allowed '€'; \
              markdown; low density \"ntr\" found 1 needed 2"
                 .to_owned(),
+            "PlexusTyping: AI attempt with Gemini failed: the provider did not answer in time"
+                .to_owned(),
             "PlexusTyping: AI text from Claude rejected: empty".to_owned(),
         ]
     );
     assert!(lines.iter().all(|l| !l.contains(KEY)));
-    assert!(rejection_lines(&[(ProviderId::Openai, ProviderError::Timeout)]).is_empty());
+    // A malformed reply is logged too: it shows the same notice as a rejected text.
+    let malformed = ProviderError::BadResponse {
+        message: "The answer was not a {\"text\": \"...\"} JSON object.".into(),
+    };
+    assert_eq!(
+        rejection_lines(&[(ProviderId::OpencodeGo, malformed)]),
+        [
+            "PlexusTyping: AI attempt with OpenCode Go failed: The answer was not a {\"text\": \"...\"} JSON object."
+        ]
+    );
 }

@@ -177,16 +177,20 @@ pub fn provider_reason(id: ProviderId, err: &ProviderError) -> String {
     }
 }
 
-/// One stderr line per attempt whose text failed validation, listing every
-/// issue (S3). Issues hold only lengths, characters and targets: never a key.
+/// One stderr line per failed attempt (S3): a rejected text lists every
+/// validation issue (lengths, characters and targets only); any other failure
+/// (malformed reply, timeout, rejected key…) its message, which the client has
+/// already stripped of the key.
 fn rejection_lines(errors: &[(ProviderId, ProviderError)]) -> Vec<String> {
     errors
         .iter()
-        .filter_map(|(id, err)| match err {
-            ProviderError::Invalid { issues } => Some((id, issues)),
-            _ => None,
-        })
-        .map(|(id, issues)| {
+        .map(|(id, err)| {
+            let ProviderError::Invalid { issues } = err else {
+                return format!(
+                    "PlexusTyping: AI attempt with {} failed: {err}",
+                    short_name(*id)
+                );
+            };
             let listed: Vec<String> = issues
                 .iter()
                 .map(|issue| match issue {
