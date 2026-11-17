@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   CODE_INDENTS,
+  DEFAULT_LANGUAGE,
   DEFAULT_LAYOUT,
   ERROR_MODES,
+  LANGUAGES,
   LAYOUTS,
+  loadLanguage,
   loadLayout,
+  saveLanguage,
   saveLayout,
   MAX_CODE_LINES,
   MIN_CODE_LINES,
@@ -243,13 +247,13 @@ describe("keyboard layout setting", () => {
       { id: "es-qwerty", label: "Español (España)" },
       { id: "latam-qwerty", label: "Español (Latinoamérica)" },
       { id: "us-qwerty", label: "English (US)" },
+      { id: "pt-abnt2", label: "Português (Brasil)" },
+      { id: "fr-azerty", label: "Français (France)" },
+      { id: "de-qwertz", label: "Deutsch (Deutschland)" },
     ]);
     expect([...LAYOUTS].sort((a, b) => a.id.localeCompare(b.id))).toEqual(bundled.sort((a, b) => a.id.localeCompare(b.id)));
     expect(DEFAULT_LAYOUT).toBe("es-qwerty");
   });
-      { id: "pt-abnt2", label: "Português (Brasil)" },
-      { id: "fr-azerty", label: "Français (France)" },
-      { id: "de-qwertz", label: "Deutsch (Deutschland)" },
 
   it("defaults to the Spanish layout, ignores unknown stored ids and persists the choice", () => {
     const storage = memoryStorage();
@@ -258,5 +262,27 @@ describe("keyboard layout setting", () => {
     saveLayout("us-qwerty", storage);
     expect(storage.getItem("plexustyping.layout")).toBe("us-qwerty");
     expect(loadLayout(storage)).toBe("us-qwerty");
+  });
+});
+
+describe("language setting", () => {
+  it("lists the five prose languages, Spanish first and default", () => {
+    expect(LANGUAGES).toEqual([
+      { id: "es", label: "Español" },
+      { id: "en", label: "English" },
+      { id: "pt", label: "Português (Brasil)" },
+      { id: "fr", label: "Français" },
+      { id: "de", label: "Deutsch" },
+    ]);
+    expect(DEFAULT_LANGUAGE).toBe("es");
+  });
+
+  it("defaults to Spanish, ignores unknown stored ids and persists the choice", () => {
+    const storage = memoryStorage();
+    expect(loadLanguage(storage)).toBe("es");
+    expect(loadLanguage(memoryStorage({ "plexustyping.language": "xx" }))).toBe("es");
+    saveLanguage("fr", storage);
+    expect(storage.getItem("plexustyping.language")).toBe("fr");
+    expect(loadLanguage(storage)).toBe("fr");
   });
 });

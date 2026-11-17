@@ -29,7 +29,9 @@ import {
   savePracticeKind,
   loadErrorMode,
   loadFlashes,
+  loadLanguage,
   loadLayout,
+  saveLanguage,
   saveLayout,
   loadHeatmap,
   loadLiveStats,
@@ -59,6 +61,8 @@ export class SettingsStore {
   heatmap = $state(loadHeatmap());
   /** Drawn keyboard and the chars texts may contain (S1–S4). */
   layout = $state(loadLayout());
+  /** Language of prose texts (S1). */
+  language = $state(loadLanguage());
   targetCount = $state(loadTargetCount());
   textLength = $state(loadTextLength());
   metronome = $state.raw(loadMetronome());
@@ -129,6 +133,12 @@ export class SettingsStore {
   setLayout(id: string) {
     this.layout = id;
     saveLayout(id);
+  }
+
+  /** Loads a new prose text in the language (the practice screen watches it). */
+  setLanguage(id: string) {
+    this.language = id;
+    saveLanguage(id);
   }
 
   setHeatmap(on: boolean) {

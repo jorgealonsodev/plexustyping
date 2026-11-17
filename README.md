@@ -22,7 +22,7 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   Shift, AltGr; dead keys underlined): it highlights the next key, plus Shift or
   AltGr, coloured by finger, and flashes typed keys green or red. `F2` shows or hides it.
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
-  window, with one section per topic. "Práctica": error mode (continue, stop
+  window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
   targets per text (3–5), text length (100–600 characters) and live stats.
   "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
@@ -173,25 +173,37 @@ Without saved sessions (or in temporary mode) the window shows "Aún no hay
 sesiones guardadas.". `Escape`, `×` or a click outside closes it and returns
 to the text.
 
-### Keyboard layouts
+### Languages and keyboard layouts
 
-"Ajustes → Teclado → Distribución" chooses one of three built-in layouts:
+"Ajustes → Práctica → Idioma" chooses the language of prose texts: Español
+(default), English, Português (Brasil), Français or Deutsch. Each language has
+its own offline corpus (5,000 frequent words, everyday sentences and a
+diagnostic paragraph) and the AI is asked for texts in that language. Changing
+it loads a new text; each saved session records its language (history and the
+CSV `idioma` column). Code practice is not affected.
 
-| Layout | Id | Shape | Dead keys | AltGr |
+"Ajustes → Teclado → Distribución" chooses one of six built-in layouts:
+
+| Layout | Id | Shape | Dead keys | Notes |
 |---|---|---|---|---|
-| Español (España) (default) | `es-qwerty` | ISO | `` ´ ¨ ^ ` `` | yes |
-| Español (Latinoamérica) | `latam-qwerty` | ISO | `` ´ ¨ ^ ` `` | `@` on Q, `\` on `'`, `~` on `+` |
-| English (US) | `us-qwerty` | ANSI | none | none |
+| Español (España) (default) | `es-qwerty` | ISO | `` ´ ¨ ^ ` `` | |
+| Español (Latinoamérica) | `latam-qwerty` | ISO | `` ´ ¨ ^ ` `` | `@` on AltGr+Q, `\` on AltGr+`'`, `~` on AltGr+`+` |
+| English (US) | `us-qwerty` | ANSI | none | no AltGr layer |
+| Português (Brasil) | `pt-abnt2` | ABNT2 | `` ´ ` ^ ~ ¨ `` | `ç` key; extra `/ ?` key beside the right Shift |
+| Français (France) | `fr-azerty` | ISO | `^ ¨` | digits on Shift; no `æ œ` or accented capitals |
+| Deutsch (Deutschland) | `de-qwertz` | ISO | `` ^ ´ ` `` | `ß ä ö ü` keys |
 
 The layout drives the drawn keyboard (labels, next-key highlight, heatmap) and
-the characters generated texts may contain: on the US layout texts have no
-`ñ` or accents, and a new profile skips the Spanish diagnostic text. Changing
-the layout loads a new text; each saved session records its layout (history
-and the CSV `layout` column).
+the characters generated texts may contain: on the US layout Spanish texts
+have no `ñ` or accents. A new profile starts with the diagnostic text of the
+chosen language when the layout can type it. Changing the layout loads a new
+text; each saved session records its layout (history and the CSV `layout`
+column).
 
 Limits: the keystrokes themselves come from the system keyboard layout, so the
-layout chosen in the app must match the one set in the operating system. Texts
-stay in Spanish on every layout.
+layout chosen in the app must match the one set in the operating system. The
+statistics of weak keys are one model per profile, shared by every language.
+Corpus sources and licences: `THIRD_PARTY_NOTICES.md`.
 
 ### Where data lives
 
@@ -209,7 +221,7 @@ stay in the webview's local storage.
 | --- | --- |
 | `crates/plexustyping-core` | Typing session engine: input replay, error modes, stats |
 | `crates/plexustyping-layouts` | Keyboard layouts (TOML) and dead-key composition |
-| `crates/plexustyping-corpus` | Local offline corpus and AI-free text generator |
+| `crates/plexustyping-corpus` | Local offline corpora (es, en, pt, fr, de) and AI-free text generator |
 | `crates/plexustyping-store` | Local SQLite store: profiles, sessions, keystrokes, statistics, AI text cache and usage |
 | `crates/plexustyping-ai` | AI providers, prompt, validation and fallback chain |
 | `crates/plexustyping-audio` | Metronome audio |

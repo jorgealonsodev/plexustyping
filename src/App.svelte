@@ -87,6 +87,7 @@
   {practice}
   indent={settings.codeIndent}
   layoutId={settings.layout}
+  languageId={settings.language}
   codeLines={settings.codeLines}
 />
 

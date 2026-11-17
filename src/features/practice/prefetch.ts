@@ -28,7 +28,7 @@ export function sourceLabel(t: Pick<PracticeText, "source" | "provider" | "model
 /**
  * Identifies the settings a next text depends on; a prefetch made under another key is stale.
  * `practice` is a `practiceKey` (`prose` or `code:<lang>`), `codeLines` the snippet size,
- * `layout` the keyboard layout id.
+ * `layout` the keyboard layout id, `language` the prose language id.
  */
 export const generationKey = (
   targetCount: number,
@@ -37,7 +37,8 @@ export const generationKey = (
   practice = "prose",
   codeLines = 12,
   layout = "es-qwerty",
-) => `${targetCount}|${textLength}|${aiRevision}|${practice}|${codeLines}|${layout}`;
+  language = "es",
+) => `${targetCount}|${textLength}|${aiRevision}|${practice}|${codeLines}|${layout}|${language}`;
 
 /** Holds at most one background request, tagged with the generation key it was made for. */
 export class Prefetcher<T> {

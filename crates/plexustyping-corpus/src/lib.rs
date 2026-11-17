@@ -45,12 +45,63 @@ pub struct GenerateOptions {
     pub seed: u64,
 }
 
-static SPANISH: LazyLock<Corpus> = LazyLock::new(|| Corpus {
-    language: "es",
-    diagnostic: include_str!("../data/es/diagnostic.txt").trim(),
-    words: data_lines(include_str!("../data/es/words.txt")),
-    sentences: data_lines(include_str!("../data/es/sentences.txt")),
+/// One bundled language: its code and its three embedded data files.
+struct LanguageData {
+    id: &'static str,
+    diagnostic: &'static str,
+    words: &'static str,
+    sentences: &'static str,
+}
+
+/// Bundled languages in display order; a new language is one entry here.
+const LANGUAGES: &[LanguageData] = &[
+    LanguageData {
+        id: "es",
+        diagnostic: include_str!("../data/es/diagnostic.txt"),
+        words: include_str!("../data/es/words.txt"),
+        sentences: include_str!("../data/es/sentences.txt"),
+    },
+    LanguageData {
+        id: "en",
+        diagnostic: include_str!("../data/en/diagnostic.txt"),
+        words: include_str!("../data/en/words.txt"),
+        sentences: include_str!("../data/en/sentences.txt"),
+    },
+    LanguageData {
+        id: "pt",
+        diagnostic: include_str!("../data/pt/diagnostic.txt"),
+        words: include_str!("../data/pt/words.txt"),
+        sentences: include_str!("../data/pt/sentences.txt"),
+    },
+    LanguageData {
+        id: "fr",
+        diagnostic: include_str!("../data/fr/diagnostic.txt"),
+        words: include_str!("../data/fr/words.txt"),
+        sentences: include_str!("../data/fr/sentences.txt"),
+    },
+    LanguageData {
+        id: "de",
+        diagnostic: include_str!("../data/de/diagnostic.txt"),
+        words: include_str!("../data/de/words.txt"),
+        sentences: include_str!("../data/de/sentences.txt"),
+    },
+];
+
+/// The parsed corpora, one per [`LANGUAGES`] entry and in the same order.
+static CORPORA: LazyLock<Vec<Corpus>> = LazyLock::new(|| {
+    LANGUAGES
+        .iter()
+        .map(|data| Corpus {
+            language: data.id,
+            diagnostic: data.diagnostic.trim(),
+            words: data_lines(data.words),
+            sentences: data_lines(data.sentences),
+        })
+        .collect()
 });
+
+static IDS: LazyLock<Vec<&'static str>> =
+    LazyLock::new(|| LANGUAGES.iter().map(|data| data.id).collect());
 
 fn data_lines(text: &'static str) -> Vec<&'static str> {
     text.lines()
@@ -61,12 +112,12 @@ fn data_lines(text: &'static str) -> Vec<&'static str> {
 
 /// Returns the corpus of `language` (for example `"es"`), if bundled.
 pub fn corpus(language: &str) -> Option<&'static Corpus> {
-    (language == "es").then(|| &*SPANISH)
+    CORPORA.iter().find(|c| c.language == language)
 }
 
 /// Lists the codes of every bundled language.
 pub fn languages() -> &'static [&'static str] {
-    &["es"]
+    &IDS
 }
 
 impl Corpus {
@@ -75,7 +126,7 @@ impl Corpus {
         self.language
     }
 
-    /// Fixed text covering every letter, accent, sign and capital use.
+    /// Fixed text covering the language's letters, accents, signs and capital use.
     pub fn diagnostic(&self) -> &str {
         self.diagnostic
     }

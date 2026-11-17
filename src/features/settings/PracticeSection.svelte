@@ -1,13 +1,27 @@
 <script lang="ts">
   import type { ErrorMode } from "../practice/engine";
   import SettingField from "./SettingField.svelte";
-  import { ERROR_MODES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
+  import { ERROR_MODES, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
 
   type Change<T extends HTMLElement> = Event & { currentTarget: T };
 </script>
+
+<SettingField label="Idioma" hint="Idioma de los textos; cambiarlo carga un texto nuevo.">
+  {#snippet children({ id, hintId })}
+    <select
+      {id}
+      aria-describedby={hintId}
+      onchange={(e: Change<HTMLSelectElement>) => settings.setLanguage(e.currentTarget.value)}
+    >
+      {#each LANGUAGES as l (l.id)}
+        <option value={l.id} selected={l.id === settings.language}>{l.label}</option>
+      {/each}
+    </select>
+  {/snippet}
+</SettingField>
 
 <SettingField label="Modo de error" hint="Qué pasa al fallar una tecla; cambiarlo reinicia el texto.">
   {#snippet children({ id, hintId })}

@@ -410,16 +410,27 @@ pub fn diagnostic_for_new_profile(
     }))
 }
 
-/// `profile` as it types now: with the chosen built-in `layout`, or with its
-/// own when none is given; an unknown `layout` is an error, as in `first_text`.
-pub fn typing_profile(profile: &Profile, layout: Option<&str>) -> Result<Profile, String> {
+/// `profile` as it types now: with the chosen built-in `layout` and corpus
+/// `language`, or with its own when none is given; an unknown `layout` or
+/// `language` is an error, as in `first_text`.
+pub fn typing_profile(
+    profile: &Profile,
+    layout: Option<&str>,
+    language: Option<&str>,
+) -> Result<Profile, String> {
     let layout = match layout {
         Some(id) if plexustyping_layouts::builtin_ids().contains(&id) => id,
         Some(id) => return Err(format!("unknown layout: {id}")),
         None => &profile.layout,
     };
+    let language = match language {
+        Some(id) if corpus(id).is_some() => id,
+        Some(id) => return Err(unknown_language(id)),
+        None => &profile.language,
+    };
     Ok(Profile {
         layout: layout.to_owned(),
+        language: language.to_owned(),
         ..profile.clone()
     })
 }
@@ -1333,20 +1344,86 @@ mod tests {
     }
 
     #[test]
+    fn each_diagnostic_is_typeable_on_its_native_layout() {
+        for (language, layout) in [
+            ("es", "es-qwerty"),
+            ("en", "us-qwerty"),
+            ("pt", "pt-abnt2"),
+            ("fr", "fr-azerty"),
+            ("de", "de-qwertz"),
+        ] {
+            let allowed = plexustyping_layouts::builtin(layout).unwrap().allowed_chars();
+            let text = diagnostic_text(language).unwrap_or_else(|e| panic!("{language}: {e}"));
+            let missing: String = text.chars().filter(|c| !allowed.contains(c)).collect();
+            assert!(missing.is_empty(), "{language} on {layout} cannot type {missing:?}");
+        }
+    }
+
+    #[test]
     fn typing_profile_takes_a_known_layout_rejects_an_unknown_one_and_defaults_to_its_own() {
         let (_, profile) = memory();
         assert_eq!(profile.layout, "es-qwerty");
-        let us = typing_profile(&profile, Some("us-qwerty")).unwrap();
+        let us = typing_profile(&profile, Some("us-qwerty"), None).unwrap();
         assert_eq!(us.layout, "us-qwerty");
         assert_eq!((us.id, &us.language), (profile.id, &profile.language));
-        assert_eq!(typing_profile(&profile, Some("xx")), Err("unknown layout: xx".to_owned()));
-        assert_eq!(typing_profile(&profile, None), Ok(profile));
+        assert_eq!(
+            typing_profile(&profile, Some("xx"), None),
+            Err("unknown layout: xx".to_owned())
+        );
+        assert_eq!(typing_profile(&profile, None, None), Ok(profile));
+    }
+
+    #[test]
+    fn typing_profile_takes_a_known_language_rejects_an_unknown_one_and_defaults_to_its_own() {
+        let (_, profile) = memory();
+        // A profile stored with another language: the chosen corpus language wins.
+        let other = Profile {
+            language: "zz".to_owned(),
+            ..profile.clone()
+        };
+        let es = typing_profile(&other, None, Some("es")).unwrap();
+        assert_eq!(es.language, "es");
+        assert_eq!((es.id, &es.layout), (other.id, &other.layout));
+        assert_eq!(
+            typing_profile(&profile, None, Some("xx")),
+            Err("unknown language: xx".to_owned())
+        );
+        assert_eq!(typing_profile(&other, None, None), Ok(other.clone()));
+        let both = typing_profile(&other, Some("us-qwerty"), Some("es")).unwrap();
+        assert_eq!((both.layout.as_str(), both.language.as_str()), ("us-qwerty", "es"));
+    }
+
+    #[test]
+    fn a_session_records_the_language_of_the_typing_profile_not_the_stored_one() {
+        let (mut store, profile) = memory();
+        let stored = Profile {
+            language: "zz".to_owned(),
+            ..profile.clone()
+        };
+        let typed = typing_profile(&stored, None, Some("es")).unwrap();
+        let scored = score_session(
+            &mut store,
+            &typed,
+            "hola",
+            ErrorMode::AllowContinue,
+            &typing("hola"),
+            1,
+        );
+        assert!(scored.saved, "{:?}", scored.save_error);
+        let sessions = store.sessions(profile.id, None, None).unwrap();
+        assert_eq!(sessions[0].language.as_deref(), Some("es"));
+        assert_eq!(
+            typing_profile(&stored, None, Some("xx")),
+            Err("unknown language: xx".to_owned()),
+            "an unknown language stores nothing: the command fails before scoring"
+        );
+        assert_eq!(store.sessions(profile.id, None, None).unwrap().len(), 1);
     }
 
     #[test]
     fn a_session_records_the_layout_of_the_typing_profile() {
         let (mut store, profile) = memory();
-        let latam = typing_profile(&profile, Some("latam-qwerty")).unwrap();
+        let latam = typing_profile(&profile, Some("latam-qwerty"), None).unwrap();
         let events = typing("hola");
         let scored = score_session(
             &mut store,

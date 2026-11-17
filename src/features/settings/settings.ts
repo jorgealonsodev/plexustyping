@@ -10,16 +10,17 @@ const HEATMAP_KEY = "plexustyping.heatmap";
 const TARGETS_KEY = "plexustyping.targetCount";
 const LENGTH_KEY = "plexustyping.textLength";
 const LAYOUT_KEY = "plexustyping.layout";
+const LANGUAGE_KEY = "plexustyping.language";
 
 /** Built-in keyboard layouts (`layouts/*.toml`) in display order; the first is the default. */
 export const LAYOUTS: { id: string; label: string }[] = [
   { id: "es-qwerty", label: "Español (España)" },
   { id: "latam-qwerty", label: "Español (Latinoamérica)" },
   { id: "us-qwerty", label: "English (US)" },
-];
   { id: "pt-abnt2", label: "Português (Brasil)" },
   { id: "fr-azerty", label: "Français (France)" },
   { id: "de-qwertz", label: "Deutsch (Deutschland)" },
+];
 
 export const DEFAULT_LAYOUT = LAYOUTS[0].id;
 
@@ -30,6 +31,25 @@ export function loadLayout(storage: Storage = localStorage): string {
 }
 
 export const saveLayout = (id: string, storage: Storage = localStorage) => storage.setItem(LAYOUT_KEY, id);
+
+/** Prose languages (corpus ids) in display order; the first is the default. */
+export const LANGUAGES: { id: string; label: string }[] = [
+  { id: "es", label: "Español" },
+  { id: "en", label: "English" },
+  { id: "pt", label: "Português (Brasil)" },
+  { id: "fr", label: "Français" },
+  { id: "de", label: "Deutsch" },
+];
+
+export const DEFAULT_LANGUAGE = LANGUAGES[0].id;
+
+/** The stored prose language if it is a listed one, else Spanish. */
+export function loadLanguage(storage: Storage = localStorage): string {
+  const id = storage.getItem(LANGUAGE_KEY);
+  return LANGUAGES.find((l) => l.id === id)?.id ?? DEFAULT_LANGUAGE;
+}
+
+export const saveLanguage = (id: string, storage: Storage = localStorage) => storage.setItem(LANGUAGE_KEY, id);
 
 /** Error modes in display order; the first is the default (S3). */
 export const ERROR_MODES: { id: ErrorMode; label: string }[] = [

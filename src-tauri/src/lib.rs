@@ -100,7 +100,8 @@ async fn next_text(
 }
 
 /// `mode` is the error mode; `practice` is prose (default) or the code language;
-/// `layout` is the layout typed with, recorded with the session (default: the profile's).
+/// `layout` and `language` are the layout typed with and the language of the text,
+/// recorded with the session (default: the profile's).
 #[allow(clippy::too_many_arguments)]
 #[tauri::command]
 fn score_session(
@@ -114,6 +115,7 @@ fn score_session(
     practice: Option<PracticeMode>,
     indent: Option<IndentMode>,
     layout: Option<String>,
+    language: Option<String>,
 ) -> Result<ScoredSession, String> {
     let mut store = store(&state);
     let metronome = MetronomeTrack { bpm, offsets_ms };
@@ -127,7 +129,7 @@ fn score_session(
         started_at_ms,
         metronome: &metronome,
     };
-    let profile = commands::typing_profile(&state.profile, layout.as_deref())?;
+    let profile = commands::typing_profile(&state.profile, layout.as_deref(), language.as_deref())?;
     Ok(commands::score_practice(&mut store, &profile, &req))
 }
 

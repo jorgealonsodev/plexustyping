@@ -45,13 +45,15 @@ export interface StorageStatus {
   error: string | null;
 }
 
-export const LANGUAGE = "es";
-
-/** `layout` decides the chars a text may contain; `mode` is prose or code; `maxLines` sizes code snippets. */
-export const firstText = (layout: string, mode: PracticeMode = "prose", maxLines = 12) =>
-  invoke<PracticeText>("first_text", { language: LANGUAGE, layout, day: localDay(), mode, maxLines });
+/**
+ * `language` is the prose language; `layout` decides the chars a text may contain;
+ * `mode` is prose or code; `maxLines` sizes code snippets.
+ */
+export const firstText = (language: string, layout: string, mode: PracticeMode = "prose", maxLines = 12) =>
+  invoke<PracticeText>("first_text", { language, layout, day: localDay(), mode, maxLines });
 
 export const nextText = (
+  language: string,
   layout: string,
   seed: number,
   targetCount: number,
@@ -61,7 +63,7 @@ export const nextText = (
   maxLines = 12,
 ) =>
   invoke<PracticeText>("next_text", {
-    language: LANGUAGE,
+    language,
     layout,
     seed,
     targetCount,
@@ -81,9 +83,10 @@ export interface Practice {
 /**
  * `offsetsMs` has one entry per event; `bpm` is the one metronome tempo of the text, if any.
  * Code sessions are stored with their language and folded into the code statistics (S5);
- * every session records the `layout` it was typed with.
+ * every session records the `language` of its text and the `layout` it was typed with (S5).
  */
 export const scoreSession = (
+  language: string,
   layout: string,
   text: string,
   mode: ErrorMode,
@@ -103,6 +106,7 @@ export const scoreSession = (
     practice: practice.mode,
     indent: practice.indent,
     layout,
+    language,
   });
 
 /** Of the statistics model of `mode` (prose and code are kept apart). */

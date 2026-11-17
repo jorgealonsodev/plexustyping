@@ -44,10 +44,48 @@ fn pseudo_sentences(text: &str) -> Vec<Vec<String>> {
 }
 
 #[test]
-fn registry_lists_spanish_only() {
-    assert_eq!(languages(), ["es"]);
+fn registry_lists_the_five_languages_spanish_first() {
+    assert_eq!(languages(), ["es", "en", "pt", "fr", "de"]);
     assert_eq!(es().language(), "es");
-    assert!(corpus("en").is_none());
+    assert!(corpus("it").is_none());
+}
+
+/// Lowercase letters of each new language that its word list may use.
+const NEW_ALPHABETS: [(&str, &str); 4] = [
+    ("en", ""),
+    ("pt", "áâãàéêíóôõúüç"),
+    ("fr", "àâæçéèêëîïôœùûüÿ"),
+    ("de", "äöüß"),
+];
+
+#[test]
+fn new_languages_have_5000_words_many_sentences_and_a_full_diagnostic() {
+    for (id, extra) in NEW_ALPHABETS {
+        let c = corpus(id).unwrap_or_else(|| panic!("{id} is registered"));
+        let alphabet: String = ('a'..='z').chain(extra.chars()).collect();
+        assert_eq!(c.words().len(), 5000, "{id} words");
+        for word in c.words() {
+            assert!(word.chars().all(|ch| alphabet.contains(ch)), "{id} word {word:?}");
+        }
+        assert!(c.sentences().len() >= 40, "{id} sentences");
+        let diagnostic = c.diagnostic();
+        assert!((280..=340).contains(&diagnostic.chars().count()), "{id} diagnostic length");
+        let lower = diagnostic.to_lowercase();
+        for letter in ('a'..='z').chain(extra.chars().filter(|ch| !"æœ".contains(*ch))) {
+            assert!(lower.contains(letter), "{id} diagnostic lacks {letter}");
+        }
+    }
+}
+
+#[test]
+fn every_registered_language_resolves_to_its_own_non_empty_corpus() {
+    for &id in languages() {
+        let c = corpus(id).unwrap_or_else(|| panic!("{id} is listed but not found"));
+        assert_eq!(c.language(), id);
+        assert!(!c.diagnostic().is_empty(), "{id} diagnostic");
+        assert!(!c.words().is_empty() && !c.sentences().is_empty(), "{id} data");
+    }
+    assert!(corpus("").is_none());
 }
 
 #[test]
