@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 128" role="img" aria-labelledby="t">
+  <title id="t">PlexusTyping</title>
+  <rect x="8" y="12" width="112" height="108" rx="26" fill="#4f6fa8"/>
+  <rect x="16" y="10" width="96" height="94" rx="20" fill="#89b4fa"/>
+  <g stroke="#1e1e2e" stroke-width="4" stroke-linecap="round" fill="none">
+    <path d="M38 32 L54 50 M64 26 L54 50 M64 26 L76 50 M90 34 L76 50 M38 32 L64 26 L90 34 M54 50 L76 50 M54 50 L64 70 M76 50 L64 70"/>
+  </g>
+  <g fill="#1e1e2e">
+    <circle cx="38" cy="32" r="5.5"/>
+    <circle cx="64" cy="26" r="5.5"/>
+    <circle cx="90" cy="34" r="5.5"/>
+    <circle cx="54" cy="50" r="5"/>
+    <circle cx="76" cy="50" r="5"/>
+  </g>
+  <circle cx="64" cy="70" r="7" fill="#f5c2e7" stroke="#1e1e2e" stroke-width="4"/>
+  <rect x="48" y="84" width="32" height="6" rx="3" fill="#1e1e2e"/>
+  <text x="144" y="78" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="54" font-weight="700" letter-spacing="-1">
+    <tspan fill="#89b4fa">Plexus</tspan><tspan fill="#7f849c">Typing</tspan>
+  </text>
+  <text x="146" y="108" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" font-style="italic" fill="#7f849c">Del cerebro a los dedos.</text>
+</svg>

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo-wordmark.svg" alt="PlexusTyping — Del cerebro a los dedos." width="420">
+</p>
+
 # PlexusTyping
 
 *Del cerebro a los dedos.* An adaptive typing tutor built with Rust and Tauri 2.
