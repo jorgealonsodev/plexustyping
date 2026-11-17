@@ -11,6 +11,45 @@ use crate::{GenerationRequest, Mode};
 /// counts and the allowed characters; each count is
 /// [`GenerationRequest::min_counts`] at the longest accepted length, so a
 /// snippet that meets it always meets [`crate::validate`].
+/// Topics drawn at random when the user leaves the topic free, so models do not
+/// write the same "El amanecer en la montaña…" text again and again.
+pub const FREE_TOPICS: [&str; 24] = [
+    "una receta de cocina",
+    "un partido de fútbol",
+    "un viaje en tren",
+    "un día de trabajo en una oficina",
+    "una conversación entre amigos",
+    "un descubrimiento científico",
+    "una mascota traviesa",
+    "un mercado de barrio",
+    "una tormenta de verano",
+    "una mudanza",
+    "un concierto",
+    "un huerto urbano",
+    "una noticia de tecnología",
+    "un museo",
+    "una carta a un familiar",
+    "un problema de matemáticas",
+    "una excursión en bicicleta",
+    "una película de misterio",
+    "la historia de un inventor",
+    "una tienda de reparaciones",
+    "un festival popular",
+    "una entrevista de trabajo",
+    "un día en la playa",
+    "una biblioteca",
+];
+
+/// The free topic for `nonce` (any number; the caller passes something that varies).
+pub fn free_topic(nonce: u64) -> &'static str {
+    // SplitMix64 finalizer: neighbouring nonces still pick unrelated topics.
+    let mut z = nonce.wrapping_add(0x9E37_79B9_7F4A_7C15);
+    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    z ^= z >> 31;
+    FREE_TOPICS[(z % FREE_TOPICS.len() as u64) as usize]
+}
+
 pub fn build_prompt(req: &GenerationRequest) -> String {
     const ANSWER: &str = "Responde solo con JSON: {\"text\": \"...\"}";
     let language = language_name(&req.language);
@@ -28,6 +67,7 @@ pub fn build_prompt(req: &GenerationRequest) -> String {
                 req.length.start
             ),
             format!("Tema: {topic}."),
+            "No empieces con «El» ni con «La».".to_string(),
             ANSWER.to_string(),
         ]
         .join("\n");
@@ -121,6 +161,23 @@ mod tests {
         }
     }
 
+    #[test]
+    fn prose_asks_for_a_varied_start() {
+        // "le doy a recargar textos y todos empiezan por EL"
+        assert!(build_prompt(&prd()).contains("No empieces con «El» ni con «La»."));
+        assert!(!build_prompt(&code(prd())).contains("No empieces"));
+    }
+
+    #[test]
+    fn free_topics_are_many_and_vary_with_the_nonce() {
+        assert!(FREE_TOPICS.len() >= 20);
+        let picked: std::collections::BTreeSet<&str> = (0..200).map(free_topic).collect();
+        assert!(picked.len() >= 15, "{picked:?}");
+        for t in FREE_TOPICS {
+            assert!(!t.is_empty() && !t.contains('\n'));
+        }
+    }
+
     fn code(mut req: GenerationRequest) -> GenerationRequest {
         req.mode = Mode::Code {
             lang: "rust".into(),
@@ -135,6 +192,7 @@ mod tests {
             build_prompt(&prd()),
             "Escribe un texto en español de 250–300 caracteres.\n\
              Tema: viajes.\n\
+             No empieces con «El» ni con «La».\n\
              Responde solo con JSON: {\"text\": \"...\"}"
         );
     }

@@ -154,6 +154,22 @@ impl AiClient {
         let end = Instant::now() + self.deadline;
         let mut errors = Vec::new();
         // The retry after a rejected or malformed text asks for any text: no targets.
+        // A free topic becomes a random one, so texts do not all look alike.
+        let topic_is_free = req.topic.as_deref().is_none_or(|t| t.trim().is_empty());
+        let picked;
+        let req = if topic_is_free {
+            let nonce = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_nanos() as u64)
+                .unwrap_or(0);
+            picked = GenerationRequest {
+                topic: Some(crate::prompt::free_topic(nonce).to_owned()),
+                ..req.clone()
+            };
+            &picked
+        } else {
+            req
+        };
         let free = GenerationRequest {
             targets: Vec::new(),
             frequencies: Vec::new(),
