@@ -74,6 +74,22 @@ The copyright/license for each individual theme belongs to the author of that th
 
 `crates/plexustyping-corpus/data/es/words.txt` is adapted from [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/es/LICENSE.md`](crates/plexustyping-corpus/data/es/LICENSE.md).
 
+## English word list
+
+`crates/plexustyping-corpus/data/en/words.txt` is adapted from `content/2018/en/en_50k.txt` of [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/en/LICENSE.md`](crates/plexustyping-corpus/data/en/LICENSE.md).
+
+## Brazilian Portuguese word list
+
+`crates/plexustyping-corpus/data/pt/words.txt` is adapted from `content/2018/pt_br/pt_br_50k.txt` of [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/pt/LICENSE.md`](crates/plexustyping-corpus/data/pt/LICENSE.md).
+
+## French word list
+
+`crates/plexustyping-corpus/data/fr/words.txt` is adapted from `content/2018/fr/fr_50k.txt` of [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/fr/LICENSE.md`](crates/plexustyping-corpus/data/fr/LICENSE.md).
+
+## German word list
+
+`crates/plexustyping-corpus/data/de/words.txt` is adapted from `content/2018/de/de_50k.txt` of [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/de/LICENSE.md`](crates/plexustyping-corpus/data/de/LICENSE.md).
+
 ## Syntax highlighting
 
 Code mode highlights snippets with [syntect](https://github.com/trishume/syntect) and the syntax definitions bundled by [two-face](https://codeberg.org/CosmicHarper/two-face), which are curated by the [bat](https://github.com/sharkdp/bat) project.
