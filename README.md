@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo-wordmark.svg" alt="PlexusTyping — Mecanografía adaptativa" width="420">
+  <img src="assets/logo-wordmark.svg" alt="PlexusTyping — Adaptive typing" width="420">
 </p>
 
 # PlexusTyping
