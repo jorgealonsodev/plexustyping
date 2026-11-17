@@ -26,7 +26,8 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   until corrected, or fix with Backspace; changing it restarts the text),
   targets per text (3–5), text length (100–600 characters) and live stats.
   "Teclado": on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
-  colour themes, dark and light, switched live. Everything is remembered
+  colour themes, dark and light, switched live, plus themes imported from
+  VS Code (see below). Everything is remembered
   locally; targets and length apply from the next text. `Escape`, `×` or a
   click outside closes the window and returns to the text. "IA" and
   "Metrónomo": see below.
@@ -96,6 +97,24 @@ Kotlin or Swift. Switching loads a new text at once.
   feed their own weakness model (mode `code`, shared by every language), so
   symbols never touch the prose metrics. Results, weaknesses and the keyboard
   heatmap in code mode come from that model.
+
+### VS Code themes
+
+"Ajustes → Apariencia → Importar tema de VS Code…" reads one VS Code colour
+theme file (`.json` / `.jsonc`, comments and trailing commas allowed, up to
+1 MB) in the WebView and adds it to the "Tema" selector under "Importados".
+It is applied at once and kept in local storage; importing a theme with the
+same name replaces the earlier one, and at most 30 are kept. "Eliminar tema
+importado" removes the selected import and returns to the default theme.
+
+- **Mapping:** `editor.background`, `editor.foreground` (both required),
+  `editorCursor.foreground` and `editor.selectionBackground` give the base
+  colours; `terminal.ansiBlack` … `terminal.ansiBrightWhite` give the 16 ANSI
+  colours that colour the keyboard, the status colours and the code syntax.
+  Each ANSI colour the file lacks comes from the built-in base scheme
+  (PlexusTerm for dark themes, the first light scheme for light ones).
+- **Dark or light:** from the file's `type`, else from the background.
+- **Not read:** `tokenColors` and `include`; alpha in colours is dropped.
 
 ### Metronome
 

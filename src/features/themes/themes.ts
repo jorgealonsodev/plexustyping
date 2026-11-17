@@ -70,7 +70,17 @@ export const DEFAULT_THEME_ID = "catppuccin-mocha";
 
 const byId = new Map(THEMES.map((entry) => [entry.id, entry]));
 
-export const isThemeId = (id: string) => byId.has(id);
+/** Schemes imported by the user (see `custom.ts`); their ids never collide with the built-in ones. */
+let custom: ThemeEntry[] = [];
+
+/** Replaces the imported schemes that `isThemeId` and `themeById` know besides the built-in ones. */
+export function setCustomThemes(themes: ThemeEntry[]) {
+  custom = themes;
+}
+
+const find = (id: string) => byId.get(id) ?? custom.find((entry) => entry.id === id);
+
+export const isThemeId = (id: string) => find(id) !== undefined;
 
 /** The scheme with this id, or the default one for an unknown id. */
-export const themeById = (id: string): ThemeEntry => byId.get(id) ?? byId.get(DEFAULT_THEME_ID)!;
+export const themeById = (id: string): ThemeEntry => find(id) ?? byId.get(DEFAULT_THEME_ID)!;

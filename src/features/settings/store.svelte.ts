@@ -1,6 +1,19 @@
 import type { PracticeKind } from "../code/api";
 import type { ErrorMode, IndentMode } from "../practice/engine";
-import { applyTheme, loadThemeId, saveThemeId, themeById } from "../themes";
+import {
+  DEFAULT_THEME_ID,
+  TOO_MANY,
+  addCustomTheme,
+  applyTheme,
+  initCustomThemes,
+  loadThemeId,
+  parseVsCodeTheme,
+  saveCustomThemes,
+  saveThemeId,
+  setCustomThemes,
+  themeById,
+  type ThemeEntry,
+} from "../themes";
 import type { MetronomeSettings } from "../metronome/beat";
 import {
   MAX_CODE_LINES,
@@ -38,6 +51,8 @@ export class SettingsStore {
   liveStats = $state(loadLiveStats());
   showKeyboard = $state(loadShowKeyboard());
   flashes = $state(loadFlashes());
+  /** Themes imported from VS Code; loaded before the theme id so a saved import is known. */
+  customThemes = $state.raw(initCustomThemes());
   themeId = $state(loadThemeId());
   heatmap = $state(loadHeatmap());
   targetCount = $state(loadTargetCount());
@@ -66,6 +81,29 @@ export class SettingsStore {
     this.themeId = id;
     applyTheme(themeById(id));
     saveThemeId(id);
+  }
+
+  /** Imports a VS Code theme file and switches to it; the error (Spanish, for the user) when it cannot. */
+  importTheme(text: string, fileName: string): { ok: true; name: string } | { ok: false; error: string } {
+    const parsed = parseVsCodeTheme(text, fileName);
+    if (!parsed.ok) return parsed;
+    const next = addCustomTheme(this.customThemes, parsed.theme);
+    if (!next) return { ok: false, error: TOO_MANY };
+    this.storeCustomThemes(next);
+    this.setTheme(parsed.theme.id);
+    return { ok: true, name: parsed.theme.name };
+  }
+
+  /** Removes an imported theme; the default theme takes over when it was the active one. */
+  removeTheme(id: string) {
+    this.storeCustomThemes(this.customThemes.filter((t) => t.id !== id));
+    if (this.themeId === id) this.setTheme(DEFAULT_THEME_ID);
+  }
+
+  private storeCustomThemes(themes: ThemeEntry[]) {
+    this.customThemes = themes;
+    setCustomThemes(themes);
+    saveCustomThemes(themes);
   }
 
   setLiveStats(on: boolean) {
