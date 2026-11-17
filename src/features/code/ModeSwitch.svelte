@@ -28,6 +28,13 @@
 </script>
 
 <div class="mode">
+  {#if settings.practiceKind === "code"}
+    <select aria-label="Lenguaje de programación" onchange={choose}>
+      {#each LANGUAGES.list as l (l.id)}
+        <option value={l.id} selected={l.id === settings.codeLanguage}>{l.name}</option>
+      {/each}
+    </select>
+  {/if}
   <div class="kinds" role="group" aria-label="Modo de práctica">
     {#each KINDS as k (k.id)}
       <button
@@ -38,13 +45,6 @@
       >
     {/each}
   </div>
-  {#if settings.practiceKind === "code"}
-    <select aria-label="Lenguaje de programación" onchange={choose}>
-      {#each LANGUAGES.list as l (l.id)}
-        <option value={l.id} selected={l.id === settings.codeLanguage}>{l.name}</option>
-      {/each}
-    </select>
-  {/if}
 </div>
 
 <style>
