@@ -1,0 +1,2007 @@
+# German sentences from Mozilla Common Voice.
+# Source: https://github.com/common-voice/common-voice/blob/605c25e48f9fb87cb25ca794cb39bf91d3741f29/server/data/de/sentence-collector.txt
+# Commit: 605c25e48f9fb87cb25ca794cb39bf91d3741f29
+# License: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+# Filters: NFC, trimmed, 40-120 chars; only German letters, space and . , ; : ? !; typeable on de-qwertz; capital start; ends with . ? or !; no inner dots; no word-list profanity; no duplicates
+# Selection: the first 2000 survivors by SHA-256 of the sentence, by scripts/import-commonvoice.py
+# Count: 2000
+Schon beim Pfropfen entstehen chimäre Organismen.
+Beides wurde bereits in mehreren unabhängigen Studien nachgewiesen.
+Die Demonstration verlief größtenteils friedlich.
+Die tief stehende Sonne blendet den Fahrer.
+Mediterrane Ernährung ist nicht nur Olivenöl, Fischspeisen und Fetakäse.
+Sehen Sie sich vor, sie dürften mit unangenehmen Dingen konfrontiert werden.
+Meine Nachbarn kenne ich vor allem daher, dass ich Pakete für sie annehme.
+Die Pflanze braucht Sonne, aber nicht zu viel Sonne.
+Ein Therapeut kann dir nur Hilfe zur Selbsthilfe geben.
+Schätzchen, willst du mir deine Steueridentifikationsnummer verraten?
+Aaron Freitag ist Designer und Gründer des Unternehmens.
+Sie bauten ihre Zelte rund um das Lagerfeuer auf.
+Obwohl ich Sex mit ihr haben will, bekomme ich keine Erektion.
+Also da müssen Sie schon etwas konkreter werden.
+Am besten ist, wenn er es gar nicht erst in die Finger bekommt.
+Svetlana hat keinen blassen Schimmer, was letzte Nacht passiert ist.
+Doch kurze Zeit später fuhr sie die Straße auf und ab.
+Mein Seil reicht für diese Höhe nicht aus.
+All das sind Informationen, die wir bei der Konkurrenz abgeschnorchelt haben.
+Die Venus wird auch als Morgenstern bezeichnet.
+Hier soll ein Kabelkanal angebracht werden.
+Jeder Tropfen, der daneben geht, kostet tausend Euro.
+Zertifikat und Schlüssel sind essentielle Bestandteile zum Aufbau einer gesicherten Verbindung.
+Ich muss auf der Rückfahrt noch ein paar Aufgaben erledigen.
+Wenn unsere Auftraggeber wüssten, wie es hier zugeht!
+Dem Deutschen sind seine Autos so heilig wie dem Amerikaner seine Schusswaffen.
+Joe Biden ist Nachfolger von Donald Trump als Präsident der Vereinigten Staaten.
+Da wirft Sie Ihren Hintern wieder herum.
+Synapsen verbinden die Neuronen untereinander.
+Ihnen wird der Allmächtige Gerechtigkeit geschehen lassen.
+Eine häufige Folge von Schlaganfällen sind einseitige Lähmungen.
+Wenig überraschend befindet sich Zeppelinheim direkt neben dem Flughafen.
+Schon wieder ein Fehler mit dem Code vierhundertdrei.
+Damit fällt der Ausflug nach Breslau ins Wasser.
+Taschenplätze: Taschenplätze sind Ihr Inventar im Spiel.
+Bist du schon schon mal im Cabrio zweihundert gefahren?
+Wisst ihr, dass ihr eigene Sätze bei Common Voice Sentence Collector einstellen könnt?
+Zur Zeit residiert ihre Majestät in ihrem Anwesen am Mittelmeer.
+Kinder bekommen grundsätzlich alle eine Schwimmweste.
+Frau Senninger aus dem zweiten Stock hat bei einem Sturz einen Oberschenkelhalsbruch erlitten.
+Wie viele Massaker braucht es, um ein restriktiveres Waffengesetz durchzusetzen?
+Die Prominenz hat von der Empore einen besseren Ausblick.
+Damals war die Welt noch eine gänzlich andere.
+Hat ein Stoppschild sechs oder acht Ecken?
+Ich möchte ihm noch etwas zum Abschied sagen.
+Na ja, es gibt so ein paar übliche Verdächtige, denen so etwas zuzutrauen wäre.
+Hunde liefern sich besonders gerne mit Katzen und Ratten nächtliche Schaukämpfe.
+Dieses Jahr haben wir echt Pech mit dem Wetter.
+Wieso sagt mir denn keiner, dass mein Hosenstall offen ist?
+Insgesamt wird die Mittelalterwelt sehr gut in Szene gesetzt.
+Geklärt werden muss vor allem, ob der Arzt wissentlich falsche Medikamente verschrieben hat.
+Die Bestimmungen dieser Verordnung gelten für alle Betriebe, die der Aufsicht der Bergbehörde unterstehen.
+Sitz gerade, sonst kommt mein Zeigefinger.
+Unsere Kunden schätzten die Ehrlichkeit von Frau Mielke.
+Trotz der unerfreulichen Ereignisse, möchte ich noch mal an das Positive erinnern.
+Trauma entsteht, wenn ein Ereignis nicht verarbeitet werden kann.
+Otmar hat weder bejaht noch verneint, sondern im Grunde mit einem Jein geantwortet.
+Seit ich keinen Kaffee mehr trinke, bin ich ruhiger und ausgeglichener.
+Da ist eigentlich nichts Wertvolles drin.
+Klaus Ender starb am achtzehnten März zweitausendeinundzwanzig in Bergen auf Rügen.
+Ich möchte noch ein halbes Dutzend Hemden haben.
+Schon wieder so ein komisches Gewinde, das nicht standardisiert ist!
+Leider kann man ungenutzte Talente nicht an andere abgeben.
+Welche Fortschritte wurden auf der Baustelle gemacht?
+Wenn ihr Abenteuer erleben wollt, seid ihr hier genau richtig.
+Als der Binnenmarkt auch nach Jahren nicht gedeihen wollte, vollzog sie die Kehrtwende.
+Nach der ersten Klausurenphase weiß man seine Matrikelnummer auswendig.
+Auf solche Kleinigkeiten muss man bei Frequenzen im Gigahertzbereich achten.
+Das fragt ihn der Kollege, der von all dem nichts mitbekommen hat.
+Von dem Geld könnte ich jetzt eine Woche Skiurlaub machen.
+Rick hat einen Nebeneingang offen gelassen.
+Früher gab es einen Blasebalg, der mit Muskelkraft bedient werden musste.
+Macht beides, Inhaltsverschlüsselung und Datenverschlüsselung, dann seit ihr auf der sicheren Seite.
+Doch was befindet sich unter der Kuppel?
+Maschinenbauer sind sowieso eine Spezies für sich.
+Der Kompost muß noch ein paar Monate reifen.
+Rick erinnert sich nur noch bruchstückhaft.
+Einem geschenkten Gaul haut man nicht aufs Maul.
+Ich hoffe, ich konnte ihnen weiterhelfen.
+Du musst noch eine Präsentation erstellen.
+Jedenfalls wundert es mich jetzt nicht mehr.
+Den merkwürdigen Gästen musste man jeden einzelnen Satz aus der Nase ziehen.
+Einige ertragen den Anblick nicht und brechen in Tränen aus.
+Der Geruchssinn dieser Hunde ist unglaublich.
+Tischlerei Kröger heizt mit einem Ofen, in dem Sägespäne verbrannt werden.
+Sie hatte alle Läden in der näheren Umgebung abgegrast und dennoch nichts gefunden.
+Mit Handschuhen schiebt Olivia das Rost in den Ofen.
+Ich lese vor, du machst im Hintergrund die Beatbox, okay?
+Manchmal erfordert ein Update manuelle Intervention.
+Und die Grafikkarte rechnet bereits am Limit.
+Um die Ausfallzeiten zu verkürzen, wird Tag und Nacht gearbeitet.
+Netflix merkt schnell, wenn du krank bist.
+Ohne maschinelle Hilfe wäre die Arbeit nicht zu bewältigen.
+Das möchte ich zuerst mit meiner Anwältin besprechen.
+Die Melodie ist von einem anderen Song geklaut.
+Wie viele Punkte gibt es für die dritte Aufgabe?
+Eine solche Verallgemeinerung ist der erste Schritt zum Populismus.
+Konnte ja keiner ahnen, dass sie sich so heftig wehren wird!
+Mittlerweile interessiert sich ja keiner mehr für den Bereich.
+Zweimal übersprang der Überflieger eine Klasse und holte den Stoff binnen Wochen auf.
+Ich denke mal, das kann man ihm eher nicht andichten.
+Eine alte Pantoffel muss als Türstopper herhalten.
+Aber im Gegensatz zu Herrn Wegener hat er Charisma.
+Jugendliche von Stadtbesichtigungen zu begeistern ist nicht einfach.
+Warum wird bei Benutzung des Notausgangs der Alarm ausgelöst?
+Deine Stellungnahme enthält viel zu viele einschränkende Wörter und wirkt daher unsicher.
+Bei der Besichtigung sollten Keller und Garage nicht vergessen werden.
+Behandeltes Holz sollte nicht im Kamin verbrannt werden.
+Grundschulkindern kann man keine langen Wege zumuten.
+Arbeiten wir, um zu leben oder leben wir, um zu arbeiten?
+Der Chef moniert, dass die Putzfrau während der Arbeitszeit ständig die Toilette aufsucht.
+Kann man Pflanzen mit destilliertem Wasser gießen?
+Ich bin sehr froh gewesen, dass ich schon geimpft bin.
+Kann mir einer die schreienden Kinder abnehmen?
+Oh, der Herr ist heute bereit, mich zu lecken?
+In Lebenskrisen altert man besonders schnell.
+Immer wenn es ernst wird, macht er sich ganz schnell aus dem Staub.
+Oft ist sie nicht nur Erkenntnis, sondern auch Eingeständnis.
+Mit welchen Fertigkeiten können Sie uns sonst noch beeindrucken?
+Das Verständnis ist bei allen Angesprochenen groß, solange ein Fernsehteam dabei ist.
+Seid ihr alle im Fitnessstudio angemeldet?
+Es ist seine Art, dir zu sagen, dass er dich mag.
+Wenn man eine Strumpfmaske auf hat, ist die Frage nach dem Stroh naheliegend.
+Kann ich bitte noch Ihre Bahncard sehen?
+Der Bordcomputer empfiehlt eine Kurskorrektur.
+Passt Ihnen der frühe Freitagvormittag gut?
+Schon mal über eine duale Ausbildung nachgedacht?
+Sprachexperten geben ihre Einschätzung dazu ab, ob der Akzent echt ist.
+Wann wird endlich mit harter Hand durchgegriffen?
+Die haben mich beim Crowdsurfing beklaut!
+Panzertape heißt Panzertape, weil die Bundeswehr damit ihre kaputten Panzer repariert.
+Was im Bollerwagen passiert, das bleibt im Bollerwagen.
+Auf der einen Seite des Grabens ist Nadelwald, auf der anderen Laubwald.
+Dieses Mal wurde die Strasse komplett gesperrt.
+Irgendwann wollte Fabian dann doch noch mal nach Malaysia fliegen.
+Der erfolgreichste Film auf der Berlinale kam dieses Mal von Wim Wenders.
+Hast du gesehen ob dort was explodiert ist?
+Sie versucht sich durch diese Spielchen interessant zu machen.
+Nur die guten Studenten landen an meinem Lehrstuhl.
+Lassen Sie mich das hier noch kurz verstauen!
+Die Flöte gilt als einfach zu erlernendes Instrument.
+Die Auswirkungen auf das Klima werden wir alle noch zu spüren bekommen.
+Kannst du bitte aufhören, ununterbrochen zu nörgeln?
+Du kannst doch Corona nicht mit einer Grippe vergleichen!
+Wer als Mann in Aachen studiert, ist wahrscheinlich Single.
+Der unfähige Tontechniker hat den Track völlig übersteuert.
+Die Notausgänge befinden sich an den markierten Stellen.
+Vorher war Wuhan vor allem für scharfes Essen bekannt.
+Die Auswertung der Beweismittel wird voraussichtlich mehrere Monate andauern.
+Es muss doch nicht immer das Billigste sein.
+Kein Lungenfacharzt der Welt würde so etwas sagen.
+Erklären Sie es Freunden, ihrem Mitbewohner oder notfalls der Zimmerpflanze.
+Könntest du das Schreiben bitte Korrektur lesen?
+Mein Kollege hat Ihnen keinen Rückruf angeboten?
+Dass ihre Bewegungen nicht zum Takt passen, merkt sowieso keiner.
+Mein Taschenrechner zeigt aber etwas anderes an!
+Es ist ein Skandal, dass heute schon wieder Menschen im Mittelmeer ertrinken mussten.
+Daraufhin verständigte Lieselotte den Platzwart.
+Mit ihrem Lärm hat sie schon die halbe Nachbarschaft geweckt.
+Den Wochentag zu einem gegebenen Datum zu berechnen, ist nicht so schwierig.
+Hey Jarvis, was schenke ich meiner Freundin Lara zum Geburtstag?
+Wo lagerst du derweil deine Sommerreifen?
+Der Neuling sollte sich lieber warm anziehen.
+Führen Sie Ihre Telefonate bitte nicht im Ruhewagen.
+Auf der anderen Straßenseite soll ein neues Parkhaus entstehen.
+So oft wie der im Schneidersitz sitzt, ganz bestimmt.
+Ein Lasermikrofon findet man bei jedem gut sortierten Agentenausstatter.
+Nein; wenn es nötig ist, kann ich mich in fünf Minuten ankleiden.
+Andernfalls können die Türen nicht schließen.
+Deshalb würden wir gerne den Brustkorb röntgen.
+Auch darf die Glasfaser nicht geknickt werden.
+Ich habe extra einen neuen Account angelegt, um diesen Dankeskommentar schreiben zu können!
+Mehrere Möglichkeiten, drei an der Zahl, stehen zur Auswahl.
+Hierbei handelt es sich nicht nur um einen grippalen Infekt.
+Deshalb ist die Karte beidseitig beschriftet.
+Ich bringe ihn um, sollte er mir meine Frau streitig machen.
+Und wie denken eigentlich die Nachbarn darüber?
+Sparen Sie diesen Samstag zehn Prozent bei Ihrem Hamstereinkauf!
+Wer geht heute noch in einen Plattenladen?
+Dafür wurde Annemarie nicht ausgebildet.
+Die verantwortlichen Stellen haben nicht die nötigen Kapazitäten um jedem gemeldeten Fall nachzugehen.
+Franziska mochte den von Anfang an nicht.
+Werden Nicken und Kopfschütteln in jeder Kultur verstanden?
+Der Schornstein ist schiefer als der schiefe Turm von Pisa.
+Man wird zu schnell alt und zu spät gescheit.
+In zehn Jahren wird niemand mehr über dieses Internet sprechen!
+Fällt der einundzwanzigste November nächstes Jahr auf einen Dienstag?
+Altes Brot ist nicht hart, kein Brot, das ist hart.
+Ich glaube, sie trägt keine Unterwäsche unter dem Rock.
+Diese Serie wird unterstützt durch Produktplatzierungen.
+In der Wissenschaft ist Darmstadt sehr bekannt.
+Computer muss man lieben, haben sie uns doch elektronische Musik ermöglicht.
+Krankenkassen hantieren mit hochsensiblen Gesundheitsdaten.
+Damit die Zahlung in Zukunft zuverlässiger klappt, hat Iwan einen Dauerauftrag eingerichtet.
+Frösche verfallen nicht in einen Winterschlaf, sondern in Winterstarre.
+Ich komme ein bischen später, dafür gehe ich dann ein bischen eher.
+Der Seilauflauf ist so einzurichten, daß er nicht von Hand aus geregelt werden muß.
+Im Wintersemester möchte ich ein Studium in Maschinenbau anfangen.
+Welches Referat kümmert sich um mein Anliegen?
+In zwanzig Jahren haben wir noch nie eine Sicherheitskopie gebraucht.
+Es könnte stimmen, dass das neunzehnhundertsechszehn passiert ist.
+Es war noch früh am Morgen, als der Hahn das erste mal krähte.
+Meiner ist der braune und Dörte gehört der gelbe.
+Sylt ist über den Hindenburgdamm mit dem Festland verbunden.
+Fiona hat sich eine Powerbank, aber kein Kabel mitgenommen.
+Fassungslos starrt sie auf die Stelle, an der eben noch ihr Boot festgemacht war.
+Was zieht die denn für eine Schleimspur hinter sich her?
+Auch der Angreifer hat eine Achillesferse.
+So unschön der Regen auch ist, er wäscht wenigstens die Pollen weg.
+Oder wenn man weiß, warum Hände waschen sinnvoll ist und wie man verhütet.
+Das Gluckern entsteht nur, wenn Luft im System ist.
+So hebelt man geräuscharm ein Fenster auf.
+Außerdem haben sie einen lustigen Dialekt, den ich mir gerne anhöre.
+Eigentlich wollte ich es genau umgekehrt probieren.
+Mir ist sowas von egal, ob mein Dienstwagen dabei kaputt geht!
+Eine einheitliche Bedienung wäre wünschenswert.
+Bei der Verwendung von Musik in eigenen Podcasts ist das Urheberrecht zu beachten.
+Wir wollen unsere Kunden dazu anhalten, ihre Becher selbst mitzubringen.
+Im tiefen Meer ist man vor Erdbeben und Tsunamis sicher.
+Wenn das Virus mutiert, könnte es vielleicht über die Luft übertragen werden.
+Wieso steigt die eigentlich ein, wenn sie keine Maske hat?
+Gegen Abend hatte der Wind gedreht und so verlangsamte sich ihre Fahrt noch weiter.
+Sobald irgendeine Pflanze blüht, tränen ihm die Augen.
+Man kann nicht innerhalb von zwei Wochen eine neue Fabrik aus dem Boden stampfen.
+Ich hätte gern die Kontrolle über alle Messdaten.
+Wenn man einen Baum pflanzen will, sollte man sich den Ort gut aussuchen.
+Alternativ könnte man sie auch aus einem Fonds finanzieren.
+Tiere ohne Herz sind also sicher vor ihnen.
+Welches ist die Anode und welches die Kathode?
+Es sollte offensichtlich sein, dass Stromanschlüsse eher weiter oben platziert werden sollten.
+Wer kauft denn ein Cabrio ohne Schiebedach?
+Seine Recherchen kratzen höchstens an der Oberfläche.
+Falsch eingestellte Scheinwerfer blenden den Gegenverkehr.
+Jetzt sind wir an einem Punkt angelangt, wo es peinlich wird.
+Deshalb erwarte ich von einem Arzt kein Mitleid.
+Blöd, jetzt ist auch noch die Seife leer.
+Die Diebe versteckten sich im Wald und warteten bis zum Abend.
+Letztendlich haben sie es dadurch nur verschlimmbessert.
+Mit einem Skalpell seziert der Laborant einen Froschschenkel.
+Pastinaken, Auberginen, rote Beete, Sellerie und Mangold sind vergleichsweise unbeliebt.
+Die fehlenden Quellenangaben reiche ich nach.
+Alma hat zu allem eine Meinung, aber für nichts eine Begründung.
+Rick wurde dazu verdonnert, den gesamten Flur zu fegen.
+Deine Hose sieht super bequem aus, woher hast du sie?
+Nun geht es dem Drückeberger von nebenan an den Kragen.
+Kann man eigentlich eine linke Niere auch rechts einbauen und umgekehrt?
+Wann wird man endlich Organe drucken können?
+Hey, die neue LiveVoting Version ist gerade in Testung.
+Im Torraum darf der Torwart nicht behindert werden.
+Kann man so sagen, ist das richtiges Esperanto?
+Quellen und Senken sind in Rot beziehungsweise Blau eingezeichnet.
+Bei solchen Themen ist die Vermieterin sehr streng.
+Und wo sind deine Handschuhe abgeblieben?
+Bis dahin habt ihr allenfalls eine Boje versenkt.
+Mitbewohner mit Putzfimmel werden toleriert, solange sie nicht eben diesen von anderen erwarten.
+Sich volllaufen lassen bis die Schwarte kracht.
+Wenn ich das höre, bin ich froh, dass ich keine Geschwister habe.
+Die Achatstücke ergaben keine wirklich schönen Schnittbilder.
+Auf dem Brachland soll nun ein Gewerbepark entstehen.
+Eigentlich interessiere ich mich nicht für Motorräder, aber meine beste Freundin erzählt so begeistert.
+Hundertzwanzig Jahre später hätte die Titanic gegen keinen Eisberg mehr fahren können.
+Die Inhalation von zu viel Kohlenstoffdioxid kann zur Bewusstlosigkeit führen.
+Damit wir etwas zum Mikroskopieren haben, reiße ich mir schnell ein Haar aus.
+Hey Firefox, setz bitte noch einmal Kaffee auf.
+Wenn ein Wort mit einem Vokal beginnt, tun wir automatisch den Knacklaut davor.
+Mehr fällt Frau Färber im Moment auch nicht ein.
+Mit Messer und Gabel isst es sich für Europäer leichter als mit Stäbchen.
+Die Verhandlungen mit den Alliierten sollen auf neutralem Boden stattfinden.
+Die beiden haben heimlich auf der Toilette geraucht.
+Erfahrungsgemäß ist es hinten im Zug nicht ganz so voll.
+Wenn man einmal dabei ist, kann man nicht mehr aufhören.
+Der Kuchenboden muss gleichmäßig ausgewalzt werden.
+Einmal veröffentlicht, lassen sich die Änderungen nicht mehr revidieren.
+Ohne gültige Papiere hat man echt Probleme in diesem Land.
+Plattfische sind wegen ihrer Tarnung kaum vom Meeresboden zu unterscheiden.
+Bei der geringsten Provokation explodiert er.
+Die Niederlassung in Dachau fungiert vor allem als Auffangbecken für schwieriges Personal.
+Zu allem Überfluss hatte auch niemand die serielle Schnittstelle getestet.
+Geräte und Software sind hoffnungslos veraltet.
+Du meine Güte, ich habe noch gar kein Geschenk!
+Die gelernte Einzelhandelskauffrau blieb skeptisch.
+Brauchst du noch irgendetwas oder sind wir hier fertig?
+Die Bundesregierung sollte was für den Einsatz und die Verbreitung von Common Voice tun.
+Vielleicht schafft es Deutschland ja wenigstens ins Halbfinale.
+Die erste Reisegruppe hat sich im Besucherzentrum eingefunden.
+Cool, ihr habt so eine alte Petroleumlampe?
+Die Art, wie die beiden wortlos miteinander kommunizieren, grenzt an Telepathie.
+Brot und Spiele ermöglichten Diktaturen.
+Er flog damals für die Sowjetunion ins All.
+Die Insel befindet sich ungefähr auf halbem Wege von hier nach Liliput.
+Wie hat man sich den Spin eines Elektrons vorzustellen?
+Was macht eigentlich dieser Ring an meinem Finger?
+Ich mache nur noch kurz einen Schnelltest.
+Zwei moderne Glühbirnen erhellen seinen riesigen Arbeitsplatz.
+Wann immer ein Flixbus Verspätung hat, ist es höhere Gewalt.
+Es ist ausdrücklich erlaubt, Bande zu spielen.
+Für kleine Kinder sind Klettverschlüsse sehr praktisch.
+Schieben Sie den Mauszeiger darüber, um den Wert abzulesen.
+Urplötzlich bekommt man auch sofort einen Termin.
+Nun ja, jedenfalls hat Annegret nun einen neuen Avatar.
+Wisst ihr noch, wo ich vorhin geparkt habe?
+Gib ihm den allerbesten Platz und lächle mit den Augen.
+Die meisten Legehennen werden nicht einmal zwei Jahre alt.
+Wie viel Kakaopulver nimmst du für eine Tasse Milch?
+Schöne Statistik, aber hat sie auch irgendeinen praktischen Nutzen?
+Der Steward und die Stewardess kümmern sich um das Wohl der Passagiere.
+Du musst zugeben, dass es besser ist, als wir dachten.
+Dann setzen wir Herrn Ahrendt als Gegenpol zu ihr ein.
+Versuchen Sie mal, eine Spinne vegetarisch zu ernähren.
+Wann das passieren wird, steht leider in den Sternen.
+In unserem Garten wächst tatsächlich Moos.
+Dazu muss man die Gepflogenheiten des Milieus kennen.
+Und hier, gleich neben dem Hang, pflanzen wir Felsenbirnen an.
+Ein riesiges Gerät, das einige Millionen Kronen gekostet hat.
+Betty versucht, ihre Schäfchen ins Trockene zu bringen.
+Mensch, ich habe heute noch keinen Fuß vor die Tür gesetzt!
+Auf dem Bürgersteig muss man übrigens nicht in der Mitte gehen.
+Hat sie euch jemals etwas zum Geburtstag geschenkt?
+Bert stört sich an der Hecke seines Nachbarn.
+Über das Kommen mancher Leute tröstet uns nichts als die Hoffnung auf ihr Gehen.
+Da müssen wir noch ein bisschen nachhelfen.
+Wenn Sie aufmerksam lesen, können Sie einige Lebensweisheiten lernen.
+Ich schlage vor, das alte Produktivsystem abzuschalten.
+Echte Kerzen aus Wachs am Weihnachtsbaum sind uns zu gefährlich.
+Bei manchen Ernährungsgewohnheiten muss man schon von selbstverletzendem Verhalten sprechen.
+Mein Herr, der Kornspeicher ist bis zum Dach gefüllt.
+Endlich, da kommen die Krankenwagenbelademeister!
+Das Dorf ist geprägt von einem rustikalen Baustil.
+Und die Reinigung ist ja auch nicht zu vergessen.
+Jetzt noch eine halbe Stunde köcheln lassen.
+Hört mal auf zu schießen, ich muss ein Interview geben!
+Herr Stegnitz muss seinem Ärger Luft machen.
+Intrinsisch motivierte Mitarbeiter sind wertvoller als Leute, die sich nur vom Gehalt locken lassen.
+Mithilfe von Sonnenlicht produzieren Pflanzen den Sauerstoff, den Tiere zum Atmen brauchen.
+Der Fliesenleger marschierte schnurstracks auf sie zu.
+Ich weiß nicht ob ich so schnell wieder für ein Startup arbeiten will.
+Ein schöner Anblick ist es wahrlich nicht.
+Im Brennpunkt wird es so heiß, dass das Papier Feuer fängt.
+Ich hab bis Deutz einen Platz reserviert im Wagen der nicht über Deutz fährt.
+In meinen Gebeten hat er mir noch nie geantwortet.
+Leider muss die Grundsteinlegung verschoben werden.
+Gemeinwohl säuselte der egozentrische Individualist.
+Die Nachbarskinder haben mit Kreide die Straße bemalt.
+Die Maschine ist überhitzt und muss nun erst einmal abkühlen.
+Die Ableitung der Stammfunktion ergibt nach dem Hauptsatz wieder die ursprüngliche Funktion selbst.
+Wer in seinem Leben nichts unternimmt, wird alt, ohne Lebenserfahrung zu sammeln.
+Alice legt ihren Fuß auf seiner Schulter ab.
+Warum hat Jüllich ein falsches Geständnis abgelegt?
+Damit ist erst in der zweiten Jahreshälfte zu rechnen.
+Das Vorlesen der Termine scheint der Pressesprecherin heute große Schwierigkeiten zu bereiten.
+Später arbeitete er als Journalist und wurde danach Schriftsteller und Dramatiker.
+Das kann man auch einfach mit einem scharfen Messer machen.
+Hangwässer sind so abzuleiten, daß Haldenrutschungen vermieden werden.
+Leute mit Kinderwagen, Rollstuhl oder Gehbehinderung brauchen den Fahrstuhl wirklich.
+Dieser Winter wird hart für ungeimpfte Personen.
+Egal wie idiotisch seine Forderungen sind, sie werden erfüllt.
+Das Leben erzählt die tollsten Geschichten.
+Sie entschied sich zunächst, das Ganze für sich zu behalten.
+Offenbar haben die Viecher gelernt, Fliegenklatschen zu fürchten.
+Leiten Sie dies weiter an die wehrtechnische Dienststelle.
+Ich habe nie behauptet ein Engel zu sein.
+Der Typ, der ständig über die Dreifaltigkeit predigte, kam mir ziemlich einfältig vor.
+Die Ersthelferin bringt den Verunglückten in die stabile Seitenlage.
+Zunächst schien ihr die Platzwunde am Kopf wenig auszumachen.
+Herr Meißner führt garantiert etwas im Schilde.
+Vielleicht erbarmt sich ja einer deiner Mitfahrer.
+Einhundertachtzig Euro sind ein stolzer Preis für ein Paar Stiefel.
+Er bedient sich provisorisch am Holzstapel, um den Wagen aufzubocken.
+Misch du dich nicht in unser Gespräch ein!
+Der Verkäufer fragte noch einmal nach der Kundenkarte.
+Sie reiht sich ein in die Reihe derjenigen, die nicht anders sein wollen.
+Musst du ihn denn wirklich bei jeder Kleinigkeit maßregeln?
+Man kann dann auch nicht mehr mitreden beim Austausch mit anderen.
+Zwischen den Parteien gibt es kaum inhaltliche Überschneidungen.
+In Julian lösten asiatische Nudeln immer ein magisches Gefühl aus.
+Als er das gehört hat, musste er lachen.
+Wieso machst du auf einmal mich dafür verantwortlich?
+Können Sie vielleicht mal den Kofferraum aufmachen?
+So ein Kopfhörer könnte eigentlich locker zehn Jahre halten.
+Den Umstieg hatte man sich einfacher vorgestellt.
+Damals war Moers noch unter preußischer Verwaltung.
+Willst du die rote oder die blaue Pille?
+Linus kennt sich mit Cybersicherheit gut aus.
+Aber wo soll man die Sachen sonst verwahren?
+Eventuelle Analogien zur Realität sind reiner Zufall und nicht beabsichtigt.
+Dirk hatte mit dem Mord am Ende gar nichts zu tun.
+Mancherorts sollen sogar unterrichtsrelevante Dinge über diesen Dienst abgewickelt werden.
+Wirklich nützen tut diese Aussage aber niemandem.
+Langfristig soll der Betrieb kostendeckend laufen.
+Wenn ich dem Entwickler wenigstens die restlichen zwölf Euro schenken könnte!
+Aus Bequemlichkeit hat er das Paket lieber gleich beim Nachbarn im Erdgeschoss abgegeben.
+Wieso geht das Licht ständig an und aus?
+Besonders beliebt sind die Partys der Sporthochschulen.
+Kannst du mir bei meinem Frauenproblem helfen?
+Meine Beiträge enthalten auch Fehler, die mir manchmal erst im Nachhinein auffallen.
+Jeder Landtag kann auf Antrag der Bundesregierung vom Bundespräsidenten aufgelöst werden.
+Sie hat sich erst einmal eine Rosinenschnecke reingepfiffen.
+Ich will, dass der Computer mich auch versteht, wenn ich mit vollem Mund spreche.
+Warum veranstalten alle so einen Hype um Ingwer?
+Sie wissen überhaupt nicht, worum es geht.
+Morgen können wir die Gefriertruhe abeisen.
+Von einem kleinen Flugplatz startet ein Propellerflugzeug.
+Alle Kontrollen werden manuell durchgeführt.
+Hinterher war er so besoffen, dass er der Ollen in den Ausschnitt gekotzt hat.
+Außerdem wird der Keller von zahlreichen Spinnen bewohnt.
+Diese Jacke gefällt mir wegen ihrer Farbe sehr.
+Überall entlang des Baches plätschert es unaufhörlich.
+Das Verhalten ändert sich halt mit, weil man immer denkt.
+Je nach verwendetem Zauber oder verwendeter Fähigkeit kann dieser Zeitraum kürzer oder länger ausfallen.
+Frauenfeindliche Beispielsätze bringen uns auch nicht weiter.
+Multikulti ist man in dem kleinen Dorf einfach nicht gewöhnt.
+Zur letzten Nachricht springen Sie, indem Sie auf den Button ganz unten klicken.
+Der schnauft unter seiner Maske wie Darth Vader beim Halbmarathon.
+Zweifelsohne besteht Nachbesserungsbedarf.
+Im überkritischen Zustand sind Fluide irgendwie gleichzeitig flüssig und gasförmig.
+Das alles wäre längst umgesetzt, wenn Minister Taugenichts es nicht zur Chefsache erklärt hätte.
+Weil ihr Licht defekt war, wich sie der Polizei über Schleichwege aus.
+Man gibt fünfzehn Cent zu viel pro Liter aus.
+Ist ein einmaliger Seitensprung schon ein Trennungsgrund?
+Dabei kann die Versuchsperson keinen Unterschied zum echten Reiz ausmachen.
+Daran sieht man mal, wie viel die solare Einstrahlung selbst im Winter ausmacht.
+Eine kaputte Rathausuhr würde heutzutage nur noch Touristen auffallen.
+Gerne würde Theresa beruflich etwas kürzer treten.
+Eure Gier nach Gold wird euch nichts als Tod und Unheil bringen!
+Wer noch nie auf Kosten anderer gescherzt hat, der werfe den ersten Stein!
+Ich verpasse dir eine anständige Tracht Prügel.
+Ich mag den verbrannten Pfannkuchen nicht essen.
+Kein Automat der Welt prüft, ob da eine Unterschrift ist.
+Wie lange kann man nicht lüften, ohne zu ersticken?
+Damit Kunststoff als biologisch abbaubar beworben werden darf, muss er Vorgaben erfüllen.
+Versionsnummern sagen heutzutage nichts mehr aus.
+Steht so in Artikel achtunddreißig, Absatz eins des Grundgesetzes.
+Im Frühling ist es besonders angenehm durch das Weinanbaugebiet auf Kalkstein zu wandern.
+Nach dem Zahnarztbesuch kam er mit Sprachbefehlen nicht mehr in sein Haus.
+Wer die Lieferung von Waffen ins Kriegsgebiet fordert, kann sich nicht ernsthaft Friedensdemonstrant nennen.
+Sind von den Insassen welche eingeklemmt?
+Noch schwieriger ist es manchmal, den aggressiven Besitzer abzuwehren.
+Nach dem Sex ging er unter die Dusche, während dessen hat sie sich selbstbefriedigt.
+Schließlich gibt es einige wenige, die das Tier nicht bemerken oder gleichgültig ignorieren.
+Mit ihrem extravaganten Kühlkörper ist die Grafikkarte ziemlich wuchtig.
+Zuständig ist das Verwaltungsgericht Limburg.
+Kann man Airbags mit Mehlstaub auslösen?
+Wohl einen über den Durst getrunken, wie?
+Der Flughafen ist aber nicht in München, sondern in der Nähe von Freising.
+Lass bloß meinen Lieblingskugelschreiber heil!
+Sterbehilfe ist in diesem Land doch verboten, oder?
+Denkst du, ich muss nur mit dem Finger schnipsen und schon ist alles erledigt?
+Das ist die neuste Spiegelreflexkamera von Nikon.
+Sie war die Hälfte der Zeit mit etwas anderem beschäftigt.
+Warum konnte der Hersteller nicht einfach ein metrisches Gewinde verwenden?
+Jürgen Klopp ist der Einzige, der Löw ersetzen könnte.
+Hier finden Sie zahlreiche Formulare und viele weitere Vorteile.
+Bitte unterlassen Sie solche Kraftausdrücke in Gegenwart der Kinder!
+Du darfst auf alle, alle Arten komisch sein.
+Dabei warf mir der Lehrer immer wieder eindeutige Blicke zu.
+Direkt nach einer säurehaltigen Mahlzeit soll man nicht die Zähne putzen.
+Neben Deutsch ist auch Rätoromanisch Amtssprache in der Schweizerischen Eidgenossenschaft.
+Leider befanden sie sich in der falschen Wohnung.
+Der Lokführer eines Güterzuges hatte vergessen, die Bremsschläuche anzuschließen.
+Sehr geehrte Fahrgäste, unser nächster Halt wäre Wolfsburg gewesen.
+Zimmerlautstärke heißt, dass man die Musik in jedem Zimmer gut hören kann.
+Sekundär bilden sich Gesteine durch Sedimentation.
+Das Gewicht muss nach vorn verlagert werden.
+Gesellige Abende verbringt man am besten mit gutem Essen.
+Durch die drastisch verringerte Schwerkraft könnte man mit mehr Gegenständen gleichzeitig jonglieren.
+Ich melde mich dann noch mal per Mail bei Ihnen.
+Herr Kaminski und seine Gattin sind auffällig kamerascheu.
+In vielen Büros werden sie extrem vernachlässigt.
+Harry wusste nur so ungefähr wo die Braunkohle her kam.
+Die Nachricht schien ihr doch aufs Gemüt zu schlagen.
+Stellen Sie keine Fragen, tun Sie einfach, was ich sage.
+Ich hätte nie gedacht, dass ich selbst so einer bin.
+Er hat es aufgegeben, eine Partnerin zu finden.
+Ist das jetzt Satire oder eine wahre Meldung?
+Mir ist schleierhaft, wie das passieren konnte.
+Man versucht, einen halbgaren Prototypen als fertiges Produkt zu verkaufen.
+Ich grüble, als wäre es mir eben doch nicht egal.
+Sätze für Common Voice zu spenden ist wie Nachrichten auf Twitter schreiben.
+Am Christbaum fehlt noch das Goldengelchen!
+Den Projektnamen solltest du noch mal überdenken.
+Wegen seiner Schulden war Amadeus ihm schon zuvor in Ungnade gefallen.
+Gestern ist unsere Waschmaschine kaputt gegangen.
+Wieso lässt sich die Tür nicht abschließen?
+Es ist nach den Grundsätzen eines Milizsystems einzurichten.
+Die letzte Sanierung fand im Jahr zweitausendfünf statt.
+Bei manchen Läden fragt man sich wirklich, ob sie überhaupt Geld verdienen wollen.
+Der Schönheitschirurg soll mir einen Babybauch machen, den ich als Mann nicht bekommen kann.
+Da kommt irgend so ein glibberiges Zeug raus.
+Daher können sie auch mehr Fotosynthese betreiben.
+Den Wunsch kann ich dir leider nicht erfüllen.
+Die letzten Tage schien die Sonne so stark, dass die Wiese ganz ausgetrocknet war.
+Dass der Text politisch korrekt gegendert ist, macht ihn nicht gerade lesbarer.
+Heute ging es in Biologie um die Feldmaus.
+Ich bin nur auf Erdnüsse allergisch, nicht auf Haselnüsse.
+Und im Wald darf ich mein Zelt auch nicht einfach so aufbauen.
+Nehmen wir den Fahrstuhl oder die Treppe?
+Dann ziehen wir dir die Stromkosten vom Taschengeld ab.
+Hetze richtet sich immer gegen Randgruppen und Minderheiten.
+Der Rennwagen muss in dieser Runde zum Boxenstopp in die Box fahren.
+In einer halben Stunde ist das Essen fertig.
+Du machst keinen Sinn! Ich verstehe deine Taten nicht.
+Keiner kennt dich so gut, wie du selbst.
+Das haben die vor zehn Jahren auch schon verkündet, aber passiert ist seither nichts.
+Du ehrst auch nicht die heiligen Sakramente.
+Aber der Vater traute sich nicht und versuchte, es ihm auszureden.
+Ernsthaft, dieses Affentheater muss ich mir nicht noch einmal antun.
+Dummheit frisst, Intelligenz säuft, das Genie macht beides.
+Stimmen muss man besonders ernst nehmen, wenn man der Einzige ist, der sie hört.
+Ausführliche Informationen zur Anmeldung finden Sie hier.
+Viele würden auch gerne auf einem Dinosaurier reiten.
+Und das ist der Punkt, ab dem es gefährlich wird.
+In den zehn Jahren Beziehung sind sie aneinander gewachsen und aneinandergewachsen.
+Schimmel muss dem Vermieter umgehend gemeldet werden.
+Open Source lebt von der Teilhabe unterschiedlicher Menschen.
+Ich wünsche dir einen guten und gesegneten Appetit!
+Die Behörden der Zollverwaltung sind zur Mitwirkung an Prüfungen der Landesfinanzbehörden berechtigt.
+Natürlich sollen auch Markennamen erkannt werden.
+Die Bedienung der App ist selbsterklärend.
+Säuglinge haben mehr Knochen als Erwachsene.
+Welche Stellung habt ihr beim ersten Analsex genutzt?
+Vergangene Lebensabschnitte kann man nicht wiederholen.
+Mit deiner Stimme könntest du Werbung produzieren.
+Ich kann doch jetzt noch keinen Joker verschwenden!
+Sie schafft es nicht einmal, gegen Heranwachsende das Wort zu erheben.
+Kaum einer ist mit seinem Alter zufrieden.
+Anscheinend war es nur ein Klingelstreich der Nachbarskinder.
+Wer korrigiert eigentlich die gemeldeten Fehler in den Sätzen?
+Informiert euch vorher, damit ihr keinen Stress mit dem Zoll kriegt!
+Oje, das Experiment ging ja mal mächtig schief!
+Bitte, treten Sie näher; ich werde Herrn Song gleich benachrichtigen.
+Im Schützenverein kann man schießen lernen, und Freunde treffen.
+Gummiparagraphen sind dazu gedacht, jeden verurteilen zu können, der einen nervt.
+Die Anzeichen für einen Infarkt sind je nach Geschlecht unterschiedlich.
+Güterzüge ziehen große Lasten durch das schmale Tal.
+Frische Luft, blauer Himmel, angenehme Temperaturen: Frühling!
+Wieso denkt denn wieder keiner an die Gitarristen?
+Voraussetzung dafür ist ein hoher Druck.
+Unter der Absperrung taucht sie einfach hindurch.
+Wenn man ständig unterwegs ist, fehlt einem manchmal die Ruhe.
+Fachsprachlich bezeichnet man es als Brackwasser.
+Herkömmliche Pumpen können diese Leistung nicht erbringen.
+Als man zurückkam, hatte sich die Natur das Land zurückerobert.
+Da sind sich alle Historiker rückblickend einig.
+Um ehrlich zu sein, ich wäre gerade fast eingeschlafen.
+Oder bin ich nur zu blöd, es zu kapieren?
+Emotionale Vernachlässigung im Kindesalter kann genauso traumatische Folgen wie andere Misshandlungen haben.
+Unter den eingewanderten Menschen sind viele wertvolle Fachkräfte.
+Magst du lieber Star Trek oder Star Wars?
+Ich brauche größere Lautsprecherboxen, um noch rücksichtsloser Musik hören zu können.
+Je länger man wartet, desto teurer wird es.
+Wie bändige ich nur meinen unkontrollierten Paarungstrieb?
+Beim Spazierengehen nehme ich oft eine Tüte für den herumliegenden Müll mit.
+Hier können noch weitere Plattitüden zum Besten gegeben werden.
+Wie kriegt man den Dübel wieder aus der Wand?
+Hugo konnte den Fahrradfahrer im Rückspiegel sehen.
+Das Hotel ist die nächste Kreuzung rechts.
+Ein Ruder münzt die Kraft des Wassers in eine Seitwärtsbewegung um.
+Damals ging man in die Kneipe um die Ecke und besoff sich.
+Man kann nicht alle unter Generalverdacht stellen.
+Zum Beispiel dürfen sie keine Medikamente verabreichen.
+Nach Osten zu wird der Strand sandiger und hat weniger Steine.
+Das ist bloß Lebensmittelfarbe, die ist harmlos.
+Dann kann Arnold sich schon einmal auf eine Tracht Prügel gefasst machen.
+Der Rest der Endstehung ist kompliziert.
+Viele Abfalldeponien trüben das Bild einer heilen Welt.
+In Afghanistan gilt kein generelles Tempolimit auf Autobahnen.
+Ohne ersichtlichen Grund hat der Mann einen Streit vom Zaun gebrochen.
+Zum Rauchen gehen Sie bitte auf den Balkon!
+Hilfst du mir bitte beim Kartoffeln schälen?
+Ich bin negativ, wann willst du dich testen?
+Hier müssen Gerichte geltendes Recht durchsetzen.
+Es steht nur eine begrenzte Anzahl von Impfdosen zur Verfügung.
+Ziemlich dunkel muss es in solchen Wohnungen sein.
+Nun ein paar Produktinformationen des Hauptsponsors.
+Nein, ich möchte gern etwas Helleres haben.
+Ist die Farbe gelb, handelt es sich um eine passive Kreatur.
+Wird die Temperatur in Celsius oder in Fahrenheit angegeben?
+Er lehnte den Auftrag ab, weil das Projekt überhaupt nicht seinem Stil entsprochen hätte.
+Okay, dafür wäre ich bereit, meine Seele zu verkaufen.
+Jetzt lassen die uns hier im Regen warten.
+Versucht da gerade ernsthaft ein Glatzkopf, Shampoo für kraftvolles Haar zu bewerben?
+Ha, da habe ich aber einen Wortwitz gerissen!
+Leider funktionierte die Verbindung eher schlecht als recht.
+Erst wenn das letzte Licht erloschen ist, wird das Haus verlassen!
+Ich meine, viel weiter im Osten als Japan geht ja nun mal nicht.
+Ich hätte es sonst bestimmt wieder vergessen.
+Der Song ist an Oberflächlichkeit und Überheblichkeit kaum zu übertreffen.
+Somit gibt es auch keine deutsche Botschaft in Taiwan.
+Und weil es so schön ist, gleich noch mal!
+Musst du jedes Mal so mit den Türen knallen?
+Die einen im wörtlichen, die anderen im übertragenen Sinne.
+Normalerweise antworte ich nicht auf solche Fragen.
+Niemand wird davon glücklich, wenn er immer alles bekommt, was er will.
+Hast du heute mit dem Hammer deine Haare gekämmt?
+Zum Frühstück esse ich meistens eine Banane.
+Politisch gehören die Kanaren zu Spanien.
+Den ganzen Abend flirtete Charlotte mit dem Barkeeper in der Hoffnung auf ein Freigetränk.
+Deine Mutter sagt solche Dinge nicht aus Spaß.
+Bis zu welcher Windstärke kann man noch Raketen starten?
+Wer mit Privatjet reist, kann sich nicht mehr als bürgernaher Politiker bezeichnen.
+Sie braucht jemanden, der ihr zuhört und sie in ihren Selbstzweifeln bestätigt.
+Der Ganove hat uns eine falsche Fährte gelegt.
+Eine gebräunte junge Frau steht vor einem Swimmingpool.
+Bitte bring mir aus dem Baumarkt ein Mittel zur Stahlentrostung mit.
+Und erst recht, was die Menschen denken, die diesen Satz einsprechen.
+Erzähl denen die gleichen Lügen wie sonst auch immer!
+Es ist echt schwer, aus dem Glas noch etwas herauszuholen.
+Da wüsste ich jetzt auch nichts Besseres.
+Offensichtlich wird nicht jedes unerwünschte Kind abgetrieben.
+Alle stellen überrascht fest, dass sie noch einkaufen müssen, und stürmen die Läden.
+Überhaupt fehlt es an wissenschaftlichen Untersuchungen zum tatsächlichen Nutzen.
+Ja meine Damen und Herren, hier haben wir einen Ballkünstler vor dem Herrn!
+Jeder Arbeitgeber wünscht sich gesunde Arbeitnehmer.
+Schon die Nominierung an sich ist eine Auszeichnung.
+Bei der Bundeswehr sieht es nicht besser aus.
+Ja, es gibt auch einen Jeep von Porsche.
+Nicht jeder Mensch, der Sätze korrigiert, beherrscht sämtliche Regeln der deutschen Sprache.
+Lastschrifteinzüge lassen sich nach bis zu acht Wochen noch rückabwickeln.
+Die Musik läuft erst seit einer halben Minute, aber sie nervt mich jetzt schon.
+Nur Geduld, mit der Zeit wird aus Gras Milch.
+Museumsinseln sind beliebte Ausflugsziele bei Intellektuellen.
+Zeigen Sie mir bitte Ihren Impfnachweis.
+In den letzten sieben Tagen wurden im Schnitt neuntausendeinhundertzwanzig Corona Neuinfektionen registriert.
+Die Frau hat im Bett geraucht und ist dann eingeschlafen.
+Wenn man seine Aussage selbst für wahr hält, ist es keine Lüge.
+Er möchte die Züchtigkeit im Lebensstil seiner Tochter zementieren.
+Ihr Bruder ist also viel jünger als Sie.
+Das Geschenk für meine Freundin war ein Griff ins Klo.
+Aber reicht das schon für eine Veröffentlichung?
+Egal was du tust, wir unterstützen dich.
+In der Schule denkt man noch, wer ein abgeschlossenes Studium hat, muss intelligent sein.
+Hat euch eure Mutter Dünger in die Schuhe getan?
+Aber da wird die dritte Dimension auch nicht sichtbar.
+Achte bei kleinen Bohrern darauf, dass du sie wirklich mittig ins Bohrfutter einspannst.
+Jemand hat die Tiere aus ihrem Käfig befreit.
+Ein schrilles Auftreten ist praktisch Voraussetzung, um Aufmerksamkeit zu bekommen.
+Gut, ich denke, wir müssen das jetzt nicht alles noch mal durchkauen.
+Der Gegenverkehr kam in der Kurve gefährlich nah.
+Viele persönliche Daten und sogar Gesundheitsdaten waren öffentlich im Internet abrufbar.
+Auf die Schnelle habe ich nichts finden können.
+Wie sieht es hier eigentlich schon wieder aus?
+Der Pianist haut heute wieder richtig in die Tasten.
+Bauch einziehen führt zu schnelleren Erfolgen als Abnehmen.
+Mittlerweile haben sie reagiert und das Sortiment angepasst.
+Auf keinen Fall sollte man seine Eltern mitbringen.
+Der Vater stand vor der Wahl, entweder Kind oder Handy fallen zu lassen.
+Mitten in der Nacht wurde er von ohrenbetäubendem Getöse geweckt.
+Worauf die Frage abzielt, ist nicht offensichtlich.
+Ich versuche aber, schneller fertig zu werden.
+Genau genommen ist dies der Grund, warum Sie diesen Satz gerade vorlesen.
+Sieht man durch blaue Sonnenbrillen alles in blau?
+Dieser Sachverhalt wird gerade vor Gericht geprüft.
+Es kann helfen, die Gedanken zu Papier zu bringen.
+Ich komme eigentlich ganz gut mit ihnen zurecht.
+Mango, Ananas oder Papaya wachsen nicht in Deutschland.
+Ist bei dir nachher eigentlich noch Platz, um mitzufahren?
+Wo habe ich denn mein Freistoßspray gelassen?
+Durch jede Zwischenstation verzögert sich die Reaktion weiter.
+Die Holzhäuser brannten ab, die aus Stein stehen heute noch.
+Alle wieder einzufangen, wird weiß Gott nicht leicht.
+Wie viele Glühlampen bunkern Sie im Keller?
+Wir haben einen neuen Stundenplan bekommen.
+Einige Automarken aus den Fünfzigerjahren existieren heute nicht mehr.
+Trotz des platten Reifens pustete das Rad in atemberaubender Geschwindigkeit um die Kurve.
+Das kann man leider nicht mehr nachvollziehen.
+Aus der Kontrollgruppe klagte niemand über Sodbrennen.
+Sie liegt deshalb schon länger mit Stella im Clinch.
+Die zwei verbindet eine merkwürdige Hassliebe zueinander.
+Erst vor einer Woche haben wir Möbel gekauft.
+Die Luftqualität wurde langsam wieder besser.
+Nach eineinhalb Stunden Fußmarsch kamen wir an eine Lichtung.
+Früher haben wir noch am Friedhof gechillt und uns dabei unendlich cool gefühlt.
+Rayen hat Paul voll auf die Nase geboxt.
+Würdest du deinen Körper mit meinem tauschen wollen?
+Der Kandidat zieht seinen letzten Joker.
+Meine Maus war noch mit meinem Laptop verbunden.
+Ein Strauch hebt sich besonders von den übrigen Sträuchern ab.
+Nach langem Warten öffnete die schrullige Dame uns die Tür.
+Am Ende des Tunnels ist nur der Lichtschalter.
+All die Luftschlangen haben Alfons eher genervt als erfreut.
+Am siebenundzwanzigsten Juni wurde ein zweiter Vertragsentwurf vorgestellt.
+Piratenschiffe erkennt man an den Fahnen mit Totenkopf.
+Aber darüber hinaus wird es schon anstrengend.
+Beim Schminken betont man meist entweder die Augen oder die Lippen.
+All das ist heute schon technisch möglich.
+Nein, ich möchte nicht Chorleiter werden, ich singe nur.
+Sie hätte schon gern mit Elisabeth geschlafen.
+Im November kamen über Zweiundsechzigmillionen neue Infektionen hinzu.
+Aber das eigene Leben in die Hand nehmen zu können, half schon viel.
+Betrunkenen Personen darf das Betreten der Bergbauanlagen oder der Aufenthalt daselbst nicht gestattet werden.
+Zweitausendzweiundzwanzig wird Frankreich leider schon in der Vorrunde ausscheiden.
+Was halten Sie von einem Handyverbot für Schüler?
+Einige fotografieren ihn oder sich selbst.
+Kann ich nicht irgendeiner sinnvollen Beschäftigung nachgehen?
+Hast du Freitag nach meinem Frisörtermin Zeit?
+Auch diese Zeitung war voller Werbung für Kaffeemaschinen.
+Den Besatzungskräften war es verboten, der hungernden Bevölkerung etwas abzugeben.
+Es wird die Krankheit nicht auslösen, aber es könnte sie begünstigen.
+Ja, ein bisschen mehr Abwechslung hätte nicht geschadet.
+Bald baut Bernhard Breyer bestimmt Babybetten.
+Wenn die Kugel keine ganze Umdrehung schafft, kommt unten keine Farbe an.
+Denken Sie auch an die globalen Auswirkungen.
+Wieso fragst du mich eigentlich, wenn du sowieso alles besser weißt?
+Gab es je einen Menschen, der älter als hundertzwanzig Jahre alt wurde?
+Lange Beiträge lässt das System nicht zu.
+Im Stellenangebot stand klar drin, dass Reisebereitschaft erwartet wird.
+Alle Geräte auf diesem Tisch sind durchgecheckt.
+Also hör mal, das finde ich jetzt aber nicht in Ordnung, ok?
+Nicht einmal Frank traute sich dem Polizisten zu widersprechen.
+Fang bloß nicht wieder mit deinem Sprechgesang an!
+Dann werden die Stinktiere eben woanders einquartiert.
+Sie war mit der jungen Houston dort, die damals auch Model war.
+Uschi wollte schon immer mal als Tauchlehrerin arbeiten.
+Trotz winterlicher Temperaturen lief er mit kurzer Hose durch die Stadt.
+Kannst du das bitte noch einmal vorlesen?
+Was die Auslastung betrifft, steht die Linie an achter Stelle im Netz.
+Die Wirbelsäule ist eigentlich nicht für den aufrechten Gang konstruiert.
+Franzi hat die Finte sofort durchschaut.
+Gibt es eigentlich Planeten mit geostationären Monden?
+Schade, dass das größte Vermittlungsportal kommerzialisiert wurde.
+Um den Spieler bei der Stange zu halten, muss rasch ein Erfolgserlebnis her.
+Der bedeutendste polnische Komponist trug einen französischen Namen.
+Herbert hat Krebs im Endstadium und wird daher in wenigen Wochen sterben.
+Nach zwei Stunden Probe, war ich froh um die Pause.
+Ihr habt uns zu Unrecht vorgeworfen, uns nicht aktiv an der Aktion zu beteiligen.
+Ich hätte entweder meine Tochter oder mein Smartphone fallen lassen müssen.
+In der größten ansässigen Fabrik stehen die Fließbänder still.
+Ich habe mir nichts zu Schulden kommen lassen.
+Es bieten sich vielfältige Möglichkeiten.
+Meine Bohrmaschine funktioniert nicht mehr so gut wie früher.
+Wobei es natürlich Diskussionen darüber gibt, ob Taiwan überhaupt ein Land ist.
+Ich hab im Absender meinen Namen abgekürzt.
+Das sieht sehr nach einem Hinterhalt aus.
+Es gibt nur eine Möglichkeit dort herauszukommen.
+Vom Regen wird das Gel in die Augen gespült und brennt fürchterlich.
+Der Generalverdacht wird weiter ausgebaut.
+Ich bin Mutter von zwei kleinen Kindern.
+Darf ich mir mal kurz deine Luftpumpe ausleihen?
+Das ist wirklich ein gravierender Unterschied.
+Der Rest ist, denke ich, selbsterklärend.
+Die Hecke wuchert so heftig, dass man den Weg kaum noch benutzen kann.
+Die meisten Menschen ziehen nicht gerne weit von ihrer Heimat fort.
+Nehmen Sie sich zwei Minuten Zeit für eine Umfrage.
+Die Ratende in der Quizshow hatte großen Erfolg.
+Weißt du überhaupt, warum wir jedes Jahr Weihnachten feiern?
+Der erste Permanentmagnet ist etwa auf Hüfthöhe angebracht.
+Das Mikrofon lässt sich separat wechseln.
+Auffällig viele unserer Nutzer haben angegeben, aus Afghanistan zu kommen.
+Fälschlich nennt man manchmal auch nur die im Newsfeed verlinkten Medieninhalte Podcast.
+Die kleine Ruth spielt mit einem Flummi.
+Was nützt dem Verstorbenen das Staatsbegräbnis?
+Irgendwann werden die Sprachfehler wegen ihrer Verbreitung als korrekt anerkannt.
+Wollt ihr die Vereinfachung jetzt ernsthaft dafür kritisieren, dass sie eine Vereinfachung ist?
+Von schnellem Internet braucht man auf den Halligen wohl nicht zu träumen.
+Nicht zuletzt möchte ich mich bei der Anästhesistin für den unvergleichlichen Trip bedanken.
+Niemand schreibt mir vor, wie ich meine Haare zu tragen habe.
+Der Temperatur ist für einen Winrer zu hoch.
+Statt Döner hätte ich auch Bock auf ein Krabbenbrötchen.
+Tatsächlich bleiben die Daten im Browser und werden nicht zum Server übertragen.
+Die Steuererklärung ist immer ein wenig schwierg bei so vielen Geschäftsreisen.
+Das Mädchen schenkte der Mutter einen Blumenstrauß.
+Es ist schwierig, diesen Leuten etwas zu verkaufen.
+Egal wie oft du hinfällst, du musst immer wieder aufstehen.
+Man sieht einige Gebrauchsspuren, aber das Gerät ist noch okay.
+Nach vier Stunden war der Spuk für den Bewohner beendet.
+Kann man Bestechungsgelder von der Steuer absetzen?
+Viele Zutaten sind einfach schwer im Handel zu kriegen.
+Stattdessen dümpelt er die ganze Zeit bei fünf bis zehn Prozent herum.
+Wie ist das Barfußlaufen aus orthopädischer Sicht zu beurteilen?
+So ein Stubenhocker ist Herr Krämer dann auch wieder nicht.
+Die Chefetage hat mal wieder etwas verkauft, was es nicht gibt.
+Nicht schon wieder so ein sinnloser Töpferkurs!
+Vielleicht ist der Vorstand endlich auf den Trichter gekommen, dass es Murks ist.
+Transportverschlüsselung beherrschen mittlerweile die meisten Webserver.
+Brauchen wir einen antivirologischen Schutzwall?
+Gestatten Sie, dass ich meine Uhr nach der Ihrigen stelle.
+Recht haben und Recht bekommen sind zwei verschiedene Dinge.
+Das Einnehmen von Holunder hat die Symptome verschlimmbessert.
+Den Gesichtern der Fans zufolge kann das Spiel nicht ideal verlaufen sein.
+Die Kurzgeschichte beschäftigt sich inhaltlich mit einem Jugendlichen.
+Wie viele Treffer hält das Fahrzeug aus?
+Ich bringe ihn um, sollte er sich in unsere Beziehung einmischen.
+Er stellte eine leichte Rötung der Haut fest.
+Unser Immunsystem ist mal wieder der beste Schutz und viel flexibler als jede Medizin.
+Wir könnten ihn an der Kreuzung mit der alten Kastanie abpassen.
+Cassandra Röllig möchte sich die Schlachtung lieber nicht ansehen.
+Warum sehen die Emojis bei Jeanette anders aus?
+Für so einen kurzen Zeitraum lohnt sich die Reparatur nicht.
+Und wenn Sie nicht gestorben sind, lamentieren Sie noch heute.
+Alle Affen im Zoo haben ein neues Gehege.
+Mein Name ist Martin und mein Mantel reicht für uns beide.
+Der minimalistische Stil ist nicht jedermanns Sache.
+Wenn man sie biegt, darf man einen gewissen Biegeradius nicht unterschreiten.
+Das Blatt hat doch zwei Seiten mein Schatz.
+Darf man in der Probezeit Urlaub nehmen?
+So lassen sich ähnliche Prozesse auch in der Gegenwart erkennen.
+Für Herrn Thormählen gibt es wieder nur eine Kinderportion.
+Wenn du auf dem Stück stürzt, verlierst du auf jeden Fall auch deine Skier.
+Das lenkt mental nur von den wichtigen Dingen ab.
+Ist eigentlich schon aufgefallen, dass ich nicht da bin?
+Sind Sie schon einmal mit dem Gesetz in Konflikt geraten?
+Eine Sechs bekommen hat nichts mit Geschlechtsverkehr zu tun.
+Kaulquappen mag ich noch lieber als fertige Frösche.
+Ohne ihre Schachtel kann man Streichhölzer nicht entzünden.
+Vor den Dornen sollen dich die Gartenhandschuhe schützen.
+Kanuwandern wird bestimmt bald ein Trendsport.
+Sie werden aber noch schriftlich darüber informiert.
+Also so kachektisch sieht sie doch gar nicht aus.
+Auf anwaltliches Anraten hin möchte ich mich dazu nicht weiter äußern.
+Das liegt nur daran, dass meine Tastatur klemmt.
+Woran liegt es, dass die Bilder so unscharf werden?
+Die Mitglieder des kolumbianischen Drogenkartells schieben Stress.
+Für sechs Euro bekommt man bereits eine ganze Spindel.
+Wenn man mit offener Heckklappe fährt, sollte man stets auch vorne ein Fenster öffnen.
+Der gemeine Pöbel darf sich schön hinten anstellen!
+An meiner Krönung kämpfte ich gegen meinen Vater.
+Hier gilt die Maxime: Je mehr Ordner, desto mehr Ordnung.
+Wenn das mit den Kindern nicht klappt, mache ich halt Karriere.
+Trotz Strumpfmaske konnte der Täter anhand seiner Stimme identifiziert werden.
+Rausgeschmissen wird nur, was falsch ist.
+Habt ihr seine Sekretärin ausgekundschaftet?
+Und immer schön die Luke möglichst weit aufreißen.
+Auch wenn es für dich unerwartet kommt, möchte ich mit dir über Liebe sprechen.
+Manche Dinge sind schwer in Worte zu fassen.
+Ohne Anhänger müssen Sattelschlepper eine unglaubliche Beschleunigung haben.
+Weihrauch kennt jeder, aber was ist Myrrhe?
+Organe aus einem toten Körper sind wertlos.
+Wie kann ich meine eigene Intelligenz fördern?
+Lange und auch ausgiebig und ohne Punkt und Komma.
+Auf dem Rückweg durchfließt das Blut die Venen.
+Sollte der Fall der Fälle eintreten, stehe ich dumm da.
+Eine Schildkröte hat dem Jugendlichen in die Achillessehne gebissen.
+Mir fallen die Augen zu, wenn ich daran denke.
+Zum Glück habe ich meinen Freund dabei, der auf mich aufpasst.
+Der furchtlose Junge wollte mit seinem Vater auf die Drehleiter.
+Das wollte ich hier nur mal erwähnt haben.
+Im Schrank des Kommissars stehen Akten von hunderten noch ungelösten Fällen.
+Man sollte über Brandschutzschneisen in Wäldern nachdenken.
+Ist wohl doch nicht so toll, wie ich dachte.
+Ich bin gespannt wie ein Flitzebogen, was sich der neue Trainer Kant ausgedacht hat.
+Das heißt: Einmal arbeiten, öfter abkassieren.
+Jüdische Friedhöfe werden für die Ewigkeit gebaut.
+Diese Kennzeichen weisen sie als Questgeber aus.
+Sollte der Download nicht automatisch starten, klicken Sie hier.
+Der Naturschutzbund ruft zu einer bundesweiten Vogelzählaktion auf.
+Eine Schulstunde dauert fünfundvierzig Minuten.
+An der Rückwand wurde die historische Tischleuchte montiert.
+Der Händler meldet sich nicht auf mein Preisangebot zurück.
+Der Morgen war von reichhaltigen poetischen Ergüssen geprägt.
+Zum Kartoffelgratin gibt es einen mediterranen Salat.
+Tja, aber bei einem ganzen Hotel sage ich natürlich auch nicht nein.
+Allen Bemühungen zum Trotz hat der Legastheniker viele Fehler gemacht.
+Bei der Bundeszentrale für politische Bildung kann sich jeder das Grundgesetz kostenlos bestellen.
+Kühl und dunkel lagern, dabei nicht die gleichmäßige Temperatur aus den Augen verlieren.
+Vor der Grabbelkiste entsteht ein Gerangel um die begehrten Schnäppchen.
+Die Tüte ist prall gefüllt mit Süßigkeiten.
+Ich finde, die Suppe enthält zu viele Erbsen!
+Die Errichtung eines Gemeindewachkörpers oder eine Änderung seiner Organisation ist der Bundesregierung anzuzeigen.
+Bei der Formulierung schwingt schon einiges an Gesellschaftskritik mit.
+Unter dem Regenmantel war sie splitterfasernackt.
+Nicht zu verwechseln mit Gitarrensaiten.
+Ab Sommer zweitausendfünf tauchten einige Podcasts mit erotischen Inhalten auf.
+Unter welcher Nummer kann ich Sie erreichen?
+An welcher Haltestelle muss ich aussteigen, wenn ich zur Universität möchte?
+Meier konnte sich auf eigene Faust befreien.
+Wirklich, es ist besser, man bleibt zu Hause, bis das Wetter wieder schön wird.
+Zur Mitte der Gesellschaft zählt nur noch, wer sich in irgendeiner Form benachteiligt fühlt.
+Vorerst würde ich auf Kresse und Thymian verzichten.
+Was hat Nero wirklich mit der Brandstiftung in Rom zu tun gehabt?
+Es fühlt sich an, als würde man auf Zahnfleisch gehen.
+Auch Künstler und Musikanten waren von der Coronakrise betroffen.
+Zum Glück hat Jenny sich ausreichend Lesestoff mitgenommen.
+Kommen Sie, ich bin extra früh aufgestanden deswegen!
+Aber seit ein paar Jahren weiß ich, dass es für mich einfach nicht stimmt.
+Welcher Idiot hat dort auf den Straßenbahnschienen geparkt?
+In dem Moment ist sie ja unehrlich zu sich selbst.
+Der Ausgang des Experiments ist ungewiss.
+Kommt, wir gehen rein und beenden die Party!
+Bis ein Grabstein ausgesucht ist, wird provisorisch ein Kreuz aus Holz aufgestellt.
+Die anderen Stände will ich mir auch noch ansehen.
+Alle Mitglieder der Rentnergang tragen so ein Stirnband.
+Leider hat der Wächter den Braten gerochen.
+Spätere Berühmtheiten haben mehr Konkurrenz und gehen irgendwann unter.
+Könntet ihr nicht einen Abstecher nach Hagen machen?
+Immerhin ist überhaupt Obst in der Wohnung.
+Die Kinder haben dich gerade in den höchsten Tönen gelobt.
+Wenn etwas rot blinkt, ist das nie ein gutes Zeichen.
+Am Computer wird alles detailgetreu nachgebaut.
+Die Unterspülung ist bedauerlich, ließ sich aber nicht verhindern.
+Sei endlich still, sonst trage ich dich ins Klassenbuch ein!
+Teilnahmslos sah er sich das Geschehen an.
+Die Mitarbeitenden werden um ihre Ferien gebracht.
+Die Plantage ist von Bewässerungsgräben durchzogen.
+Hierfür würde ich imprägniertes Holz empfehlen.
+Die Versicherung will schon wieder Geld von mir haben.
+Den ausgetrockneten Sumpf konnte man problemlos zu Fuß durchqueren.
+Ein Muskelkrampf wurde Krupp zum Verhängnis.
+Schweres Tragen sollte man danach ebenfalls vermeiden.
+Richard hatte zwar die Bananenschale liegen lassen, aber nicht damit Katja ausrutschte.
+Spätestens wenn Fahnen verbrannt werden, dürfte klar werden, daß einige Personengruppen nicht tolerant sind!
+Er war so besoffen, dass er sich mit der Klobürste die Zähne putzen wollte.
+Wir spielen die besten Hits der Siebziger, Achtziger und das Beste von heute!
+In der Atmosphäre verglühen alle kleinen Teile, die auf den Planeten stürzen.
+Asche und Schlacke dürfen in heißem Zustand nur auf besondere Aschenhalden gestürzt werden.
+Frau Martens erklärte sich zur Mitarbeit daran bereit.
+Diese unberechenbare Schizophrenie ist beängstigend.
+Schließlich einigten sie sich auf einen neuen Spielmodus.
+Wie voll ist dein Terminkalender im Moment?
+In allen vier Ecken soll Liebe drin stecken.
+Immer dann, wenn man den Service braucht, steht er vorübergehend nicht zur Verfügung.
+Justus findet seine Stimmgabel nicht mehr.
+Weshalb muss man niesen, wenn man in die Sonne blickt?
+Die Benutzung des Sprungturms erfolgt grundsätzlich auf eigene Gefahr.
+Beim Überholen achtete Franz immer auf ausreichend großen Sicherheitsabstand.
+Vielleicht nimmt ja ein netter Nachbar mein Paket entgegen.
+Stellt sich noch die Frage, wie wir mit Nichtlinearitäten umgehen.
+Die Kunden haben mir kein gutes Feedback gegeben.
+Aber um ihn zum Reden zu bringen, müssen Sie sich schon anstrengen.
+Im Prinzip hat er dir einen Persilschein ausgestellt.
+Lautlos klettert der Spezialagent den Fahrstuhlschacht hinauf.
+Zu diesem Zweck wurde ein großes Labor eingerichtet.
+Die Klugen haben Zweifel, die Dummen nicht.
+Aber irgendwie gut erschöpft, weil ich den ganzen Tag mit dem Fahrrad unterwegs war.
+Werden die Preise nach dem Ukraine Krieg wieder sinken?
+Es bleibt weiterhin trocken im schönsten Bundesland der Welt.
+Mit der neuen Zahnbürste war das Zähneputzen viel angenehmer.
+Das Betäubungsmittel verhindert nicht die Bildung von Neurotransmittern.
+Die neuen Covid Mutanten sind teilweise als besorgniserregend eingestuft worden.
+Wer solchen Lösegeldforderungen nachkommt, finanziert die organisierte Kriminalität.
+Ich hätte gern einen großen Teller Nudeln mit Tomatensoße.
+Wollen wir an Silvester einen Film schauen?
+Eigentlich wäre es auch für mich Zeit, sich schlafen zu legen, dachte sie.
+Als wir ankamen erwartete man uns bereits.
+Der Tod durch Verbrennung gilt wegen der Schmerzen als besonders grausam.
+Wie sich nach kurzer Zeit herausstellte, bestand noch viel Klärungsbedarf.
+Ich habe mich heute morgen gewogen, ich bin zu klein.
+Wollen wir mal zusammen eine Weinprobe machen?
+Ihre langen, dünnen Finger passen zum Rest ihrer dürren Gestalt.
+Sie will sich einfach nicht geschlagen geben.
+Den Farbstich rechnet dein eingebauter Weißabgleich schnell wieder heraus.
+Ich habe mich mit ihrer Erlernung über vier Jahre beschäftigt.
+Wenn Gott einen bestraft, sagt er nie wofür eigentlich.
+Damit macht ihr es euch viel zu einfach.
+Otto war es unangenehm, dass sie den Elefanten in den Porzellanladen eingeladen hatten.
+Der Fuchs ist schlau und stellt sich dumm, beim Menschen ist es andersrum.
+Manchmal gibt es noch sehr günstige Verbindungen.
+Nie hätte ich für möglich gehalten, dass ausgerechnet Herr Breyer solche Musik hört!
+Den Stab in die eine Hand, das Fell in die andere und dann rubbeln!
+Im Prospekt sieht alles schön und idyllisch aus.
+Wie macht sich die Unterforderung bemerkbar?
+Für ein Feuer braucht man Hitze, Brennstoff und Sauerstoff.
+Gerne stellt man sich dann als größten Retter der Menschheit dar.
+Dann kam ich wohl einfach zu spät auf die Welt.
+Angeblich handelt es sich beim Einfrieren um die schonendste Variante, einen Hummer zu töten.
+Es hat nur ein bisschen gefehlt und es wäre zu einem Blechschaden gekommen.
+Ich suche das Netzteil von meinem Laptop.
+Es kommt zu Zugausfällen, weil die Stellwerke nicht ausreichend mit Personal besetzt sind.
+Vom Verbot ausgeschlossen sind Tiere mit Flossen.
+Am Telefon weiß man nie, wer sonst noch mithört.
+Wir haben zweitausendzweiundzwanzig und ich altes Trottelgesicht habe mich verliebt.
+Nach ein, zwei Kameraschwenks sieht man schließlich die besagte Gaube.
+Wussten Sie, dass ausgerechnet am Valentinstag die meisten Beziehungen zerbrechen?
+Wenn er einen direkt nach der Körbchengröße fragt, gibt man ihm einen Korb.
+Bestimmt wird es für einen guten Zweck verwendet.
+Ja, das klang nach einem endgültigen Nein.
+Gäbe es einen Computerspezialisten im gallischen Dorf, so hieße er Unix.
+Sein Publikum zeigt ihm sehr deutlich, was es davon hält.
+Und wenn wir einfach mit dem Rad hin fahren?
+In dem Gedränge musste man quasi andere anrempeln.
+Die Entscheidung wurde im Parlament einstimmig gefällt.
+Wir holen unsere Brötchen immer bei der Bäckerei Gehring.
+An öffentlich einsehbare Adressen wird nach kurzer Zeit auch Spam adressiert.
+Donauwelle heißt mancherorts auch Schneewittchenkuchen.
+Hör dir bitte deine eigenen Aufnahmen an.
+Im Wohnzimmer steht eine stilvolle Kuckucksuhr.
+Er unterhält den ganzen Bus mit seinen Telefongesprächen.
+Bei der Bundesnetzagentur sind bestimmt schon viele Beschwerden über Flixbus eingegangen.
+So eine tiefe Stimme hatte nicht mal mein Opa.
+Sie erreichen alle vorgesehenen Anschlüsse.
+Sie denken immer noch, dass ich Sie davon abhalten wollte, oder?
+Das war doch höchstens ein kurzes Hupen vor der Tiefgarage.
+Dann müsst ihr euch einen anderen suchen.
+Ein Gedicht bei vorschriftsmäßiger Zubereitung.
+Diese beiden wären ein Traumpaar, das leider nie zustande gekommen ist.
+In meiner neuen Wohnung habe ich endlich eine Fußbodenheizung.
+Sie fuchtelt mit dem Putzlumpen in der Hand herum.
+Ein Knirps gerät auf seiner Gummiente in Seenot.
+Wieso ist die Waschmaschine immer so laut?
+Indem man den Dotter mehrfach von einer Hälfte der Schale in die andere kippt.
+Normale Verkehrsflugzeuge bewegen sich deutlich unterhalb der Schallgrenze.
+Erzähl ihr nicht solche Schauergeschichten!
+Insbesondere da es ein Jugendwort ist, liegt die Vermutung doch irgendwie nahe.
+In der Deutschen Sprache gibt es fünf Selbstlaute.
+Der Teig hatte sich um das Nudelholz gewickelt.
+Es sind aber lateinische Buchstaben, nicht etwa griechische.
+Das ist einfach durch nichts mehr zu rechtfertigen.
+Bei Mangelernährung oder Ähnlichem wird diese Größe natürlich nicht erreicht.
+Nimm die Kopfhörer ab, wenn ich mit dir rede!
+Supermärkte sollten um zwei bis drei Stockwerke zum Wohnen aufgestockt werden.
+Bei einer Kollision nehmen alle den gleichen Schaden.
+Jedoch ist mit erheblichen Bürgerprotesten zu rechnen.
+Auch mit einem Smartphone kann man telefonieren.
+Bei der nächsten Möglichkeit bitte wenden.
+Wie ist denn heute das werte Befinden, euer Hochwohlgeboren?
+Karl muss seinen Laptop im Zug vergessen haben.
+Unter welchem Lastzustand tritt das Spulenpfeifen auf?
+Aber das brauche ich Ihnen ja nicht zu erklären.
+Die Diskussion zu Common Voice auf Deutsch läuft in einer separaten Kategorie ab.
+Martha fühlt sich inkompetent, weil sie keines der Captchas lösen konnte.
+Heute wird nicht mehr ferngeschaut sondern gestreamt.
+Zu meiner Verteidigung muss ich sagen, dass der Ofen sehr ungleichmäßig heizt.
+Was tun gegen den digitalen Analphabetismus?
+Das Sekretariat ist derzeit nur sporadisch besetzt.
+Falls du es nicht siehst: Ich bin gerade gestresst.
+Ich schreibe ein Email an die Verwaltung.
+Die Wiese erblüht in ihrer ganzen Pracht.
+Diesen Gruß aus der Küche wird sie nicht vergessen.
+Und so kämpft das Duett für mehr Gerechtigkeit.
+Migrationsnazis mit einem Substanzproblem gibt es auch?
+Ich glaube, dreimal darf ich das Passwort falsch eingeben.
+Jedoch fördert er erfahrungsgemäß die besten Leute zutage.
+Man sollte nicht vergessen, Löcher in den Boden der Blumenkästen zu stechen.
+Lorenz ist mit einem dicken Schädel aufgewacht.
+Viele Menschen können nicht diszipliniert Schlange stehen.
+Behältst du nach der Heirat deinen Namen?
+Wie oft darf man die Identifikationsnummer falsch eingeben?
+Es war nicht die spartanische Lebensweise, mit der der Jesuit nicht klar kam.
+Ist die Garnitur etwa aus Elfenbein geschnitzt?
+In der Schifffahrt regelt man das anders.
+Danke, augenblicklich brauche ich nichts davon.
+Maroni denkt, wir kommen zu ihr, um mit ihr frühstücken zu gehen.
+Das Werfen von Schneebällen auf dem Schulhof ist verboten!
+Den Spruch mit Mann, Frau, Fahrrad und Fisch checke ich nicht.
+Ich hatte auch einen harten Tag im Büro!
+Schließen Sie die Augen und entspannen Sie sich!
+Ich wünschte mein Fernseher würde sich selbst anschalten sobald ich nach Hause komme.
+Man kann aus ihnen Brei, Pommes oder Kroketten herstellen.
+Mittlerweile macht Macau beim Glücksspiel mehr Umsatz als Las Vegas.
+Ich hoffe, wir haben uns nicht ausgeschlossen.
+Mein künstliches Kniegelenk arbeitet problemloser als mein noch natürliches.
+Die Deutschen glauben an Zertifikate und Prüfsiegel.
+Sogar der Werfende selbst weiß nicht, wohin der Ball gehen wird.
+Probleme mit dem Micro oder Handy können so erkannt werden.
+Wo habe ich denn meine Zahnbürste hingelegt?
+Mit der Zugangskarte könnt ihr übrigens auch die Schranke zum Parkplatz öffnen.
+Die meisten davon sind Gescheiterte, die die Schuld bei anderen suchen.
+Dann gleicht diese Belohnung eher einer Bestrafung.
+Verlieben sich zwei Menschen, wenn man ihnen nur die richtigen Hormone verabreicht?
+Wenn der Schläger zu lang ist, kannst du ihn oben einfach absägen.
+Wenn dich das Ergebnis des Schwangerschaftstests schon schockiert, warte erst mal auf den Vaterschaftstest!
+Ich kaufe Produkte made in Germany, Austria oder Switzerland.
+Den Kommunen muss viel mehr Entlastung verschafft werden.
+Die, ähm, das Kapitel zwölf ist ja eine Hausaufgabe.
+In seiner langen Geschichte wurde der Fluss mehrfach künstlich begradigt.
+Bei diesen Zeilen hat sich der Dolmetscher wohl vertan.
+Nicht alles, was einen Fortschrittsbalken hat, ist ein Download.
+Wozu soll ich mir Formeln merken, die ich jederzeit problemlos nachschlagen kann?
+In diesem Song steckt so viel Wahrheit, dass ich weinen muss!
+Und unter Brandy und Liebe im Überfluss löste sich plötzlich ein Schuss.
+Ich glaube, ich verstehe die Handlung nicht.
+Ich lasse Ihnen meinen Führerschein als Pfand da.
+Vielleicht etwas, von dem wir nichts wissen.
+Demnächst soll auch die Schillerstraße mit Glasfaser versorgt werden.
+Manchmal frage ich mich, ob ich mir das alles nur einbilde.
+Feuerwehrmänner kennen dieses gefährliche Verhalten und raten dringend davon ab.
+Mit einem absägten Auspuff umgeht man die Schalldämpfer.
+Die Zielperson trägt einen schwarzen Mantel und einen Zylinder.
+Also musste alles noch einmal gedruckt werden.
+Offenbar will sich das Land weiter von seinen Nachbarn abschotten.
+Deswegen kommen am Montag ja auch die Dachdecker.
+Schade, ich hatte gehofft, du würdest es pantomimisch darstellen.
+Wir haben abgesprochen, wie es weiter geht.
+Hier ist Ihr Regenschirm Ihr Stock und da sind Ihre Handschuhe.
+Anderenfalls würde die Fahrt in einem Schweißbad enden.
+So kerzengerade, wie die Bäume in diesem Wald wachsen, sieht es irgendwie unnatürlich aus.
+Die Urkunden über die Ratifikation, Annahme oder Genehmigung wird beim Generalsekretariat hinterlegt.
+Nicht zuletzt liegt das auch an der Erwartungshaltung der Gäste.
+Denn die nächsten stehen bereits in den Startlöchern.
+Das Problem ist nun mal, dass keiner weiß, wie lange er leben wird.
+Hier ist Seife, Handtuch, Kamm und Haarbürste.
+Welche Zeichen der Nervosität konnten Sie noch erkennen?
+Bei der Wartung fiel auf, dass die Bremsbeläge einseitig abgenutzt waren.
+Lediglich seinem eigenen Gewissen ist er unterworfen.
+Pascal Küchler pflegte schon immer eine gefährliche Arbeitsweise.
+Ja wo gehn se, wo gehn se denn alle hin?
+Bei einem Arbeitsunfall hat Dieter sich die Hand verbrüht.
+Deshalb wird an allen Ecken und Enden gespart.
+Du reparierst meine Nähmaschine und ich im Gegenzug deine Luftmatratze.
+Der Sitz des Nationalrates ist die Bundeshauptstadt Wien.
+Hast du die Datei umbenannt, oder warum finde ich sie nicht?
+Darum haben sich Radkes lieber für ein Haustier entschieden.
+Mit dem Betrachten von Landkarten kann man Stunden verbringen.
+Wir automatisieren ja gerade deshalb alles Mögliche, damit wir es nicht selbst erledigen müssen.
+Es ist zweifelhaft, ob die Koalition lange halten wird.
+In einigen Ländern wird der Versuch der Selbsttötung mit dem Tode bestraft.
+Meine Diagnose lautet chronische Aufschieberitis in weit fortgeschrittenem Stadium.
+Kriegst du diese Tür auf, ohne sie kaputt zu machen?
+Ab wie viel Bar öffnet das Überdruckventil?
+Wir alle sind beruhigt, dass wir nicht von der amerikanischen Raumfahrtbehörde abgehört werden.
+Diese Konstruktion sieht sehr abenteuerlich aus.
+Aber leider darf ich dir nicht zu nahe kommen.
+Bitte entschuldigen Sie, tropft aus Ihrer Decke im Bad auch Wasser?
+So war das eigentlich nicht gedacht, aber es funktioniert ja.
+Die am nördlichsten gelegene Stadt Österreichs ist Litschau.
+Auf beiden Erdhalbkugeln weht der Wind meistens von Westen.
+Wahrscheinlich steckt die Mafia dahinter.
+Sogar die Audiodateien dieses Projektes werden von Amazon ausgeliefert.
+Kritisieren möchte ich, dass die handelnden Charaktere überhaupt nicht richtig vorgestellt werden.
+Die Aktion wird garantiert nach hinten losgehen.
+Wiedergutmachung ist nicht möglich, aber eine symbolische Geste darf man erwarten.
+Wir können einfach auf dem Feldweg fahren.
+Warum haben Monde keine natürlichen Satelliten wie die meisten Planeten?
+An der Hotline wird man nur abgewimmelt.
+Sobald man sich von diesen Altlasten unabhängig macht, werden sie in der Bedeutungslosigkeit verschwinden.
+Mein Beifahrer hatte so eine Fahne, dass die Alkoholwegfahrsperre mich nicht losfahren ließ.
+Vom angeblichen großen Aufschrei habe ich nichts mitbekommen.
+Um mit anderen zu zocken, braucht man heutzutage nicht einmal mehr grundlegende Netzwerkkenntnisse.
+Es wird nicht lange dauern, bis der Fressflash einsetzt.
+Was soll das denn hier werden, wenn es fertig ist?
+Es wird gegessen, was auf den Tisch kommt.
+Sie lässt sich im Schlaf akustisch mit dem Stoff berieseln, den sie lernen will.
+Keine Branche schreibt so komplizierte und lange Geschäftsbedingungen wie Geldinstitute.
+Worms hat in diesem Fall nichts mit der Lutherstadt zu tun.
+Der Nutriscore ist eine Vereinfachung der Realität.
+Vielleicht hätte sich dann jemand erbarmt.
+Fischer sei auch als Fürsprecher von Despoten mehrfach auffällig geworden.
+Warum mutieren manche Viren schneller als andere?
+Sie hören eure Worte und doch verstehen sie sie nicht.
+Der Autor charakterisiert den dunklen Lord als Inbegriff des Bösen.
+Wie sieht denn das aus, wenn hier Gäste kommen?
+Zu den Unterstützern zählen der Bürgermeister von Bielefeld und andere Prominente.
+Auf Bismarck wurde mehrfach geschossen, doch er überlebte.
+Der Briefträger kommt bei uns erst immer nachmittags.
+Im Herbst verlieren die Bäume ihre Blätter.
+Andere Techniken sind schon näher am heiligen Gral dran.
+Im Sachgebiet C sind die Kontrollgruppen, unter anderem die Flughäfen, zusammengefasst.
+Medizinische Fortschritte haben die Kindersterblichkeit drastisch reduziert.
+Jedes Jahr organisiert die Tanzschule einen Abschlussball.
+In der Sonne bleicht das Planschbecken aus.
+Mit einem fulminanten Fallrückzieher erzielt er kurz vor Schluss den Anschlusstreffer.
+In meiner Heimatstadt wird ein Wolkenkratzer gebaut.
+Sozialversuche mit Kindern gucken sich immer alle gern an.
+Sind Sie auf der Suche nach familienfreundlicher Unterhaltung?
+Bitte nur mit kleinen Scheinen und Münzen bezahlen!
+Für Kulturfremde mag der Tanz womöglich etwas verhaltensgestört aussehen.
+Gibt es hier in der Nähe einen Verkehrsübungsplatz?
+Manchmal muss man einfach ein bisschen Quatsch machen.
+Und was ist der aktuelle Stand der Technik.
+Es beginnt mit wenig Rauch, der nach und nach zu dichtem Qualm wird.
+Aber es ist ja kein Wunder angesichts der immer fetteren Fahrzeuge.
+Durch Austauschprozesse im Poorenwasser entstehen abwechselnd Feuersteinbänke und Kalksteinschichten.
+Kann er sich nicht einfach mal benehmen?
+Eine abgeschnittene Aufnahme ist nichts wert.
+In kaum einem anderen Schleichspiel kommt so viel Spannung auf.
+Jetzt darf man hier schon Werbung für Firmen volesen?
+Längst hat Sabine an ihrem neuen Wohnort Wurzeln geschlagen.
+Es sieht nicht gut aus für den Drittligisten.
+Zudem darf es nicht mehr als drei Farben enthalten.
+Deshalb ist es zeitaufwendig herauszufinden, womit ein Opfer vergiftet wurde.
+Was ist der Unterschied zwischen kostenlos und umsonst?
+Erzählen sie auch ihren Bekannten und Verwandten von Common Voice.
+Kann Poseidon mit seinem Dreizack überhaupt umgehen?
+Unter meinen Nachbarn gibt es eindeutig zu viele Spießbürger.
+Am einfachsten gelangt man über das Joch ins Nachbartal.
+Im Landkreis Ammerland befinden sich einige der größten Fleischverarbeitungsbetriebe Deutschlands.
+Man könnte den Konsum auch entkriminalisieren.
+Schon daran, wie er sitzt, sieht man, dass er überhaupt keine Körperspannung hat.
+Ein Patt ist nur möglich, wenn sich jemand enthält.
+Unter solchen Umständen kann man nicht mehr klar denken.
+Das öffentliche Singen des Textes war ihnen verboten worden.
+Es wird sich alles aufklären, glauben Sie mir!
+Was hat er denn schon wieder für Probleme?
+Alle zehn Jahre sollte man seinen Impfschutz gegen Diphterie, Pertussis und Tetanus auffrischen.
+Folgerichtig wird der Fluss nicht so schnell über seine Ufer treten.
+Selten habe ich so angenehme Kunden wie Sie!
+Bitcoins waren ursprünglich nicht als Spekulationsobjekt gedacht.
+Diese ganzen Fintech Startups sehen wenig vertrauenswürdig aus.
+Die tragenden Teile meines Wagens sind auch knusprig.
+Es bleibt keine Zeit zum Däumchen drehen.
+Wussten Sie, dass einundachtzig Komma vier Prozent aller Statistiken frei erfunden sind?
+Blattläuse sterben, wenn man sie mit einer Mischung aus Milch und Pflanzenöl besprüht.
+Ihr Zeitgefühl hatte Frau Mai mittlerweile ganz verloren.
+Über verletzte Arterien kann man sehr schnell große Blutverluste erleiden.
+Woher kommt die Leiche in meinem Keller?
+Weiß auch nicht, wie ich das angestellt habe.
+Denken Sie doch mal an die armen Fluggesellschaften!
+Es ist äußerst unwahrscheinlich, dass alle vier Triebwerke ausfallen.
+Immer verwechselt er Pelikan und Kakadu.
+Irgendwo muss man ja auch noch kochen können.
+Als es im Juli warm wurde musste Daniela sich einen Ventilator besorgen.
+Kannst du das bitte noch mal wiederholen?
+Durch Hecheln regulieren sie ihre Körpertemperatur.
+Weichen Sie meiner Frage nicht aus, Herr Burmeister!
+Nirgends suchen Kunden länger nach ihrer Ware als in Baumärkten.
+Wildschweine zu stören ist eine dumme Idee.
+Statt eine Briefmarke aufzukleben, hatte sich die Austauschschülerin etwas anderes überlegt.
+Aber in Berlin müssen wir dann im Grill essen.
+Die Software währe ähnlich einem Schachprogramm.
+Letztlich sind das auch nur Menschen wie du und ich.
+Der Mann wachte auf und konnte sich offenbar an nichts erinnern.
+Bei diesem Mumpitz werden wir nicht mitmachen.
+Marsmenschen sind auf der Erde gelandet.
+Etwa ein Drittel aller Probleme der Menschheit sind auf Egoismus zurückzuführen.
+Ein Vorstellungsgespräch möchte gut vorbereitet sein.
+Nach längerer Nichtbenutzung wachsen die Löcher in den Ohrläppchen wieder zu.
+Ich wollte nur Bescheid sagen, dass ich etwa zwanzig Minuten später komme.
+Die wunderbare Fähigkeit, die sich Träumen nennt, sollst du nie verlernen.
+Wieso denken alle, dass Arbeit erstrebenswert sei?
+Vordenker wie er sind ein Idol für mich.
+Mitunter reagiert das Thermostat recht träge.
+Aus Angst vor dem Feuer versteckte sich der kleine Junge im Kleiderschrank.
+Rein technisch konnte Heizöl früher als vergünstigter Dieselkraftstoff eingesetzt werden.
+Maria soll ohne Befruchtung schwanger geworden sein?
+Solche Sprüche habe ich bisher nur von alten Menschen gehört.
+Wo endet Verhandlung, wo beginnt Erpressung?
+Für eine ordnungsgemäße Kündigung bedarf es der Schriftform.
+Nein, Andreas hat die Kreuze nicht erfunden!
+Zum Glück werden die Fangquoten nur in der Fischerei und nicht beim Eishockey reguliert.
+Ihre Afterflosse ist oft kackbraun gefärbt.
+Diese kratzige Jacke werde ich nie wieder anziehen.
+Meine Gedanken zerreißen die Schranken und Mauern entzwei.
+Der Springer geht zwei Felder vor und eins zur Seite.
+Und die Jugendlichen haben die Möglichkeit, praktische Berufskenntnisse zu erwerben.
+Mehrere Wähler attestieren der Präsidentin ein Verantwortungsdefizit.
+Eine neue Fuhre Zellulose ist gerade angekommen.
+Es klang so, als wäre eine Druckleitung geplatzt.
+Birtes neue Anschrift ist jetzt Am Wiesengrund fünf.
+Sichtlich zerknirscht verließ sie den Besprechungsraum.
+Wenn der Angreifer physischen Zugriff haben muss, tut sich kein zusätzlicher Angriffsvektor auf.
+Ich wollte eigentlich nix mehr bei Amazon bestellen.
+Ob ihr es glaubt oder nicht, wir haben einen Dachschaden.
+Die eine Seite zeigt einen stehenden weiblichen Genius, der eine Maske und Leier hält.
+Es ist nicht meine Schuld, wenn Sie noch im Bett liegen.
+Kommandant Hartleben hat einen sehr nervösen Zeigefinger.
+Manche Steine in der Steilwand verwittern schon.
+Es sind immer wieder Überraschungen dabei.
+Der Staubsauger war mir am Ende doch zu laut.
+Fridolin gewann eine Schachpartie nach der anderen gegen den Sensenmann.
+Das neue Headset funktioniert leider nicht.
+Beim Höhentraining wird der Hämoglobinwert gesteigert.
+In der Badewanne wird die Haut schrumpelig.
+Und den Moritz hat er volle Kanne auf den Kopf geschlagen.
+Ich habe immer wieder gehört, dass das in der Praxis nicht gut funktionieren soll.
+Dann hast du sein wahres Gesicht noch nicht gesehen.
+Durch Nachdenken und Hinterfragen deckt man Pseudowissenschaften auf.
+Bei jeder Wahl gibt es Gewinner und Verlierer.
+Bitte, reichen Sie mir doch einmal das Salz herüber.
+Anstelle einer Nase hat das Sams einen Rüssel.
+Tanja trank ein koffeinhaltiges Kaltgetränk.
+Der moderne Mensch hat sich an die Spitze der Nahrungskette gekämpft.
+Du musst den Wasserkocher anschalten wenn du warmes Wasser haben möchtest.
+Ich koche heute Spaghetti mit Garnelen und Spinat.
+Die Datenverbindung geht in beide Richtungen.
+Seien Sie dankbar, dass Sie so aufmerksame Nachbarn haben!
+Du wirst mir für diesen Rat dankbar sein.
+Viele Quests, die Ihnen im Startbereich übertragen werden, sind einfach zu bewältigen.
+Entsprechend viele Hilfskräfte befinden sich im Einsatz.
+Sind die Konfirmanden Konfirmanden, weil sie Konformisten sind?
+Also hat Falk es einfach auf Verdacht bestellt.
+Doch, ich für meinen Teil, habe gut geschlafen.
+Wie viele der Passanten werden stehen bleiben und Hilfe leisten?
+Man kann nicht Äpfel mit Birnen vergleichen.
+Diverse physikalische Größen treten in der Natur gequantelt auf.
+Mittlerweile kann man die Technik als ausgereift bezeichnen.
+Wenn es kein Trinkwasser ist, muss dies gekennzeichnet sein.
+Hier herrscht ein Kommen und Gehen wie am Hauptbahnhof.
+Veranstalte bitte nicht wieder so ein Affentheater.
+Das Schlafzimmer muss ohnehin nicht so stark beheizt werden.
+Dich Sahneschnitte werde ich nicht von der Bettkante schubsen!
+Habt Ihr Lust, einen Spaziergang mit mir zu machen?
+Die jungen Leute wollen lieber zu Genderthemen forschen als Wärmepumpen installieren.
+Ihre Befürchtungen kann ich nicht ganz nachvollziehen.
+Wer gelegentlich auf BitTorrent schaut, hat es vielleicht schon bemerkt.
+Was geschieht nach Olympia mit dem olympischen Dorf?
+Hat Kilian immer noch seine Wahnvorstellungen?
+Bei den Temperaturen hier draußen ist das wirklich angebracht.
+Damit kann man festzustellen, ob du in den letzten fünf Jahren Cannabis konsumiert hast.
+Selbstzerstörungssequenz in zehn Sekunden ausführen.
+Für die vermeintliche Sicherung von Arbeitsplätzen gibt man alles andere auf.
+Da versuchen Firmen, sich ein Stück vom Kuchen abzuschneiden.
+Frau Seiler wird das nicht lustig finden.
+Das Bettgestell passt nicht zur Matratze und das Lattenrost nicht zum Bettgestell.
+Seine neue Freundin ist sehr besitzergreifend anderen Frauen gegenüber.
+Sieht so eine angemessene Bezahlung aus?
+Mit einer alten Lore kann man in das ehemalige Bergwerk fahren.
+In einem riesigen Bottich wird alles zusammengerührt.
+Hast du einen eigenen Server aufgesetzt?
+Worauf sollte man bei einer Wohnungsbesichtigung achten?
+Für jedes Land besteht ein Verwaltungsgericht des Landes.
+Monika wollte sich sofort das neue Buch in der Buchhandlung besorgen.
+Zum dritten Mal bekommt der Elektriker eine gewischt.
+Vor allem wollte er Silvio einen Denkzettel verpassen.
+Die Fernbedienung zu verstecken, ist ein schlimmes Vergehen in Schuberts Wohnzimmer.
+Wie kann hier die Qualität verbessert werden?
+Mensch, euer Bücherregal quillt ja schon über.
+Da fällt einem ja der Kitt aus dem Fenster!
+Einige fürchten sich vor Gravitationswellen und Röntgenblitzen.
+In der Schule legte man uns das kritische Denken nahe.
+Der Fleischsaft kann in einer Schale darunter aufgefangen werden.
+Nachdem das Schiff auf einer Sandbank aufgesetzt hat, wartet die Besatzung auf die Flut.
+Angeheiratete Familienmitglieder sind nicht blutsverwandt.
+Greif mit deinen dreckigen Fingern nicht den Teig an.
+Dieses Stück wurde uns als Leihgabe aus einer Privatsammlung zur Verfügung gestellt.
+Sie werden gut tun, den Arzt holen zu lassen.
+Vorhin habe ich eine Folge Bella Block gesehen, das war streckenweise ganz schön gruselig.
+Dazu benötigt man als Erstes ein offenes Protokoll.
+Dachtest du ernsthaft, du könntest mit Schwimmweste tauchen?
+Könnt ihr alle nicht mit der Kommandozeile umgehen?
+Ich weiß gar nicht, was man zu solchen Anlässen sagt.
+Man muss auch zwischen den Zeilen lesen.
+Hat die nicht eigentlich mit dem Rauchen aufgehört?
+Es reicht, wenn man weiß, wo man es nachgucken kann.
+Fahrlehrer achten peinlich genau auf die Einhaltung der Verkehrsregeln.
+Jetzt kann sie wenigstens niemanden mehr beißen.
+Auf dem Wochenmark war es nicht so voll, wie Sabine erwartet hatte.
+Du bist so heiß! Ich will mit dir in die Kiste steigen.
+Ein verbitterter Mathematiker aus England kam schon im siebzehnten Jahrhundert auf die Kraftformel.
+Zum Schreiben einer Bewertung bin ich leider zu faul.
+Wie nennt man eine Alleinerziehende an einem Kletterseil ohne Sicherungspartner?
+Währenddessen gießt Xenia ihre Plastikblumen.
+In ihrer Analyse zeigt Alexa schonungslos auf, wo etwas im Argen liegt.
+Nachdem ich da zuletzt dauernd drüber gegangen bin.
+Unterstützen Sie auch andere Projekte wie Open Street Map.
+Dies war ein Vorgeschmack auf die Zukunft.
+Deine Frage hast du ja zum Glück total wertfrei gestellt.
+Afrika könnte ein Kontinent mit großer Zukunft sein.
+Omikron ist jetzt der neueste Corona Trend.
+Wiedergabeliste nach Künstler sortieren.
+Hauptsponsor des Vereins sind die Stadtwerke.
+Wer Rollmops lecker findet, mag wahrscheinlich jede Art von Fisch.
+Ich bin kein Rassist, aber gegen Migranten wird man ja wohl noch hetzen dürfen!
+In Präsentationen eingebettete Videos sorgen oft für Probleme.
+Für morgen ist eine Fahrradtour geplant.
+Welcher berühmte Mathematiker starb schon mit zwei mal zehn hoch eins Jahren im Duell?
+Tut mir leid Kinder, ich habe es kaputt gemacht.
+Mit solchen Anfeindungen gießt man Öl ins Feuer.
+Die näheren Bestimmungen über das Wahlverfahren werden durch Bundesgesetz getroffen.
+Das ist ein sehr behagliches Zimmer, es ist ziemlich geräumig und nicht zu teuer.
+Wahlen sind des Volkes einziges Mittel der unblutigen Entmachtung.
+Wen würdest du wählen, wenn jetzt Nationalratswahl wäre?
+Die Sitzungen des Nationalrates sind öffentlich.
+Nenne mich Manfred, Gott wäre übertrieben.
+Ich informiere Sie hiermit über Ihre Rechte.
+Den habe ich wer weiss wie lange nicht gesehen.
+Aber die Freibeuter waren schlechter organisiert und bewaffnet.
+Eigentlich wurde das Feuerwerk aus Versehen ausgelöst, aber es passt ganz gut.
+Dort wächst nicht viel, aber was dort wächst, wird jede Apokalypse überstehen.
+Ärzte und Chirurgen haben sowieso schon genug zu tun.
+Sollten Lastwagenfahrer sich einseitig gegen die Sonne eincremen?
+Der Bundespräsident ordnet die Volksabstimmung an.
+Ich liebe es, in schlauen Büchern zu schmökern!
+Du hast nicht geweint, also zählt das nicht.
+Möchten Sie Ihre Eingangsanschlüsse jetzt prüfen?
+Zur Musterung erschien er bekifft und mit Kuscheltier unterm Arm.
+Wenn Sie an Gut und Böse glauben, konsumieren Sie weniger Märchen!
+Vielen Dank, sehr rücksichtsvoll von Ihnen!
+Windischgarsten verfügt über eine Volksschule, zwei Neue Mittelschulen und eine Polytechnische Schule.
+So jedenfalls titelt eine zwielichtige Tageszeitung.
+Die Unglückszahl dreizehn hat man bei der Nummerierung einfach ausgelassen.
+Seine Population wächst und wächst und wächst.
+Die ist die Verordnung des Bundesministers über Banderolen.
+So leicht enttarnt man einen Lügenbaron.
+Zu Lehrzwecken haben sie ein Miniaturmodell des Führerbunkers angefertigt.
+Wegen der zunehmenden Piraterie bietet die Marine den Frachtern Geleitschutz.
+Darf ich deinen Ex töten oder hättest du ein Problem damit?
+Die Explosion ereignete sich nahe des internationalen Flughafens.
+Samantha nimmt eine Vuvuzela mit ins Stadion.
+Verblüffend, dass sich die Kerne so schnell verfärben.
+Zumindest bin ich nicht vom Skript abgewichen, so wie meine Vorredner.
+Natürlich hält jeder sich für eine Ausnahme.
+Eis am Stiel ist viel teurer als Eis aus der Literpackung.
+Die Ausübung dieser Rechte wird durch besondere Gesetze geregelt.
+Das hat mit der Sprache nichts zu tun, das ist überall so.
+Man sollte die Kenntnis von Produkten und Markennamen nicht mit Fachwissen verwechseln.
+Was folgt, ist ein jahrelanger Papierkrieg.
+Bei schweren Entstellungen versucht man, Haut vom Gesäß ins Gesicht zu transplantieren.
+Das müssen wir auf einer Metaebene betrachten.
+Diese Gelegenheit hat Hakan sich nicht nehmen lassen.
+Als er die nahende Ohnmacht bemerkte, brachte er sich vorsorglich in die stabile Seitenlage.
+Seine tapsige Art wird euch noch so manches Mal zum Verhängnis werden.
+Die halbe Nachbarschaft befindet sich im kalten Krieg mit der anderen Straßenseite.
+Hat die Quasseltante auch eine Pausetaste?
+Ab dem Punkt gibt es kein Zurück mehr für euch.
+Was Versöhnung ist, weiß ich, aber was ist Vertöchterung?
+So falsch können wir dann ja nicht liegen.
+Ich dachte, Sie riefen mich an, weil ich der Experte bin!
+Aus so spitzem Winkel wird das schwierig.
+Hiermit taufe ich den Kutter auf den Namen Husum.
+Vor laufender Kamera gibt sich der Vollzugsbeamte gesprächig.
+Und schon wieder verschwendete ich den halben Tag mit Dokumentation.
+Würfeln oder in Scheiben schneiden gelten als das Nonplusultra in der Vorbereitung.
+Die Anpassung an die Farbtemperatur wurde dabei sträflich vernachlässigt.
+Diese Frage stelle ich mir jedes Mal, wenn ich auf der Toilette war.
+Daran sollte man nicht sparen, sonst kann es teuer werden.
+Die Bleiweste soll gegen die Röntgenstrahlung schützen.
+Wäre ja morgen gekommen, aber du kannst ja nicht.
+Ich bitte bloß darum, die Kirche im Dorf zu lassen.
+Italienische Pasta, asiatischer Reis oder skandinavisches Wurzelgemüse sind ansprechend zubereitet.
+Ich dachte mir schon, dass es wieder teurer werden wird als gedacht.
+Maximal elf Wörter sollte ein Satz umfassen.
+Wie viele Menschen sind prekär beschäftigt?
+Jetzt lässt er sich einen Bart wachsen, damit er älter aussieht.
+Meiner Meinung nach hatten die Songs überhaupt keinen Wiedererkennungswert.
+Versprich nie etwas, das du nicht halten kannst.
+Bevor wir Leute fürs Impfen bezahlen, sollten wir den Impfstoff an andere Länder abgeben.
+Dabei werden die meisten Halbleiter für moderne Elektronik in Taiwan gefertigt.
+Andererseits möchte ich mir noch offen halten, ob ich dabei bleibe.
+Ich habe keine Lust, mir das alles durchzulesen.
+Im Sommer ist schließlich sehr trocken und wir wollten doch Wasser sparen.
+Ich will auch so ein Fahrzeug wie James Bond!
+Der Auslieferungsfahrer hat endlich Wochenende.
+Ich bin aus Sicherheitsgründen Single, denn die meisten Morde sind Beziehungstaten.
+Wenn die Lamellen so verstaubt sind, lässt die Kühlung nach.
+Wie Aquakulturen in Chile aussehen, möchten Sie nicht wissen.
+Allerdings gibt es schon einige Anhaltspunkte.
+Hier kann man nicht mal Parkour laufen, ohne dass jemand die Polizei ruft.
+So eine Einstellung passt nicht mehr in unsere heutige Zeit.
+Gelegentlich ist mir die Autokorrektur zu intelligent.
+Was erlauben Sie sich, Genosse Schlüter?
+Das jüngste Kind wird stets am wenigsten konsequent erzogen.
+Ich möchte am Dienstag ein paar Klamotten kaufen.
+Ich hoffe, sie kennt sich mit Pilzen aus.
+Geld macht nicht glücklich, aber es beruhigt ungemein.
+Ich kann immer noch keine neuen Sätze lesen.
+Ihn würde ich als schwer vermittelbar bezeichnen.
+An einer Seite hat man wohl vergessen, ihn wieder zu schließen.
+Es braucht allerdings viele Versuche, bis es dann endlich mal klappt.
+Gebrannte Kinder fürchten das Feuer oder vernarren sich darein.
+Ursprünglicher Sinn des Friesengiebels war der Brandschutz.
+Um schärfer sehen zu können, kneift sie die Augen zusammen.
+Wofür zahle ich eigentlich den Aufpreis der ersten Klasse?
+Zu dem Thema habe ich mir auch schon eine Verschwörungstheorie ausgedacht.
+Übrigens wäre das auch ein zum Vorlesen geeigneter Ort.
+Die Freizeitgestaltung in diesen Dörfern besteht im Wesentlichen aus gemeinschaftlichem Drogenkonsum.
+Ein Verteidigungsminister ohne militärische Grundausbildung ist wie ein Bildungsminister ohne Grundschulbildung.
+Saisonales Obst und Gemüse kaufen, damit der Geldbeutel geschont wird.
+So können sie im Verteidigungsfall schnell gesprengt werden.
+Wie schätzen Sie die Chancen ein, so einen Prozess zu gewinnen?
+Den Rest können Sie sich selbst zusammenreimen.
+Oft wurde diese Aufgabe von Kindern übernommen.
+Können tiefgefrorene Früchte noch zur Saat verwendet werden?
+Kannst du auch einen Purzelbaum rückwärts?
+In der oralen Phase müßen sie sich alles in den Mund stecken.
+Können wir das Amphibienfahrzeug mal in Aktion sehen?
+Im Vorfeld hat er sich einiges überlegt, was er heute umsetzen will.
+Endlich fahren einem die anderen Kunden an der Supermarktkasse nicht mehr in die Hacken.
+Der Verkehrslärm ist dort kaum auszuhalten.
+Aber nicht auf diese hinterhältige Weise!
+Von sieben Uhr dreißig bis neun Uhr wird Frühstück serviert.
+Gestatten Sie, dass ich Ihnen Herrn Frank vorstelle.
+Wann ist die nächste Tagung des Ortsbeirates?
+Gibt es das bei Netflix oder muss ich jetzt doch wieder BitTorrent benutzen?
+Könntet ihr euch bitte wie erwachsene Menschen benehmen?
+Der Konsum von Alkoholika wird durch die Ausgangsbeschränkungen steigen.
+Die Verwaltung kontrolliert den Pegel täglich.
+Überhaupt scheint das goldene Handwerk immer noch Zukunft zu haben.
+Für die Dusche brauche ich noch eine Lampe.
+Sind Sie schon dahinter gekommen, wie Tamara in echt heißt?
+Ein Arzt muss dem Patienten helfen, nicht mit ihm leiden.
+Dann noch die Sozialdemokratische Partei Deutschlands.
+Wenn der Körper gesund ist, geht es auch der Seele besser.
+Morgen wird der Verdächtige dem Haftrichter vorgeführt.
+Negative Kundenerfahrungen sprechen sich schneller herum als positive.
+Dorthin gelangen sie mit der Zeit über Haushaltsabwässer.
+Der Genitiv wird umgangssprachlich kaum verwendet.
+Glauben Sie an einen Zusammenhang zwischen Schlagerkonzerten und Suizidversuchen?
+Beim letzten Lied musste der Schlagzeuger improvisieren, weil ihm ein Fell gerissen war.
+Aus Erfahrung wusste sie natürlich, dass es passt.
+Gehälter von über hunderttausend Euro im Jahr sind meiner Meinung nach nicht zu rechtfertigen.
+Still und heimlich dreht mein Mann die Heizung Stück für Stück herunter.
+Doch macht euch gefasst, ich bin der Jackpot auf dem Markt.
+Bestimmt haben Sie sich dies alles schon hundertmal durch den Kopf gehen lassen.
+Passanten hatten sie bemerkt und alarmierten die Bürgerwehr.
+Wir schwimmen auf dem Autobahnparkplatz um die Wette.
+Heute habe ich den Originaltext kennengelernt.
+Der große Bestand an Bachforellen und Barschen lässt Anglerherzen höher schlagen.
+Wolltest du das nicht schon am Wochenende erledigt haben?
+Mein Arzt sagt, ich soll noch keinen Sport treiben.
+Ich bezweifle, dass du einen vorgetäuschten Orgasmus vom echten unterscheiden kannst.
+Hier musste ein Komma gesetzt werden, denn es beginnt ein Nebensatz.
+Und liest er dir jeden Wunsch von den Lippen ab?
+Rennt mir nicht in die Schussbahn, ihr Trottel!
+Unkritisch werfen alle ein paar Euro in den Klingelbeutel.
+Bei einer namentlichen Anrede durfte man sich quasi geehrt fühlen.
+Er hat besonnen und vorbildlich reagiert.
+Für Gefrickel an der Konfiguration habe ich keine Zeit.
+Dann stieg Philipp auf sein Mountainbike und radelte los.
+In den unteren Etagen befinden sich Ruheräume.
+Na ja, muss ich halt noch lauter aufdrehen.
+Aber das dürfen die gar nicht verlangen.
+Am Geschenkpapier sieht man, von wem welches Geschenk ist.
+Nehmen Sie sich ruhig Zeit, sich ein wenig umzuschauen!
+Wann wird der Hanf in Deutschland freigegeben?
+Tja, dann wird es halt wieder nur Tütensuppe geben.
+Dummerweise hatte man vergessen, die Polizei zu schmieren.
+Längst ist das Blatt nicht mehr so auflagenstark wie früher.
+Jetzt hat er doch tatsächlich die Portion Spaghetti verschmäht, der Lotzi.
+Wie willst du mich heute nehmen? Anal, oral oder vaginal? Mit oder ohne Kondom?
+Die langanhaltende Dürre machte den Bauern sorgen.
+Früher konnten Schulhöfe auch nachmittags als Spielplatz genutzt werden.
+Selbst der teuerste Ökostromtarif bietet mehr Energie fürs Geld als unser täglich Brot.
+Laut Personagramm wurde er als Gefährder eingestuft.
+Man geht ja auch nicht in den Wald, um gegen Bären zu kämpfen.
+Gott sei Dank ist der Psychopath wasserscheu.
+Hast du noch ein altes Smartphone, welches ich benutzen kann?
+Der Himmel bietet uns heute eine Pracht aus allen erdenklichen Grautönen.
+Wer schon traumatisiert ist, hat eine niedrigere Schwelle für weitere Traumatisierungen.
+Investieren Sie noch heute in Betongold!
+Als Zahnarzt muss man strahlend weiße Zähne haben.
+Während der Auftragsflaute betrank er sich aus Langeweile mit seinen Kollegen.
+Möglichst unbemerkt stellen sich die Spieler gegenseitig Fallen.
+Dazu müsste man den Sachverhalt genauer erörtern.
+Bei ihrem Fahrrad fällt bald der Ständer ab.
+Was wird noch alles aus Zellstoff gefertigt?
+An sich gab es keinen Grund, ihnen das zu verbieten.
+Sinje Eder hat da eher die gegenteilige Erfahrung gemacht.
+Manche Ameisen können verschiedene Polarisationen des Lichtes unterscheiden.
+Was nützt mir ein strahlungsarmes Babyfon, wenn seine Reichweite nur fünf Meter beträgt?
+Sie klimpert ein wenig mit den Wimpern und schon bekommt sie, was sie will.
+In Brücken über die Grenze steckt immer noch Sprengstoff.
+Bei der Füllung und den Beilagen kann man variieren.
+Alternativ kannst du die Schambehaarung auch einfach wegrasieren.
+Es ist immer bedauerlich, wenn der Preis das einzige Entscheidungskriterium ist.
+Das Autohaus stellte ihm einen Leihwagen zur Verfügung.
+Die Kanzlerkandidatin der Grünen ist Annalena Baerbock.
+Gibt es Freiwillige, die die Tafel wischen wollen?
+Mit einem entsprechenden Werkzeug kannst du die Speichen nachziehen.
+Wie lange haben Sie gebraucht, um die französische Sprache zu lernen?
+Die Preise sind saisonalen Schwankungen unterworfen.
+Die Leute plappern einfach nur nach, ohne zu verstehen.
+Hier ist noch ein Platz, steigen Sie schnell ein!
+Das hilft Ihnen jetzt auch nicht weiter.
+Ich habe gar nicht gewusst, dass Tanja Zahnärztin ist.
+Ich bedauere unendlich, ich kann es Ihnen nicht sagen.
+Wir treffen uns an der Straßenbahnhaltestelle vor der Synagoge.
+Die Mail hat wohl mein Spamfilter gefressen.
+Der Staat darf uns sowas nicht aufzwingen.
+Der Hund liegt dort begraben, wo der Hase im Pfeffer liegt.
+Beziehen Sie das Kind in die Entscheidung mit ein.
+Seine Mitstreiter sind damit schon genug bestraft.
+Versteht ihr mich? Bin ich gut zu verstehen?
+Hoffentlich wird er nicht verschwunden aufgefunden!
+Tja, die Werksfeuerwehr hat heute Urlaub.
+Aber Astrid ist doch die Expertin auf diesem Gebiet.
+Es gibt noch andere Lösungen, die ich euch auch gerne bei Gelegenheit zeige.
+Vielleicht ahnt er schon, wer als nächstes dran ist.
+Es hat sich noch nie ein Paar nach einer gemeinsamen Weltraummission getrennt.
+Einen Bezieher von Arbeitslosengeld trifft es umso härter.
+Leute mit zu hohem Augendruck sollten keinen Kopfstand machen.
+Der Mundschutz soll vor den Sporen schützen.
+Wenn gelindere Mittel ausreichen, ist vom Freiheitsentzug abzusehen.
+Möglicherweise sägen die Gewerkschaften hier am eigenen Ast.
+Es gibt Berufe, da schlackerste mit den Ohren!
+Wenn die Deutschen fluchen, wird es meist fäkal.
+Jeder hat das Recht auf eine Staatsangehörigkeit.
+Im Tal der Ahnungslosen konnte man kein Westradio empfangen.
+Entschuldigen Sie bitte die Tonqualität.
+Wir behalten uns vor, in dieser Angelegenheit rechtliche Schritte einzuleiten.
+Ehrlich gesagt finde ich den Laden zu schickimicki gestaltet.
+Bleibt ganz ruhig, dann passiert euch nichts.
+Erfahrene Bastler können den Prozessor auch köpfen.
+Könntet ihr mal bitte etwas vorsichtiger sein?
+In diesem Fach könnten Sie zum Beispiel gut Ihr Klopapier bunkern.
+Eigentlich müssten die Saudis massiv in Photovoltaik investieren.
+Welche App saugt hier eigentlich die ganze Zeit den Akku leer?
+Und ich habe dir geantwortet, dass ich keine habe!
+In zwanzig Minuten lohnt es sich nicht mehr, groß was anzufangen.
+Es steht ihr nicht zu, so über ihn zu urteilen.
+Man kann auch auf einem Containerschiff mitfahren, um den Atlantik zu überqueren.
+Alle Arbeitsstellen müssen gefahrlos erreichbar sein.
+Ja, aber das kennt die Wirtin sicher schon.
+Es ist das gleiche Bild, nur mit anderem Weißabgleich.
+Er wirft mit Brot und Böllern, weil momentan niemand schweigt.
+In den letzten Tagen ist das Internet so langsam geworden.
+Dem Kampfrichter entgleitet diese Partie zunehmends.
+Das Geheimnis um die genaue Rezeptur hat er mit ins Grab genommen.
+In einer guten Autobiografie wird der Mensch mit allen Characterzüge porträtiert.
+Da er nur etwa jedes dritte Mal trifft, liegen lauter Knödel auf dem Boden.
+Jetzt, wo die Autos Internet haben, warte ich auf das erste Modell mit Flugmodus.
+Jedes Schaf hofft ungeschoren davon zu kommen.
+Wenn das Programm ohne Parameter aufgerufen wird, gibt es einen Hilfetext aus.
+Was meinst du, wer sich gerade um seine Kinder kümmert?
+Damit geht der Rechtsanspruch auf Entschädigung verloren.
+Samuel rannte ungestüm auf die Verkäuferin los.
+Sie können sich sicher vorstellen, dass hier nachts eine gespenstische Atmosphäre herrscht.
+Dann will ich der jungen Liebe nicht im Weg stehen.
+Das Holz der jungen Äste muß aushärten, sonst erfriert es im Winter.
+Da fällt mir ein, ich müsste eigentlich mal wieder nach dem Rechten schauen.
+Seit ich die Tabletten abgesetzt habe, wache ich morgens immer mit einer Latte auf.
+Geübte Unternehmer verbrennen nicht ihr eigenes Geld, sondern das der Aktionäre.
+Kannst du auch schon ganz allein aufs Klo gehen?
+Es gibt Fälle, in denen vernünftig sein, feig sein heißt.
+Nirgendwo im gigantischen Imperium gibt es das ein zweites Mal.
+Mit der Decke über den Kopf gezogen kauerte er in der Ecke.
+Und nun zeige ich Ihnen die Asservatenkammer.
+Mit digitaler Souveränität hat das nichts zu tun.
+Ich weiß, dass du dich von mir hintergangen fühlst.
+Hey, pass auf, worauf du das Ding richtest!
+Deswegen bestellte sich Mohammed eine Pizza.
+Nächstes Mal füllen wir die Eierkuchen mit Pflaumenmus.
+Besonders demokratisch hört sich das aber nicht an!
+Wir haben uns extra für Schattenrasen entschieden und trotzdem wächst er nicht.
+Die einen kennen mich, die anderen können mich.
+Dadurch ist man gezwungen aufzustehen, wenn man ihn deaktivieren will.
+Aber inzwischen ist der Konzern viel zu mächtig geworden, um ihn zu unterstützen.
+Unterm Strich wirklich kein Film, den man gesehen haben sollte.
+Die erwachsenen Schwäne sind weiß, die kleinen grau und schlechter zu sehen.
+Jedes Kind hat das Recht auf Schutz vor wirtschaftlicher und sexueller Ausbeutung.
+Jetzt läßt er sich einen Bart wachsen, damit er älter aussieht.
+Mei, das scheint eine schwere Fehleinschätzung zu sein.
+Ich habe sehr viel Unterhaltungselektronik zu Hause.
+Ich hoffe, der satirische Anteil ist erkennbar.
+Mit Besen und Schaufel kehrt er den Dreck zusammen.
+In welcher Fabel soll das bitte schön vorkommen?
+Die Koalitionspartner übten sich in demonstrativer Gelassenheit.
+Von einem so hochdekorierten General hätte ich mehr Patriotismus erwartet.
+Man kann Alois als Vieltelefonierer bezeichnen.
+Ich habe gestern erfahren, dass mein Flug gestrichen wurde.
+Gibt es irgendwas, was du überhaupt nicht magst?
+Für schwere Kisten nimm mal lieber eine Sackkarre mit.
+Noch schlechter als die Ballführung ist nur die Kameraführung.
+Das wollte ich gar nicht in Abrede stellen.
+Gute Saftpackungen sind undurchsichtig, weil das Licht die Vitamine zerstören würde.
+Als das Radio in voller Lautstärke losdröhnte, zuckte sie zusammen.
+Halten Sie Ihre Meinung jetzt besser zurück, bevor ich den Direktor rufe!
+Stattdessen werden die eigenen Moralvorstellungen als Maßstab angelegt.
+Alle redeten von der Blockchain, aber niemand wusste worum es sich dabei handelte.
+Die verschiedenen Produkte sind mal wieder absichtlich nicht miteinander kompatibel.
+Passierschein A achtunddreißig haben wir leider gerade nicht vorrätig.
+Emotionale Flashbacks sind charakteristisch für komplexe posttraumatische Belastungsstörungen.
+Außerdem sollten Löser für das Mathematikbuch gratis mitgeliefert werden.
+Ich habe meinen Videorecorder erst kürzlich entsorgt.
+Das zweitbeste Motiv ist das mit den Hundsrosen im Vordergrund.
+Die heutige Kollekte fließt in meine persönlichen Ersparnisse.
+Jeden Tag muß das Fell gebürstet werden!
+Der arme Bolle starb an den Folgen häuslicher Gewalt.
+In der Salzertstraße gibt es eine gute Pizzeria.
+Verfolgt ihr die aktuellen Diskussionen?
+Irgendwie hilft mir das alles nicht sonderlich weiter.
+Einer möglichen Zukunft mit ihm als Anführer sehe man gelassen entgegen, heißt es.
+Unsere Außenanlage ist immer noch im Rohbauzustand.
+Bei eiernden Rädern muss man einen Kompromiss finden zwischen schleifender und nicht greifender Bremse.
+Aus irgendeinem Grund fährt der Kaminkehrer heute mit einem Vierzigtonner vor.
+Ich habe einfach irgendeine Nummer gewählt.
+Wer erlangt die letzten drei Exemplare zum Schnäppchenpreis?
+Als Arzt muss man nicht nur in seinem Fach kompetent sein.
+An der kleinen Steilküste waschen die Wellen Höhlen im Geschiebe aus.
+Wieso muss bei dir immer alles perfekt sein?
+Nur bei festem, erfahrungsgemäß zuverlässigem Gebirge darf jeglicher Ausbau fehlen.
+An Freitagen vor langen Wochenenden spielt sich immer das Gleiche ab.
+Welche dieser Emotionen werden zu den Basisemotionen gezählt?
+Fahren Sie zunächst nach dem grossen Platz!
+Ich habe den Fehler die ganze Zeit übersehen.
+Weitere Symptome sind Schwindelgefühle und Appetitlosigkeit.
+Es ist gar nicht so einfach in Deutschland ein Smartphone von Oppo zu kaufen.
+Werden die Letzten wirklich die Ersten sein?
+Sie fanden es deshalb ratsam, einen anderen Weg einzuschlagen.
+Cool, ihr habt Pfirsiche aus eigenem Anbau?
+Wollt ihr mir ernsthaft mein altes Nokia rauben?
+In künftigen Projekten sollten wir die Fehler der Vergangenheit vermeiden.
+Wie viel hast du für den Klingelton ausgegeben?
+Die Crew bereitet sich auf den Countdown vor.
+Haltet den Dieb, der hat sein Messer im Rücken.
+Er beichtete mir, dass er ab und zu das Kondom weggelassen hat.
+Sie kann auch mit ihrer Kreditkarte bezahlen.
+Wie lange liegt der Frachter schon im Hafen?
+Niemand wusste wo Fabian all das Geld her hatte.
+Geht es nach dem Ministerium, soll dort schon bald ein neues Inkompetenzzentrum entstehen.
+Christbirnen und Kräuterschnaps waren seine Favoriten.
+Sexspielzeuge dürfen nur von Erwachsenen gekauft werden.
+Auch mit der Verfügbarkeit gibt es selten Probleme.
+Sollte ich dennoch der Versuchung verfallen, darfst du mich bestrafen.
+Sophie zeigte auf den Bildschirm und nun konnte auch Vivi den Pixelfehler sehen.
+Die Diesellokomotive beschleunigt langsam.
+Unsicher, aber voller Tatendrang holperte Denise los.
+Mit dem Meridian kommst du bis nach Kufstein.
+Der Baum neben ihm ist fast doppelt so hoch gewachsen.
+Kannst du bitte mein Fahrrad mit anschließen?
+Mein Geodreieck ist leider schon wieder kaputt gegangen.
+Was passiert, wenn man den Wasserkocher zu voll macht?
+Kann man irgendwie gegen den Wind segeln?
+Bitte begrüßen Sie unseren heutigen Stargast!
+Allerdings konnte ich die Spannung nicht aushalten und habe auf eigene Faust weitergeguckt.
+Das Mädchen klebt den Sticker ins Album.
+Professor Schiefer arbeitet am Lehrstuhl für Apokalyptik und allgemeine Panikmache.
+Dumpingpreis und Dumpinglohn gehen meist Hand in Hand.
+Ich wurde ihm nicht geopfert, sondern habe seine Misshandlungen überlebt.
+Das Witzigste an dem Video sind die Kommentare darunter.
+Davon ausgenommen sind natürlich Phasen wie Winterschlaf und Winterruhe.
+Der Neutralleiter ist nicht mit dem Erdungskabel zu verwechseln.
+Die wohl wichtigste Kompetenz ist es, die Grenzen der eigenen Kompetenz richtig einzuschätzen.
+Hat diese Zulassungsstelle denn keine Telefonnummer?
+Diese Frau bringt mich noch um den Verstand!
+Bei ihrer Performance verzog die Solistin merkwürdig das Gesicht.
+In welcher Reihenfolge wollen wir die Star Wars Filme gucken?
+Was soll an dem Spiel gewaltverherrlichend sein?
+Unweit des Atomkraftwerks Brokdorf gab es an der Stör einen Störfall.
+Intelligenz ist zum Glück nicht nötig, bloß ein bisschen Übung.
+Mein Akku gibt schon wieder den Geist auf?
+Auf den gestrandeten Buckelwal reagieren die Touristen ganz unterschiedlich.
+Sie machten ein Fotoshooting in der Karibik.
+Tiermedizin ist ein anspruchsvoller Studiengang.
+Jeden Tag werden Millionen von Besuchern mit einem Spendenaufruf genervt.
+Frau Weber ist mit einer einzigartigen Gabe gesegnet.
+Kondensatoren kann man bedenkenlos tief entladen.
+Auf die Dummheit der Menschen ist Verlass.
+Die Polizei ist gerade gekommen und hat ihn abgeführt.
+Sie ist sehr schnell eifersüchtig, wenn sie mich mit anderen Frauen sprechen sieht.
+Man kann nicht überprüfen, ob jemand etwas wirklich gelöscht hat.
+Die Provinz ist vom Bürgerkrieg zerrüttet.
+Elina und Annina haben sich für den Gottesdienst einen Wettbewerb ausgedacht.
+Weglaufen und verstecken ist nicht so mein Ding.
+Niemand ändert gerne seine Gewohnheiten.
+Unter der Schneelast ist die Decke der Halle eingekracht.
+Dann könnte man dort doch ein Segel dranhängen.
+Nachtzüge könnten eine Alternative zum Fliegen sein.
+Hoffentlich hält die Frisur, ich war gerade erst beim Friseur.
+Unsere Auszubildenden sind jung und auch erfahren.
+Es ging schonmal schief, als du was vorgeschlagen hast.
+Das Leben in der wilden Natur bringt zahlreiche Gefahren mit sich.
+Neugierig betrachtete der kleine Junge den Müllbehälter.
+Vor einem Jahr hätte niemand gedacht, dass dies von öffentlichem Interesse sein würde.
+Ein Kind zu zeugen ist nicht schwer, einen Partner finden jedoch sehr.
+Dann könnte man sie auch gleich zur Meerwasserentsalzung nutzen.
+Das Spiel war so schlecht, dass ich es sofort wieder von meiner Festplatte verbannte.
+Jetzt geht es primär darum, die wichtigsten Eckpunkte abzustecken.
+Er zog kräftig an seinem Joint und fing dann an lauthals zu lachen.
+Manche demonstrieren freitags für ihre Zukunft, andere montags für die Rückkehr der Vergangenheit.
+Für gewöhnlich versuche ich mich der Werbung zu entziehen.
+In diesem Moment merkte Udo, wie kalt es mittlerweile draußen geworden war.
+Die Mütze wurde später in der Nähe des Hauses gefunden.
+Podcasts bedienen sich bereits existierender Techniken.
+Nenn es Sprachfehler oder Dialekt, jedenfalls ist es deren Markenzeichen.
+Zur besseren Überwachung tragen daher alle Kühe einen Chip am Ohr.
+Wenn der Kopf nicht arbeitet, müssen es die Füße umso mehr.
+Lasst uns zu Simeon fahren und ihn fragen!
+Nikolas macht häufig die Nacht zum Tag und bereut es einen Tag später.
+Och nee, wir haben drei solche Labertanten am Tisch vor uns.
+Die Männer in den weißen Kitteln sind unterwegs!
+Darf man das jetzt als Annäherungsversuch verstehen?
+Selbstredend wird das Bauprojekt viel teurer als ursprünglich geplant.
+Deine fruchtbare Erscheinung beeindruckt mich zutiefst.
+Notfalls betreiben wir den Kamin mit Briketts.
+Überzeugen Sie auch Ihre Bekannten und Verwandten davon die Stimme zu spenden.
+Ich muss lernen die Autovervollständigung effektiver zu nutzen.
+Puh, du bist gerade noch rechtzeitig gekommen!
+Er erkennt die Zeichen seines Körpers nicht.
+Ein Klavier hat schwarze und weiße Tasten.
+Die Polizei durchsuchte die ganze Wohnung inklusive Keller und auch dem Auto.
+Sie forderte ihn auf, sich einen runterzuholen.
+So wie Herrn Wunderlich geht es derzeit vielen Wolfsburgern.
+Können die nicht einfach mal eine weitere Kasse aufmachen?
+Die Stadt Westerstede liegt im Ammerland.
+Auf der Oberfläche des Sees spiegelt sich der Vollmond.
+Geistern in Ihrer Gegend auch regelmäßig Untote umher?
+Das Geld habe ich all die Jahre sicher unter meinem Kopfkissen verwahrt.
+Wenn Newton wüsste, dass man Kraftformeln heute vor allem mit Haarwaschmittel in Verbindung bringt!
+Allerdings wehren sich auch passive Kreaturen, wenn sie angegriffen werden.
+Warum schreiben wir eigentlich von links nach rechts?
+Wenn ihr meint, dann diskutiert das mit ihm aus!
+Sie finden es unten in der Lehrbuchsammlung.
+Vielleicht ist das ja in zwei, drei Monaten wieder alles okay.
+Wir bekamen Geleit durch vier berittene Polizisten.
+Die Einstellung der Leute muss sich ändern.
+Schlafen Sie gleich wieder ein, wenn Sie in der Nacht aufwachen?
+Er freut sich schon tierisch auf seine Gefolgschaft.
+In der Altstadt gibt es hunderte von ihnen.
+Sie sind derjenige, der die Welt retten muss.
+Sehr viele Apps für Smartphones sind trojanische Pferde.
+Nicht alle Tasten meiner Fernbedienung funktionieren richtig.
+So leicht lässt sich die Menge des Abriebs nicht bestimmen.
+Ihre Beleidigungen können Sie für sich behalten!
+Bis Redaktionsschluss stand nur eine Vorabversion zur Verfügung.
+Ich wünsche mir eine Vasektomie zum Geburtstag.
+Mein Haus möchte ich mit Wetten auf Pferderennen finanzieren.
+Projektgegner könnten versuchen, die Kosten in die Höhe zu treiben.
+Kann die Feuerwehr so festen Stahl eigentlich noch schneiden?
+Können die eigentlich auch im Stehen schlafen?
+Es tut mir leid, aber ich habe verschlafen.
+Eines Tages werde ich mit einem Rundumschlag alle Umschläge beseitigen müssen.
+Neumann ist Verfechter von Netzneutralität.
+Ohne Verlängerungskabel wird das nichts.
+Im Gegensatz dazu kann unser Gehör etwa zehn Oktaven wahrnehmen.
+Warte mal, ich glaube, das ist ein neuer Rekord.
+Wieder macht der Ausbilder von sich reden.
+Bundeskartellamt schränkt Facebook beim Datensammeln ein.
+Wenn es regnet nehme ich den Hubschrauber zur Arbeit.
+Mensch Benno, das habe ich nicht gewollt.
+Man kann Glück nicht erzwingen, aber man muss es zulassen.
+Wer bei seinem Tod noch Geld besitzt, der hat unnötig viel im Leben gearbeitet.
+Dann lasst uns hier die Zelte abbrechen.
+Aus einer Flasche und Reiskörnern oder Ähnlichem lässt sich eine Rassel bauen.
+Wir überraschen ihn, nutzen seine Schrecksekunde und schnappen uns die Sprühdose.
+Ein Intranet ist ein Rechnernetz, das im Gegensatz zum Internet nicht öffentlich ist.
+Frank wollte nicht schon wieder eine neue Waschmaschine kaufen.
+Und damit hat sie mir ihre Nummer gegeben.
+Dieser Fehler muss in der nächsten Reissue behoben werden.
+Rechenleistung ist manchmal durch nichts zu ersetzen, außer durch noch mehr Rechenleistung.
+Ich will ihm nur ein bisschen Angst einjagen.
+Bringt mir noch ein Bier und ihr kriegt eure Zugabe!
+Ohne Kontaktlinsen ist Elena blind wie ein Maulwurf.
+Doch die Kuh auf der Wiese glotzte nur dumm.
+Etwas Kindsein sollte sich jeder bewahren.
+Ihr habt es doch echt auf Durchseuchung angelegt!
+Schon gut, ich zweifle nicht daran, aber es ist trotzdem merkwürdig.
+Sie dachte, eine solche Gelegenheit bietet sich kein zweites Mal.
+Wann ist die beste Zeit für die Aussaat?
+Im großen Zimmer könnt ihr die Eisenbahn aufbauen.
+Zu Ihrer Information, die Kreisstadt Soest wird als Sost ausgesprochen!
+Marina empfiehlt uns die abgesägte Schrotflinte.
+Hat jemand die Stromrechnung nicht bezahlt?
+Illegalerweise hatte Mustafa sich eine Hanfplantage in der Garage angebaut.
+Welchen evolutionären Vorteil hatte eigentlich das Lachen?
+Claudia mochte gar keine Zucchini essen.
+Es kommt zwar Wasser vom Himmel, aber der Wetterbericht sagt, es regnet nicht.
+Genau am vierundzwanzigsten August zweitausendeinundzwanzig.
+Unmotiviert und widerwillig gab Anette nur einsilbige Antworten.
+Wurde die Demokratie am Hindukusch verteidigt?
+Manche Leute kann man für ihre Stimme echt bewundern.
+Die grüne Taste ist die Wahlwiederholung.
+Seine Auftritte von damals sind zum Fremdschämen.
+Wir haben keinen freihen Anschluß an das Ethernet.
+Sollten Sie auch diese Frist verstreichen lassen, können wir Ihren Tod leider nicht anerkennen.
+Lassen Sie sich nicht mit dubiosen Unterhändlern und Immobilienmaklern ein.
+Ich möchte ein unvorschriftsmäßig abgestelltes Kraftfahrzeug melden.
+Wie heißt der Bogenschütze mit den langen blonden Haaren?
+Nicht über den Feuerwehrhelm streicheln, das geht ins Auge.
+Bratkartoffeln wären mal wieder sehr lecker.
+Tja, das war wieder einmal kurz vor knapp.
+Das Forum ist voller hilfsbereiter Menschen.
+Das entscheiden nicht die Aufsichtsbehörden.
+Seit ich kalt dusche, schuppt mein Haar nicht mehr.
+Eine weitere Milliarde wurde in den Sand gesetzt.
+Astrophysiker wissen natürlich, dass Spaghetti in der Nähe von Schwarzen Löchern hergestellt werden.
+Die Göttin der Gerechtigkeit attestiert der Göttin der Liebe unfaires Verhalten.
+Statt des Grünen Punktes sollte man Verpackungen danach kennzeichnen, wie sie zu entsorgen ist.
+Nicht nur ein bisschen sauer, sie ist stinksauer!
+Vielleicht bringt euch dieses Lied hier ja einen anderen Musikstil nah.
+Wasserzuflüsse in das Tagbaugelände sind abzufangen und auf sichere Weise abzuführen.
+Solche Videos schaue ich am liebsten im privaten Modus.
+Und wie lange hielte die Wirkung dann an?
+Es muss rund um die Uhr jemand die Produktion überwachen.
+Neuer Trainerassistent von Joachim Löw ist seit Oktober zweitausendvierzehn Thomas Schneider.
+Wenn man schon ein Tier schlachtet, sollte man es auch möglichst vollständig verwerten.
+Werden die Überraschungshühner unter so schlechten hygienischen Bedingungen gehalten?
+So selten, wie ich auf Werbung klicke, verdienen die eh nichts an mir.
+Auch die Konkurrenz kocht nur mit Wasser.
+Wenn man spricht, würde man gedachte Klammern auch nicht aussprechen.
+Störer werden vom Admin nach einmaliger Ermahnung rausgeworfen.
+Ich tu das im Moment nämlich nicht mehr.
+Viele wissen das nicht, aber einige meiner besten Freunde sind Menschen.
+Hallo mein Freund, heute kein Bier erhältlich?
+Gotje wird in den Ferien keine Kurse mehr anbieten.
+Frag doch mal Falco, ob er weiß, wie das Spinnrad funktioniert.
+Erst im Zug zum Flughafen merkte Stefan, dass er seinen Reisepass vergessen hatte.
+Davor standen bei mir nur geklaute Sitzmöbel.
+Wann bekommt unsere Stadt endlich eine Großwärmepumpe?
+Der Sack Reis, der umgekippte, sollte die Familie eigentlich für die nächsten Wochen ernähren.
+Woher kommt diese martialische Rhetorik?
+Bei der Arbeit wird nur Englisch gesprochen.
+Aber man braucht es nur ein klein wenig anders formulieren.
+Obwohl, sogar bei Tinder wird das nichts geben.
+Der Kopf muss überstreckt und der Mund der niedrigste Punkt sein.
+Messer, Gabel, Schere, Licht, sind für kleine Kinder nicht.
+Und da kommen ganz schön ansehnliche Beträge zusammen.
+Zum Schluss kommt eine Limette in den Cocktail.
+Raffael konnte es sich vorstellen in einem Chor zu singen.
+Und sollte eine Beziehung in die Brüche gehen, steht der nächste Partner schon Schlange.
+Kontingentsflüchtlinge, Asylanten, und sogenannte Fußballfans werden in drei Kategorien eingeteilt.
+Steig auf dein Pferd und nimm mich mit ins Traumparadiesland.
+Bevor der Laden insolvent geht, werden sie sicher viele Hebel umlegen.
+Habt ihr wirklich alles in eurer Macht stehende getan?
+Das ist eine beeindruckende Sammlung von Küchenmessern.
+Wolken haben einen bedeutenden Einfluss auf das Klima.
+Die Würde der lobbystarken deutschen Wirtschaftsunternehmen ist unantastbar.
+Alle blicken unbeteiligt weg, als hätten sie Herrn Häusler nicht gehört.
+Bei diesem Regenwetter nahm Ludwig einen Regenschirm mit.
+Bevor man sich die Beine verdreht, soll sich die Bindung öffnen.
+Jedes Individuum ist das Produkt seiner Gene und Umwelteinflüsse.
+Wollen wir wirklich in diese Zeit zurück?
+Die Vorlesung ersetzt nicht das Selbststudium.
+Dem Patienten sind die alltäglichen Abläufe in den Praxen nicht geläufig.
+Dabei kann jedes Ereignis unscheinbar wirken, zusammen und in der Abhängigkeitssituation traumatisieren sie trotzdem.
+Dieser Weg soll nach Wilhelmshöhe führen.
+Ja, meine Herren, wohin wollen Sie fahren?
+Falls der erste Versuch daneben geht, auf jeden Fall einen zweiten Versuch starten.
+Das ist ein Wort, das man nicht anwenden darf.
+Die dazu benötigten Heilkräuter wachsen nur im Himalaja.
+Je höher der Stoffwechsel, umso höher die Lebensfreude.
+Die Klasse der Druiden verfügt über eine breite Palette von Zaubern, darunter auch Heilungszauber.
+Niemand hat hier in Anröchte vor eine Mauer zu bauen!
+Bei den Erfindern der Technik dürfte ihre heutige Verwendung für Kopfschütteln sorgen.
+Werden wir genauso versagen wie die Generation unserer Eltern?
+Genau für diesen Zweck wurden sie ursprünglich angeschafft.
+Ich kann mich am Morgen am besten konzentrieren.
+Ach komm, dann zahlen wir halt die Vertragsstrafe.
+Während der Arbeit ist der Schwimmmeister zumeist bemüht, vernünftig mit den Leuten zu reden.
+Heute fand ich auf Poel einen Feuerstein mit einer Fossilie.
+Doch als ein Jahr vergangen war, da war der Kuckuck wieder da.
+Es versteht sich von selbst, dass man auf einem Kindergeburtstag keine Beischlafvollzugsmusik spielt.
+Ohne hübsche Frauen wird das Musikvideo ein Flop.
+Hermine Hassel humpelt heute Hertha hinterher.
+Sind Männer wirklich primitiver als Frauen, oder wäre so eine Behauptung schon Feminismus?
+In Warschau fand Marianne das perfekte Restaurant.
+Im Schreiben vom Kreiswehrersatzamt wird Kalle aufgefordert, zur Musterung zu kommen.
+Wenn ein Körper tot in der Wohnung liegt, wird er bald von Insekten befallen.
+Wie stelle ich bei der Brotschneidemaschine die Dicke ein?
+Die schlimmsten Stürme sind vorbeigezogen.
+Meine Internetverbindung bricht alle dreißig Minuten ab.
+Bei Isaak handelt es sich um einen biblischen Namen.
+Trotz tadelloser Tapete trottet Torge zu Toom.
+In einer Minute schafft er zehn Stockwerke.
+Schallwellen werden von dichtstehenden Bäumen reflektiert.
+In World of Warcraft können Sie einen männlichen oder einen weiblichen Charakter verkörpern.
+Diese Erklärung kannst und solltest du eins zu eins ins Wiki kopieren.
+Die Netzpolitikerinnen sind da anderer Meinung.
+Ein paar sind ja ganz okay, aber so viele?
+Urlaub nehmen wäre auch mal wieder eine feine Sache.
+Bei mir sind Geheimnisse bestens aufgehoben!
+Wenn die großen Berge verwittern, dann zerfallen zuerst die Feldspäte.
+Man hat nur einen Kopf damit es nicht in den Hals regnet.
+Insbesondere die Medien überbetonen die klassischen Formen von Kunst und verwechseln sie mit Bildung.
+So ein Versprecher in ihrer Gegenwart wäre peinlich.
+Die Klage hat Aussicht auf Erfolg, sofern sie zulässig und soweit sie begründet ist.
+Wieso bleiben die Zähler bei zehntausend stehen?
+Kaum sind die Sommerferien vorbei, beginnen auch schon wieder die Herbstferien.
+Neben Licht strahlen die Scheinwerfer vor allem auch große Mengen Wärme ab.
+Einen Partnerwechsel stelle ich mir unbürokratischer vor als einen Wechsel der Krankenversicherung.
+Geld ist ein wirksames Mittel, Menschen zu Dingen anzutreiben, die sie eigentlich nicht wollen.
+Die meisten öffentlichen Parks und Gärten werden vom Amt für Kultur und Freizeit verwaltet.
+Im Schlamm fühlt sich das Flusspferd pudelwohl.
+Niemand hat das Recht, meine Chats mitzulesen.
+Mit einer Kelle schöpft sie etwas Suppe aus dem Topf.
+Sie hat in ihrer Rede kein gutes Haar an ihr gelassen.
+Mit der rechten Taste kannst du auf Nachtsicht umschalten.
+Ein tollwütiger Mann in Waschbärkostüm verteilt Schaumküsse.
+Ich stehe im wahrsten Sinne des Wortes hinter dir.
+Bei der wundere ich mich über gar nichts mehr.
+In Modegeschäften ist die Damenabteilung meist doppelt so groß wie die Herrenabteilung.
+Zum Glück war die See flach wie ein Brett.
+Von dieser überzeugenden Mimik könnte sich der andere Schauspieler eine dicke Scheibe abschneiden.
+Es gibt keine Beweise für den Sachverhalt.
+Kannst du mir erklären, was ein Cunnilingus ist?
+So empörten sich etwa alte Menschen in den Siebzigern über lange Haare bei Männern.
+Nun steht das Vorhaben wieder auf der Kippe.
+Schlussendlich hab ich auf einer Hundewiese viele junge Brennesseln gefunden.
+Egal was die Werbung sagt, Wasser ist immer noch der beste Durstlöscher.
+Im März gab es über siebenhundertfünfzigtausend Infektionsfälle.
+Dabei lief ihr eine Träne über die Wange.
+Habt ihr genügend Vorräte für zwei Wochen?
+Nach drei Stunden Suche entsteht eine gewisse Frustrationstoleranz.
+Wie viele Staffeln von South Park gibt es mittlerweile?
+So ist es zum Beispiel beim Thema Verkehrswende.
+Hey Firefox, lösche alle Einträge in der Chronik, die älter als zwei Wochen sind.
+Navigiere mich zum Rotkelchenring vierzehn!
+Schatz, ich glaube, ich habe das Internet gelöscht.
+Ein kurzer Blick auf die Blitztabelle zeigt: Es ist noch alles drin.
+Wieso kann man die Werbung nicht auch in doppelter Geschwindigkeit schauen?
+Er hat klar gegen die Nutzungsbedingungen des Dienstleisters verstoßen.
+In naher Zukunft ist eher mit Evolution statt mit Revolution zu rechnen.
+Aber man muss nicht jeden Fliegenschiss dokumentieren.
+Du und ich, Hand in Hand, auf dem Weg zum Dönerstand.
+Sagt man das in der Schweiz wirklich so?
+Staatsgrundgesetz über die allgemeinen Rechte der Staatsbürger.
+Aber daraus lässt sich keine Schuld ableiten.
+Pastor Nolte machte auch immer was er wollte.
+Vorher drohte er, unter Last zu überhitzen.
+Eine Absage ist nicht das Ende der Welt.
+Auch die Hauptversammlung hat Schnitzler sausen lassen.
+Inzwischen ist Normalgewicht nicht mehr wirklich normal, fast schon die Ausnahme.
+Eine Zweierpotenz ist das vorherrschende Quantum in der Informatik.
+Natürlich ändert der Ventilator nichts an der Temperatur.
+Kommst du etwa jetzt mit dem ganz schrägen Sexzeug an?
+Der Schreibtisch ist aus Birkenholz getischlert.
+Ich weiß, ihr habt bereits alle Hände voll zu tun.
+Selbst dann, wenn die überwiegend negativen Konsequenzen eindeutig bewiesen wurden.
+Ich hatte mich noch nie so über ein Stück Brot gefreut.
+Er hat in der Vorstellungsrunde von sich aus seine Pronomen dazu gesagt.
+Und erst ab dem sechsten Stern werden Panzer eingesetzt.
+Wollt ihr die Säcke nicht noch zusammenbinden?
+Für das Testat sind keine Hilfsmittel zugelassen, insbesondere keine Taschenrechner.
+Ob es ihm schon beim Auftakt gelang, ist nicht überliefert.
+Der Bürgermeister möchte hier an Ort und Stelle ein Denkmal errichten.
+Meine Handschuhe gehen immer an der gleichen Stelle kaputt.
+Man kann auch über den Pazifik oder den Nordpol von Europa nach Amerika fliegen.
+Kurz zusammengefasst: Acht Stunden Arbeit am Tag sind das Problem.
+Dieser junge Mann hier hat den Bullen des Fleisches wegen geschossen.
+Nicht jeder hat das Glück, direkt an der Nordsee zu leben.
+An die Preise werden wir uns wohl oder übel gewöhnen müssen.
+Schlägt bei euch neuerdings auch immer ein Satz fehl?
+Langsam aber sicher verstummen auch die letzten Zweifler.
+Unsere Kunden haben oft eine genaue Vorstellung, von dem, was sie wollen.
+Wow, was du für eine tolle Bassstimme hast! Wundervoll!
+So viel ungefederte Masse wirkt sich negativ auf die Fahreigenschaften aus.
+Manche Menschen nennen eine Tischlampe auch eine Studierlampe.
+Aussichtsreicher wäre es, die andere Karosse ausfindig zu machen.
+Okay, das mit dem Erbe ihrer Eltern war nicht so geplant.
+Jetzt bist du gesund und auf mich nicht mehr angewiesen.
+Am Eingang gibt es eine Ausweiskontrolle.
+Nur weil es keiner hinbekommen hat, heißt es ja nicht, dass es nicht geht.

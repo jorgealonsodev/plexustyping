@@ -1,0 +1,2007 @@
+# Brazilian Portuguese sentences from Mozilla Common Voice.
+# Source: https://github.com/common-voice/common-voice/blob/605c25e48f9fb87cb25ca794cb39bf91d3741f29/server/data/pt/sentence-collector.txt
+# Commit: 605c25e48f9fb87cb25ca794cb39bf91d3741f29
+# License: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+# Filters: NFC, trimmed, 40-120 chars; only Brazilian Portuguese letters, space and . , ; : ? !; typeable on pt-abnt2; capital start; ends with . ? or !; no inner dots; no word-list profanity; no duplicates
+# Selection: the first 2000 survivors by SHA-256 of the sentence, by scripts/import-commonvoice.py
+# Count: 2000
+Um menino está saltando no skate no meio de uma ponte vermelha.
+A estrada era tão íngreme que o motoqueiro teve que mudar algumas marchas.
+Um pedaço de pão preto melhor que uma bolsa vazia.
+Um homem de chapéu preto ao lado de uma estrutura incompleta.
+Eles amavam o lago, e é por isso que eles ficaram lá.
+Donald Trump é o presidente dos Estados Unidos desde dois mil e dezesseis.
+Eu queria que você me deixasse te ajudar.
+Quando você vai comer, cartas ou livros não querem olhar.
+Quem não provou um tímido, não sabe doce.
+Mas ele ficou quieto porque ouviu o que o alquimista disse ao monge.
+Também devemos nos referir ao amor de Francisco, que consegue amar o leproso.
+Novas opções de integração de email para usuários que desejam enviar emails com anexos.
+Quanto ao primeiro, discutiremos um tópico de verdade.
+Você tem feito um ótimo trabalho ultimamente.
+Teremos que correr se quisermos pegar o ônibus.
+Garcia alcançou prontamente que o outro acabasse com tais estudos.
+Todos sabem comprar, e deduzo que eles também deveriam saber cozinhar.
+Quem com a espada mata, morre da espada.
+Menor consumo de memória e, portanto, uma carga de páginas e imagens mais eficientes.
+Esta não era a única maneira viável de se produzir oxigênio puro.
+Um homem de bermuda preta joga tênis do lado de fora.
+Eles vão desfrutar de uma licença remunerada de quatro horas.
+Todas essas chapas de aço causaram frio e raiva.
+Toda a habilidade dos homens políticos é, então, formar partidos.
+Uma mulher Amish está preparando um cavalo para puxar seu carrinho.
+Eu pensei que o assento livre não teria assento.
+Qual foi a avaliação do filme Tomates Verdes Fritos?
+Eles têm preconceitos contra estrangeiros.
+Meu químico me disse para tomar esses comprimidos antes de comer.
+Os dous saíram, ele e o estudante ficaram no quarto.
+Um homem de terno cinza caminha por um corredor de pedra carregando uma maleta.
+Levante a vela e leve o navio para o norte.
+Todas as pesquisas espanholas fazem o contrário.
+Um homem que trabalha com metais usando solda ou ferramentas de moagem.
+O amor é o caminho mais feliz para um acidente.
+Um homem está caminhando em uma pista coberta de neve.
+A gema brilhante era estimulante de contemplar enquanto brilhava.
+Um homem em uma sala durante o dia fazendo uma parada de mão.
+Para o irmão, irmã rica, e para o marido, a mulher saudável.
+Quem fez isso por burros não deve se surpreender se os outros estão andando.
+Qual é a previsão para daqui a um minuto?
+Os refrescos de cortesia foram satisfatórios.
+Uma garota pula no ar no meio de um parque da cidade.
+O menino sentiu uma pontada no coração pensando na filha do comerciante.
+O homem está caindo de uma corda balançando em um rio calmo.
+Você tem que dizer que não sabia de nada?
+Tudo bem, eu concordo que este poderia ser o caso.
+Ele me disse que eu deveria tentar fazer isso.
+Todas as atividades terminaram este ano.
+Pássaro que é criado na água, na água da piula.
+Então você vai morrer no meio de tentar perceber o seu destino.
+Caminhei a beira mar em Praia Grande com meu pai, durante minha juventude.
+Você não tem idéia de quem poderia ter feito isso?
+Ela foi infectada com bacilos da difteria com a idade de um ano.
+Um homem está andando perto de uma parede muito colorida.
+Não pode haver publicidade da atividade, promoção ou patrocínio fora das instalações.
+Duas jovens estão vadeando no oceano usando shorts e shorts de suor.
+Em outubro finito, a mosca e o mosquito morrem.
+As escolas publicarão os preços aplicáveis.
+Camilo quis sinceramente fugir, mas já não pôde.
+Para todos os santos, castanhas e caracóis com chifres.
+A raiva e o ódio são prejudicados por bons conselhos.
+A caixa estava ao lado de um caminhão estacionado.
+Mas ele parecia não perceber nenhum perigo.
+Eu disse que gostaria de nunca ter nascido.
+Quem ama o casamento antes do casamento não tem mais nada para a lei.
+Um homem de casaco vermelho está calçando os sapatos.
+O despertador estava marcado para as três e vinte.
+Nós devemos sempre julgar isso deste ponto de vista.
+Às vezes as ambições de Yasmin não têm limites.
+Como no caso do cinema, as reescritas dos clássicos podem ser todas uma arte.
+A versão original está disponível na web.
+Um grupo de pessoas está no convés de um barco grande.
+Agende serviços com normalidade e eficiência.
+Mulher que frita acima de alguns bens em um festival.
+Apenas projetos cujo investimento seja superior a quatro mil euros serão considerados.
+É preciso muita ajuda para acabar com isso.
+Uma família caminha por um campo de cascalho sob altas estruturas de madeira.
+Um homem cozinha frango na churrasqueira enquanto outros gostam de comida ao fundo.
+Era necessário apenas ouvir seu principal e o poderoso banqueiro.
+Uma menina está andando em um recipiente de lixo.
+Use a wifi do aerorporto ou de qualquer café.
+Ele arrisca uma parte do que ele estima para salvar o resto.
+Um menino vestindo uma camisola de hóquei está varrendo o quintal.
+A guerra traz um tesouro e os faz cem vezes na miséria.
+Uma criança nova está pegando ovos da páscoa na grama.
+O cachorro que quer pão deve lamber sua mão.
+O amor de uma mãe é a melhor coisa do mundo.
+A comissão pode igualmente declarar, total ou parcialmente, a atribuição dos subsídios convocados.
+Há uma carne na mesa que é muito deliciosa.
+Um cão com orelhas flexíveis é executado em uma floresta no outono.
+Há economias que cobrem as toalhas de mesa.
+O cultivo diário de plantas é uma questão de mulheres.
+Em outros, os poderes legislativo e judicial são completamente confusos.
+A expectativa foi grande devido ao atraso, especialmente porque foi a primeira vez.
+É melhor matar um homem do que colocar um mau hábito.
+Camas? praias? e gramados são bons para leitura.
+Não tenha um rei ou rocha ou uma espingarda que queime fogo.
+O Tribunal decidirá sobre os pedidos de adaptações e ajustes feitos.
+O peixe e o leitão vivem na água e morrem no vinho.
+O funcionamento desta Comissão não apresentará despesas adicionais.
+Dos crimes contra a administração pública.
+Duas mulheres vestindo quimonos estão sentadas à sombra de algumas lojas.
+Qual personagem folclórico costuma ser agradado pelos caçadores com a oferta de fumo?
+Duas crianças dentro de uma casa de pé sobre móveis? jogando piratas.
+Eu poderia continuar por dias sobre os deliciosos vinhos produzidos nesta parte do mundo.
+Isso nos ajuda a homogeneizar as traduções entre os projetos.
+Água para San Juan, adega vazia e muita fome.
+Eu não sei porque vocês são tão bons para mim.
+Você não pode desembaralhar um ovo mexido.
+Ambos brincam no parquinho perto do rio.
+Um homem sorridente está segurando uma ferramenta.
+Por esse preço, você também pode obter a broca sem fio da marca.
+Meca é muito mais longe que as pirâmides.
+Nosso grupo tocou guitarras enquanto os outros acertavam aleatoriamente objetos ressonantes.
+Apreciamos profundamente o trabalho de todas as pessoas por trás dos projetos mencionados.
+Turistas em um templo islâmico em um dia ensolarado.
+Facilita a criação do retorno esperado a longo prazo.
+Se você continuar sendo tão tolerante, não progredirá mais.
+Três pessoas cruzando um caminho de pedras sobre um lago.
+Portanto, o crédito total disponível é de setenta e três mil euros.
+É verdade que tudo tem seu destino, mas um dia esse destino será realizado.
+Se você quer morrer, coma romã e vá dormir.
+Senhora em um polo azul segurando um bebê e uma pequena caixa.
+Não há atualmente nenhuma razão técnica para justificar isso.
+O texto completo é publicado para este anúncio para servir como uma notificação.
+A guerra entre eles foi feita quando alienígenas estão desaparecidos.
+Afinal, eles estão vivendo sob o teto dos outros.
+Ele contou a ela sobre a reunião da manhã.
+Um garotinho no acampamento? em uma camiseta azul? jogando uma bola de futebol.
+Posso ver um caso inocente no cinema mais próximo.
+O barco avançou com menos velocidade para a água morta da gaivota.
+Em sua visita ao Irã, o diplomata criticou a censura estrita.
+O homem de roupa branca e rosa está segurando uma guitarra.
+Ela atravessou a rua usando fones de ouvido estéreo e olhando para seu smartphone.
+Um homem e uma mulher sentados em uma mesa com bebidas e conversas profundas.
+O infinito é uma coisa chata, nos dois sentidos da palavra.
+Os testes incluirão conteúdos teóricos e realizações práticas.
+Nunca pedimos subsídio e sempre rejeitamos cordialmente aqueles que nos ofereceram.
+Há armários no segundo andar do primeiro andar.
+Ele estava disfarçado de um colapso na poltrona.
+Ontem esperei eternamente pelo trem do metrô.
+O dia não passa por Toni, e à noite ela passa cremes de óleo.
+Aja como deveria, com a moeda que você paga, você pagará.
+Nós temos as condições necessárias para isso.
+Meu celular tem alguns problemas com a bateria.
+Pasmo sempre quando acabo qualquer coisa.
+Aproveitar essa oportunidade depende em grande parte de administrações, universidades e instituições.
+Sua morte está registrada no Departamento de Guerra em Washington.
+É uma variedade perfeitamente adaptada às condições da área.
+Aparentemente, são os bolinhos que fazem com que o ensopado seja tão bom.
+Você pode contar comigo sob uma condição.
+Como pode haver uma pessoa tão preguiçosa?
+Entidades que possuem um Centro de Informações para Jovens vinculado à Rede.
+Você não pode esconder o amor e nariz vermelho.
+Romeu e Julieta pode ser o ato mais famoso de William Shakespeare.
+Durante todo o dia estaremos atentos aos nossos inimigos.
+Nestas cidades, há muito menos degradação do que miséria.
+Parece que Lena deu uma jaqueta para casa.
+Uma mulher loira em uma camisa prateada está falando uma caminhada.
+Actualmente, o horário de aula não pode encontrar as informações da turma.
+Nos dias de hoje, a perna de frango é um prato raro.
+As novas invenções nos ajudam, mas nunca devemos nos tornar seus escravos.
+Eles vão pedir ajuda, mas eles não fizeram.
+Para a família, é por isso que lhe devia o que ele era.
+O mandato terminou no final de junho do mesmo ano.
+Uma mulher ajudando outra mulher com um site em um computador.
+Um cão manchado preto e branco está circundando um cão cinzento e branco.
+Do Imaculado ao Natal, dezessete dias inteiros.
+Para San Antonio em janeiro, coloque o frango na palha e no celeiro.
+Para as feiras de Girona, houve uma grande festa.
+Uma mulher sentada ao lado da piscina enquanto outro joga badminton na piscina.
+Pescador de cana, mais ele perde do que ganha.
+Foi dos últimos que usaram presilhas no Rio de Janeiro, e talvez neste mundo.
+O velho burro não se alonga, mas entende.
+O modelo prevê que, às vinte e meia, as chances poderiam mais que dobrar.
+Ela tem o sorriso mais lindo que eu já vi.
+Mulher que sorri ao guardarar um livro e uma estrela de papel amarela.
+Discussão e propostas para discussão subseqüente na Wikipedia.
+Mas Sangonera voltou a encolher para o barco sem obedecer ao mandato.
+Pessoal docente que possui credenciamento de docentes profissionais.
+Preciso falar com você acerca de um problema pessoal.
+Darren nunca viu uma garrafa até os seis meses de idade.
+As motivações são plurais e difíceis de enumerar.
+Sua mandíbula estava ficando cansada de chiclete.
+Cada uma das seções de seus sete movimentos conclui com um coral homofônico.
+Ou seja, os dados dos participantes que estão abandonando também devem ser coletados.
+Foi preciso muito esforço mental para fazer as coisas mais básicas.
+Foi um erro grave por parte do novo juiz.
+Ela aprendeu a tocar piano na escola de música.
+Um homem e uma mulher a pescar na praia.
+Dois homens estão preparando o jantar em fogo com latas.
+Uma mulher com uma roupa cinza faz malabarismo com bolas de tênis.
+Outra hora começou a dominar os clientes.
+É tolerante para pessoas que pensam de forma diferente.
+O vinho frio e o caldo quente e, se possível, ferver.
+Dois homens na varanda olham para cima e apontam para alguma coisa.
+Mulheres com uma camisa amarela falando com um homem mais velho.
+E aqui, sem raiva ou ressentimento, eu me despeço de você.
+Isso nos deixa, portanto, um campo bem definido em relação ao resto das passagens.
+Isso vem de muitas causas materiais que precisam ser desenvolvidas.
+O Banco pressionou por um pagamento da dívida.
+E não esqueça a linguagem dos presságios.
+Foi assim que o próprio benfeitor insinuou a este homem o sentimento da ingratidão.
+Coordenação de experiência com pediatria, especificamente com doenças alérgicas.
+Elabora relatórios de acompanhamento cronológico para as diferentes unidades do Departamento que propõem contratos.
+Tem uma boa integração de sua educação com a atividade profissional.
+Eles trazem um grão de trigo que é maior que eles.
+Enquanto isso, faça um alho picado e salsa e adicione a metade fervendo.
+Contanto que a área seja grande o suficiente, você pode vir.
+Agora, as coisas de consistência esperavam quando as grandes festas chegaram.
+Eu suponho que tudo isso está levando a algum lugar?
+Um cão branco segura um pedaço de pau na boca quando sai da água.
+Aposto que é um mandado para minha prisão.
+Oficiais agora estão trabalhando para conhecer o corpo.
+Uma criança está derramando água de um copo na banheira.
+Então veio a noite da primeira estrela cadente.
+Um cara com uma câmera à moda antiga fica de lado na escada rolante.
+Deus te proteja de vizinhos maus e iniciantes no violino.
+Um homem corpulento está de pé ao lado de um prédio.
+Franquias de zoológicos são uma desgraça para o movimento global de direitos dos animais.
+Se necessário, essas instalações serão fechadas ou cobertas.
+Outras fontes de energia também recebem subsídios, muitas vezes muito mais altos.
+Um grupo de pessoas está próximo a um pequeno vendedor ambulante.
+Dois meninos estão segurando pipas vermelhas com água no fundo.
+É necessário capacitação para realizar esse trabalho.
+Dois homens estão trabalhando em madeira.
+Considere as diferentes situações colocadas pelos idiomas em contato.
+Ela salvou a vida de todos os homens naquele transporte.
+Uma cócega, tão longa, fina e retorcida, parece uma cobra quando está matando.
+Rico de verdade não trabalha, rico vive do trabalho alheio.
+Um dos maiores problemas do mundo é o crescimento da população humana.
+Uma jovem mulher está de pé sob uma placa de rua.
+Mesmo o vento mais forte não agita a água no poço.
+Sua fruta, tendo uma grande competição no verão, não tem aceitação.
+Você não pode julgar o livro pelo título.
+Decore com manteiga e esprema o queijo ao gosto de cada um.
+Isso mostra claramente que os povos são como indivíduos.
+Primeiro você tem que assinar um recibo.
+Teste específico para demonstrar conhecimento de idioma.
+O jovem olha para a fonte em um dia ensolarado.
+Esta ação terá um impacto permanente no terreno afetado.
+Ele resolveu a equação muito mais rápido do que se pensava anteriormente.
+Para San Bernabé, todas as perdas estão bem.
+Se os caracóis estiverem profundamente enterrados, acumularão invernos rigorosos.
+O sol foi transformado em um disco de ouro.
+Um pássaro de bico longo no meio do vôo.
+Por que você não está disposto a divulgar?
+O entendimento correto entre a Europa e os países mediterrânicos associados é a chave.
+Eu voei do navio onde eu morava até agora.
+Este é um carro esportivo vermelho e branco descendo uma estrada de terra.
+Quanto mais precisa ser levantado para conseguir a festa?
+A operação tem um suprimento de água potável de um poço localizado na fazenda.
+Cinco pessoas estão sentadas juntas na neve.
+Nos exércitos aristocráticos não existe tal causa de enfraquecimento moral.
+Eu suponho que você poderia escrever os números verticalmente.
+Três amigos estão relaxando em volta da mesa.
+Corte fatias de pão grosso por cerca de um centímetro.
+Se considerado, esses campos podem ser incluídos na tabela de atributos do arquivo geográfico.
+Imediatamente sentiu que fez um grande desserviço.
+Os dois homens correram para trás e encontraram o cilindro ainda na mesma posição.
+Convolutional Neural Networks são ótimos para trabalhar com imagens.
+Amanhã? vende o seu camelo e compra um cavalo.
+Meu acordo com vocês senhores permanece!
+Sua popularidade e esforços estavam à vista.
+O que não é tirado pelo inimigo na guerra é tomado por um amigo.
+Eles tropeçaram e caíram? e o solitário homónimo ficou de pé em silêncio.
+É engraçado, eles não entendem nada, mas não param de falar.
+Para evitar a computação traiçoeira, precisamos de um grande número de cidadãos organizados.
+Suas probabilidades de observação são calculadas como um produto de probabilidades de pixels.
+Corresponde à Generalitat a execução da legislação do Estado sobre produtos farmacêuticos.
+Badall não pode mentir: ele quer comer ou quer dormir.
+Eu não vou chegar cedo porque eu gosto de dormir.
+A licença gratuita não inclui o uso da marca.
+A cidade já foi famosa por suas comemorações anuais.
+Agora você vai se aposentar para chegar a um veredicto.
+As pessoas vestidas de branco estão se divertindo.
+O cachorro marrom está correndo em direção a um tubo azul e amarelo.
+Duas mulheres estão sentadas em uma mesa e bebendo cerveja.
+Às vezes me pergunto como pode haver tantas estrelas no céu.
+Suas desgraças eram antigas e pareciam irremediáveis.
+Eu sou um grande fã de Star Wars como todo mundo.
+Você vai ajudar com essa parte para a Páscoa ou somos nós?
+O Registro de ingressos da câmara certificará a apresentação e sua prioridade temporária.
+A razão para este? é discernir seus pontos fortes.
+Cozinhe aproximadamente sessenta minutos.
+Eu vou falar depois que você pegar a estrada.
+Um macho em uma jaqueta verde aponta uma espingarda imaginária para o céu.
+Um homem é conhecido pela empresa que ele lidera.
+As pessoas estão se deslocando em torno de um cruzamento movimentado da cidade.
+Atualmente, tem quase quatro mil assinantes em seu boletim mensal.
+Depois de todo o giro ter parado? Megan se sentiu melhor.
+A criança quase machucou um cachorro pequeno.
+Mas quando os viu caídos no chão, outra frase lhe veio à mente.
+Por que as pessoas estão tão deprimidas?
+Obrigado para seu patrocínio de nossa loja.
+Ele pegou um engarrafamento na estrutural.
+Bom vinho arruína a bolsa? e o vinho ruim estraga o estômago.
+Médico e subdelegado vieram daí a pouco.
+O terminal está quase vazio? apenas algumas pessoas estão lá chegando ao seu destino.
+Sendo esta uma regra de ouro, temos muitas referências pictóricas que caminham nessa tendência.
+Um grupo de homens jogando um jogo de rugby.
+Os solos agrícolas que estamos na área de estudo são de alta capacidade agrológica.
+O artigo deve ser amplamente reescrito antes de qualquer reenvio.
+Um grupo de pessoas anda em uma trilha pela floresta.
+O engate entre o cavalo e o carro quebrou.
+O presente terá um caractere de anúncio para proprietários desconhecidos.
+Situação de compatibilidade dos deputados.
+É necessário que noventa por cento dessas lâmpadas fluorescentes atendam a esse critério.
+Um homem vestindo uma jaqueta preta, olhando para baixo.
+Que é capaz de entender até mesmo o contexto.
+Existe alguma possibilidade de expansão?
+Eles gritaram consolo e promessas e voltaram para a cidade novamente para buscar ajuda.
+Suas mãos começaram a tremer? e a mulher sentiu isso.
+É verdade que? é o café mais caro que já provei.
+O dinheiro é a parte irrelevante em tudo isso.
+Independentemente disso, você pode arquivar qualquer outro recurso.
+Um homem olha para o céu noturno através de um telescópio.
+Exceto pelo chefe e o oficial administrativo, que serão três meses.
+Por que nós temos que ter todas essas crianças?
+Há novos shows disponíveis no Netflix este mês?
+O WiFi da escola dela tem uma quantidade ridícula de sites bloqueados.
+Um mecânico de macacão azul trabalha em um ônibus.
+Mulheres e homens são iguais em dignidade, assim como em direitos e deveres.
+Alison não pôde deixar de sentir orgulho por sua criação.
+Um homem? usando uma camisa listrada? opera um microscópio em um laboratório.
+Quatro crianças estão brincando em uma colina de areia.
+Uma longa nota soou em uma corneta? e todos montaram.
+Vamos manter nossa idade escondida, sempre saindo.
+Não fique com a bochecha que treme à noite.
+Calcule a proporção de transmissão nos casos, quando apropriado.
+Todos os caminhos levaram ao mesmo destino.
+Um homem idoso em um boné azul olhando para o chão.
+Que ele frequentou um seminário até os dezesseis anos.
+Um homem faz um back flip em uma piscina enquanto os espectadores assistem.
+Três mulheres de casacos atravessam a rua.
+A coisa toda parecia deprimentemente fútil.
+A chamada determinará a ponderação dos critérios definidos nos artigos seguintes.
+Pegue o arroz em um lugar seco e frite um pouco.
+Ele deu generosamente a ele: afinal, a espingarda era dele.
+Os soldados mortos foram substituídos por outros? e a vida continuou.
+Uma multidão de pessoas está passando por um antigo arco.
+Ambas as empresas levaram a Microsoft ao tribunal.
+Eu sei de uma maneira que você pode fazer isso.
+A voz do anjo corresponde a uma voz de soprano.
+Eu sou tudo que o promotor disse que eu era.
+Dois homens em uma rua? um segurando uma bandeira vermelha.
+Eu gostaria que algumas coisas fossem diferentes.
+Agora vou me afastar suavemente da terra dos sonhos.
+A inveja é a punição mais severa da inveja.
+Um bom exemplo de dinossauro é o Pterodáctilo.
+Aquele que canta é assombrado pela tristeza.
+Uma marca legal pode ser feita de linho.
+Preparar os relatórios dos programas que acompanham a proposta econômica do orçamento.
+Na sua opinião, quais são os problemas mais sérios?
+Um homem sorridente com uma barba está tomando um banho de espuma.
+Três âncoras estão rindo enquanto no set.
+Bolsonaro será o melhor presidente que o Brasil já teve!
+Eu faria se achasse que eu ouviria alguma coisa que valesse a pena ouvir.
+Você já sabe qual é o gênero do seu bebê?
+É impossível estacionar no centro de Calafell.
+Suas pernas pareciam os pilares do Parthenon.
+O outro progenitor pode retirar seus objetos e efeitos para uso pessoal.
+Eu já digo que foi sobre os primeiros anos do século passado.
+Que se torna público para que adquira conhecimento e seus efeitos.
+Levou um tempo para chegar ao escritório.
+Não venham abusar da ignorância daqueles que nos escutam.
+Um esquiador em vermelho está alto no ar.
+O mesmo regime será aplicado à aquisição de ativos que envolvam endividamento.
+Não é incomum ver um voo turbulento de avião.
+O vinho, o sal e a pimenta tomam medidas.
+Amêijoas são pequenas, redondas, macias e saborosas.
+Um cientista em uma bata de laboratório está usando um microscópio.
+Divida o bolo, mas não esqueça as crianças.
+É comum encontrar problemas, então leia atentamente as instruções.
+Eu tenho a dieta de uma criança que encontrou vinte dólares.
+Um grupo de jovens fica em pé e come em pratos de papel.
+Revise seu humor e nos coloque em um local agradável de vitalidade.
+Esse identificador pode ser repetido várias vezes.
+Eles estavam separados por? em fileiras a um metro de distância.
+Africanos de todas as idades cantando seus corações cercados pela mãe natureza.
+Quais os principais heterônimos de Fernando Pessoa?
+Nós corremos para uma patrulha policial.
+Um homem em um terno de negócio andando na calçada.
+O design tenta minimizar os elementos de distração.
+A Ironia é o primeiro indício de que a consciência se tornou consciente.
+O conteúdo desta base é regido pelas disposições da quarta base dos generais.
+Sim? Eu tive uma cutucada nisso e não consegui descobrir o que estava errado.
+Por favor, procure por Thirayum Theeravum video game.
+Um passo a mais e o conselho entrará em colapso.
+Ele encolheu as costas e caminhou através da chuva pesada.
+Eu pensei que a irmã vai cuidar de você.
+Você saberá mais tarde que isso não é possível.
+Para ouvir a verdade, você precisa ouvir dois sinos.
+A lista de finalistas detalhada será anunciada no dia da cerimônia de premiação.
+Parecia uma coisa tão pequena, tão brilhante, pequena e silenciosa.
+O uso que corresponde a esses espaços se torna um sótão.
+Esta é, na minha opinião, sua maior vantagem.
+Duas mulheres no chute alto heterogéneo em uma parada.
+Você sabe que eu não contei a ninguém que eu estava vindo aqui.
+Vamos ao rodízio de sushi, sashimi e temaki?
+Claro? os dois não conseguiram fazer nada.
+Não insira todos os ovos no mesmo cesto.
+Sim, temos medo de esperar até depois do almoço.
+É quando ele estará em segurança e nem um minuto antes.
+Infelizmente, tive que voltar para reiniciar.
+Um lutador está pronto para pular em outro lutador fora do ringue.
+Era um modo de dar feição monumental às idéias.
+Foi escondido de vista por uma massa de folhas e arbustos.
+Mergulhador sob a água segurando pequeno crustáceo em suas mãos.
+Não há ninguém mais do que nós e eles têm o barco mimado.
+Ele sabia que ele era mais forte que seu amigo.
+O alquimista retirou a panela do fogo? e a colocou de lado para esfriar.
+Dois jogadores de hóquei estão brigando pelo disco.
+O órgão substantivo determinará a freqüência das referidas inspeções.
+As expressões que estão conectadas ao sono estão todas rindo.
+E também supõe uma difusão poderosa, já que atinge potencialmente qualquer parte do mundo.
+O garoto sabia? e agora estava trabalhando para isso.
+É chegada a hora de uma nova Constituinte?
+Além disso, não se pode ver que esse deslocamento implique duas injustiças profundas.
+Esta é a minha sentença, que se pronuncia firme e firmemente.
+Câmeras de vigilância foram montadas para permitir que a polícia encontrasse atividades suspeitas.
+Nos próximos anos, provavelmente iremos até Marte.
+Se necessário, os tratamentos relevantes serão aplicados para atender aos limites estabelecidos.
+Para enterrar a verdade, muitas pás precisam ser.
+Para continuar sua busca pelo tesouro, ele teve que abandonar Fátima.
+Para fazer o pacote funcionar, o melhor remédio é o vinho.
+Não imagina como meu marido é seu amigo, falava sempre do senhor.
+Quem faz carvão come um dia sim e o outro não.
+Se ele esperasse outra taça por sua tolice, ficaria desapontado!
+Uma mulher em uma camisa branca está pintando uma barreira de estrada.
+Essa frase sempre aparece em minha mente.
+As vidas humanas decorrem da mesma íntima inconsciência que as vidas dos animais.
+Os artistas folclóricos dos pobres estudam para o dinheiro dos ônibus.
+Uma criança pequena que está em um círculo branco em um passeio.
+A pessoa de capuz vermelho salta da pilha de pedras.
+A maior parte da energia será absorvida pela fricção cinética.
+É também uma nova experiência na minha vida.
+De tarde ou primeiro, Carnaval em fevereiro.
+Das diferentes infraestruturas que fazem parte da ação e detalhe dos diferentes pontos singulares.
+De acordo com janeiro, você vai comer o pão do próximo ano.
+Os dois cachorros grandes estão correndo pela areia.
+Uma pessoa tocando uma guitarra com um capo na segunda casa.
+Isto é, por que as cidades são mais resistentes que outras?
+O cachorro marrom está na água ondulante.
+Uma cadeira de pelúcia escorregou da van em movimento.
+Eu acho que ela veio em uma longa caixa vermelha.
+Esse é um presente de Natal de um amigo muito querido meu.
+Você pode incluir ferramentas de idioma, mas não traduz a interface.
+Encontre os gêmeos que roubaram o colar de pérolas.
+Três mulheres caminham juntas pela rua e passam por um prédio coberto de pichações.
+Seção oito: resposta incompleta e incorreta em erros técnicos e contradições.
+Me desculpe, até que eu realmente esqueci de entrar na casa no fundo.
+Eu ouvi um zumbido peculiar vindo do poço.
+Controlar o arquivamento e custódia da documentação da Área Básica da Polícia.
+Este montante será entregue ao beneficiário para pagamentos mensais antecipados, sempre que possível.
+O documento estratégico inicial do plano foi acompanhado pelo pedido.
+Os animais estavam exaustos? e os homens conversavam entre si cada vez menos.
+O tratamento é feito com ajuda de raios infravermelhos e ultravioleta.
+Empresas que vendem software como produto.
+Vantagens competitivas que podem ser usadas para reter e atrair talentos e capital humano.
+Imagine se todos saíssem transformando chumbo em ouro.
+As placas de indução não funcionam por radiação térmica.
+Essas colônias podem causar problemas de saúde pública e afetar a vida selvagem.
+Em setembro, chuvas e tempestades de manhã.
+Um homem com um suéter vermelho segura uma criança em cima de seus ombros.
+O que escolhemos tem que ser a pessoa média típica.
+Eu encontrei uma loja de língua de boi grelhada.
+O velho com uma bengala está ouvindo um walkman.
+Coordenar a entrega de terminais de teste para novos usuários.
+Você realmente ateou fogo na casa para matar uma barata?
+Um homem e uma mulher colocam velas de aniversário em um bolo.
+Nós o censuramos tanto quanto nossos ancestrais, mas por diferentes razões.
+Se você não dorme seus olhos, descanse seus ossos.
+Eu atribuo o exercício da autoridade dos pais exclusivamente ao progenitor da mãe.
+Mas essa bruxa estava fresca se eu esperasse a herança!
+Uma criança que bebe de um copo em um carro do brinquedo.
+Material de merchandising no qual a campanha promocional valenciana aparece explicitamente.
+Caso contrário, você poderia se esconder em algum café ou outro por um tempo.
+Você ainda está usando o Google Tradutor?
+Ele viu o menino aparecer do outro lado das dunas.
+Os agricultores vieram para obter aveia.
+Nada aguarda mal, quando um homem é muito formal.
+Esta quinta tinha gado bovino? frango? ovelha e muitos outros animais.
+A tradução para o catalão da interface do LibreOffice seis está completa.
+Já foi dito antes, mas tem que ser repetido.
+Desta forma, podemos avaliar com maior precisão as características e a função.
+Uma competição em cavalos em um dia bonito entre o verde.
+O diretor da biblioteca municipal ou pessoa delegada.
+Do bem ao mal, há apenas um pequeno salto.
+Ouvi dizer que ele começou a trabalhar desta vez.
+Que mudança rápida foi essa, da adoração idólatra a uma repulsa instintiva?
+Eu quero passar o Natal na Califórnia com minha família.
+Dois homens que jogam o frisbee ao ar livre em um campo.
+Grupo de corredores saindo da linha de partida de uma corrida.
+Um homem louro com uma trouxa está ao lado de uma lagoa.
+Pouco tempo depois, uma inspeção legal de software chegou à empresa de Jose.
+Depois de jogar tênis em realidade virtual, ele se sentiu tonto.
+Clifton é incapaz de alcançar a prateleira.
+Uma mulher de casaco vermelho passa por um homem de barba grande.
+Eu diria que ambos são companheiros e chefes.
+Ele estava em Juneau, no Alasca, no mês passado.
+Embora dócil, também era nosso e ele preferia ir embora.
+Ela diz que não é nada para se preocupar.
+Por favor, aguarde um momento enquanto eu estou investigando o problema.
+Para a trombeta da morte, nunca te surda.
+Como tal, acolhe projetos artísticos com alto nível de especialização e excelência artística.
+O Flávio sabia que não era fácil trabalhar no Hospital Anchieta.
+O cachorro preto está pulando em alguma coisa no quintal.
+Quantas calorias há em uma barra de chocolate?
+Que foi incapaz de lidar com esse menino que falava a língua do mundo.
+Se você continuar assim, seu corpo será quebrado.
+Os representantes denunciam o culpado, o Senado o pune.
+Em abril, toda a água entra em um barril.
+Você poderia ir até lá, mas isso depende de quão bom é.
+Nosso gerador foi interrompido por ondas de alta frequência.
+Deposto o ferido na cama, Garcia disse que era preciso chamar um médico.
+Antes que ele chegue esta noite, ele vai nos arruinar!
+O clima está seriamente doente por algum motivo que eu não conhecia.
+Então o velho começou a inspecionar a ovelha e viu que ela era manca.
+Coisas baratas só funcionam por um curto período de tempo.
+Caça e guerra parecem ser as únicas tarefas dignas de um homem.
+Três melhores amigos que apreciam a vista de um lago.
+Por que as pessoas têm idéias realmente boas no chuveiro?
+Feche a escotilha antes que as ondas a empurrem.
+No primeiro ano, quanto mais ele passou a morte do que o vivo.
+Dois homens montando cavalos em um rodeio enquanto perseguindo um touro.
+O Conselho, nessa situação, só pode fazer acordos urgentes e necessários.
+No lado esquerdo da árvore é a casa de rua das Três Gargantas.
+Centralize, formalize e priorize as atividades do Centro de Liderança.
+Um lance forte pode assustar seu parceiro.
+É por isso que estou aqui no meio do deserto.
+A lua é responsável pelas marés da terra.
+É hora de explorar de maneira prática como isso é feito.
+Algumas pessoas de etnia oriental estão sentadas em tendas brancas.
+Uma pessoa andando por um beco em direção à luz.
+Além disso, aumentaria o escopo da atividade e o impacto produzido.
+Uma garota no parque está tirando uma foto.
+Qual é a medida dos seguintes recursos como blocos?
+Faça a oferta de forma clara e em diferentes formatos.
+Antes, eu disse que todos os estados da União haviam admitido o voto universal.
+Se os pássaros não viessem, o trigo não cresceria.
+A água de longe não desliga o fogo de cima.
+Na Catalunha e em Castela, o cavalo carrega o selo.
+A felicidade se cansa se alguém a usa por muito tempo nos ombros.
+Então ela novamente pegou as mãos dele e as estudou cuidadosamente.
+Uma garota mostrando uma criação de arte.
+Em Portugal, são cada vez mais as pessoas a viverem.
+Um homem usa ferramentas para trabalhar em um portão mecânico.
+Você acha que alguma vez encontraremos uma cura para o câncer?
+Ela tem mais quatro irmãs e dois irmãos mais novos.
+As avós tinham um carinho especial; Eu nunca soube porque.
+Aquele primeiro dia? todo o mundo dormiu de esgotamento? inclusive o inglês.
+Carlos veio com José, Gustavo e Guilherme.
+Um cão preto e branco está correndo na areia.
+O presente do inimigo esconde a insídia.
+Será quente no lugar atual duzentos e quatorze dias a partir de agora?
+O garoto se sentiu mal e terrivelmente sozinho.
+As habilidades descritas acima contribuem para que os alunos adquiram competência matemática.
+Você poderia manter uma mesa para quatro, por favor?
+Que o aluno já tenha um diploma superior ou superior.
+O problema deve ser abordado de outra perspectiva.
+Por que você acha que silêncios constrangedores nos deixam tão desconfortáveis?
+A felicidade é como um copo; é mais brilhante, mais frágil.
+O alquimista seguiu enquanto o cavalo do menino corria por quase meia hora.
+Cláudio tinha uma conta no Banco do Brasil e no Itaú.
+Um reconhecimento aberto é bom para a alma.
+Quando eu era pequeno e as lentilhas eram feitas, elas ferviam em casa.
+E com isso eu disse a ele? e ele tomou o meu lugar.
+Nós não adquirimos nada a menos que a mudemos.
+Pouco depois ele dormiu profundamente, mas sem liberar o boletim.
+Uma pessoa está em pé sobre rochas irregulares acima da água abaixo.
+Quem joga e ganha vinho, e volta a jogar vinho, paga o vinho.
+Essa tomografia embaçada não me ajuda muito com o diagnóstico.
+Todo esse tempo os marcianos devem ter se preparado.
+Executa o processamento da tela, reconhecendo as características técnicas dos elementos.
+Sua filha de oito anos ficou ferida no evento.
+Uma mulher vendendo chapéus do lado de fora.
+Ele também foi eleito membro da sociedade francesa.
+Nós não vivemos para cálculos míopes e de curto prazo.
+Ninguém conseguiu desencadear o mistério.
+Eles informarão sobre o programa, suas características e os requisitos de participação.
+Por favor, diga a eles depois que você acordar.
+Um homem mais velho de camisa branca andando de moto.
+E lamento dizer que o congestionamento está aumentando.
+Em geral, todas as atividades não especificadas acima e que estão relacionadas ao anterior.
+Se você quiser mais grosso, você precisa colocar mais uma colher de farinha.
+O artigo se beneficiaria de exemplos demonstrando a ponderação do conjunto de dados.
+Um menino? usando um boné de beisebol? pula no ar perto de alguns degraus.
+Sim, mas quando uma pergunta, dinheiro está sendo solicitado.
+Você pode ver o que está além dos vidoeiros de ouro?
+Dentro dos órgãos oficiais, devido à especialização das funções, pode haver escalas.
+O cavaleiro estava completamente imóvel? como era o menino.
+O parlamento segue sempre o lado mais forte.
+Um homem está montando um wakeboard no oceano.
+Naquele verão, o avô estreou um rolo, mas só serviu para pegar.
+A polícia está investigando você neste caso.
+Você tem uma ou duas garrafas de água em seu carro?
+Um policial sentado em sua moto policial.
+A criança pequena branca está perto do carro de esportes verde.
+Eu achei que a enfermeira era muito poderosa.
+O Jorge Castro Alves é o pintor mais indicado pra esse trabalho.
+Por que você não se opôs quando conseguiu?
+Crianças em uma sala de aula estão ocupadas trabalhando escrevendo e fazendo projetos artísticos.
+Gera indicadores ambientais baseados em dados cadastrais e no sistema de informação geográfica.
+Os prêmios e distinções não acarretarão qualquer mérito econômico.
+O homem fez várias vezes pela janela do carro.
+Todos os testes são obrigatórios e eliminatórios.
+Ele notou o resfriamento desigual de sua superfície.
+O medo de perder tira a vontade de ganhar.
+Mas ele não precisava se preocupar com isso agora.
+Doenças desesperadas devem ter remédios desesperados.
+Eu ainda digo que essa pessoa de John Doe é um mito.
+No céu, a névoa do vigésimo quinto dia do inverno é prevista.
+Uma mulher sai de um carro vermelho muito pequeno.
+Ontem ele se sentiu invencível? agora ele está de ressaca.
+Embora a capacidade reduzida fosse justificável em sua opinião, eles mantiveram o rumo.
+Uma banda local tocando em um local local.
+Viver juntos significa viver juntos, compartilhar objetivos e ter um bom relacionamento.
+Mulher que veste um lenço alaranjado que guarda um telefone celular.
+Para sua tristeza, a indignação aconteceu.
+Um grupo de pessoas e um cão sentado na arquibancada de concreto.
+O prefeito, por proposta do Tribunal, nomeará funcionários de carreira.
+Três ciclistas passeiam por um caminho cercado perto de bosques.
+Como o arroz da nossa família é tão desagradável?
+Aceitarão voluntariamente as irmandades às quais são propostos.
+É o exemplo que eu ofereço à Nação brasileira.
+Pessoas em um carnaval participando de um concurso de tiro.
+Esta entrevista pode consistir em um teste prático.
+A falta de informação não justifica nada.
+Sabia da conversa do menino com o deserto? porque os ventos sabem tudo.
+O que, basicamente, é um problema político, e a tecnologia também está envolvida aqui.
+Ele tinha aproximadamente a mesma idade e altura que o menino.
+A composição do conselho foi diferente desta vez.
+O interruptor traseiro não pode ser desligado.
+A criatividade é muitas vezes não comercial.
+A crise epiléptica pode ter sido causada pelas luzes estroboscópicas.
+Estimamos o recurso interposto pelo senhor José Velasco Santamaría.
+Não certifica cartões de carteira de motorista.
+O parente, Deus dá; o amigo, você escolheu.
+Janeiro e fevereiro comem mais do que o mundo inteiro.
+Um homem de camisa rosa cruza as pernas.
+Mas? se você puder? tentar tomar suas próprias decisões.
+Uma parceria entre as companias seria o ideal.
+Se ele disse ao surdo, ele não disse o perecível.
+Quatorze palhaços de aparência boba entraram juntos no parque provocando risadas enquanto faziam piruetas.
+A água que coleta as partes externas externas também é derramada no solo adjacente.
+Da próxima vez, quando você cair, por favor, me ligue!
+Quando ela entrou na pista de dança, todos na boate estavam olhando para ela.
+O que não deveria morrer, tudo acontece.
+Parece impossível que homens e crianças honestos possam ler essa porcaria.
+Um respiradouro perto da borda trouxe ar fresco.
+Grama seca, curta ou longa, em junho deve ter sido seca.
+Os locais fornecidos são cobertos por meio de promoção interna.
+Um cara tirando dinheiro de um caixa eletrônico.
+Eu não sei se começo um livro ou uma série.
+Este grau qualifica para o exercício da profissão regulamentada de fisioterapeuta.
+Entre em contato com as empresas encarregadas de fazer os trabalhos para coordenar administrativamente.
+O dinheiro também ajudará a fornecer habitação privada e acessível.
+Ele condenou o comandante à morte sem honra.
+Adicione o artista à lista de reprodução de explosões nucleares.
+A grama e os arbustos estavam molhados de orvalho.
+Quantas pessoas foram assistir a um jogo de futebol no fim de semana?
+Também seria necessário prever a localização do circuito em espaços com menor valor natural.
+Precisamos quebrar as barreiras físicas que impedem a inovação.
+Adicione ocasionalmente um balde de água fria, se necessário.
+Jovem mulher comemorando a formatura dela.
+Premiado projetos empreendedores que criam emprego na Comunidade Valenciana.
+Sonia Muro Garrido, que atuará como presidente.
+Uma mulher em uma camisa azul e calça preta está consertando sua meia branca.
+Eu conheci um grande caminhão pela manhã.
+De alguma forma, a cor roxa desbotou para cinza.
+Os setores emergentes que poderiam ser relevantes.
+Três pessoas estão do lado de fora de um barraco do gueto.
+Quais os requerimentos para o preenchimento das sentenças?
+Você consegue pensar em outra pergunta para perguntar a um parceiro?
+A primeira regra de não lutar contra o clube é falar sobre isso.
+É importante manter a mente aberta? e ela me incentivou a fazer o mesmo.
+É difícil para alguns jogar as pedras tão longe.
+Eu não estava preparado para suas pickles.
+Todo dia estava lá para ser vivido ou para marcar a partida deste mundo.
+Nossa galáxia, a Via Láctea, aparentemente contém matéria escura.
+O valor das ações da empresa aumentou dramaticamente depois que encontraram um novo medicamento.
+Objetivo: contratos de seguro que cobrem as cem gangues.
+Os homens no bar estavam obviamente bêbados.
+O objetivo final é tentar ganhar o campeonato.
+Um grupo de cinco mulheres em saias azuis praticando tiro com arco.
+Os gênios eram os espíritos do bem e do mal.
+Um grupo de mulheres jogando roller derby em uma formação compacta.
+Você aponta para um rastro de formigas que leva à casa.
+Estes são ritmos que compõem um palíndromo.
+Dois garotos jogando um jogo? um com a boca bem aberta.
+Um motociclista de testes fazendo um truque no ar.
+Eu lidei com muitas grandes promoções no meu tempo.
+Envio de convites: para um mínimo de três pessoas de negócios, sempre que possível.
+Enzo saiu do time logo após Arthur deixar o time.
+Este site precisa de mais elementos interativos.
+Melhor primeiro na aldeia do que o último da cidade.
+Mulher com cabelo loiro cantando em um microfone.
+O artigo apresenta uma variante de um modelo oculto de Markov para imagens.
+Esperarão anoitecer, pois, se nos descobrirem, irão nos expulsar sem piedade.
+Neste último caso, participe das reuniões do Conselho com voz, mas sem voto.
+Direciona operacionalmente todo o pessoal designado a ela.
+Ambas as linhas evacuam a subestação Beneixama.
+Há uma discussão no pódio sobre os prós e contras do horário de verão.
+Pela catedral da igreja, como os pais foram, os filhos serão.
+Nenhum de nós tinha a Geórgia se encaixando, mas eu não pensei.
+Nas lentilhas, tivemos um aborrecimento especial.
+São conquistas, se quisermos, modestas, mas tocadas pela genuína sensibilidade proletária.
+Há um cientista olhando através de um microscópio.
+O resultado é um mosaico extraordinário.
+Dois homens novos pintam em cores brilhantes em uma parede.
+Um homem de uniforme está andando de carro.
+Um homem usando óculos de sol sai de uma piscina pela escada.
+Presumivelmente, Ryan nunca fez nenhum teste de sanidade.
+Um menino andando pelo pátio de edifícios em ruínas.
+Um cão preto detém um pequeno haltere branco na boca.
+Controla a realização de campanhas de saneamento de gado.
+Pode ser adicionado à minha playlist de dias úteis?
+Fora da prisão é a saída, não há retorno da morte.
+Um dispositivo eletrônico está sendo trabalhado por uma mulher.
+Os fornecedores serão incluídos quando fizerem uma missão complementar.
+As partes concordam unanimemente em aceitar a proposta e, portanto, proceder à sua assinatura.
+Será um longo caminho de volta ao começo novamente.
+Acho que eles perceberam que nada deveria ser feito no momento.
+A égua cinza andou na frente do volante.
+O projeto de urbanização inclui memória, especificações, estimativas, orçamento e planos de execução.
+Um cão esverdeado corre através da água por várias pedras grandes.
+Encontramos uma síntese extrema de todas as áreas: harmonia, melodia, ritmo, forma, orquestração, etc.
+Cerca de onze? Voltei para minha casa em Maybury porque nada parecia estar acontecendo.
+Este relatório será apresentado às partes signatárias para que possam avaliar os resultados.
+E Jesus disse, Sempre eis de comentar teu código.
+Um homem trabalha na soldagem de um corrimão.
+A orquestra tem sua primeira aparição hoje.
+O relatório preliminar de sustentabilidade ambiental do plano acompanha o pedido.
+Ela agora gosta de sua preocupação no começo.
+Cinco adultos de terno e vestido tiram uma soneca em um pedaço de grama.
+Que eles encorajam atitudes positivas em relação à língua catalã.
+E porque esta afirmação é muito clara, eles engolem a mandioca com uma bebida.
+Nós iremos a El Salvador de férias esta semana.
+Um alpinista escala um penhasco enquanto outros assistem.
+Você gostaria de falar mais devagar, por favor?
+Um homem em uma praça olha para uma mulher com uma calça transparente.
+Teoricamente, o melhor é onde a taxa não reduz a demanda.
+Meu cheque de pagamento não está chegando até a semana que vem.
+O governo que eles têm é tão bom quanto a escolha deles.
+Cada licitante só pode enviar uma proposta.
+Ela precisa obter suas transcrições e passaporte primeiro.
+Pedro tinha internet da Vivo, mas queria mudar pra Oi ou pra Claro.
+Um cachorro está pulando no ar para pegar um brinquedo.
+Quando pela manhã o cuco canta, no cais da tarde ou vala.
+Mas qual o custo do software necessário para que essa fratura não ocorra?
+Eu definitivamente estou fora da prática escrevendo coisas? também.
+Meu freezer contém o suficiente para um banquete.
+Você tem alguma informação adicional sobre o assunto?
+A sociedade americana muda a um ritmo maior do que a oferta eleitoral republicana.
+As probabilidades de pixel são condicionadas no estado do modelo.
+Para agosto, depois do sol, depois do bom tempo.
+As vigas estão tensas nos dias chuvosos.
+As pessoas estão andando na frente de uma área cercada.
+Adicionar jesus está bem para a lista de reprodução do Daily Lift.
+Cumprir as disposições desta Especificação, usando os meios descritos nela ou outros legalmente permitidos.
+As duas meninas e seu pai estão olhando para o caminho.
+Uma pessoa em uma bicicleta de bmx? executando um curso.
+Abuso de autoridade por parte do partido.
+Uma criança anda de bicicleta por um caminho pavimentado.
+Um motociclista está dirigindo por uma estrada em sua moto.
+Uma criança no meio da rua quando uma banda se aproxima.
+Uma gangue amigável deixou o tráfico de drogas.
+Isso foi tão legal e tão lento ao mesmo tempo.
+Rollerbladers rolam em formação descendo uma colina.
+Uma jovem está vendendo brinquedos estranhos e frutas ao lado de uma rua.
+Isso não é apenas necessário, mas desejável.
+Atualmente, os horários para preparação de pedidos são às terças, quintas e sábados.
+Neste caso, o objetivo é aperfeiçoar as ações de governo realizadas pelas diferentes organizações.
+Garcia ouvia só, sem dizer nada, nem lhe dar crédito.
+Amores, tristezas e dinheiro, eles não podem ser secretos.
+Jordi Gil i Pujol, Subdiretor Geral de Assuntos Interdepartamentais, que atuará como presidente.
+A segunda característica essencial do fenômeno é que é muito homogeneamente territorial.
+Não há mais nada que possamos fazer hoje à noite.
+Um homem com um chapéu branco está fazendo smoothies.
+O que ele disse lembrou o menino do velho rei.
+O cavalo velho não aprende trote novamente.
+Eram quatro da tarde e as pessoas estavam impacientes.
+Pessoas subindo um conjunto estreito de escadas de madeira.
+Os maiores traficantes não moram na favela.
+Qual é a altura do pirata quando ele usa o chapéu?
+Um grupo de pessoas está fazendo aeróbica no oceano.
+Nós conversamos sobre uma performance estranha em um circo.
+Quem trabalha, uma sardinha; e quem não trabalha, uma galinha.
+Eu trabalho para uma empresa de alimentos.
+Um homem de camisa laranja e chapéu azul sorri.
+É por isso que você precisa de um relacionamento direto com os usuários.
+De repente, o menino ficou feliz por estar lá no armazém.
+Duas pessoas vestindo todo branco estão pintando uma parede de tijolos.
+Eu estive esperando por você por muito tempo!
+As taxas do conselho não podem ser pagas.
+Essa página do grupo de pesquisa parecia boa, a propósito.
+Às vezes eu preciso comprar alguns artigos de papelaria e outros suprimentos.
+Em setembro passado, deixe o mar para navegar, mas não para pescar.
+Muitas dessas pessoas estão sem trabalho.
+Minha mente correu sobre as possibilidades de seu conteúdo.
+Não, eu tenho um colchão solteiro e o chão do meu escritório.
+O garçom foi até o teclado para destravar a entrada do depósito da adega.
+Calcule a compactação da lactação ou a redução parcial, total ou parcial dos dias.
+Ele estava de cócoras em um canto fazendo yoga.
+Ano das sete nevascas, trigo para os telhados.
+Para a pena e a canção você conhecerá o burro.
+Uma mesa está disponível para três para comer.
+Tem o acesso principal à primeira dessas ruas e depois a entrada pela segunda.
+Essa atitude, nos melhores cenários, leva ao conformismo e incapacidade para a criatividade.
+Chegou, entrou e mandou seguir a trote largo.
+Sinais de pontuação: corte, derreta, cortina e afiada.
+Não deixe velhos caminhos para romances.
+Em setembro, quem tem trigo, o que você lembra?
+Escorra e mexa em uma panela com uma corrente de óleo e sal.
+Ela deveria estar aqui a qualquer momento.
+Os homens fumavam narguilés e trocavam histórias do campo de batalha.
+Os catalisadores possibilitam reações químicas em baixas temperaturas.
+Certamente, quando você explicar as circunstâncias de nosso chamado prematuro, ela entenderá.
+Estamos no campo e temos que nos contentar com o que eles trazem.
+É assim quase todas as flores da primavera de maio.
+A vara de pesca é usada para pegar salmão rosa.
+Você foi pago por isso ou você não estava?
+Cavar fundo na terra para o ouro dos piratas.
+Toronto fica a alguns quilômetros de distância.
+Uma jovem mulher está chutando uma bola de futebol em um campo.
+Onde quer que você vá, faça o que você verá.
+Um homem casado em uma camisa xadrez azul está comendo uma fruta vermelha.
+Pessoas corajosas e bom vinho não duram muito.
+Ele disse que virá quando ele quiser vir.
+Vinhedo na beira da estrada e janela mulher estão em mau estado.
+O fim do cilindro ainda estava como Ogilvy e Henderson tinham deixado.
+Quem te critica, te ajudará a pagar alguma conta?
+Dois jovens tocam trompete no tradicional vestido mariachi.
+Todo mundo fala de dignidade nos dias de hoje.
+Um esquiador com um casaco vermelho descendo uma colina.
+Você pode pagar em dinheiro ou com cartão de crédito.
+Senhoras e senhores, este é o seu capitão falando.
+Pessoas que participam de um evento em um parque.
+Em nossas mãos, aqueles de todos, pessoas e instituições, existe a possibilidade de melhorar.
+O garoto disse a ele que precisava chegar às pirâmides.
+E? amanhã? seu inimigo também seria parte dessa Alma.
+Ei, você que está lendo, tenha uma vida maravilhosa!
+Ele conhecia o recinto de feiras de gado mais popular.
+Agora eu posso ver que não foi tão ruim.
+O conteúdo da discussão também é muito rico, incluindo sete temas principais.
+Este exercício, na eleição do tribunal, pode ser lido em sessão pública pelo candidato.
+Isto é garantido pela força de trabalho de cerca de cinquenta editores ativos.
+As experiências relatadas vão do Vale do Jequitinhonha ao Norte e Sul do país.
+Um esquiador faz o único caminho em uma montanha vazia.
+Isto é, atualmente o multilinguismo é a norma mais comum.
+Na noite solitária, ele secretamente fez um juramento.
+Lawrence ficou perplexo com a quantidade de coisas que aprendera sobre a lógica difusa.
+A tomada roxa é para conectar a antena ao receptor.
+Duas crianças estão jogando hóquei no gelo no chão congelado lá fora.
+Quase tiveram a certeza de que o pobre cavalo não superaria a doença.
+Isto é o que eu queria ver claro na lei.
+Como você se sente falando sobre a experiência na frente da câmera?
+Com armas, mulheres e fogo, você não quer jogos.
+Ana, Júlio, Juliana e José foram ao evento na quinta.
+Isso vai do antigo porto até o pé do castelo.
+Uma mulher e um homem estão dançando na grama.
+Eles usaram o relu como uma função de ativação para esse problema.
+Uma rapariga que veste o azul está saltando no ar.
+Eu pensei que tudo que eu possuía seria destruído.
+Neste momento muitas pessoas trabalham neste projeto, sejam elas da cidade ou de fora.
+Também supervisione que as máquinas e utensílios que existem na cozinha estão limpos.
+Ele estava mais certo disso do que de qualquer coisa no mundo.
+Um homem feliz é um barco que navega sob um vento agradável.
+Como há crédito disponível, é necessário modificar os valores atribuídos a esses subsídios.
+Cidade de navegadores e viajantes que, ontem como hoje, deixaram tudo virado do avesso.
+Quão caro custou a ele ser o marido de uma mulher bonita e rica!
+Bem? você não deveria ter nenhum problema então.
+Eu só quero te dar nada grande o suficiente!
+Onde não há sangue, você não pode fazer molhos.
+O alquimista desmontou? e disse aos acompanhantes que eles poderiam voltar ao acampamento.
+Você quer voltar para casa para passar alguns dias?
+Nestes momentos meu coração pulsa mais alto por minha consciência dele.
+Toda mulher valente faz a preciosa filha.
+Meu tablet da Wacom tem um fio suspeito.
+Uma mulher de preto caminha pela rua em frente a uma parede grafitada.
+Ele é nomeado pela maioria e serve como instrumento passivo.
+Centenas devem ter visto? e tomado por uma estrela cadente.
+Os médicos não esconderam sua triste opinião.
+Lá embaixo, na escuridão, havia centenas de pessoas que dormiam em paz.
+Quanta maldade estará no décimo diagrama?
+Um grupo de crianças está andando em um rio perto da margem do rio.
+Camilo, maravilhado, fez um gesto afirmativo.
+Um grupo de pessoas está cavando buracos na terra.
+O que acontece com um coxo, um ano coxo e meio.
+Bem, muito fácil: porque tudo está aprovado!
+Os necessários para que a casa obtenha a adaptação de habitabilidade.
+Os retornos financeiros derivados dos ativos irrelevantes que eles depositam ou administram.
+Os mesmos juízes, em alguns estados, são eleitos pela maioria.
+Quando isso não ajuda, apenas a música limpa as lágrimas e incha o coração.
+Descontraído e sem pressa, ele resolveu andar pelas estreitas ruas de Tânger.
+Notemos, contudo, que não trata da harmonia na linha dos tratados históricos tradicionais.
+Enquanto a limeira está florescendo, não falta abelhas.
+E ele perguntou ao menino se ele também estava em busca do alquimista.
+Você consegue ver o farol no topo da turbina eólica?
+Esta invenção pode significar o fim de todas as doenças.
+Interprete corretamente os símbolos gráficos e conheça os típicos da linguagem musical contemporânea.
+Peru e Venezuela venceram suas partidas.
+O senado condenou a invasão das colônias do império.
+A acupuntura é um serviço muito relevante.
+Ela meditou sobre a questão por um tempo.
+Achei um diário do meu pai por acidente.
+Quando teremos a oportunidade de ver o eclipse lunar?
+Uma criança pequena de camisa vermelha fica no meio da rua.
+A verdade é que eu não fiz antes porque a comida era estranha.
+Fóruns podem ser criados para intervir em assuntos que afetam mais de um aconselhamento.
+Em litígios entre as administrações públicas, não há necessidade de apresentar um recurso administrativo.
+Almada é um concelho que possui mais de uma centena de associações.
+Muitas linguagens de programação são nomeadas em homenagem a pessoas reais.
+O pescador, quando ele tem peixe, não conhece sua mãe.
+Uma menina segurando um violino com outro dançando em uma praia com ondas rolando.
+O Internet Explorer só servia para instalar o Google Chrome.
+Para aquele que ridiculariza, o demônio expurga.
+O homem sem camisa está sentado numa pedra junto a uma árvore.
+Animais de estimação geralmente não podem ter abrigos ou varandas, como de costume.
+A fita vermelha rodeava a comida de contrabando.
+Os certificados aprovados nos exames emitidos permitirão o título profissional de pescador.
+Nós vamos para a Flórida no próximo ano.
+Melhoria na gestão dos canais de informação.
+Lena está flertando comigo ou apenas cumprimentando?
+O homem mora longe, sabemos que ele nos procura e geralmente nos deixa vivos.
+Um cão marrom corre em um campo com um cão preto e branco.
+Um mau trabalhador culpa suas ferramentas.
+Como as ondas do mar, as coisas no mundo vêm e vão.
+Um homem que faz um truque do skate no ar ao ser filmado.
+Grupo de pessoas jogar tênis em um tribunal de argila.
+Coloque de volta exatamente onde você achou neste instante.
+Quando você volta para a escola porque não estou ansioso.
+Eu nunca percebi o quão alto é o povo norueguês.
+Tinta cinza se estendia por quilômetros ao redor.
+A garota estava usando um vestido elegante.
+Eles também devem suportar os desconfortos que podem ocorrer durante a colocação das placas.
+Eu realmente não gosto de códigos de vestimenta.
+Quatro horas da manhã e nenhum sinal dele.
+Alguns comerciantes em um parque fora do cinema vendem cobertores.
+Qual é o valor para descobrir quanto me resta?
+Não há divisões, nem competição, nem interesses parciais nessa questão.
+Eu nunca poderia saber se eu fiz uma carta ruim.
+Em relação à população, as estruturas também permitem alguma lógica explicativa.
+Máquinas de costura modernas podem reduzir sua velocidade.
+Não haverá limitação técnica para implementar qualquer bandeira das comunidades autônomas da Espanha.
+Um cão do exército sendo treinado por um soldado.
+Você precisou tomar medidas especiais ao ir naquele momento?
+Obrigado também a Gerald Pennant por nos ajudar a conhecer algumas das plantas.
+É verdade, hoje não é nada grande também.
+Garotos gordinhos levantam as mãos no ar enquanto jogam um esporte.
+Será acreditado mediante certificação emitida pelo respectivo Secretariado da administração.
+É sua opinião o que isso significa, filho.
+Após o prazo ou conclusão da inspeção, o desenvolvedor pode cobrir as valas.
+Outras modificações profundas no motor afetam a geração de alternativas e serão descritas posteriormente.
+Bebê de jaqueta marrom? chorando e caminhando até um menino? de carro laranja.
+Eu poderia ter acrescentado: este é o teste ao mesmo tempo.
+Relata que todo mundo está seguro agora.
+Supervisionar os relatórios solicitados pelos tribunais.
+O novo portátil parece ter muito desempenho.
+Por todos os meios? é apenas no corredor.
+Um sapo e um sapo são difíceis de distinguir.
+O shopping está aberto das oito e meia às cinco e meia da noite.
+Uma tenista está de pé com os pés afastados em uma quadra.
+Um adolescente faz truques em seu skate em uma área com muito grafite.
+Você pode me dizer o que estava escrevendo no livro?
+Um músico no palco chega a um fã na platéia.
+Se você não gosta de passar, você não precisa de roupa de linha.
+O prêmio será honorário e não tem recursos financeiros.
+O aluno produziu o texto que o professor havia pedido.
+Qualquer um que inverte o seu tempo legitimamente se afasta da felicidade.
+Desde que você entrou em contato com você, você está muito feliz.
+Eu tenho uma continuidade por um mês inteiro.
+Na sua opinião, quais são as principais causas de gravidez em jovens?
+A combinação de trompetes, violinos e bateria é bastante incomum.
+Dois para um são probabilidades no futebol.
+Se não nos apressarmos, seremos salgados.
+Meninos dançando para o grupo de espectadores.
+Várias pessoas estão sentadas do lado de fora de um prédio.
+É aqui que começa a segunda declaração, a das intenções.
+A Espanha está produzindo lotes de alface? páprica e tomates.
+Você é exatamente como o pai costumava ser.
+Não havia como todos saberem sobre alquimia.
+Um homem vestido de vermelho está tocando uma guitarra em uma rua.
+Ligar o ar condicionado leva a um aumento do consumo de combustível.
+Enquanto sentado à mesa, este homem usa um computador.
+Atividades que integram propostas para a promoção da igualdade de gênero, até certo ponto.
+Crianças praticando artes marciais enquanto os mais velhos observam.
+Então, esta biblioteca estava livre para uso não comercial, mas não era software livre.
+Marc dobrou sessenta centímetros de luz livre.
+Suas contribuições não serão esquecidas.
+O ouriço estava coletando folhas marrons.
+Só eles poderiam estabelecer influências intelectuais.
+Ele sentou em uma pedra? e se permitiu ficar hipnotizado pelo horizonte.
+Eu também li dois livros que também são muito interessantes.
+Um homem de casaco amarelo e azul, pedindo ajuda a uma mulher.
+Entre eles, alguns serão pouco definidos e responderão a interesses diversos.
+Não é impossível delinear este personagem antecipadamente.
+As galinhas põem tantos ovos por semana que não seria possível vender todos.
+As circunstâncias eram, por outro lado, favoráveis.
+A mesma política e a indústria não aguentam.
+Exceto conforme previsto pelas leis que continuam a ser aplicadas, elas não estão previstas.
+Um surfista masculino pega um pouco de ar de uma grande onda.
+A temperatura subirá para dez graus Celsius.
+Se você quer mentir, diga o que você ouve.
+Ela deu a comida do viajante e algo para vestir.
+O menino era judicioso e trabalhador como sua mãe.
+Três garotos sentam e fazem gestos com as mãos.
+Pessoas ricas recebem conselhos e curas antigas.
+O menino ficou surpreso com seus pensamentos.
+Os assistentes virtuais só funcionam com a linguagem principal definida no dispositivo.
+Uma criança vestindo uma camisa azul está andando na rua segurando dois dedos.
+Capitu fez quatorze à semana passada; são dois criançolas.
+Se meu padrasto vendesse essa escultura antiga, provavelmente se tornaria milionário.
+O documento fornece seus próprios regulamentos, consistentes com o conteúdo do documento geral.
+A polícia em uma sociedade multiétnica e a carta de Roterdã.
+O contratante não pode reivindicar em qualquer caso a indefinição do projeto.
+O programa de monitoramento ambiental busca o cumprimento de medidas preventivas, corretivas e compensatórias.
+A estrada sobre a montanha era estreita e íngreme.
+Duas meninas lutam pela bola em um jogo de futebol.
+Mas estou começando a entender muitas coisas.
+Na verdade, já é menor que seu antecessor.
+Ele também permite que você instale gerentes para conteúdo específico quando necessário.
+Essas últimas palavras foram uma forte declaração.
+A simples aquisição de computadores pessoais não implicará o cumprimento desta condição.
+A via navegável é ramificada através da planície.
+Tem certeza de que o caso Joe está acontecendo na próxima semana?
+Uma mulher está apresentando vários documentos usando equipamentos multimídia.
+Ele fez tanto ghostwriting que ele começa a se sentir como um fantasma? também.
+Vá até o escritório e organize algum tempo de rádio.
+A apresentação de um novo pedido de destino substitui o anterior.
+Algumas crianças estão jogando em um forte.
+Não muito tempo atrás, quem está em silêncio e faz o seu jogo.
+Ou você acha que isso iria estragar ele?
+Pois naquele momento? não lhe ocorreu que poderia ser oco.
+Até então? ele considerou os presságios como coisas deste mundo.
+Uma tigela não é barata, são necessários trezentos ienes.
+Um homem mais velho caminha pela calçada de um parque em direção ao estacionamento.
+Salve sua irmã uma peça? ou ela ficará brava.
+Eu tenho sido solitário e faminto por algo praticamente toda a minha vida.
+Todo mundo quieto e pronto para uma emergência.
+Já faz vinte anos que o planejamento não sabe o que fazer aqui.
+De acordo com a receita, precisamos de mostarda.
+A economia está tremendo e afetando a China.
+O problema é mais sério do que não ter uma infraestrutura específica.
+A menos que você seja forte, será curioso.
+Ela leva sua filha para a escola todos os dias.
+Originalmente, eu queria contar ao presidente.
+Duas mulheres se abraçam em uma sala lotada onde as pessoas estão tomando bebidas.
+Que mais? A prova é que ela agora estava tranqüila e satisfeita.
+O skatista está andando no trilho de prata, enquanto outros três jovens olham.
+A má intenção de um mostra a necessidade de buscar a doutrina do outro.
+Você tem sorte quando acredita em felicidade.
+Este é um menino em uma praia segurando um pedaço de pau.
+As convenções de cosplay serão este mês.
+O homem é mais fácil de conseguir do que manter.
+Tem uma área de cinquenta e oito metros, oitenta e sete decímetros quadrados.
+Este exame médico é obrigatório e eliminatório.
+Um orador em uma camisa xadrez fala no microfone.
+Um pouco cansado, quero descansar primeiro.
+As linhas telefônicas podem não funcionar por um longo tempo ainda.
+E eu, mesmo sendo pobre, não tenho forças para isso.
+Eu costumava olhar para aquelas mulheres e invejar sua felicidade.
+Este documento será um título suficiente para acessar qualquer registro público.
+O menino foi para o seu quarto e empacotou seus pertences.
+Na América vem através de eleições e julgamentos; na França, por revoluções.
+Ele ofereceu provas na forma de um gráfico grande.
+Uma opção que certamente faz você tremer mais de um.
+Duas garotas fazendo uma demonstração na frente de uma platéia lá fora.
+Quando você perde o que você tem, você conhece esse valor.
+Eu nunca roubei um relógio na minha vida.
+Isso quebrou o coração para as três mulheres.
+É ineficaz para atropelar um canudo vazio.
+Nove homens foram contratados para cavar as ruínas.
+Uma equipe de construção trabalhando em trilhos.
+Quanto mais cidades portuárias tivermos, mais teremos que defender e perder.
+Dois socorristas estão tratando um paciente ao ar livre.
+Eu não posso evitar, mas viro minha cabeça.
+A tarefa de hoje é escrever uma sinopse do romance recentemente publicado da Tata.
+Um adolescente tem um anel de prata saindo do nariz.
+Ele era um guarda civil em Guantánamo e não errou.
+Essas excursões eram suaves para a situação dolorosa.
+A rede, como você pode ver, fala coreano?
+Em nenhum caso a exploração terá impacto na qualificação dos testes de acesso.
+Beneficiários: câmaras municipais, associações comunitárias autónomas e entidades públicas que dela dependem.
+Um homem limpa a terra enquanto uma mulher segue atrás.
+Você precisará saber para criar seu próprio ambiente personalizado.
+É uma honra como um rio que corre onde já está molhado.
+Este é um novo dado positivo sobre o uso do catalão na Internet.
+Eu acho que eles lhe dão todas as chances.
+E por qual motivo eu não poderia dar uma boneca para meu filho?
+Você já rabisca coisas em um pedaço de papel quando está entediado?
+Acabei de encontrar uma loja com um assento.
+Eles estão angustiados, o filhinho não vive em nenhum lugar.
+Para a Páscoa, carne de cordeiro e para o Natal, do galinheiro.
+Em fevereiro, me jogue bem; Em março, não me toque.
+Sei que não é certo pensar isso, mas tudo seria tão mais facil assim.
+Por favor, encontre o trabalho? The Burning World.
+Agosto e setembro não duram para sempre.
+O mesmo tipo está presente nos painéis cerâmicos da Sala Nova.
+A vida sem amor é como um ano sem primavera.
+Gustavo viajou pela Itapemirim para Belo Horizonte.
+Dois homens estão trabalhando em uma ferrovia.
+A Academia tem um laboratório chave nacional para a engenharia marinha.
+A paciência é a chave para a porta para os bens desejados.
+Como se eu tivesse o dinheiro de volta em um cofre.
+O texto é muitas vezes desnecessariamente obscuro.
+Vou discutir as técnicas que uso para discutir minhas gramáticas.
+Dispensar um trabalhador; isto é o que você vê.
+Quem você acha que é responsável por esse?
+O avar é como o porco, não é usado, mas está morto.
+O filhote puxou a coleira quando viu uma forma felina.
+Qual filme ganhou o Oscar no ano passado?
+Várias pessoas que trabalham em uma estrutura de madeira.
+Adicionar velas à minha lista de reprodução House After Work.
+O tema da solenidade é um tema harmônico.
+Léo mora no Cruzeiro e trabalha em Sobradinho.
+Ele assumiu a liderança e manteve toda a distância.
+Vários trabalhadores da construção civil estão ao lado enquanto algumas máquinas estão sendo operadas.
+Data de formalização: nove de janeiro de dois mil e dezessete.
+Burra e burrito não vão direto para o moinho de vento.
+O coração do menino começou a falar de medo.
+Uma senhora que cozinha um bolo para sua família.
+Abaixo está uma carta que chegou à minha mesa esta manhã.
+Dois homens olham como um terceiro coloca detergente em uma máquina de lavar.
+Flores de alecrim e mel para casar, durante todo o ano.
+Um homem indiano em um chapéu está sentado e sorrindo.
+Essas circunstâncias nos chamam a atenção e apontam para a necessidade de proteção naval.
+Várias pessoas estão saindo no centro das atenções.
+Isso permite que os usuários finais os instalem no sistema.
+Deslize a tampa para trás e abra a mesa.
+Todo o escritório foi atingido por um silêncio ensurdecedor.
+Um homem de cabelos grisalhos está sentado do lado de fora falando ao telefone.
+Qual é o nome do alfabeto onde as pessoas estudam terremotos?
+De repente, um dos falcões fez um mergulho intermitente no céu, atacando o outro.
+Uma família sem amor é como uma árvore sem raízes.
+Embora a maioria estivesse em jardins privados.
+As pessoas esperam para embarcar em barcos.
+O Ministério da Economia Sustentável está plenamente ciente da relevância dos clusters.
+Quem quer que queira desperdiçar a fumaça livre.
+Um menino está jogando um balde de água em alguém em uma fonte.
+O artigo aborda a classificação de imagens com descritores de imagens locais.
+Dona Glória, a senhora persiste na idéia de meter o nosso Bentinho no seminário?
+De todos os santos ao natal, o inverno formal.
+Um grande pedaço de repente caiu e caiu com um ruído alto e agudo.
+Será necessário apresentar a relação das lendas que se querem escrever em valenciano.
+Eu lhe disse que não posso mais usar sua coluna.
+Um corredor de pista entrega um bastão ao seu companheiro de equipe.
+As crianças pequenas não devem ter medo.
+Uma mulher está pagando por uma compra, enquanto outras duas mulheres olham para revistas.
+Eu era o único paciente na sala de espera.
+Menina em uma rua usando um bambolê? com três pessoas no fundo.
+Um menino está vestindo uma toalha vermelha que está na praia.
+Plantação de cabras, pior do que nublado.
+Grupos de trabalho podem convidar pessoas especializadas ligadas ao objeto da análise.
+É óbvio que para o governo valenciano o termo catalão é uma palavra tabu.
+Dos pais quando eles são velhos, não negligencie um ponto deles.
+O grupo de mulheres está vestindo um traje todo branco.
+Duas prateleiras carregadas com vários frascos de perfume novidade.
+É claro que? isso apenas reduz a gravidade do problema.
+Ainda é jovem, mas quem sabe para onde nos levará.
+Eu não vejo o propósito de criar muita âncora no scrum.
+Antes de poder ofender, raspe sua língua.
+Um bebê olha para fora sobre a borda de seu cercadinho.
+Igreja e Estado são separados por um motivo.
+A história da história foi Child Denzil e Eileen.
+Quantos carros estão envolvidos no acidente da rodovia?
+Eles disseram que os membros presentes estão dormindo.
+Dois homens em maquiagem de palhaço estão realizando um esquete musical no palco.
+Em agosto, no post único, é imediatamente escuro.
+Eu tive que ir ao jantar, mas não falei, mas disse minha esposa.
+Um menino de short branco fica em uma torre enferrujada.
+Então de repente? eles se ajoelham e morrem.
+Um homem está trabalhando em cima de um telhado.
+Então suponha que você me dê o dinheiro.
+Eu estava em perseguição da scooter quando pedalei pela avenida.
+O Celso nasceu em Campinas, mas mora em Santos.
+Havia um corte vermelho com raiva na testa.
+Apesar de anos de pesquisa, o problema permaneceu intratável.
+Ela está sentada em um travesseiro, usando apenas calças e sutiã.
+Hoje, apenas o Norte possui barcos, manufaturas, ferrovias e canais.
+Faça bem, não machuque e outros conselhos não são necessários.
+Mas o rosto vermelho, sobre a hemiplegia, não mentiu.
+Ela estará esperando por você em Albany.
+Não, esse nunca foi seu verdadeiro plano.
+Uma redistribuição equilibrada de alunos com necessidades educacionais específicas corresponde a três pontos.
+Quem eu veria em relação ao retorno do dinheiro do governo roubado?
+Oficiais especializados estão atualmente apoiando sua família.
+Por que você olha à distância, mas quando a sorte está ao seu lado.
+Logo a proporção entre as duas raças foi revertida.
+De acordo com essas palavras, Ana retorna com vinho.
+Este está bom para você pôr ao pé da porta a fazer de vaso.
+Eu aprendi coisas da ovelha? e aprendi coisas do cristal? ele pensou.
+Uma mulher fica em uma piscina com três jovens rapazes.
+Isso é verdade tanto nas cartas quanto na política.
+O critério da avaliação é manter as condições iniciais, pois não há incidentes.
+Uma criança sorri em um balanço da árvore.
+Você pode conferir o repositório original de exemplos ou módulos mencionados nos documentos.
+Logo eles foram forçados a mudar a lei e estabelecer duas câmaras.
+Então, de repente, ele notou isso com um sobressalto.
+Em setembro iremos para a colheita de Josep de Carro.
+Insuficiência venosa periférica que produz sinais de êxtase no esforço.
+Uma mulher está acariciando um cachorro lá fora.
+Este inconveniente será corrigido em versões futuras.
+As crianças pequenas estão brincando em uma piscina.
+Não é bom que o burro não estremeça no estábulo.
+A Letônia e a Estônia estão entre o Mar Báltico e a Rússia.
+Adicione o macarrão à panela e misture bem, junto com a carne.
+A proposta de assistência técnica deverá conter pelo menos as seguintes especificações.
+Quando ele era criança, esse homem queria viajar? também.
+Muitas vezes, a própria natureza de um processo deve servir como uma regra jurisdicional.
+Quando eu estou comendo? isso é tudo que eu penso.
+Senti sua falta e não pude ligar, mas tentei.
+E quero que você saiba que estou voltando.
+Apenas as disposições administrativas de natureza geral serão adotadas sob a forma de ordem.
+Eu preciso ir para a sala de emergência.
+Foi uma refeição muito preciosa entre nós.
+Um homem carrega um bebê em uma cidade grande.
+Uma pessoa solitária está andando na calçada.
+Todas as noites, os cães do nosso bairro estão uivando.
+Espero que? você pense duas vezes antes de me dar o deslize no futuro.
+Não deixe que expliquem, porque não pode ser explicado!
+Mas o rei de Salem esperava desesperadamente que o menino tivesse sucesso.
+As granadas de flash explodem com um estrondo alto e causam desorientação.
+Portanto, é essencial depurar o sistema legal e continuar promovendo sua simplificação.
+Elabora relatórios e propostas de resoluções sobre o processamento de autorizações de transporte.
+Tudo o que não é considerado importante é um engano de comércio.
+Um menino está empurrando outro menino em um balanço.
+Pensei que poderia estar ouvindo de você.
+Há uma mulher parada em um ponto de ônibus.
+Paulo e Joana estão trabalhando no projeto.
+Facilmente adquirido, facilmente perdido.
+Considere as potencialidades existentes.
+Paulo tem na sua lista de amigos: Leonardo, Carlos, Francisco e Daniel.
+Se ponho o caldeirão a fazer de vaso, onde cozinho eu depois?
+Victoria nasceu no décimo nono anos setenta.
+Esta frase foi feita especificamente para você.
+Sim, aceita a premissa, as conseqüências se impõem.
+Colegiado que fornece o dever de serviço ou serviço gratuito de justiça.
+O que você não quer para você, você não o quer para ninguém.
+Estes não podem exceder o número de lugares convocados.
+Resta resolver a questão da Horta de Valência e da própria cidade.
+De seus pais, se forem velhos, não separe um punhado deles.
+Na formação de grupos de trabalho prevalecem os critérios de especialização dos participantes.
+Um homem muito feliz em uma camisa colorida está dançando.
+É necessário, portanto, modificar o marco regulatório do bem social em um duplo sentido.
+Vá em frente com catalão e novas tecnologias.
+A imaginação do monge nem sempre esteve sujeita ao lirismo rosa.
+Ele aprecia a capacidade de abstrair, generalizar e pensar de forma construtiva.
+Quatro pessoas? três homens e uma mulher? estão trabalhando em seus computadores.
+Onde o amor mostra, não há outro mestre.
+Se você quiser gelo puro, não congele a água suja.
+Você não vai fazer nenhuma lei, exceto aqueles que me atormentam?
+Nós não sabemos o que temos até perdermos.
+Todas as realidades foram distorcidas para mim.
+Uma pessoa está falando ao ar livre em um microfone.
+Clique na imagem abaixo para saber mais.
+A não apresentação deste relatório descritivo será motivo de exclusão.
+O limite de caminhada da minha namorada é de duas horas.
+Roller derby menina vestida de capacete rosa? regata branca? e calções pretos.
+A lista, no entanto, de possíveis relações com o número três não termina aí.
+O vizinho do quarto é um caso como um repolho.
+Duas senhoras confusas que estão ao redor após um evento.
+O setor industrial consome setenta por cento do consumo total municipal.
+Você poderia ter morrido depois que a paz fosse declarada.
+Rever a instrução e processamento de registros de sancionamento de shows de touradas tradicionais.
+Eu de repente me tornei muito importante.
+A dívida que podemos incorrer não merece nossa consideração se a tarefa for cumprida.
+Tendo ouvido que? o menino ficou ainda mais interessado em alquimia.
+Se todos estivessem adivinhando, ninguém estaria doente.
+O velho usava uma couraça de ouro? e ele sabia do meu passado.
+Vovó realmente foi muito importante para esta operação.
+Uma menina andando de bicicleta por uma rua ao sol.
+Você precisa remover mais alguma coisa da parede antes de se mudar?
+A criança absorveu informações como uma esponja.
+Também garantirá a conexão correta às redes externas existentes.
+Aqueles de nós que estão acima têm que olhar muito bem todas essas coisas.
+O garoto ofereceu sua garrafa, esperando que o velho o deixasse em paz.
+Não, não me arrependo das vinte apólices que lhe deixei.
+O cão de boa raça lembra o pão e o jogo.
+Uma equipe de ciclistas trabalhando duro no que parece ser uma moto muito veloz.
+Os candidatos, juntamente com o aplicativo e o currículo, não acompanharão nenhuma documentação.
+Você também pode exercer qualquer outro recurso que julgue pertinente.
+A porcentagem de dióxido de carbono no ar atingiu um nível extraordinário.
+Nem todas as partes estavam na Alemanha e no Japão.
+Ele está fazendo isso porque é o que ele quer fazer.
+Duas mulheres estão colocando em uma estrutura de concreto ao lado do oceano.
+Se você quer um sanduíche, não hesite em pegar um.
+Mulher de janela, não fará tecido longo.
+Honesto Ahmed não convenceu os desenvolvedores.
+Residência na Catalunha deve ser eficaz e ininterrupta.
+Faça dados conhecidos que afetem a privacidade de menores ou familiares atendidos.
+Lua avermelhada e crescente, vento forte.
+Último endereço conhecido: desconhecido, não está incluído no arquivo.
+Reconhece materiais têxteis, descrevendo suas propriedades e aplicações.
+Vamos Betty, vamos tomar uma bebida e afundar alguns.
+Que sejam projetos de inovação, expansão e melhoria da competitividade.
+Dois cães estão brincando uns com os outros em uma praia pelo oceano.
+Quantas pessoas colaboraram nessas traduções?
+Eu perguntei a alguém ao meu redor que eu ouvi isso.
+Um ingresso para ver Harry Potter, por favor.
+Um menino em um parque brincando com duas bolas de laranja.
+Eles seriam bons para alguém no Natal, mas ninguém pensou a tempo.
+Que tipo de comida prefere comer no restaurante?
+Vamos falar sobre um desses professores barbudos e conversando com calma.
+A dívida total reclamada é no valor de mil oitocentos e oitenta euros.
+O produto desta cisa serviu para pagar a festa do padroeiro São Pedro.
+Qualquer um que acordar tarde tem que trabalhar o dia todo.
+Você foi visto no campo inimigo há três dias.
+Um motociclista corre em volta de uma pista.
+Eu tenho um taco de beisebol no meu quarto para me defender de intrusos.
+As principais empresas internacionais do setor nos ofereceram traduções.
+No entanto, houve mais diagnóstico do que estratégia.
+A cabeça se rompe mais rápido que as pernas.
+Criação, modificação e exclusão de arquivos que contenham dados pessoais.
+O processo de bolha é exatamente o mesmo.
+A riqueza não é o que os ladrões conseguem.
+Os candidatos não poderão obter mais de dez pontos pela avaliação de seus méritos.
+Envie coisas em um saco de papel grosso.
+O mais difícil é, às vezes, não fazer nada.
+Fale sobre dinheiro e todo mundo vai sair.
+Data de resolução: quinze de quinze de dois mil e seis.
+Algumas panelas flutuam, outra ponta azul na água.
+As pétalas caem com o próximo sopro de vento.
+Meu império vai do oceano no leste até o cume da montanha no oeste.
+Uma escavadeira deixou a pedreira com cascalho grosso em sua pá.
+Você acha que Steven teria deixado você manter isso?
+O exemplo dos idosos faz bem ou mal para os menores.
+Nós falamos deles apenas para as crianças.
+Pessoas em casacos estão assistindo a um jogo.
+Um homem com uma bicicleta anda por um cruzamento de rua.
+São apenas alguns quarteirões para o norte.
+Felizmente, quando não estamos em casa, está dormindo.
+Eu acho que você deve pensar que eu sou meio maluca.
+Ele precisa armazenar dados de seus clientes, por exemplo, que o sistema não prevê.
+De crianças e roupas brancas, nunca há o suficiente em uma casa.
+Um homem é visto tossindo em uma rua movimentada.
+Duas pessoas estão andando em um caminho listrado.
+Aceitar doações, subsídios ou subvenções, sejam elas de entidades públicas ou de particulares.
+Se abril estiver chovendo, o fazendeiro não será pobre.
+Em caso afirmativo, o lançamento será considerado nulo e não poderá ser repetido novamente.
+Será que ainda haverá país depois desse inferno acabar?
+Este é dedicado ao gueto de onde eu venho.
+A Priscila faz trabalho voluntário no Hospital de Brazlândia.
+Autoriza, registra, identifica e controla os operadores do setor de laticínios, tanques e cisternas.
+Dois homens vestindo roupas escocesas tradicionais seguram as gaitas de foles nas mãos.
+No caso de você usar o serviço de sala de jantar.
+Nós usamos principalmente Python e Tensorflow em nossa inicialização.
+A duração da autorização será de dois anos, extensível a cinco.
+Uma jovem garota contorce seu corpo durante uma performance.
+Um jovem está carregando algo em um grande saco de lixo de plástico preto.
+Nós ignoramos os outros pais que não falam francês.
+Como você faz isso para trabalhar sem instalar nada no meu computador?
+Reconciliação é agora um sonho falacioso.
+Eu ainda acho o artigo desnecessariamente obscuro.
+Informar e derivar as ações decorrentes dos contratos assinados nas reuniões.
+Ninguém prestou atenção aos dois viajantes.
+Esta é uma comparação de maçãs e laranjas.
+O poder estava, de fato, nas mãos deles.
+Você já viu o novo pavimento da caminhada?
+Um grupo de crianças e mulheres agachadas de lado um fluxo de água.
+As seções de crédito não possuem personalidade jurídica.
+Quais as implicações da Revolução Francesa no resto do mundo?
+O paramédico cansado entregou seu paciente para a cirurgia.
+Na política, a ocasião se apresenta em todos os momentos.
+Ele não é justo com ela ou com as pessoas também.
+No entanto? eu não acho que seja impossível.
+Muitos povos diferentes em um protesto que prende bandeiras e sinais diferentes.
+Foi uma situação difícil para você este ano.
+A máquina apara e apara qualquer madeira.
+Da vara penduram fitas coloridas que na evolução as crianças treinam e disfarçam.
+É garantido que, para parecer digno, você tem que ficar sério.
+As expressões básicas, os músculos que intervêm, as combinações e as possibilidades expressivas.
+Ela tem olhos azuis e cabelos castanhos.
+Encontre horários de filmes para os teatros de referência.
+Quem está à beira do calor também é aquecido.
+Do Natal ao Carnaval, o mundo inteiro em treze voltas.
+As pessoas estão em pé na calçada da fama de Hollywood.
+O Francisco voou com pontos da American Airlines.
+Monitora o posicionamento do orçamento e mede as contas.
+Que tipo de coisas precisamos procurar antes de redigir?
+Foi um movimento tão gradual que ele só percebeu os pontos.
+Mas essa regra é básica e a Generalitat é autônoma.
+Uma aluna está estudando em uma biblioteca.
+Que sorte traz felicidade para a próxima lua.
+Um sinal amarelo anuncia seguro em espanhol.
+Mas qualquer teste precisa ser gerenciado de forma eficaz.
+O debate com a comissão não pode exceder duas horas.
+Duas pessoas estão nas ruas segurando bandeiras.
+O amor dos amantes é uma renovação do amor.
+Um homem e uma mulher estão tendo uma conversa em um banco do parque.
+E ele imediatamente sentiu paz em seu coração.
+Ambas as experiências reais e eventos imaginários podem ser narrados.
+Nós mudamos o assento da cadeira mais de cinco vezes.
+E os nomes das pessoas envolvidas eram muito difíceis de pronunciar.
+A imagem do sanduíche tem uma consequência inesperada.
+Da mesma forma, as escavações arqueológicas são consideradas pesquisas arqueológicas.
+Um homem em um chapéu amarelo e azul que trabalha com madeira.
+Estes sistemas são essenciais para o desenvolvimento do catalão em novas tecnologias.
+Por favor, não seja uma pessoa preguiçosa.
+Teste de aptidão ocupacional e habilidades de busca de emprego, etc.
+Várias pessoas estão pedindo comida em uma janela.
+Mais é uma mentira doce do que uma verdade amarga.
+Um carro está estacionado em uma rua cheia de pichações.
+Como o resfriamento lento do estado gasoso quente resulta em cristais puros?
+E isso deve ser valorizado em sua medida justa.
+Estavam em frente um do outro, ao pé da mesa.
+Três pessoas caminham ao longo da costa.
+Você sabia que o papa já foi um guarda de segurança?
+Um homem inspeciona uma fileira de equipamentos.
+Centros de treinamento que ministram cursos devem ser órgãos oficiais ou centros reconhecidos.
+Por favor, vá para outro cobertor, por favor?
+As pessoas diziam que os ciganos passavam a vida enganando os outros.
+Você tem sorte se não quiser o que não pode ter.
+Por favor, me dê histórias do show de baladas inglesas e escocesas.
+Escrever projetos e outros documentos técnicos em relação às obras executadas nos serviços territoriais.
+Um grupo de esquiadores mostrados em uma montanha coberta de neve.
+Mas então percebi que ela não poderia ter sido.
+Duas mulheres em vestidos posam em uma rua.
+A verdade é que eles não diziam mentiras depois de tudo.
+Fugir seria equivalente a provar o que até então eram apenas suspeitas.
+Isso implicaria uma resposta aos mecanismos de extinção.
+Esta política nobre e virtuosa não foi seguida.
+Eu me sinto tão bem que eu poderia cuspir.
+Dentro da unidade há grande contraste interno, devido à heterogeneidade dos elementos.
+As pessoas às compras no mercado coberto de tenda.
+De seu gesto único, ficou claro que o rinoceronte era hostil.
+A chuva se moverá para a direção noroeste na parte da tarde.
+Várias pessoas mais velhas estão na frente de uma barraca de comida.
+Cada pássaro sente que tem o melhor ninho.
+Mas eu vou fazer você e Maria uma proposta de negócios.
+O cão preto pega um brinquedo na boca enquanto corre no campo.
+Feriados devido a horas extras coincidirão com a semana das festas de Natal.
+Estas são mensagens privadas de um emissor para um único participante.
+Era incrivelmente quente, não uma nuvem no céu nem um sopro de vento.
+Coréia do Norte e do Sul são muito diferentes.
+Uma rapariga com calças roxas da neve está limpando a neve.
+As proteções do tipo patrimonial estarão sujeitas aos projetos de gestão.
+O que é mais fictício que uma inferioridade puramente legal!
+Ele pegou meio caminho e já está no elevador.
+Pesquisa no Google Maps para Miami Florida.
+Não, é verdade, William terá que lhe dar a notícia viva.
+A opressão domina todos os cantos do mundo antigo.
+Ela sempre foi muito gentil e amigável com todos os estranhos.
+Bata devagar por cerca de quinze minutos.
+Uma multidão de pessoas andando na calçada em uma cidade.
+Escolas para senhoras ensinam charme e graça.
+Guarda a documentação oficial relativa ao Conselho Geral e, quando apropriado, ao Comitê Executivo.
+Fatores que influenciam a adesão terapêutica.
+Você não quer tanto dinheiro para gastar, para sua filha se casar.
+O cachorro pulou a cerca de dois metros e meio.
+Um cão branco carrega uma garrafa de refrigerante no chão nevado.
+Ele era um ser insignificante e pretensioso.
+Enquanto a cédula engraçada não for jogada, não continuarei a aula.
+Ao fundo sobre o canapé, estava Rita morta e ensangüentada.
+Os narcisos eram como um tapete no jardim dos fundos.
+Uma grande parte do cilindro havia sido descoberta.
+A verdade sempre tem uma cabeça comprometida.
+Quais são as principais coisas a lembrar ao ler o tempo?
+Graças à extensibilidade dos navegadores modernos? isso funciona surpreendentemente bem.
+O café fresco é muito melhor do que o material liofilizado.
+O médico legista relatou que a causa da morte foi um homicídio.
+Isso é encontrado tanto em carreiras intelectuais quanto em todas as outras.
+Na verdade, tem sido há muito tempo, mas hoje eu notei.
+O professor não está feliz com seus alunos.
+A falta de credenciamento neste processo implicará a não valorização do mérito.
+A Argentina jogará contra o Chile nas finais.
+Uma família com duas crianças está em uma exposição da loja.
+Três meninos em uma plataforma na floresta.
+Durante o verão, quero começar a trabalhar em roteiros com Bethan.
+Várias pessoas estão colhendo culturas em um mercado urbano.
+Isso foi o suficiente para provocar paixões violentas.
+Dessa perspectiva, você pode ver os círculos concêntricos.
+A população da favela convive com o medo.
+O trem não sabe quanto dinheiro vai e volta.
+Nuvens, leves já com bagagem, voavam com pressa para se perder.
+Dois adultos balançam alto em direção à câmera em um parque infantil.
+O que causa inundações e como mitigar os efeitos das inundações?
+Uma criança em uma jaqueta vermelha? cintura no fundo de um poço na praia.
+Uma grande quantidade de pessoas se aglomerou em um sistema de metrô.
+As contas foram enviadas prontamente no décimo dia do mês.
+São necessárias duas pessoas para discutir.
+Foi muito difícil para ela se concentrar.
+Mantenha a madeira no lenhador na época de fevereiro.
+Um homem se afogando vai se agarrar a um canudo.
+Todos os dias eles têm mais produtos celíacos.
+O diabo encontra trabalho para mãos ociosas.
+Na casa de uma mulher rica, ela manda e chama.
+Por que você não veio para a festa de lançamento?
+O streamer de gás veio em nossa direção.
+A Patrícia conseguiu um emprego na Microsoft depois de pedir demissão do Google.
+Até agora, o texto responde à criação do autor.
+Barcelona é bom se a bolsa soar como isso.
+De que forma poderia ela agora preparar as horríveis poções?
+Os socialistas levaram o computador para a sessão plenária.
+Meu pai renunciou para obter uma posição melhor.
+Uma criança em uma camisa marrom que joga ao lado de uma fonte.
+É verdade que pendurar agora parece divertido.
+Cristina Rovira Trepat, que atuará como presidente.
+Como é que o lavrador há de pagar as suas dívidas?
+Eu acordei com o grito do meu vizinho praticando trompete.
+É muito mais importante que o trem de alta velocidade.
+Foi o estudante que lhe deu as indicações do nome, rua e número.
+Não tenho opinião sobre quem você quer dar.
+Gerenciar os reparos que são a conseqüência de acidentes com veículos.
+O valor do prêmio será o valor que é repetido três vezes.
+Inicie o processo de rendenização do vídeo.
+Um pequeno corpo muitas vezes abriga uma grande alma.
+Um homem em um microfone tocando um piano e teclado.
+Eu gostaria de avaliar o Natal de Cem Anos quatro estrelas.
+Adicionar LaTour aos meus acessos no underground da playlist.
+Controla o cumprimento dos prazos no processamento de arquivos em litígios.
+Oh, janeiro, janeiro, você não me matou ovelhas ou ovelhas.
+É melhor ter sucesso mais tarde do que nunca.
+O animal selvagem veio em minha direção.
+O alquimista disse ao menino para colocar a casca no ouvido.
+Preparação de superfícies a serem cortadas.
+Uma lista de nomes é esculpida em torno da base.
+Trabalhadores tratam tecidos em piscinas externas de corante.
+Tenho a sensação de que é provável que soe aos alemães.
+Santo Agostinho, duas cabeças num travesseiro.
+Vale a pena pelo menos tentar minimizar o delta.
+Eles eram histórias fascinantes, e cada um deles vivia seu destino até o fim.
+Também se espera que o preço da criação de um memorial surja.
+Palavras humanas são uma medida de sua mente.
+Mas sua profecia estava no caminho certo.
+Um grupo de pessoas protestando em uma cidade.
+Eu não sei onde ele deveria estar, mas ele certamente não saiu do mercado.
+Qual é a extensão da fronteira necessária para percorrer o quadro?
+Esta jovem está desfrutando da inocência da infância e do clima quente.
+Isso implica a obrigação de indenizar os proprietários das fazendas afetadas.
+Se você não está registrado, você precisará se registrar como um novo usuário.
+Essas vendas serão feitas nos formatos e unidades de vendas que a empresa estabeleceu.
+Seu corpo foi descoberto na área de Morriston.
+Um menino está correndo ao redor das bases em um jogo de beisebol.
+Se você está procurando por um quarto, não há vaga.
+Ser um demônio bêbado por dez dias é manter a cabeça.
+Cadeira alta em abril: bom verão está chegando.
+Estratégia que promove a diversificação da economia local.
+Nós não sabemos o que está na coisa confusa? você?
+Mas ele decidiu primeiro comprar sua padaria e colocar algum dinheiro de lado.
+Quem incluiu tantas sentenças mal traduzidas do espanhol ao Common Voice?
+Se você não pode fazer algo de bom, pelo menos, fala bem!
+Ele suspirou profundamente na noite tranquila.
+Quais vacinas já estão disponíveis para a nossa região?
+Um casal de amigos consertando uma bicicleta de cabeça para baixo.
+Uma família faz piqueniques em um parque com uma estufa no fundo.
+A vaca preguiçosa estava deitada na grama fresca.
+Quais academias de ginástica estão abertas perto da minha residência?
+Este prêmio é dado em três categorias diferentes.
+Indo para o tênis de mesa e não poderei fazer sua palestra.
+Um motociclista faz um truque em uma rampa.
+Uma mulher sorridente segurando uma menina nos braços dela.
+Introdução rápida de emojis e outros caracteres difíceis de acessar.
+Isso não é mais um problema? indicando uma grande melhoria.
+Um homem de camisa branca está cantando com uma banda.
+Quem trabalha a vinha com apenas alguns dias fará a colheita da uva.
+Pretendemos fazer mais edições de cursos.
+Ontem fui chamado para uma conversa à parte com minha chefe.
+Isso vai para o diretor e, claro, os pais.
+Um macho jovem vestindo uma camisa branca com um personagem delineado muito sombriamente.
+Um macho com óculos está jogando um dardo.
+Para onde eles deveriam ir tão alterados?
+Você sabia que eles estão fechados em janeiro?
+Um homem vestido de preto sintoniza uma guitarra elétrica preta.
+Uma mulher nova de vista muito feliz que prepara um petisco.
+Você pode mudar a essência dos seres humanos?
+De qualquer forma, esse assunto não é urgente.
+O ar fresco dos anúncios do conselho já estava circulando pelo mundo.
+Um cão atravessa a grama verde com uma bola de tênis em sua boca.
+Os presságios me levaram a uma perseguição selvagem.
+Em setembro, colha as maçãs antes que as piadas cheguem.
+Um homem de camisa preta está tocando violão.
+Um grupo de dança se apresenta em um desfile na China.
+Uma menina parece triste enquanto ela está com o cabelo penteado.
+É apropriado, portanto, informar favoravelmente a aprovação modificadora.
+Eu não sabia se você estava em uma emergência ou não.
+Eu pensei sobre as dificuldades na tradução que podem surgir.
+Essa permissão pode ser desfrutada indiferentemente pela mãe ou pelo pai, se ambos funcionarem.
+Se chove pela Conceição, chove pelo Carnaval, pela Páscoa e pela Ressurreição.
+O inglês era a língua materna porque a mãe não sabia falar a língua.
+Se for esse o caso, tanto pode odiar que sua amizade não respeita?
+Oh Natal, verde, numa grande neve noturna.
+Uma mulher asiática idosa que reza com ofertas à disposição.
+Oh não, meu coelho desapareceu de sua gaiola!
+A faculdade decidiu diminuir seu plano de aumentar seus espaços de estacionamento.
+As entrevistas dos amantes durante a noite foram tempestuosas.
+Qual é o tempo próximo setembro na localização atual?
+A ciência tem discutido sobre a classificação zoológica da espécie há décadas.
+Tudo isso não deve exceder, em qualquer caso, as duzentas palavras.
+A Softcatalà contribuiu para a tradução em catalão de materiais no site da campanha.
+Um bebê que veste minha melhor camisa do amigo em uma cama.
+Um jovem empresário andando na rua, enquanto um pássaro preto voa na frente dele.
+A família que reza em conjunto? permanece unida.
+A rede consiste em sete estações, detalhadas nas especificações técnicas.
+Despesas com publicidade: o valor desse anúncio será pago pelo proponente vencedor.
+Um cão preto e branco com um colarinho azul anda através da grama.
+Ele deve saber lidar com as cobras do deserto.
+Quanto mais você gosta de si mesmo, menos você é para os outros.
+Eu não tenho muito dinheiro para receber este mês.
+De agora em diante não há desculpa para não escrever corretamente.
+Ele possuía a verdade e não podia viver com o cego do espírito.
+Quando estiver pronto, coloque o pato e cubra com água fervente.
+O critério que servirá de base para o prêmio será o de adiantamento econômico.
+Quando a gaivota passa pelo jardim, entre na lenha, atire e feche a porta.
+Um trabalhador em um chapéu azul está consertando a parede.
+Entre a primeira perna, almoço, cafés e o retorno os cinco foram feitos.
+Abra o que não trabalhou, que maio entrou.
+Quem são as responsáveis pelo ensino superior?
+Em outras palavras, a empresa consome no momento do empréstimo sobre seus recursos.
+As pessoas estão sentadas no sofá e rindo.
+Em La Salle, eles só fizeram experiência comercial e mercantil.
+Um jogador de futebol se prepara para lançar a bola.
+Um jogo de futebol está sendo jogado fora.
+Resolução judicial que implica a desqualificação acessória para o exercício da profissão.
+O velho erro tem mais amigos do que uma nova verdade.
+Um homem mais velho está fazendo algodão doce enquanto outros olham.
+Os testes serão realizados nos dias, horas, locais e centros indicados no anexo.
+Todos eles se encontraram durante o expediente.
+Não funciona se o moinho estiver em pé e a língua estiver silenciosa.
+Ele não gosta que as pessoas morem em Cardiff.
+Use o padrão de fábrica e um iterador para percorrer a matriz.
+Uma menina que retrocede uma bola de futebol em um estádio de futebol.
+Mas isso me deixou sem nenhum meio honesto de apoio.
+Rafael tinha doze mil pontos da Gol pelo cartão Smiles.
+Uma jovem garota em um parque lança um objeto no ar.
+E isso enquanto ele não vive de forma independente ou admite trabalhar a vida.
+Um cão marrom com um colarinho preto fica ao lado de um arbusto.
+Existe apenas uma fraqueza em alguns detalhes da ação do governo.
+Eu tenho procurado por toda a cidade tentando encontrar você.
+Tudo isso também se aplica à identidade nacional.
+Eu acho que minha mãe está um pouco fria.
+Quantas crianças gostaram de um gosto diferente?
+Duas pessoas em chapéus coloridos brilhantes descem uma rua cheia de gente.
+Se você quiser ter pão, abra para San Juan.
+Um homem está sentado no quarto feito de painéis de madeira.
+Temos um mês para arquivar um dossiê e obter mais apoio.
+Ela vai ficar nublado novamente esta noite.
+A terceira das diferenças deve ser encontrada nas políticas de linguagem.
+Um breakdancer da cidade começa a girar.
+O bom pescador obtém o melhor e o melhor.
+Durante esse ano, cerca de um milhão de correções foram feitas por mês.
+Não é por acaso que primeiro examino o município.
+Um cão marrom corre nas madeiras com um olhar sério em sua cara.
+Os adolescentes vestem um casaco vermelho para o tobogã anual.
+Quando o galgo é esperado, a lebre salta.
+O deserto era todo de areia em alguns trechos? e rochoso em outros.
+Quero reservar um restaurante de churrascaria para dez pessoas.
+A grelha do fogo, sob o creme de cinzas.
+Qual é o tamanho das pegadas no local do crime?
+Você disse que queria fogos de artifício.
+Dizem que é útil e é demonstrado todos os dias.
+Em todos os lugares havia barracas com itens à venda.
+Então ele não poderia ser apressado nem impaciente.
+Um homem está sentado em uma pedra quadrada comendo seu almoço.
+Os pardais ficaram tão entusiasmados com as palavras do pai que ninguém conseguia falar.
+Eu vou colocar guerra e diplomacia nesse nome.
+A ação formativa é obrigatória para todas as pessoas contratadas.
+Serão eleitos, para cada cargo, os candidatos que obtiverem a maioria.
+Eu quero que meu bebê se pareça com você.
+Não tenho certeza de que maneira ele foi para a casa deles.
+Temo que você esteja bloqueando minha visão.
+Quantas bebidas alcoólicas você consome por semana?
+Para casar com filhas solteiras, não venda carneiros ou ovelhas.
+Assim, eles arruinariam sem aquecer o coração da população que os cerca.
+Para um grão de bico, o pote não está danificado.
+Você pode nomear todos os dispositivos de saída, por favor?
+O estranho colocou sua espada na bainha e o menino relaxou.
+Meu chaveiro é pesado e desajeitado para carregar no meu bolso.
+Vários adultos reunidos em uma conferência.
+Você quer que eu pense em um ou você tem algo específico para eles?
+Um menino de camisa azul está sentado em um sofá com outras pessoas.
+Atribuímos divergência à conduta das vozes.
+Quem tem o telhado de vidro, não jogue pedras no vizinho.
+Nem todos os traficantes moram na favela.
+Adicione a faixa à lista de reprodução do Metal Talks Metallica.
+Alguns meninos estão no palco apontando para o céu.
+Ele está agora em um caminho muito diferente e reconstruindo sua vida.
+A linguagem é fundamental para o coração.
+Com uns pés de sardinheiras ficava bem bonito.
+Você acha que isso custa oitenta e cinco milhões?
+Este é o direito de lucrar, o socialismo refinado ou de segundo grau.
+Se você não quiser comer sopas no verão, semeie as ervilhas em abril.
+Você deveria ser aquele que tem todas as respostas.
+Incêndios de fumaça não têm chama e calor.
+Como comer ou dormir? ou como procurar amor ou encontrar um emprego.
+A Sicília é a maior ilha do Mar Mediterrâneo.
+O programa da festa vale três euros e meio.
+Ele psicografou quase quinhentos livros.
+Peço que me digam onde a economia será para o público.
+Podem ser os gases do fogo que causaram a inconveniência dos marcianos.
+Duas mulheres de short e camiseta estão caminhando segurando as bolsas no ombro direito.
+Ela falou entretanto, desarmando a raiva causada pelos paroquianos.
+Um snowboarder está descendo uma rampa em meio a neve.
+Uma menina em uma camisa amarela carregando uma cesta de flores.
+Ele estava tão longe que seu rosto nem era visível.
+Não foi possível colocar alimentos em uma geladeira ou freezer.
+Não se entra em briga que não se pode ganhar.
+O corpo foi descoberto perto da loja da Tesco na cidade no domingo.
+Na prática, os esforços para lidar com as falhas do mercado nunca são perfeitos.
+Uma mulher batendo algo com uma rocha? com uma cobaia no fundo.
+Em média, eu vou ao cinema duas vezes por mês.
+Um homem e uma mulher estão segurando comida.
+Verifique as atualizações do tensorflow.
+É como qualquer outro dia, tanto quanto eu estou preocupado.
+Dimensionamento de templates, com os ajustes dos quadrados resultantes deste dimensionamento.
+Que tipo de papel é a melhor absorção de água?
+Novembro, no meio do outono, vale a pena invocar horas de companhia agradável.
+Um rosto de menina de cabeça para baixo.
+O esbart foi suspenso, ninguém foi capaz de emitir o menor som.
+As notícias da fábrica começam a me fazer sofrer.
+Tudo isso foi possível graças ao notável aumento de colaboradores que ocorreu este ano.
+A outra opção que estamos propondo é mudar a estrutura: realocação.
+Ela permitiu que ele a guiasse pela calçada.
+Uma águia está chegando para um pouso na praia.
+Isso significava que, no final, mais porcos comiam do que nós.
+A água fluía abundantemente a apenas três metros da superfície.
+Você vai me enviar aquele livro que eu deixei em sua casa?
+As escavações a serem realizadas serão essenciais para garantir a fundação do navio.
+Um cara adolescente usando óculos está jogando um dardo.
+Gosto de usar seis ou sete aplicativos de produtividade.
+Porque nem ele nem você têm qualquer direito ou título de representação política.
+Estou planejando comprar alguns mapas topológicos para minha pesquisa.
+Transformação de conflitos, em particular através de soluções políticas e não violentas.
+Se eles não são afetados por qualquer atividade econômica ou serviço público.
+Eva teve um relacionamento misterioso com Ronald.
+Em suma, como dizemos, muito pouca imaginação e repetição de esquemas.
+Ele primeiro pediu referências e depois fez a entrevista.
+Um homem toca guitarra em um teatro externo.
+Há também muita variedade, então há algo para agradar a todos.
+Outros perguntaram com surpresa irônica desde quando funcionou.
+Uma mãe e uma criança estão interagindo em uma sala retrostilada.
+Todo mundo tem uma opinião sobre Jesus Cristo.
+Mesmo o oposto é permitido ser visto em alguns lugares.
+Muitas filhas e maus videntes desfazem o albergue.
+A lei do funil: a largura para mim, o estreito para você.
+Da próxima vez que chover, por favor me ligue.
+Um homem em camuflagem está ensinando uma aula.
+Eu poderia fazer um livro anedótico apenas por aquelas trinta horas.
+O mais vazio é aquele que é cheio de si mesmo.
+O tribunal declarará nulo se o teste não for concluído.
+Se você quer se casar, fique no mesmo bairro.
+Entre os traficantes, os fabricantes, os agricultores, têm amigos momentaneamente obscurecidos.
+Os tops são uma dádiva de Deus nos dias quentes de verão.
+Uma mulher está brincando no chão com um cachorro grande.
+Em seguida, encontramos o conceito de ritmos não retrógrados.
+Nós batemos o país inteiro nessa história.
+O que eu faço agora para me classificar?
+Eu caminho pela rua no periodo da tarde.
+Os centros de terapia védica foram espalhados por todo o bairro.
+Subsídios para o culto religioso deixam de existir com esta nova lei.
+Como daí chegaram ao amor, não o soube ele nunca.
+Adicione domine astronomia no Jantar Intimo Clássico.
+Elabora relatórios sobre ajuda financeira extraordinária e subsídios para danos catastróficos concedidos.
+Um homem segura um bebê enquanto está suspenso entre dois prédios.
+Há algum item emprestado dentro da propriedade?
+Eu não estou vagando, mas estou em casa para o céu e a terra.
+Escolhemos uma topologia de toro para nossa rede.
+Ele é quem lida com os banheiros e a limpeza das instalações.
+Eu comecei a correr no ginásio na semana passada.
+Duas crianças compartilham um balanço em um campo de jogos.
+Ele simula a operação de uma célula robotizada, projetando e executando operações de controle.
+Eu te encontrarei em seu escritório então.
+Um homem salta de uma saliência rochosa para a água.
+Mas era apenas uma imagem do seu antigo eu.
+Os trabalhadores, dentro da empresa, têm o direito de ingressar em qualquer centro sindical.
+Uma mulher em um vestido brilhante está dançando.
+Aceito seus termos, com um senão: preciso de um prazo maior.
+O figo, quando está maduro, cai sozinho.
+Consequentemente, o regime de competência acima mencionado tem um caráter fortemente assimétrico.
+Apenas um terço do lixo está sendo reciclado neste país.
+Viajar ou voar é uma maneira de aprender, de adquirir conhecimento.
+O telefone tocou enquanto ela estava acordada.
+Abaixe a cinza para o tapete velho gasto.
+Uma ameixa madura serve para o paladar de um rei.
+Ela voltou para o quarto depois de cozinhar.
+E isso, muitas vezes, vai além do que é suposto fazer.
+Duas crianças estão brincando com um tambor.
+Autorização tem uma validade definitiva.
+Um homem que trabalha com uma ferramenta de soldagem.
+Eu adoro colecionar selos de diferentes países.
+Eles correspondem à fase de arranque do programa no município.
+Acontece que alguém está construindo uma casa.
+A sentença foi muito curta disse o advogado.
+Você pode me encontrar o trabalho intitulado? um pouco curioso?
+Intriga e corrupção são vícios naturais dos governos eletivos.
+Todos eles compensam a destruição de empregos que ainda ocorrem em outros ramos.
+Você escreveu essa carta para Miss Mitchell?
+Nas noites de inverno, havia refugiados naufragados em uma ilha deserta.
+Amigos como os queremos e parentes como Deus lhes dá.
+Uma menina andando por uma trilha de natureza pula no ar.
+Alguns tecidos ajudam a absorver melhor o suor na prática de atividades físicas.
+Foi uma lua tão boa, que as novas granadas fizeram o bem.
+Os membros do conselho são os últimos a votar.
+O que eles precisam para garantir a segurança?
+Há mais dias que salsichas e mais horas que salsichas.
+É malvado como Lara negligencia seu gatinho.
+Planeje e controle a despesa e sua contabilidade correta.
+Esta caixa de marcadores tem muitas cores diferentes.
+Arremesse a palha pela porta do estábulo.
+Educar em um novo paradigma de gestão do conhecimento.
+É legal ter uma energia negativa todos os dias.
+Uma multidão de pessoas estava ao redor da fonte.
+Observar, ouvir, entender e admirar uma cidade não é suficiente para passar por ela.
+Os comentários me levaram a caça selvagem.
+A terra dá em todos os tempos não falta água ou nós.
+As enormes muralhas da cidade deram o nome à época da parede.
+Quem de todos os peixes conhece o nome, é vigiado por todos.
+Semeando tarde e pegando, você não tem conta.
+A mulher do César não deve ser apenas honesta, mas também fingir.
+Uma mulher com uma luva branca e vários outros.
+Um homem em uma camisa xadrez? fazendo um pequeno vaso de barro de terracota.
+Frágeis usam a violência, e os fortes as ideias.
+Acima do direito de sair é um critério de soberania.
+Por tudo isso, precisamos de uma definição que não seja exclusiva da identidade nacional.
+Uma mulher sentada em uma cadeira com óculos de sol brancos.
+Participar dos representantes do setor nas entrevistas que eles solicitarem.
+Uma linha de chama alta pode ser vista na atmosfera.
+O usuário decide qual doação ele quer fazer.
+Quando a gaiola está limpa, o pássaro vai.
+Sabedoria é conhecimento usado para o bem.
+Que tal mais uma vez ao redor do parque?
+Ele tomou um gole da xícara de café e balançou a cabeça.
+Não sei em que dia você costuma ouvir que estava cantando.
+Em relação aos resultados, estes são produzidos principalmente por extrações de bombeamento para consumo.
+Você aceita transmitir programas proprietários em catalão?
+O medo continha sua verbosidade, temendo falar demais.
+É possível tirar uma folga maior do estudo da física teórica?
+Cada um sabe melhor onde o sapato o aperta.
+O que as criaturas dizem? O que eles ouvem grande dizer.
+Eu acredito, por outro lado, nas altas vocações científicas.
+Ela mora perto de Caernarfon, então ela estará por perto para ajudar, se necessário.
+Ninguém pode viajar, se não em caso de necessidade.
+São dois exemplos das centenas que existem.
+Não será provável que sejam edições valorizadas do mesmo curso.
+Não há hospital adequado perto de nossa casa.
+A omissão deste requisito resultará na consideração de um viajante sem bilhete.
+Milhares de anos atrás, esta cidade era o centro de uma antiga civilização.
+Por exercer esse poder, não é, por outro lado, completamente independente.
+Superfície de serviço de manutenção e limpeza de grelhas de irrigação.
+Nós usamos toda a sua imaginação para projetar o lugar.
+As equipes de localização correspondentes já enfileiraram a agulha.
+Sem uma solução para isso, nada será possível.
+O capitão falou em voz alta sobre o ocorrido.
+Com isso, vamos registrar que falamos de cristãos antigos.
+O nó no caule de trigo cresceu diariamente.
+Se os desejos não são muito grandes, eles se renovam constantemente.
+O marinheiro no mar; o labrador, a terra e o soldado, para a guerra.
+Seus rostos estavam cobertos com os panos azuis? e seus olhos mostravam medo.
+Um cão marrom chega para uma bola de tênis.
+Portanto, é necessário estabelecer medidas corretivas que permitam mitigar esse possível impacto.
+Um homem de camisa azul monta um monociclo com bastões flamejantes na mão.
+Monitorar os relatórios de inclusão no Plano de Inspeção Territorial.
+Amanhã eu tiro a foto para postar no grupo.
+Pertencendo a um dos corpos que compõem a função de ensino público.
+Não conseguimos encontrar a rua principal.
+Um grupo de homens que vendem frutas e legumes no lado da estrada.
+Esta notificação é uma transcrição exata da resolução original contida no arquivo.
+Além disso, não serei necessário nos próximos dois dias.
+Vale a pena uma onça de prática do que um quilo de gramática.
+A natureza desta questão contrasta significativamente com a questão da decisão.
+Quantas bactérias estão no balcão da cozinha?
+O mesmo termo será regido pela adaptação à nomenclatura da nova classificação profissional.
+Ambulância destroçada está sendo rebocada por um caminhão grande.
+Foi uma época difícil com o vento áspero que estava lutando com as árvores.
+Um homem com grossos óculos de aro preto e um violão sentado na calçada.
+Dois jovens estão correndo pela grama no outono.
+Você vai sair e me deixe lidar com isso?
+Por favor, procure a fotografia? The New People.
+O pescador, se ele tem muito, segura a cana em linha reta.
+A maioria dos meteoritos é mais ou menos arredondada.
+Pontos de vista e instalações de segurança serão a única grande infraestrutura permitida.
+Use um lápis para escrever o primeiro rascunho.
+Mesmo os? fracos quando unidos? se tornam poderosos.
+Não; Naquele ano não estava acontecendo.
+Também deve ser notado que esta nova edição foi licenciada sob Creative Commons.
+Será necessário avaliar a existência de habitats aproveitando as construções preexistentes.
+Esse tópico no Reddit era muito popular.
+Isso é hora de estar de pé em um dia de semana? Está tarde!
+O contrato será renovável por mais dois anos.
+Em alguns lugares, o chão estava coberto com o sal de lagos secos.
+Se as cópias fornecidas não corresponderem, elas não serão consideradas.
+Um cão marrom e branco corre em um campo de flores amarelas.
+Um grupo de crianças em trajes estão em um palco com cortinas vermelhas.
+Mas todo mundo e sua tia Lilian passaram por essa bolsa.
+Uma mulher em uma camisa amarela comendo.
+Paus e pedras quebrarão meus ossos, mas o que não me mata me fortalece.
+Um homem em uma jaqueta branca tocando uma guitarra.
+Os londrinos se arrependeram de visitar esse lugar horrível.
+Não há como aprender as tabelas de multiplicação.
+A leitura é realmente absurda para você?
+Um homem com óculos olha para sua câmera.
+Ele enviou o menino em uma pequena missão.
+Eu tenho como objeto de comparação a Virginia, que já mencionei.
+Os prêmios consistirão em uma placa ou um diploma.
+Seu braço parecia estar lutando com o que quer que estivesse no buraco.
+Há uma caravana saindo hoje para o deserto.
+Um cachorro branco salta da água para pegar uma bola de tênis.
+Quantas outras atividades tendem à efetividade prática da Convenção.
+Atualmente, qualquer pessoa ou órgão interessado pode propor novos emojis ao Unicode Consortium.
+Só pode ser usado na superfície agrícola.
+Isso torna essa comunicação muito mais ágil e eficiente.
+Mas? com o passar do tempo? Tangier mudou.
+Reintegrar os fundos recebidos nos casos previstos na base dez.
+Casa sem fogo e sem mulher, corpo sem alma.
+Os homens participam de um jogo de beisebol.
+Quais são os principais aplicativos para o meu celular?
+Uma menina muito rasgada detém uma grande barra no ombro em um ginásio.
+Para garantir que os alunos não saiam do centro sem a autorização correspondente.
+Internet, tecnologia da liberdade, produzida livremente por seus próprios usuários.
+Um homem está vestido em denim e está sorrindo offcamera.
+Eu não sou a primeira mulher a morrer por pregar isso.
+Eu gostaria de me juntar, mas ninguém me perguntou.
+Os jovens conversam do lado de fora perto de uma rua movimentada.
+A versão completa não chega até a terceira repetição.
+Mais adiante, examinaremos essa relação que acabamos de mencionar aqui.
+No acampamento? foi difícil ver alguma coisa.
+O gerente é responsável pelos atos de seu delegado ou substituto.
+Como você pode entender, antes havia muita lã para remover.
+Viajar sozinho é bom para conhecer novas pessoas.
+A forma aerodinâmica das baleias é maravilhosa.
+Ele abriu o pacote? e enfiou em um sanduíche.
+Mas você vai amar ela? e ela vai devolver o seu amor.
+Mas ele havia encontrado um guia? e não queria perder uma oportunidade.
+Um policial chinês em pé na frente de sua estação.
+Semear em novembro e trabalhar em dezembro.
+Parece haver alguma tolerância quando a submissão final é necessária.
+Três homens desfrutando de álcool e comida.
+Dois meninos correndo na rua, enquanto uma menina olha.
+O doutor Clark chegou na semana passada.
+Toda vez que você entra em contato, você tem um novo sentimento.
+O objetivo desta ordem é regular a estrutura dos programas didáticos na educação básica.
+Mas acontece que eu tenho uma foto dela.
+Um barco de corrida vermelho de alta velocidade salta sobre a água.
+Um baterista e três saxofones fora de uma loja.
+E se o que estamos passando for apenas um surto coletivo?
+Minha senhora não pôde expressar sua desaprovação.
+Agora, nada pode prever tal revolução, nenhum sinal anuncia.
+Tudo está ficando frio e você sabe que estamos esperando por você.
+Encontrando erros, você vai se preocupar!
+Durante a exposição, o tribunal pode fazer quaisquer perguntas ou esclarecimentos que considere apropriados.
+Para onde estávamos indo, minha história já passou e ninguém está interessado.
+Pouco conhecimento é uma coisa perigosa.
+Uma garota de calça preta fazendo exercícios.
+Eu acho que representa apenas uma era de transição.
+Eles vão trabalhar para licenças estranhas, menos aquelas que descansam.
+Uma criança brincando com bolhas e andando.
+Neste caso, o maior expoente da nossa literatura.
+O que você quer ser quando crescer: astronauta, cientista ou músico?
+Não há casamento sem flores ou mortal sem lágrimas.
+Declarou ser capitalista, solteiro, morador em Catumbi.
+Nós só precisamos de metade disso, certo?
+A combinação de violinos com trombetas? e um conjunto de bateria é bastante incomum.
+Nada é tão elástico quanto a seda de uma aranha.
+Ele não precisava demonstrar sua ciência e arte para ninguém.
+As Ilhas Baleares são apenas algumas milhas náuticas.
+O grupo de jovens adultos está saindo juntos fumando e bebendo.
+Você apostou seu baixo dólar que nós faríamos!
+Coma com seus amigos, mas não faça uma barganha com eles.
+Esses problemas afetarão a duração da sentença.
+O braço de leva estava deitado na grama fria.
+O que estava ao seu lado há cinco minutos agora estava do outro lado.
+Você pode encontrar alguns dos animais da raça?
+Duas pessoas estão jogando golfe em um campo de golfe.
+O amor tem um grande poder, mas o dinheiro faz tudo.
+Mosquito zumbindo, música de violino pequena.
+Integrações com outros sistemas que suportam.
+Para que serve a suplementação com iodo e iodeto?
+As resoluções do Conselho Eleitoral são firmes.
+Eu vou ler a documentação do Keras neste fim de semana.
+Mas essas duas palavras nunca serão encontradas em meus pensamentos.
+Duas pessoas acabaram de fazer compras para produzir.
+Uma linguagem tóxica é mais perigosa que uma cobra tóxica.
+Na residência, os Tites sempre montaram muitos atos com pouca repercussão.
+Até mesmo os guias falavam muito pouco um com o outro.
+Seu corpo estava perdido entre os muitos outros no necrotério da cidade.
+Ele disse para flutuar para a Terra Feliz nas bolhas.
+Porões: são permitidos sem limitação e podem ocupar o terreno.
+Gostaria de saber o porquê dessa algazarra.
+Um grupo de corredores participa de um evento.
+Naquela época, era o melhor ônibus de longa distância no Japão.
+Disfunções das glândulas exócrinas que envolvem compromisso com a função policial.
+Nós não temos que ir para o exterior por nada.
+Deus é o único ser que governa, sem ter que existir.
+Uma mulher em um vestido laranja, montando um passeio de carnaval.
+Eu vi um jovem de pé no cilindro e tentando sair do buraco novamente.
+Estes são os princípios gerais pelos quais nos regemos.
+Um sistema que é adequadamente financiado e economicamente sustentável deve ser garantido.
+O que sua enteada quererá para a refeição da tarde?
+Três homens vestidos como cozinheiros chefe cozinham em uma cozinha de vista profissional.
+E muita ajuda é necessária para fazer todo esse trabalho.
+Pensou rapidamente no inexplicável de tantas cousas.
+Todo lugar é lindo, mas em casa é o mais bonito.
+Quanto a mim, não pude imaginar uma circunstância mais agravante.
+No último sábado eles tiveram as primeiras ervilhas expostas.
+Um homem em uma camisa verde em um salão de cabeleireiro.
+O pecado pode ser dito, que o pecador não.
+Mas devemos especificar o que estamos falando.
+Um cavalo e um cavaleiro saltam sobre um obstáculo.

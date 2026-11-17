@@ -1,0 +1,2007 @@
+# English sentences from Mozilla Common Voice.
+# Source: https://github.com/common-voice/common-voice/blob/605c25e48f9fb87cb25ca794cb39bf91d3741f29/server/data/en/sentence-collector.txt
+# Commit: 605c25e48f9fb87cb25ca794cb39bf91d3741f29
+# License: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+# Filters: NFC, trimmed, 40-120 chars; only English letters, space and . , ; : ? !; typeable on us-qwerty; capital start; ends with . ? or !; no inner dots; no word-list profanity; no duplicates
+# Selection: the first 2000 survivors by SHA-256 of the sentence, by scripts/import-commonvoice.py
+# Count: 2000
+He spoke of Juno as the wife of Jupiter.
+The clear spaces in the sky were of clean, cold blue.
+The advantages of eating healthily are too many to list.
+Did you hear me ask you where you have come from?
+It is the imperial government which deifies disembodied souls of men.
+Her figure is elegant and has the effect of being tall.
+But it was a chance, the only possible chance.
+So very good of them to send her the whole way!
+Could please let me know what the weekly skill is?
+During his illness his wife had spoilt him a little.
+On May Day they kill all the hares they find among their cattle.
+It pleased the men to see this battle between them.
+It would pay better to sell a certain number of Persians as opportunity offers.
+There was pride and strength, the ring of triumph in his voice.
+The whole form, from head to foot, is exposed.
+This aunt, I perceived, must fall into line with my other clients.
+She was never alive, and giving off life.
+The politics of Fox had their attraction for this idealist.
+I was on the phone when I saw the violin guy.
+He fell to picturing the fortunes of his friends.
+The eyes looked at her thoughtfully for a full minute.
+Governments have a hard job of keeping everyone happy.
+A reed does not need to be associated with a resonating column.
+The Red List is a framework for monitoring ecosystems.
+If they guess wrong, the May King rings his bell by shaking his head.
+It only costs five Euro for a straw hat.
+Such an understanding is nowhere expressed.
+The Estonians have various odd ways of raising a wind.
+Greek hunters dedicated spears and javelins to Pan.
+Lowering your costs also means demanding more competition.
+They were not welcomed home very cordially by their mother.
+When all these ceremonies were over, the king made a great feast.
+The slave parent of a king could only be the mother.
+Adele had peeped from time to time under the blind.
+Their duty was to tend the sacred fire, the emblem of the sun.
+Then she sat down upon a settee and watched the people dance.
+Go forth, Jeeves, and scour the neighbourhood.
+Miriam was still bent over her painted cloth.
+The young may be seen through the sac as minute triangular worms.
+Work hard to unleash your full potential.
+When the feast is over, the maidens are formally presented to the spirit.
+It appears that the whole ritual aims at ensuring a plentiful crop of rice.
+The death of Romulus took place on the seventh, not the fifth, of July.
+Such a person only may protest for not payment.
+This cannot be done by wolfing sausages.
+It is impossible to alter the position of the brushes.
+It came involuntarily, for in a moment it died, and he passed on.
+I urge every parent to make sure your school does just that.
+He pretended to be making reports and seeking orders.
+Of course, and what would sir be looking for today?
+Contact Us to ask a question, provide feedback, or report a problem.
+Two goddesses support the feet of the couple and guide them from harm.
+Integration, therefore, represents a structural change.
+Beside the altar was the place reserved for the Vestal.
+It is my great privilege to pronounce you husband and wife.
+Susan was a charming woman, but she was also an aunt.
+He loved it with its bars of yellow across.
+The vendor will provide further details.
+Most kids love pizza and eat it every week.
+The lorry will haul the aid container three hundred miles.
+He appears: greasy, warm, herbaceous, and chewing.
+On one side of this frame is pasted a leaf of thin carbonated paper.
+Business proposals are being considered.
+We require a business requirements document from yourselves before we can start.
+Our accounts of the old Lithuanian mythology are few and scanty.
+He had best go back to his tent and sleep.
+I dislike household work, but am fond of sports and gardening.
+They are supreme in civil as well as religious matters.
+At the odd sound, the lovers turned and saw her.
+The Virgin Mary seems to have succeeded Artemis and Diana.
+Then I wonder if you would mind doing something for me.
+The jaws fell, the ears drooped more limply.
+They often went through the ceremony as a precaution.
+We have two Pekingese, a King Charles, and a pug.
+They had scarcely taken their seats when there was another double knock.
+I should like mutton broth and gumbo every day.
+All our present copies agree with one another.
+On May morning the girls of the neighboring villages used to flock into Northampton.
+The holes in the latticework were partly stopped up with flowering shrubs.
+Each of its divisions must be let closely into others.
+She advanced to it, missed it, and caught it.
+It was deemed prudent to terminate their relations with the divinity.
+The Venetian swell is the only sort used in England.
+Do you know, out there just now I felt scared.
+You should make the most of your hopes, wishes and desires.
+Bees, roses, and sometimes butterflies decorate her sides from the hips downward.
+Several of them obviously emanated from sharks.
+They present an alternation of sexual and asexual generations.
+Her blue eyes were watching the cathedral quietly.
+The competitions will do much to stimulate interest in the work of our society.
+This promise, so far as I know, he did not live to fulfill.
+Villages of Upper Bavaria renew their Maypole once every three, four, or five years.
+European technologists have vainly proposed theoretical methods for the operation.
+Keep hoping for the best; that will help you, Jo.
+That night he slept near their lair, but they left him and went hunting.
+The gray house was, at first, of sheerly pastoral intent.
+You show no gratitude in return for all we do for you.
+In Egypt the offerings of hair went to feed the worshipful animals.
+The great wall of China is long and high.
+The more the medicine men suffered, the less pain they themselves would feel.
+Because, boys and ladies and gentlemen, he is a pessimist.
+Under the old log the ground was smothered with woodlice.
+In ancient Egypt the sacred kings were blamed for the failure of the crops.
+Globally Microsoft is currently the highest valued company.
+Women with child place one of their garments under the tree.
+Harry was laughing hysterically, like a man off his head.
+My present brief hospitalization is traceable to eyestrain.
+Are we building a generation of web addicts?
+It is never lawful to kill an innocent man.
+She was garbed in rusty and ancient black.
+Ideas always have some relation to our passional nature.
+At any rate chance had given him a breathing space.
+They differ from handcuffs in being intended for one wrist only.
+In casserole dish, mix green beans, soup and milk.
+Then came a sparkle of anger in his eyes.
+You see, Kitty, it must have been either me or the Red King.
+My identity as a journalist became known.
+She was driven straight from the Villa Rose to the depot.
+A crate must be safely secured to avoid damage during transport.
+Algorithmic accountability is a topic to be addressed in two thousand and nineteen.
+He saw children carrying copies of the Koran on their heads.
+Would the loss of a skewer be noticed, do you think?
+She brushed it off, and at last lay down.
+She sat on the edge in an uncertain fashion.
+That is the most diabolical deed that ever you did.
+I had a crushing headache, and felt as sick as a cat.
+That is a record size for a sea cucumber.
+We have been gifted with many bounties in our life.
+He gently patted me on the head, and I sat down.
+The storm soon began to pass upon its way.
+Her feeling toward marriage has always been one of repugnance.
+Shirley, what have you done to your hair?
+Her bright quick eye catches the truth immediately.
+The indoor firehouse is on the stairwell.
+Winter came, and with it weeks of cold and heavy rain.
+Throughout the millenia, humanity has always strived to innovate.
+The holiest regalia consist of the bodies of former princes.
+Father, I can run as fast as a moorhen flies.
+He falters an awkward excuse or two for his failure.
+There was no cover for a tomtit in those bald green places.
+She heard the door close, and descended.
+Matt came back presently and they sat down to supper.
+If the sacrifice were omitted the spirit would send disease and death.
+However, he sang softly, for fear of Clara.
+We need to map the topology of these networks.
+He realised that he was intensely hungry.
+In the long search he has scraped together a great hoard of such maxims.
+At length, by slow degrees, they became indistinct and mingled.
+Her unfavourable verdict was echoed in other quarters about the same time.
+And, after all, it had been an obsolete list.
+The savages supply it chiefly with the poncho.
+He was represented in his temple by his personal relics.
+Come back this instant and put something on you.
+She was beginning by now to realise that they would not.
+They blacken stones with the ashes of certain fruits and set them out.
+It was exhilarating to be out in the open air once more.
+Souls may be extracted from their bodies by ghosts and demons.
+The little girl reached it with the handle of a broom.
+Take the full course of your medication.
+After each of these two sentences you should cross yourself thrice.
+The epithets Rainy and Showery are occasionally applied to Jupiter.
+He sighed, scarcely hearing what she said.
+Blue collar workers have contributed a lot to the economy through sheer hard work.
+All the food of the previous day is given to matrons or old women.
+I twisted the two, and enclosed them together.
+Oh that he had sprained his ankle in the first dance!
+He always touched his hat when she came out of the house.
+They could not be together due to cultural differences.
+I hope you will persuade him, Lord bless you.
+People must learn new skills to adapt to the age of automation.
+These dogs have been bred to be ultra sensitive to smells.
+He waded into the edge of the water and began scrubbing himself.
+Often Miriam kneeled to the child and drew him to her.
+But at present there was nothing more to be said.
+Occasionally some flame would come in pursuit of her errant swain.
+From there I looked back, and saw that I was still undiscovered.
+She was given a fine for illegal parking.
+Her mistress kisses her on the cheek and makes no other answer.
+Well, they use it to build a detailed profile on each individual user.
+In times of tragedies, look for the helpers and you will see hope.
+What is the default way of doing things?
+The Afghan Boundary Mission was often met with fire and incense.
+He was holding a a minuscule antique copper coin.
+They may abuse their less spirited companions.
+Nobody but you could imagine such a thing possible.
+The ice on the lake looked like plate glass.
+It was a cold business, for I had neither coat nor waistcoat.
+I thought she might like a stroll and a chat.
+The hand turned cold within her grasp, and lay unresponsive to her caresses.
+Susan was always ready to replenish the wallets and fill the cans.
+There had been several soldiers thereabout.
+They do not know the ancients who are dead.
+The order of nature is bound up with the life of the king.
+Possibly I am letting the thing prey on my mind too much.
+Take with her the little home she brings you.
+Already he was a prisoner of industrialism.
+And do you know why he tried to dissuade me?
+Young Earnshaw was altered considerably in the three years of his absence.
+The duty of tending the fire passes to his eldest wife.
+She suddenly ran across the room and knelt down before Celia.
+At the foot of the tree, he makes a peculiar sound.
+As it turns out, the wedding is not today.
+He had supplied knowledge to the omniscient.
+His fidelity was believed to ensure an abundant crop of fruit.
+Perhaps we could compare our cells to algorithms.
+Paul, his ears red with shame, began again.
+Please go and play at Wild Beasts under the piano!
+I was intent on getting to the bottom of this mystery.
+This light and the gate opened and reopened aroused my suspicions.
+Warrior down, thank you for everything Keith!
+The lad who plays the part of Green George is ducked in a river.
+Unfortunately, I am confined to this theme by the narrowness of my experience.
+Adele was watching her with a satiric smile.
+We should find another dataset instead of only using mnist.
+The estimated time of arrival is eight twenty pm.
+Wherever did you get that hideous dress from?
+He argues for a fusion of law and equity.
+This had a very injurious effect on my health.
+Twins are supposed to be able to tell the weather.
+Her hand trembled as she held her mug of barm.
+The employment of this system requires a well established regime.
+The digitization of hard copies has enabled us to preserve deteriorating books.
+The windscreen of the car became iced up overnight.
+He brings actions for trespass; I bring actions for trespass.
+Their functions do not end with the shore, but in the sewer.
+Grown such a man too, grown such a fine strong man.
+Algebra is a foundation of Machine Learning.
+Hydrogen gas and nitrous oxide gas detonate violently.
+A small section of the X in the bar region had become genetically nonexistent!
+Alice rubbed her eyes, and looked again.
+A city is a place with a large number of men and women.
+Rajib is the assistant pastor of our church.
+It could be no reproach to him that she should now learn the truth.
+The people are coming down the crescent now.
+He was not allowed, however, to reflect upon these remarkable problems.
+Then a further scandal of the same nature agitated the Court.
+He destroyed everything that had belonged to the woman.
+Occasionally the white gleam of broken water revealed her presence.
+The wind came through the tree fiercer and fiercer.
+Then she got up, and the family straggled down.
+She felt as if she were being taken into the family.
+I am fascinated by the intricacies of woodcarving.
+These representative species often meet and interlock.
+I felt prouder than you did when it was encored.
+It delivered immediate economic relief for tens of millions of Americans.
+My friend and I danced to our favourite songs and genres.
+The vernal earth decks herself afresh with a rich mantle of green.
+It seems that you will keep a good watch over the herd.
+The wise man asked them what the king must do to get a son.
+There seemed to be two of them, men in coats and tweed caps.
+These rollers delivered the cotton to a pair of nippers.
+He will, when he learns my true feelings towards him.
+Only a small portion of the bogs can have been explored.
+Best plan to get the books out of him first.
+The snores were almost apoplectic; but the grin was not quite so big.
+She was practically adopted by the Impressionists, who initiated her into many Gallic secrets.
+The object of the taboos is to save his life.
+Sheep breeding in New England may never regain its former dimensions.
+The soul recoils from food at such a moment, miss.
+He slightly waved his hand and fell into his usual manner.
+No; but I saw her with you in the rooms.
+Gloria let her baby mouth drop slowly open.
+A few, such as invisible, can be advantageous.
+Psychology cannot attain the certainty and exactness of the physical science.
+Nothing could be seen of the young family.
+The royal family traces its pedigree through the maternal line.
+There was a long knife through his heart which skewered him to the floor.
+The steam is cooled by a body of water surrounding the tubes.
+As the path ascends it skirts round scarped acclivities.
+The Turkish greyhound is very rare in France.
+An aneurysm is generally a pulsating tumor.
+Our company is working on attracting younger customers.
+Hurricane season is a time of worry for many who live on the coast.
+My dear mother, I am nothing but a trouble to you.
+In Java the afterbirth is called the brother or sister of the infant.
+And I know he has read the Vicar of Wakefield.
+He stood aside, with his hands in his pockets, watching her.
+A proud Ukrainian people have known thirty years of independence.
+What a different thing this life and this outreach toward man becomes.
+He jumped out of a window, upsetting three plants.
+The upper knife stands in position ready to engage with the lifted hooks.
+I would teach it to mind its own business!
+By heaven, he is the proudest fellow breathing.
+Richard had received a similar letter and had made a similar response.
+A naughty or saucy boy, at school, often gets a smack on the face.
+A standing policeman swerved into view, was hastily passed.
+He began striding rapidly up and down the room.
+They must be near relations, perhaps brothers.
+Another striking looking man was the Master.
+One gets so many smacks in the face through interfering in matrimonial squabbles.
+She has been the confidential friend rather than the maid.
+I am strongly of opinion than he shall not.
+The emperor, as well as Heaven, is lord and master of all the gods.
+Like other peoples, the Greeks and Romans sought to obtain rain by magic.
+His digestion is impaired, which is highly respectable.
+People come furtively and cast within their reach what is needful for their subsistence.
+What more the letter told me needs not to be repeated here.
+You may, perhaps, have abandoned this project a long time.
+The promise is, in the language of jurists, a convention unilateral.
+The door slammed violently and was locked.
+You purchased two tons of creamed corn on March sixth.
+I always got up and gave him a handful of oatmeal.
+The whole mass of people was chanting together.
+The duty of making the sacred fire lay with the Vestal virgins.
+They had no intention of returning to Marietta.
+They were expected to be a source of fecundity to the cattle.
+He was a Nihilist of the most uncompromising type.
+Such representations were no mere symbolic or allegorical dramas.
+My voice is unsteady and my stomach is unsettled.
+He weighed out the sausages carefully on the scale.
+And while our infection rate went down, other states have been going up.
+Could I ask you to fill in this form, please?
+He does not describe the shape of the golden crown.
+She never realised this, whilst he was young.
+The Heimlich manoeuvre is a lifesaving first aid technique.
+His windows are dark and quiet, and his door is shut.
+The problem was to determine the minimum initial mass of an ideal rocket.
+Nothing harmed Ayesha or changed her or moved her.
+And the agitated voice and words remained fixed in his memory.
+And are you proposing to continue your stroll?
+Sometimes it is the souls of the dead which are believed to animate trees.
+Both the women were miserably equipped for such an expedition.
+A club acquaintance, and a mere one at that.
+I am happy to be at one with so learned and judicious a scholar.
+Fortunately, our relationship has never needed the intervention of a Marriage Counsellor.
+When something is widely available, it starts to get treated like a commodity.
+The sobriety of my own dwelling is much pleasanter to me.
+How can you let that ravening beast trot by your side?
+In the meantime, the little princess was growing up.
+Be aware of the politics and past experiences of your students.
+Though he escaped with his life and his job, it was a close call.
+All that I desire is the freedom to exercise this divine gift of loving.
+People who suffer from regular constipation should seek medical guidance.
+Saturdays and Sundays in March seem to be free.
+It is better if the market is not consolidated by the few.
+Windbound fishermen walked sunwise round the chapel.
+The right of succession to the throne descends in the female line.
+I am committed to my role as a paramedic.
+This type of musical farce is not an elevating or intellectual artform.
+She turned down the sheet and showed the child.
+This vessel was wrapped in bark cloths till it assumed a conical shape.
+The room was warm and full of the scent of hot linen.
+When I have brains I shall probably like them better.
+God grant that the wolf may not hear our cattle.
+The heart forces blood around the circulatory system.
+He takes the ashes and throws them on the water.
+I disapprove of jabbing the spear into a hog.
+We will continue to pursue the criminal until he is apprehended.
+In his left hand was a small book with a finger marking the place.
+The happiest day of my life happened recently.
+The letter was stuck down with a blob of ink.
+They might almost have been absent without changing his face.
+The priest was always considered as sacred as the god.
+He pricked his ears; distant sounds of fighting still echoed in the wood.
+He is indifferent to everything but his calling.
+She concealed her wedding ring from the thief.
+At last he caught her hand, and she stood beside him.
+That is the man whose rubbish I am now burning.
+Now is our moment to meet and overcome the challenges of our time.
+When they found the couple, they all gathered around them.
+So that after all these two may get married.
+The old grove of Vesta must surely have been a grove of oaks.
+He held her wrists while she wrestled with him.
+We all drew nearer to the cages, feigning to examine the birds.
+For all have sinned and fall short of the glory of God.
+Anything of the cheap intellectual style repels me very decisively.
+The seventh commandment forbids all unchaste thoughts, words, and actions.
+When a child is frightened, its soul flees from its body.
+We ought to be able to persuade Matthew and Robbie to help.
+His old mad desire to be with her grew weaker.
+It has been a beautiful episode with nothing but good in it.
+Phishing scammers attempt to spoof a website to steal security details.
+Wrongheaded, shortsighted, and politically expedient.
+They are at the core of the daily life of the website.
+Mayonnaise is an ideal condiment to Fries.
+Hannah weighed only five pounds at birth.
+It was at Westminster that the cause was to come on.
+The morgue in this institution was directly under the lecture room.
+It is the queen who confers royalty on her consort at marriage.
+The jury returned a verdict for the plaintiffs.
+Miss Patterson stayed her month out and over.
+At what hour would you suggest bonging the bell?
+They must meet each other, and make the best of it.
+Do you think that graffiti is vandalism or art?
+It is a kind of sketchy intellectual landscape.
+The first source of pleasure varies of course with our condition.
+The boat made slight headway against it.
+I was about to do this when cooler judgment prevailed.
+Would you like to have me explain that thing to you?
+The seventh commandment is, Thou shalt not commit adultery.
+I felt enlightened after visiting the wise man.
+The practice was continued by the dull bigot James the Second.
+I noticed around the room our participants were mostly femmes.
+A certain image of Apollo was thought to impart superhuman strength.
+The oak had been preceded by the pine or Scotch fir.
+A highway is commonly referred to as motorway in England.
+They tie up the mouths of all animals inside and outside the house.
+Now the place was empty except for two cable attendants.
+The initiation ceremony for the company director is tomorrow.
+The igniters then require to be uncoupled.
+In the month of May they always burn the grass.
+Lawrence advanced to one of the portholes.
+He hobbled after her, but she easily eluded him.
+I promised to wait here till my friend came.
+It was then observed that his head was invisible.
+The old woman who acted as servant received her.
+I asked, as he departed, if he went to Gimmerton?
+The back door stood open, and a grave butler was awaiting me.
+I recognised the quotation: it was about all the Latin I knew.
+Newly created inclinations might disturb the conditions of life.
+He stands precociously possessed of centuries of owlish wisdom.
+The mode of celebrating the festival varies somewhat in different provinces.
+From the evidence we deduced that Albert must have been the culprit.
+But presently Lois began to grasp something of the situation.
+The software development life cycle defines the phases of a software project.
+The bristly animal was immediately assaulted with a tomahawk.
+I awoke vastly invigorated and rather irritable.
+The two paintings above the lamp are small and bright.
+Their affection was always to subside into friendship.
+A common concern to many countries in our region.
+In an instant it came to him what this meant.
+The timbre of the new instrument was most pleasing.
+The Japanese government consistently refused to take the high ground.
+On this occasion, pigs and dogs are sacrificed in profusion.
+Our Kanban board is looking full this week.
+The Greek months were commonly named after the festivals held in them.
+She might well be one of my great aunts.
+Some feel stimulus from looking at scarlet flowers.
+The copy which I have is about three hundred years old.
+The appointments are kept out of the vortex of party and parliamentary jobbing.
+None at all, my dear fellow, none at all.
+As a whole, it both worked and played with energy.
+Systemic effects may be produced by such an application.
+Car body kits are often made out of fiberglass.
+It is believed that they have the wild beasts at their service.
+There is a widespread natural instinct impelling men toward homosexual relationships.
+Even the natives have difficulty in mastering this peculiar vocabulary.
+Reheat with turkey drippings or add chicken broth so it does not dry out.
+Her brother, who loved her tenderly, was appalled at this fantastic preference.
+The sky, the thunder, and the rain are celestial or aerial.
+The burden of their songs is a prayer for fine weather.
+Their prized collection of ornaments was stolen.
+I was still weak from my prolonged immersion.
+When he went to bed I sat up and finished Scudder.
+Gene analysis can be instrumental in predicting the likelihood of cancer and other diseases.
+So now, although no word was spoken, she was aware of it.
+The ends which they proposed to themselves in these rites were natural and laudable.
+It sounds thin to me, Wooster, very thin.
+The pond was deep under a hedge and overhanging oak trees.
+Speaking for myself, I intend to return to bed.
+On only one condition can I hope to forgive him.
+Young and old flock from far and near to partake of the meat.
+Crew retention has been a huge problem in recent years.
+All the rest, by some extraordinary means, has melted away.
+What is the sum of the ten commandments?
+They lost their heads when they lost you.
+He was the soul of devotion to his employers.
+We do not need to suffer depression alone, talk to someone.
+A bunch of teenagers broke into the excavator last night and trashed the place.
+Because there was a pothole on the road and no street light.
+She could see an extensive field of snow through the gap in the hedge.
+My wife is a wonderful sewer: she makes all her own clothes.
+There are few more striking objects than a large bush of the Venetian sumac.
+I am innocent of the blood of this just person.
+Tell me frankly, Jeeves, are you in pretty good shape mentally?
+The case is a very simple one, when divested of technicality.
+We can lower emissions by using less and wasting less.
+The favourite material is still cashmere.
+Gussie, for example, as we have seen, babbles of syncopated newts.
+At least a hundred feeding stations were in operation last winter.
+Three unidentified naval vessels are heading for the peninsula.
+At night she sleeps with them close to her head.
+A Hindu will strew ashes from a pyre at the door of the house.
+The Nubian woodpecker is in length seven inches and a half.
+The destruction of an image has also been employed for the discomfiture of fiends.
+So her jewels were, after all, never stolen?
+The great bulk of mankind are transmitters rather than originators of spiritual force.
+The girl who personifies the goddess walks through the rooms of the house.
+He shivered like a man who has taken a sudden chill.
+Her aunt now called her to look at a picture.
+Whatever he earns goes to his own matriarchal stock.
+I never could have been set right without you, sir.
+Upon their faces was reflected now the stupefaction of the man.
+Then the vision faded, the tambourines and cymbals rattled again.
+We know the choice is between the politically contentious or the medically infectious.
+But let me tell you, sir, I consider your conduct outrageous!
+I hope it will not come out when you are gone!
+I quickly released the animal, and lifted it into the garden.
+He may have been lovestruck, but he was no fool.
+They place a large burning log in some sheltered spot.
+Is immediately referred to innumerable people who can tell nothing whatever.
+Between the two ranks of dancers blazed a great fire.
+The boy looked at him, but said nothing.
+The power went out when the substation caught fire.
+The bystanders signalize the event by raising a long shout.
+The internal credit files of the other class members were not distributed.
+After that the rain is sure to come driving up in heavy clouds.
+And I only get really tight about once a week.
+If the patient consents to the substitution, the shaman turns himself into a hawk.
+I decided to enter myself to run the marathon.
+She had her eye on one of the houses down by the river.
+These cases are particularly important for our present inquiry.
+Having reached the Heights, I rushed eagerly to the door.
+His adversary calls down the most dreadful curses on him if he forswears himself.
+Do you want to act as administrator or coordinator?
+It cannot be: how has the idea entered your head?
+It does depend on how quickly the item is delivered.
+The parents go through the country, performing dances in the gardens of favored friends.
+This is done for the sake of the whole country.
+Covered with ink and mire generally, washing only on alternate Thursdays.
+She nodded, and her eyes grew soft and moist.
+Suddenly she flung her arms round his neck and kissed him vehemently.
+I have replenished my pastures with cattle and my ponds with fish.
+Halfway around the track one donkey got into an argument with its rider.
+I imagined her as little likely to die as myself.
+Formula one drivers train to be physically healthy to increase their endurance.
+The probabilities in their favor are overwhelmingly great.
+A mould or matrix of the design is thus produced.
+Could you kindly desist from throwing peanuts from the gallery?
+The spectators would empty down great bags of confetti.
+The scattered clearings must have appeared like islets in an ocean of green.
+He heard the apprehensive vague cry of innumerable men below.
+There was a stuffed owl in a case over a corner cupboard.
+I am very glad you have somebody who thinks of these things.
+But they have not removed from the neighbourhood.
+Better to borrow, better to beg, better to die!
+The costs are considerably higher when you buy an item on credit.
+Trauma may produce mental symptoms in one of two ways.
+Slow down on approach to the intersection.
+If you fasten the reins to the dashboard, you may trust Felix.
+Josie Pickering took first prize for knitted lace.
+Suddenly he heard a wild noise from his mother.
+He sent accordingly for the Royal Librarian.
+The latter do not possess any secular power as chiefs.
+The recent breakthrough in machine learning is due to advances in deep neural networks.
+It was evident she knew nothing of the disaster.
+He has not discussed the custom of the sacred marriage.
+I may say this; it commenced in a quarrel.
+You shall see the whole case clear, from first to last.
+Quantum machines have exotic parts and components are hard to procure.
+Many families go to church on Sunday mornings.
+One misstep might have resulted in a clear fall of three thousand feet.
+His bicycle seemed to fall beneath him, and he loved it.
+Also a fellow Senator, Chauncey Depew, said.
+He will sometimes tattoo the pattern of the bead on his wrist.
+Bonny bird; wheeling over our heads in the middle of the moor.
+The medical profession is the most wretched hive of scum and villainy.
+Only a runaway slave was allowed to break off on of its boughs.
+The incarnation reveals itself in supernatural power rather than in miracles.
+Some of them are reputed to be the wives of gods.
+Did the honourable gentleman allude to him?
+A development must prove fatal to regal and papal pretensions.
+It was too late: Heathcliff had caught hold of her.
+What a good thing it would be to know that too!
+Then suddenly he discovered the roadway!
+The boy skimmed a pebble across the pond.
+After half an hour he, troubled and bewildered, came in again.
+The cause of the disintegration is at present unknown.
+Healthy competition is a catalyst for growth and improvement.
+The following facts may possibly be of interest to you.
+The first knife deflected the images formed by the second.
+The first airplane was flown a little over a century ago.
+Her waters broke so she was taken to the maternity assessment ward.
+When a Greek sower sowed cumin, he had to curse and swear.
+So he jumped crash into the face of the hidden doll.
+Do you manage to get out on your bicycle every weekend?
+Anthony indulged in a disconcerted smile.
+So much of her own happiness, hung upon its success.
+There is inquiry made at various houses for a boy named Jo.
+He was given some checking and invoicing to do.
+His arguments were brief but satisfactory.
+All, all is against me: she has blighted my single consolation.
+The winds were of moderate strength during the first fortnight.
+The Amazon River is the longest in the world.
+But by acting promptly we should avoid such a contingency.
+The wheat stubble now disappeared with cinematic suddenness.
+From this day, Oliver was seldom left alone.
+Be a real sport for once and give me fair play.
+The thermal and the magnetic equators are connected.
+Our audiences will want to engage in that sort of thing.
+To mitigate disruptions, we ask event organizers to arrive early.
+The victim of the club soda habit was saved from further humiliation.
+A mist rises from the spring and condenses in the shape of heavy clouds.
+The full significance of this discovery will appear later on.
+He has a big head, very long arms and legs, and a ponderous body.
+He confided to me his motive in visiting the metropolis.
+The first essential is to divest ourselves of our own familiar prepossessions.
+He was further annoyed by a jay, which followed him persistently.
+The government tortured and killed thousands of civilians in a crackdown on dissent.
+Use boiled water, or disinfected water until regular water service is restored.
+He would have screamed but he had no breath.
+Because he said my trousers would split up the back.
+He would keep his faith with Gregson for the promised day or two.
+She was walking by the White Rabbit, who was peeping anxiously into her face.
+The elephants charge down on the dummy and trample it to pieces.
+Irrespective of what operating system you use.
+The instructed minority would count only for their numbers.
+The robot was modelled to have a close semblance the human form.
+He had always doubled, and sometimes quadrupled, his fees.
+She was overpowered by shame and vexation.
+I was giving all diligence to write unto you of our common salvation.
+We may assume, then, that Celia was changing her dress at that time.
+It is not likely ever to recover its tone.
+Yes, of course, at first; but which rules?
+He takes an iron rod with a hollow bulb at each end.
+I replied that I remembered to have seen him once before.
+I would give my head to know where the leak is.
+Michelle thought an exorcism seemed a bit extreme.
+Everything seems to have gone on and left one behind.
+An exclamation at the end of a sentence can express excitement or alarm.
+And I can give you twenty pounds a year, mater.
+Yes, it is interesting just because it is so human.
+The face of the earth is bare and withered for most of the year.
+As a result of that you are practically King.
+He was thrown into the water to be devoured by the sharks.
+You should just watch out for unacceptable motives, unreliable sponsors, and lost instructional time.
+I tried to keep track of it all but failed almost immediately.
+Academic research requires less anecdotal viewpoints and more facts.
+The driver cracked his whip and the horses trotted away slowly.
+From this or from any hotel in the town?
+In China it has been customary from time immemorial to plant trees on graves.
+Forgiveness is more manly than punishment.
+Besides, I remember that one from school.
+The walls are hung with gold and silver brocade tapestry.
+Soaked in seawater they offset the heat rays.
+I missed the dermatology class, may I borrow your notes?
+This proof is read through and compared with the copy.
+Cells should be tested on the thick wire of a detector.
+There are numerous issues with your proposal.
+Sometimes his wife or some of his sons dined with him.
+No child in her senses would behave as she does.
+When opened, this music box plays a single song at a moderate volume.
+The space elevator reached above the clouds.
+But she had enjoyed the part about the stocking!
+The piranhas engaged in a feeding frenzy.
+We mean that force which binds together the particles of a body.
+I need to be in the right frame of mind to be productive.
+There was seated just before her a pretty snug academic.
+There, of course, I stumbled against Lady Brandon.
+He looked presentable at the interview but struggled to convey his words.
+Boys in this class can hardly be accused of a moral offense at all.
+The queen is portrayed shooting arrows towards the four corners of the world.
+I slammed and locked the door and sat down quivering.
+He would be disappointed if the visitor had not come.
+You never had one shadow of substantial sorrow, Miss Catherine.
+They welcome new users, organize requests and improve quality everyday.
+The same prolific virtue is supposed to reside in his delegates.
+Yes, that sounds about right, more or less.
+These are the hallmarks of game changers.
+But you had isolated the house in Geneva.
+It will not be improper to give a few instances.
+It was black as pitch, for the windows were heavily shuttered.
+Magic, like science, postulates the order and uniformity of nature.
+He must gather them all up and begin again.
+I went to my cabin to finish up my packing.
+An efficient railway service would do much to create that prosperity.
+They passed by us, without skirting or searching the wood.
+Turning to his colleagues he nodded the signal for an encore.
+At the foot of this terraced hill was the necropolis.
+The deliberations of the parliament almost immediately took a much wider scope.
+Those who have been sick ascribe their illness to the coming of the luminary.
+He wondered what his antagonist was doing.
+However, he was not going to rouse him from his sleep.
+This path will lead you to your destination.
+He represents it as never either recruited or exhausted.
+That nice, fat carver is wheeling his truck this way.
+Something came out of the water and killed one of the men.
+And there is my slit in the sofa cushions.
+The fact is, the girl was washing the glasses.
+Bakers, cooks, and butlers ought to be strictly chaste and continent.
+Her words sent a strange chill through Philip.
+Welcome to our introduction to philosophy.
+Does the patients eye dilate when you flash a light on it?
+They were not meteors; they were too low.
+My dear sir, where were you at the time?
+Who is the dominant company in refrigeration equipment?
+The shadow before him whistled and another shadow appeared.
+Anthony got to his feet and switched on the lights.
+What is the difference between a gorilla and an ape?
+All that can be imparted, he can impart.
+And you will have such nice rambles on the moors.
+The girls say that they are such good conversation starters.
+The two discoverers stare at them, who return the compliment.
+My neighbour owned an Alsatian dog, it could run fast.
+They will lose their hold of their children.
+As my Dad used to say, it gave people a little breathing room.
+He opened his eyes after a few seconds, and looked anxiously round.
+The fellow is as handsome a rustic as need be seen.
+Today the start had been gruesome beyond words.
+To minimize friction it is better to keep people apprised.
+In England William Rufus was undoubtedly inverted.
+I wonder I never thought of that before.
+In the flashes of lightning they see the fire of the artillery.
+Tom apathetically states that he has no interest.
+We have weighed the arguments on both sides.
+The seeds should be sown early in Spring.
+He will say the body must have been dead about so long.
+Here are the other things I used to deceive you.
+This is an alternate website design you can choose from.
+They took her upstairs into the big bedroom overlooking the lake.
+Nowadays both the belief and the custom have changed in many respects.
+And a long time afterwards she brought her another supply.
+Her behaviour to my dear Charlotte is charming.
+Women who have given birth to twins may not go near the farm.
+This report gives insights into the best practices for creating algorithms.
+It was concerning that rainwater had penetrated the roof and leaked inside.
+A combination of Canadian capital quickly organized and petitioned for the same privileges.
+It is then that he fills his bead bags and increases his riches.
+They throw it into the water or burn it.
+They sent a plague or disaster until sacrifices were offered.
+And there would be poor Emma in the carriage behind.
+The entire body consists of shapeless plasma, or protoplasm.
+Never was there seen so ruinous a child.
+Her face was still like a soft rich mask, unchangeable.
+Intergalactic transport has not been invented yet.
+She could not afford to have this third.
+A draught of this wonderful mead imparted to Odin a knowledge of all things.
+May is a time of stress for many students.
+Anthony, munching a sandwich, leaned leisurely against the sink.
+He wanted to think how one started the engine.
+However, the Sunday after Easter he came to tea.
+Store the settled and filtered water in clean containers with covers.
+I have now come to apologize for doubting you.
+We left the Hotel Victoria this morning.
+He was so awkward at this service that she retired him from it.
+But before this happened we had had a slight disappointment.
+Presently there was a sound of footsteps on the stairs.
+I used to watch teenage mutant ninja hero turtles.
+I wonder why that cupboard door was open?
+Coral reefs near beaches are being affected by tourism.
+Taken up in this way, his steamy indistinctness abates.
+It automatically replies to spam emails.
+The tap leaked several buckets of water until the leak was repaired.
+She is the head woman at the new meeting in Russell Street.
+He shall buy another, if he gets me back again.
+I can hardly wait until next Sunday to recite it.
+I see the footprints of some queenly orb.
+This seems to imply that the families have gods as well as goddesses.
+Decoupling code will make your software less brittle during changes.
+Long before it had taken place my opinion of you was decided.
+Adrian made Henry a conciliatory proposal.
+Oh, by the way, Heath, where does Markby live?
+Whatever he might say Dot was happy now.
+The requirements were vague and undefined.
+I use the train to avoid the frustration of being in traffic.
+Upon these were laid knives and forks for six or eight people.
+He always seemed to care for things if she wanted him to.
+His glance, wandering inquisitively, fell on the bed.
+My dear Hill, have you heard the good news?
+All that will be necessary will be to consult his finger print name.
+But then, alas, shadows began to darken over their path.
+The abbot and prior with their suite attended the festival in state.
+Influential leaders of opinion warn us against materialism, secularism, unbelief.
+Saxon wiles or Saxon powers can enslave our land no longer.
+Paul sat down and told her about Blackpool.
+One misfortune frequently becomes a consolation for another.
+In the United States, Thanksgiving is on the fourth Thursday of November.
+What is the best archery range in Minneapolis?
+His faith stood simply on a vivid realization of the person of Christ.
+The ghosts retreat at the rattle of the hooves.
+He had the news then that Marthe was on her way.
+I am sorry to see you sitting in the street.
+Do you have any experience working with git or github?
+It seemed too precious an offering for any degree of publicity.
+He was a reserve officer, nervous, energetic, and enthusiastic.
+He met her with the young children in the front garden.
+Neither Papist nor dissenter need apply.
+Do you believe such people are happy in the other world, sir?
+He descended and spent a quarter of an hour with the Commissaire.
+He seems to be putting her on a pedestal.
+They shall not induce me to disconnect my army.
+Aunt Dahlia, to my amazement, now did it apparently without an effort.
+This book appears to have given origin to a large number of novels.
+Teachers can foster their own professional development in several ways.
+The sordid, miserable struggle for mastery in this household.
+Better, I hope, than they were a week ago.
+The name of the man who lost his soul is revealed in a dream.
+Go on, and tell the truth, if you can, sir.
+Beside it they found their first berries.
+Timber should only be felled when the moon is waning.
+Her attitude expressed dignified resentment as Vernon moved up to her.
+The sounds within indistinct and perplexing.
+Diana is going to lend me a book to read.
+Samyukt Kisan Morcha demands for an investigation by a Supreme Court Judge.
+Which historical places exist in Gujarat?
+The people tittered, thinking of John Bower senior.
+The headmaster gave a sort of strangled yelp of astonishment.
+In the meantime his prospects in life are ended.
+It seemed the ordained order of things that dogs should work.
+If we examine the data, we find errors were logged on consecutive days.
+It is evident that you belong to the first circles.
+She announced that the sequel was being pushed back.
+The Village received some information about the incident.
+Acute tuberculosis is a general infective disease.
+Everybody rejoiced at this, for that would be easy, they thought.
+I will now illustrate these two great branches of sympathetic magic by examples.
+He rubbed his moustache with a glad movement.
+The book has been indexed The British Library.
+Raw prawns and nippers are the best baits.
+On my way I met Moody Hurst wandering distractedly around.
+That conservatism was in great measure an effect of geographical and climatic conditions.
+The Christian Faith may be spoken of as the development of Judaism.
+How does Christ execute the office of a priest?
+There were three more steps to the door.
+Probably some wise, inscrutable motive was to be served thereby.
+Certainly; you shall go to your friends at once.
+He was silent for the best part of a minute.
+We should all agree: The answer is not to Defund the police.
+The two rats consulted together for a few minutes and then went away.
+He has some manuscript near him, but is not referring to it.
+He has the power of blessing barren women with offspring.
+They are obliged to take an uncommon care of their sacred persons.
+It strikes me as a rather unpleasant brand of nightmare.
+An Armenian generally buries his extracted teeth at the edge of the hearth.
+Side by side they started for the Plaza.
+He snatched his hands from his face and stood up.
+His ruddy face darkened in parallel planes of shadows.
+We built the system overnight at the Hackathon.
+His mind was troubled with hard, abrasive thoughts.
+The liveliest terror ran like quicksilver through his veins.
+They drove past him, above, below, eastward and westward.
+The answer was an apology, a question, an explanation.
+Overhead was one long canopy of snowy fragrant bloom.
+The little mouse goes to the supermarket.
+A clinical thermometer was inserted into the mouth.
+But deep below the surface it piqued him.
+First, stay protected with vaccines and treatments.
+I have the read the book, of mice and men.
+It rose on the second of the month in the second four years.
+The compressors will control their descent.
+Thomas Tusser advised the peasant to sow peas and beans in the wane.
+The building has inadequate insulation and loses heat.
+A fancy fair is one of the diversions of a London season.
+Ricardo cut the stitches of the sacking.
+The lace was of a delicate ivory color, faintly tinted with yellow.
+She paused at this point and gave me a look.
+A complete change of life became desirable.
+Botulism is recognized by the occurrence of giddiness and stupefaction.
+If she refused this condition now she would excite her to a terrible suspicion.
+I suppose the brooch got caught in it somehow.
+If a space ship fuel is depleted, does that mean they are stranded?
+The ancient Scythian threw the seed of the Indian hemp on the hot stones.
+The victor received a prize from the hand of a maiden.
+Intellect is in itself a mode of exaggeration.
+The father and mother will mount to the roof of the house.
+That saves their milk from the hellish charms of their witches.
+In many fantasy gaming worlds, there are two kinds of high elves.
+The young man passed off lightly all such reference.
+You heard those people shouting and singing two nights ago.
+How can I, my dear Esther, with nothing settled!
+The farmers shot all the dogs which had killed sheep.
+Even his material has an element of art form in it.
+He was fairly twittering with excitement.
+We of the Middle West are living on the prairie.
+A couple of times, I almost burst into tears after I mess up.
+William remained a year at his new post in Nottingham.
+Edbald, King of Kent, married his stepmother after the death of his father.
+They do not wish a real, that is, an autonomous wife at their side.
+The rocks have been suffering from dilapidation.
+The squadron was in an indifferent moral condition.
+Grain is frequently imported into the Tunisian territory.
+Not with the greatest urbanity, I must say.
+The researchers cited previous research to support their conclusions.
+She did not mind if he observed her hands.
+The eye underreacts to acute angles and overreacts to obtuse angles.
+There is a special language devoted to his sacred person and attributes.
+So much the poorer you; so much the richer I!
+This failure has led to sixteen power plants having zero days of coal stock.
+Richard accompanied us at night to the scene of our morning expedition.
+Three times, to be mathematically exact.
+An untreated condition could become chronic.
+The money so received is called the slush fund.
+He felt ill, and struggled in vain to get up.
+But between kisses Beau and this golden girl quarrelled incessantly.
+Today, the goal of a Europe united in liberty is in grave danger.
+Clean water is a privilege we take for granted.
+I sang as I dressed for dinner that night.
+As the Good Book says, it cometh in the morning.
+They do not know that Marthe wrote a letter yesterday night.
+And what about your camp up on the moor?
+Here, as in New Caledonia, we find religion blended with magic.
+We looked over the house; no Otis was there!
+He remembered the things that he had meant to say.
+There soon arise organized communities of cells.
+You are not striving to look taller than any body else.
+You can apply for membership of the board.
+Succession to the kingship always runs in the female line.
+It is prudent to secure the result of the contest by gouging the adversary.
+Look after your grandmother, girls; she has fainted away.
+It was one of the greatest and most popular shrines in Italy.
+I am thus enabled to obtain a fairly good regulation.
+Insulin costs about ten dollars a vial to make.
+It seemed to be sepia, sometimes mixed with a little Indian ink.
+His health took a turn for the worse and he appeared emaciated.
+Posh was not quite so absolutely perfect as this description suggests.
+I mean, why should anybody split his trousers?
+That graveyard at Tarrytown, for instance.
+There is a country in Africa called Gabon.
+Then he gave the Doctor a pinch of snuff.
+He thinks I might be emboldened in a striking costume like this.
+Every day it is met by a wall of silence.
+The young man and the girl both laughed.
+My thoughts wear wild, fantastic, unhewn shapes.
+The P in pneumonia is silent, corrected David, groaning.
+They did not receive, as matter of fact, the good government which they desired.
+He has startled and distressed me shockingly!
+The Etruscans were an indigenous Italian race, differing from all other known peoples.
+The absence of the car helped me to make it.
+Can you remember what it was like back in the day?
+Fifty yards ahead of her were the first of the rocks.
+The shadow of a mourner falling upon a person would make him sick.
+If it be achieved, I have cause to return thanks.
+He was quite unconscious of concealing anything from her.
+The foregoing discussion has led us to the following conclusions.
+But every time he shrank from such a climb down.
+Where is my distinguished cousin Autumn?
+Youth finds it impossible to keep the volume down.
+The eggs hatch in the female flowers at the base of the hollow fig.
+The Land Apportionment Act restricted Black land ownership.
+At every meal a little rice must be left in the pot.
+The mob carried away the very boards and rafters.
+Different dietary habits can have different effects on your health.
+We need to balance the accessibility of the references.
+How inappropriate that she should be out!
+We discussed the science project at the last meeting.
+We detected anomalies in the network traffic.
+He was panting till he could take her in his arms again.
+You will stay here tonight to arrange for their transfer?
+You are related to the Silberman people.
+I fear I surprised you, on the day of the storm?
+The ensemble of the piece will be hid from us and unintelligible.
+He sends a wise woman to the spot to win back his soul.
+You have brought your bird with you, I suppose?
+The reasons which led them to reverse the usage can only be guessed at.
+Dust swept from the churches on Palm Sunday had been spread on the fields.
+Dougal sniffed the air and looked seaward.
+The wind blows from regions of high to regions of low barometer.
+Its minute, clear detail pleased him exceedingly.
+They create a high quality, contemporary English translation of the Christian Scriptures.
+We may surmise that a similar belief and practice once obtained in Attica.
+She asked the little old woman; and looked, and began to laugh.
+On their return to the village, the chief kindles a fire in his hut.
+The two countries share a commitment to individual freedom, human rights, and democracy.
+The testimony of both the prophets and the laws is abundant and unambiguous.
+That would be the greatest misfortune of all!
+Nanobots could monitor our health in the future.
+That was the question, and nothing else.
+The chicken and the egg are now tied to a stick.
+We are conventional people only because we are lazy.
+If you want to adopt a dog, I recommend an two year old dog.
+Or must I have a fire lighted elsewhere?
+The book is Roman Catholic, but there is no bigotry or narrow sectarianism.
+Then a fella came in and wanted a Turkish bath.
+Now, I can neither bear to talk, nor anything else.
+And I waited seven more days, and he never said a word.
+They believe that by dancing they impart strength and courage to their husbands.
+Who ever loved that loved not at first sight?
+Each of the bearers has a garland of flowers slung over his shoulder.
+The front was parted in Madonna braids from the clear, intelligent brow.
+Near Old Calabar there is a ravine full of the densest and richest vegetation.
+There are some very rare instances of a horse having digital extremities.
+I say, Susan, I heard a whisper of your getting married.
+But that sword looks awfully gleaming and sharp.
+How to save an file on my Computer using Safari?
+He glanced back across a flaming spaciousness of hall.
+Their oral tradition, however, is very strong.
+No doubt they were looking for the coming aeroplanes.
+Frame a wish and gratify it, my daughter.
+You and others who know this language automatically spot such a message.
+Philip saw MacDougall soon after his short talk with Thorpe.
+The kings of Ethiopia were mostly kept shut up in their palaces.
+Your timely arrival saved me from death by a merciless beast.
+Early or late in the morning it breaks up and rolls away.
+What is the special and necessary constituent of royalty?
+Peter was not very well during the evening.
+A hole is knocked in the pot to allow it to sink.
+He may not leave his palace under penalty of death.
+These phenomena of suppression do not extend to the entire image.
+Rapid accelerations are not good for an engine.
+Did you know that the lassie had a pistol?
+The song was endlessly playing on repeat.
+Only the ancestors of the mother were known.
+We may suppose that herds and herdsmen equally participated in it.
+The potters copied his ugly face on their stone jugs.
+It was such that whoever heard it might listen for a thousand years.
+The president can veto legislation created by Congress and nominates heads of federal agencies.
+If they show pluck and gumption they get promoted.
+He wanted to bustle about, to run away from it.
+These ministers have no idea of what medicine is.
+I suppose he untied himself or kicked himself out.
+Individuality is concentrated, fixed, gripped in one exceptionally gifted man.
+Those circumstances it is not necessary to offer in argument.
+The cost of Medical equipment is unfordable to developing countries.
+They often leave a few trees standing on the hilltops.
+Did you know another poor person of the name of Liz?
+But at present he had no such delicate scruples.
+The union of a royal title with priestly duties was common in ancient Italy.
+They only lifted seven hundred and fifty.
+But to me the world seems full of wretchedness.
+Animals are losing their natural habitat due to deforestation.
+Timing is essential when telling a good joke.
+It is a promise that a present will be taken in the morning.
+India had disappeared behind Jo, and Grace was asleep.
+But I like rainy mornings real well, too.
+Adding new words when reading does not make the sentence correct.
+Place somewhere on East Coast between Cromer and Dover.
+Which road leads to the Wicked Witch of the West?
+A simple story of the home life of four girls.
+The word nugget among farmers signifies a small compact beast.
+And this time there were answering cries.
+It is, after all, always the first person that is speaking.
+He gave no reason, but his motive was obvious enough.
+While they were drinking their coffee Harry joined them.
+Even the fact is that the vaccine has not passed the experimental stage.
+When he was dried he struggled into his shirt.
+His manner was serious, but he answered readily.
+He had a pleasant way of whistling, lively and musical.
+I want to start the job hitting the ground running.
+I can detain you both, quite concealed, here.
+We can hardly help attempting to visualize the atoms themselves.
+A mistaken association of similar ideas produces homeopathic or imitative magic.
+Due to high demand, we are out of stock.
+They forgot even in some instances to ask the politics of its possessor.
+Here was municipality on its grandest scale.
+If they do it, then the resulting effects will stunt our way of life.
+Her usually cheerful map was clouded, and the genial smile missing.
+Jupiter is an interesting planet because it is a gas giant.
+The little man, with a low growl, stood still.
+Often they consist of milk which is poured into the hole.
+He laughed with a low, chuckling sound, and pelted her.
+This curious superstition prevails among some of the Indian tribes of British Columbia.
+The domino which serves for mere concealment, is almost the only dress assumed.
+Vaccines give protection from previously common viruses like Polio.
+We want to reduce exclusion and promote inclusion.
+The milkman who attends it has been described as a god.
+I restrained my impatience with an effort.
+The whole town turns out and accompanies the doctor to the tree.
+The kings, though invested with the title and pomp of sovereignty, ceased to govern.
+We had the comfort of questioning Leah in the afternoon.
+In the car were Unwin and Harrison, while Jones sat with the chauffeur.
+I went to you when we needed to stand strong against the beast.
+These jeans are too long, and need to be shortened.
+The girls loved him and were afraid of him.
+The Windsor rockers are not so common as the side chairs.
+She should have a holiday like the rest of us.
+May was better for everything than February.
+The steel beams held the weight of the bricks and strengthened the building.
+Cecilia was still in this tempestuous state.
+Forests are decreasing due to industrial scale deforestation.
+Adults often reminisce about their teenage years.
+My guardian said directly he would go too.
+The centre of his face became a black cavity.
+I always forget halfway through a story why I started telling it.
+I have none to spare myself, having to attend court very soon.
+Then, feeling queenly, she showed Paul how to blanch almonds.
+We possess a biography of the saint in Latin verse.
+In company with them we will inspect the villa.
+A practitioner is called in to restore the organ to its proper place.
+We are able to perceive how far both libertarianism and determinism are right.
+He guards his own people from the scourge of civil war.
+The girl had sprung back from the window.
+Brazilian footballers have the best flair.
+Midnight comes, and with it the same blank.
+Will a hundred francs be of any use to you?
+You may fancy a glimpse of the abyss where I grovelled!
+This uses the Risc processor architecture.
+Then Paul opened the door to the garden, and all was different.
+At a signal from the rainmaker, they all sit down in a line.
+Today in Jobat assembly constituency the leaders came for campaigning.
+One or more of the children carry a little pole or stick upright.
+His mother was stroking the polished wood.
+The wise man advised we work hard at work.
+Lovely dimples, like little dents in cream.
+Do you know, I fairly sneaked off with it.
+Again, hot as steel, came up the pain in him.
+But, then, they were both as hard as nails, physically.
+Most substances absorbed with great avidity rays of certain colors.
+Saskia, who had been listening intently, shook her head.
+The music struck up, and the bridal pair was led merrily to the village.
+The Brahmin leads us gently to the outermost courts of Nirvana.
+He turned round and glared suspiciously.
+They annexed Mashonaland and subsequently conquered Matabeleland by force.
+He put his eight coins proudly on the table.
+I spend my wealth on philanthropic efforts.
+Downing could not bear up against this crowning blow.
+The reason assigned in the text was probably the original one.
+What does the preface to the ten commandments teach us?
+It happened a minute after the permit expired.
+On the digital day, all students will have asynchronous work.
+He refuses to talk, reluctant to let her see him feeling vulnerable.
+If it was to show his power, he succeeded, and all Rome applauded him.
+The piles are then wobbled about, by swaying upon the guys.
+What shall I do when he pays me the four pounds?
+They may attack in large numbers up to one hundred and twenty.
+We made incremental changes to the website, rather than one large update.
+A few last colliers straggled up the dim field path.
+He had the same white skin, with a clear, golden tinge.
+And in a second he was back at the window.
+Some kings are forbidden to sail on the sea or to cross certain rivers.
+Human beings have an intuitive basic understanding of causal inference.
+Under such a system, the kings are elective and the queens hereditary.
+I slackened speed some yards off and walked briskly up to the door.
+The closing of the door recalled him to himself.
+Again I had to describe every detail of his appearance.
+Ada has been in such distress, and is so very sorry.
+Some of them should attain to the highest position of authority.
+The correspondence of Pope and Swift describes mankind around them as monsters.
+They do not occupy the positions in which the molluscs themselves lived.
+After all superfluous flesh is gone what is left is stringy and resistant.
+Her favorite Roman emperor is Hadrian due to his beard.
+Its tortured muzzle dipped below the wavelets more frequently.
+In geography, I learned the difference between arable and pastoral farming.
+Acorns were an article of diet in some parts of southern Europe.
+With them were Indians, also three other men.
+The sight of a pale face would cause him instant death.
+Do you want to buy a single or a return ticket?
+One of them rings a bell all the time he is drinking.
+It seemed to me that the conversation was becoming difficult again.
+Masculine names are reserved for planets of peculiar interest.
+That, of course, I know you would not abandon.
+They could make the best arrangements of patterns without loss of time.
+This disorder often grows without any previous complaint.
+Thank Heaven Jill continues so comfortable.
+A new Joint Declaration between the United States and Iceland was signed.
+A spark is thrown that shall eclipse the sun.
+Shakespeare is no sectarian: to all he deals with equity and mercy.
+Corpulence is still regarded as a great distinction and beauty.
+The emperor ordered the cubit to be transferred to a church.
+Sir William, how can you tell such a story?
+At the end of the course stood two or three young married women.
+No doubt you were a bit tight at the time.
+Her clothes and some skirts hung under a cloth in a corner.
+Both populations are Czech speaking the Czech language.
+Obviously Sir Walter believed in me, though why he did I could not guess.
+She was trying the brakes, that she knew were broken.
+The past participle of freeze is frozen.
+I graduated with a third class honours degree.
+Depots of matter take place in the disorganized tissue.
+The less fuss made the better, in my opinion.
+You know I always think she is quite agreeable.
+I set off one morning, accompanied by Charley.
+I like them immensely, so tell away, my dear.
+The day of grace came and went, and yet no rain fell.
+Next, we need to drill down to the detail.
+The kids are playing hide and seek in the barn.
+The spirits of the rocks or the river would snatch away their souls.
+British English: the image was licensed under a Creative Commons licence.
+For some inscrutable reason it served Miriam right.
+They would remain at the mercy of their exploiters until they were organized.
+This evening there was between them a peculiar condition of suspense.
+Too much, he told me, with ominous rolling head.
+Is kissing you generally considered a joyful affair?
+The doors are thrown open, and she passes through the hall.
+The Freudians will continue looking for the causes of mental diseases.
+The north of Italy was covered with dense woods of elms, chestnuts, and oaks.
+Her lips, parting for the word, had just faintly stirred.
+Then he kissed her fingers, then her face.
+It was difficult to bowl to Virendra Sehwag.
+The regalia reign, and the princes are merely their representatives.
+What, after all, could he have told them?
+Upon her forehead stands, in Hebrew characters, the word truth.
+Where does discretion end, and avarice begin?
+I always fetch the letters when I am here.
+There are only ten peripherals on each side.
+Farmers in Pennsylvania have a commendable spirit for building good barns.
+We have only processed a fraction of the dataset.
+No instrument can compete with the human hand.
+Make more cars and semiconductors in America.
+We are captivated by another persons imagination and storytelling skills.
+We might have symbols of indefinite multiplicity.
+Soon many of you will be walking along Broadway.
+The old man was looking at me with blazing eyes.
+If you are old and stiff, I am fat, stuffy, puffy, and old.
+Earnshaw had his countenance completely averted from his companion.
+No fire except a sacred fire might be taken out of his house.
+Could they have been waylaid and robbed?
+False alarms were horrifyingly common during the Cold War.
+Why should I do this? demanded the Beast.
+The planters are already considering the matter.
+I deposited a small box here a short time ago.
+We mainly use Python and Tensorflow on our startup.
+I have got half a smoked ham hidden in the chimney.
+Allan naturally asks what kind of man he is.
+Some of the sentences on this platform are kind of boring.
+Their authority rests above all upon their supposed power of making rain.
+It is become difficult to see any sense at all, through their envelopments.
+Revenue is expected to increase year over year.
+When the flocks are flying over he goes out and honks.
+There never was such a good fellow as Woodcourt is.
+You must sign the tenancy agreement before the lease will begin.
+There was between them now always a ground for strife.
+She liked to feel she was serving him across an insuperable distance.
+Men and women alike take up the calling of teachers and prophets.
+Then Ada blushingly asked me how did I know that.
+He has to run to earth now before he is seen.
+A bad reputation is usually of a very sticky nature.
+The marine knot is the distance equivalent to one minute of latitude.
+They supposed she scraped the bricks for rouge.
+He was a considerable proficient in music, painting, and several mechanic arts.
+Bodies are conductive and their property is conductivity.
+Today the soft currency question is practically out of consideration.
+Nothing in nature corresponds to the absurdities of their ponderous doctors.
+What astonishes me is that anyone can do it.
+They were kid boots at eight shillings a pair.
+Elizabeth accepted their company, and the three young ladies set off together.
+The peculiar set look on his face stilled her.
+The funeral rites might be considered as a phase of the new birth.
+The Russian music player, the Count, was her obedient slave.
+Some of them she had taken the trouble to read herself.
+We need to conserve water until the water supply is restored again.
+Elderly people can be vulnerable and need assistance, but might not ask for it.
+The comets are no more than very eccentric planets.
+Grissie turned to look at her with an undisguised admiration.
+He walked down the hill, and through the village.
+Some of the bronze axes appear to be copies of the earlier stone ones.
+And there would have been none but for Helene.
+Avocado makes a delicious fruit salad with the addition of lemon juice.
+He coughed up like an officer and a gentleman.
+Talking as though I were objecting or hindering you!
+Shall we see you this evening, mon dear?
+Through her pain she found purpose to demand we do better.
+The tumult of thought, the confusion, the eddy and eddy.
+With one effort, I could have hurled him into the street beneath.
+Free, is not in this shop keepers lexicon.
+Can you compare my feelings respecting Catherine to his?
+Altogether, the agility and endurance which he displayed was remarkable.
+The alpha version has been released, the beta version is expected next year.
+I thought we might walk down and see a movie.
+It was very pretty and young, and the hair was fair.
+His mother could come downstairs for tea, the doctor said.
+A plough could be run from one end of the plane to the other.
+I am putting an extreme case, but it might be so.
+The Damascus rose was cherished by the Semitic or Arabic stock.
+The personal qualities of the kings are deemed of vital importance.
+It seems to me useless to distinguish it into abdominal and vaginal.
+There was some confusion at first but we overcame it with practice.
+She came after cautiously, hanging on to the twigs and grasses.
+Dinner was now announced, and we went downstairs.
+The Teutonic thunder god resembled his southern counterparts Zeus and Jupiter.
+Helene leaned back with an air of disappointment.
+Were you able to negotiate a reduced price?
+The batsman, hitting out, was a shade too soon.
+She lay there, a distressed, unsheltered, senseless creature.
+Tom turned in without the added vocation of prayers.
+Presently, he came to a pond where Mr McGregor filled his watering cans.
+To click can be either advantageous or baneful.
+She saw the sunshine going out of him, and she resented it.
+What awfully bad pastels there were on the walls!
+They found a place that looked quite cheap.
+The procession consisted of eight elephants, twelve hundred camels, and four thousand horses.
+I put on my surliest face and shrugged my shoulders.
+He stood below in the mean street, looking up at her.
+Twice I strangled a sneeze just in time.
+I pass the greater part of the long vacation here.
+The following is another extract from the same treatise.
+They were the more sensitive to injuries and encroachments on their rights.
+One of us stood by the battery all day long.
+The cutters could be given copies of the plan for their guidance.
+In another hour he fell into a deep sleep.
+But I saw something else more interesting.
+Presently she went out and strained the potatoes.
+One may reach a recession in the rock which makes a lovely armchair.
+The three faces seemed to change before my eyes and reveal their secrets.
+Miss Bennet he acknowledged to be pretty, but she smiled too much.
+The hind legs are the first to show themselves.
+It can do nought to sixty in five seconds.
+With shaking fingers he held out a newspaper.
+As soon as he came into the yard he walked very softly.
+But just now I feel pretty nearly perfectly happy.
+We have two independent lines of proof that Saturn was supposed to be married.
+Take my advice if you want to keep out of trouble.
+What beats me is how you ever got in touch.
+The priestesses gave chase to it, running round and round the house.
+The magic touch of time distorts and magnifies the past.
+Sorters of tobacco are paid higher for the same time.
+The omnibus would have to wait for luggage.
+How much water is left in the reservoir?
+We now turned into another narrow street.
+But no such recollection befriended her.
+James arrived at an age when he could be treated as responsible.
+Nobody heeded me, nobody was aware of me.
+These parties gradually became their chief source of entertainment.
+I believe in Jesus Christ, his only Son, our Lord.
+There is a presence in the room; I will speak to it.
+On the following morning he hastened to pay his respects.
+Quartz is distinguishable from glass by the nebulae.
+The four animals named are those whose chase is most hazardous.
+From that time onward the register is nearly complete.
+The next thing to be done was to unharness the horse.
+We are here concerned with the meaning and the rites of the festival.
+And play card games on the commuting trains.
+Helene is sure to understand that simple and elementary word.
+Upon the floor there was some dark mould.
+We cut them deep in the stones, and they are there now.
+One type is haughty and reclusive, believing themselves to be superior.
+What kind of a story was I to tell about Scudder?
+He always liked it when she put one out for him.
+Again it is conjecture, and I wish to make sure.
+He shuffled to the window and looked out.
+The teacher ticked Rosie off for punching.
+Incidents of childhood and youth have faded from our memory.
+He was struck motionless and speechless.
+I asked the students questions as I went.
+The only Slavonian stems which remain to be mentioned, are, the Bohemians and Wends.
+His family were naturally, though unobtrusively, distressed about it.
+You see how much I have studied the subject.
+Economically considered, the existence of mankind is conditioned by some sort of saving.
+She seemed talking for her own pleasure, without effort.
+I think women would make splendid ministers.
+Has there been any recent reduction in welfare payments?
+The Umbrians regularly submitted their private disputes to the ordeal of battle.
+It behooves a man to be careful about his mouth.
+German woodmen make a cross upon the stump while the tree is falling.
+For some not inconsiderable time, I gather, sir.
+Hot water smells quite different from cold water.
+I rather regret never having learned to play the cello.
+But what on earth can have brought him up to London?
+Several varieties of preferential performance have been discovered.
+The natural result was that his manner was offensively abrupt.
+Excess duplicity may result in the rescinding of your acceptance.
+Equatorial Guinea is a teeny tiny country.
+A curse would follow if she neglected to do so.
+She hesitated in her approach, to watch.
+The oil is forced into the furnace in the form of fine spray.
+How I writhed, and yawned, and nodded, and revived!
+Several members of the lower house came into the tea room.
+He would have been listened to with feelings of contempt.
+On the march, his guards were preceded by men carrying fire.
+The young man stood, smiling with his lips.
+After that we can discuss plans and schemes.
+Two years ago I gave up civilization for this.
+There was the free use, too, of Christian names.
+Book on Subhash Chandra Bose written by Dr Ranbir Singh Dahiya was released.
+You were to be exactly what you were before.
+Please be rest assured that we will keep your data safe.
+Before such youth and vigour he felt clumsy and old.
+Each artist at Openclipart releases all rights to the images they share at Openclipart.
+She was hot, and she took a hurried bath.
+Everybody must have seen the snow coming on.
+She was impatient to be done with this annoying domestic interlude.
+Artificial Intelligence can be used for social good.
+If he was still obstinate, they plunged him into the water.
+Who would want such a child about the place?
+Human nature is so prone to fall into it!
+The seats are placed down the whole length of the vehicle.
+Such an event would have put the whole nation in jeopardy.
+Oh, Evelyn, I love this little room so dearly.
+She could guess what depth of feeling lay in this.
+Another instant and the house would be alarmed.
+He is forever anticipating persecution and martyrdom.
+Smith flicked a speck of dust from his coat sleeve.
+Our rude forefathers personified the powers of vegetation as male and female.
+Cautiously the men disembarked and crept up the bank.
+He leant on the back of a chair, and covered his face.
+Then I had a sudden thought, and hunted up all the steamer sailings.
+She ought never to have been burdened like it, you know.
+We were all startled by the fervour of this warning.
+I gathered that he had no preference in parties.
+They hold him up by the heels to empty out the soul.
+This is not at all the kind of thing for my voyage.
+The preparations of the women are accompanied by the bleating of the sheep.
+At all costs she must be prevented from giving that information.
+You want setting down in your right place!
+You are not aware of half my humours yet.
+I gritted my teeth and stayed there to the end.
+I have no means of knowing what his present condition is.
+He used his wrist to play that beautiful short.
+Fruit flies are small enough to get through the holes in the screen.
+The tribe worships the spirits of the ancestors of the paramount chief.
+An assembly of people gathered outside to meet the celebrities.
+When the man is in battle, the wife continually dances and sings.
+Bobby made no coherent reply; he was engaged in feeling his pulse.
+He remained concentrated in the middle of the road.
+But she felt wretched with the coming child.
+At the bottom, she knew very well he could not go.
+The women pile the seeds and their digging hoes in a heap.
+When Jesus Christ hung on the cross a flight of crossbills fluttered around him.
+We neither care for devout dunces nor for intellectual icebergs.
+And round went the poker again, more fiercely than before.
+An ethnological, racial unity had to be established.
+The climate was intensely hot, feverish, and unhealthy.
+It means to be an unrelated and autonomous whole.
+We found five new vulnerabilities in the span of eight days.
+It was our river emerging like ourselves from the great swamp.
+The wedding day was the best day of his life.
+He soon was friends with the boys, whose rudeness was only superficial.
+There was nothing at the back of all his show.
+It represented him sitting on horseback and spearing the dragon.
+Every one else knew that the news was not good.
+I consider the Indianapolis resolution against violence, sabotage, and crime a joke.
+At long intervals the various members of the party followed his example.
+The size of the restaurant bill really grabbed his attention.
+The released ventilator whirled noisily.
+Theory required that the assimilation of the kings to the gods should be complete.
+There is no such thing as a haunted wood anywhere.
+We could not agree on the colour of our carpets.
+Seven, Cousin Peter, and all of them twins!
+He is still able to support the burden and cares of state.
+I almost forgive you the fright you gave me!
+A frantic desire to free himself took possession of James.
+Anyone who comes to the house of a hunter must walk straight in.
+People often associate Christmas with tinsel and glitter.
+Loyalty and monarchy is secured against republicanism, blood, and rebellion.
+In the foregoing cases a person is supposed to influence vegetation homeopathically.
+The constituency boundaries are being redrawn.
+Money transfers must go through a clearinghouse for safety purposes.
+Comprehensible speaking is the skill needed here.
+And presently they were all laughing together.
+The priest in his robes reads a list of the horrors of hell.
+There are solar panels that look like glass windows.
+There is some fashion, in a fudgy quaint way, here in Munich.
+He did lock the cupboard door; but without properly shutting it.
+I have full confidence in your capabilities.
+She shall sit opposite, with the light upon her face.
+Then he thrust me away, and leant his head down silently.
+North Goa Konkani is different from the South Goa Konkani.
+Richard spoke with the same shade crossing his face as before.
+He is hidden under a great pyramidal or conical frame of wickerwork.
+Symonds is a curious fellow; I love him dearly.
+She brought forth to him his imaginations.
+The tissue paper roll is in the kitchen.
+He hacked at the earth till she was fretted to death.
+But it did not: it burned quite steadily.
+Except on military compulsion, I am not a man of business.
+The Knight looked very much surprised, and a little offended at the remark.
+There was a look of infinite suffering upon his face.
+I caught a large water snake or water wampum as they are called here.
+Let her fly away in a high wind on a broomstick!
+Do you know the story of Orpheus with his lute?
+There is a provincialism of mind as well as of accent.
+Obviously, it was a disease that could be contracted by contact.
+Yet they had cleared their minds of formulae!
+Autonomous brass coins of this island have been found.
+The wife of a hunter may not spin while her husband is eating.
+Snatching his boar spear from the wall, Martin Waldeck set forth.
+The horse always leads the cart, never vice versa.
+It is supposed to protect the reindeer from wolves and from sickness.
+What has become of the feathery gills which the little ones have?
+She is a great deal too ill to be moved.
+For a quarter of an hour Austin was comparatively quiet.
+No animal in its senses would hike uphill and then down again.
+He was almost ashamed to ask whether he could eat kosher there.
+The advance and recession of the glaciers seem to depend upon the seasons.
+The yellow lamp of the carriage shone alone down the black road.
+Ada would contrive to take him, somehow, he said.
+During the rest of the day the process of scratching is repeated at intervals.
+I will never stop caring for my children.
+He read aloud the number of steps in the different stairs.
+They must have thought he was a private detective.
+But of course Monsieur will require your presence.
+A school environment is conducive to learning.
+If you can assist, please write a cheque.
+She is extremely concerned when any of us are ill.
+I shall be stopping here till Monday in the village.
+He receives personally his reward, and he delivers personally his intelligence.
+A few hours of feverish joy were followed by weeks of misery.
+She always hesitated to offer or to show him anything.
+Sir William had been delighted with him.
+On your turn, you can enter a rage as a bonus action.
+A gilding powder is sometimes made from Dutch gold.
+Over everything she brooded and brooded.
+Your account does not have admin privileges.
+That is in line with our community aims in the South of the city.
+Public transport is extremely efficient.
+We can address income inequality without ending incomes.
+A good leader focuses on developing others.
+The station, when I reached it, proved to be ideal for my purpose.
+Aim at the highest, and never mind the money.
+No sentiment of shame gave a damp to her triumph.
+The tone among the boys was frankly and violently unclean.
+Sir Walter is engaged, sir, and I have orders to admit no one.
+His house becomes a complete school of vice and wickedness.
+Mathematics is the language of all things beautiful in life.
+What are the characteristics of a trustworthy salesman?
+Coal viewers or engineers regard the dislocations now described.
+But whenever there is danger my heart begins to beat fast.
+Academically, Ireland is worse off than England.
+Another good tweed dress takes a light shade of biscuit.
+He panted for breath, and looked round upon his friends.
+To curse, scold, or quarrel in its neighborhood was regarded as a crying sin.
+The term furred or shaggy represents this condition.
+They rode in chariots through the city preceded by the rods and axes.
+Are you willing to take the vaccinations?
+So they kept walking until Dorothy could stand no longer.
+There were stir and bustle, new faces, and fresh facts.
+The best workers know how to be competitive and friendly at the same time.
+It must have cost an awful lot of money.
+And why do we need refreshment, my friends?
+Reducing waste and pollution is a collective responsibility.
+Her face was flushed and shiny, her manner peremptory and quick.
+No abbreviatins in contributed sentences, please.
+About them a crowd was rapidly accumulating.
+February was the coldest month of the year.
+She looked at me in a pleading sort of way.
+My observation would be that this is an assumption.
+The microphone settings must be checked.
+They remain in the rockers from seven to ten days.
+I would not expurgate school editions of great authors.
+A man received an injury to the spine from an accident.
+The migrations of the squirrels are carried out in obedience to his behests.
+I hope she will excuse its painful nature.
+This periodically crippled the economy and resulted in widespread shortages of basic commodities.
+Communist Party of India Marxist demands that this decision be withdrawn.
+I know there is simply nothing beyond our capacity.
+His exhilaration increased rapidly, became a sort of intoxication.
+Some time or other we shall be happy to hear you.
+He recognised the Council House and the Highgate Ridge.
+The Algonquins cast their nets as usual, but took nothing.
+His determination solidified, approached momentarily a dull and sullen hate.
+You were hobbling along with a couple of sticks!
+Are you ready, Comrades Carroll and Jackson?
+The prisoner was released in order to vote.
+He had a dirty woollen scarf round his throat.
+But the man restrained himself and moved to the door.
+The finisher must insist that the sanding be done with the grain.
+The time of high water at any particular place is the same.
+It is deemed enough if he merely places the holy bundle on his back.
+We talked it all over with Mr Weston last night.
+I know enough of music to speak definitely on that point.
+Winds from southeast and southwest invariably bring fine weather.
+He bent forward to her to light his cigarette at hers.
+Something about the bees eating the clover.
+The Germans despaired of victory if they joined the battle before the new moon.
+Car safety maintenance should never be overlooked.
+She has never had sexual attraction toward a man.
+The business of girls in these islands does not lie in the great waters.
+They squirt the water into the air, making a fine mist.
+Phew! Glad the reminder system is working as it should.
+I hoped they were going to take up my tracks there.
+It is but chance that you do not get rain before night.
+There is one thing that makes up for all.
+Suddenly a spasm shoots across her face and she turns deadly pale.
+It was said that eggs whisked better in a cold place.
+And the matron she said thought I would do.
+We were overreaching and struggled to deliver.
+Straight and swift I ran, and no one dared to stop me.
+She dived from the diving board into the swimming pool.
+Aunt March received them with her usual hospitality.
+What an excited whispering and conferring took place.
+We are doing too little to save the planet.
+Botanists are not agreed about the identification of the leaves on the busts.
+The doors of the house are scrupulously barred at meals.
+This is the attack as it should have been delivered.
+When found, the man is conducted to the altar of the god.
+Downing proceeded to improve the occasion.
+So in this way he went on getting more and more pets.
+The age of Homer is surrounded with darkness, his very personality with doubt.
+He would by no means permit the introduction of Sunday papers.
+She caught up the dress and tried again.
+Religion, as a conciliation of the superhuman powers, assumes the former.
+Anthony retired into the cushions, shaken with laughter.
+You will need to bring a packed lunch for the school trip.
+It is firmly established in fantasy gaming worlds.
+She trembled, and he listened, vaguely anxious.
+A block of concrete is hardly a thing of beauty.
+Anthony sent it off elsewhere and began another story.
+When the king of Tonga ate, all the people turned their backs to him.
+After all, it is preferable to be hated than loved by him.
+It was the act of a hound and a stinker.
+He burns it and calls on the spirits to smell the incense.
+She raised herself, or rather would have raised herself.
+Have you no feeling for your profession, you groveller?
+The coaches are filled with well dressed women.
+Her hair was touched with grey, her dark eyes looked wild.
+The king of Ulster was forbidden to attend the horse fair.
+I shall therefore not draw my examples exclusively from royal personages.
+You use your Wisdom whenever a spell refers to your spellcasting ability.
+He is more powerful than all the rest of us together.
+She ran in, and was running out again when she saw me.
+Right you are, sir, exclaimed the commissioner.
+You have no business to be taking storybooks to school.
+Defamation of character: action for damages.
+We are going to go bigger and better or go home.
+He demonetised silver in Germany and monetised gold.
+Clara, a little way off, was looking at the cowslips disconsolately.
+There are no secrets between us, I think.
+But the women were intent upon their own ends.
+Solar technology can be embedded in day to day furniture.
+You remember it is time to get up, for there is a stunt on.
+Just at present I have a soul above red hair.
+He has been compelled to reorient himself to it.
+Her sisters were uneasy for her, but her mother was delighted.
+The Vienna Canning Company started out with thirteen stockholders and now has only three.
+She ups her stick and begins to belabor him across the shoulders.
+Five surprised faces looked up from a round table.
+The extremities, or ends of the branches, are soft.
+With suddenly quickened breath he walked to the telephone.
+He returned in five minutes with a whitish face.
+It was obvious that boring questions lay outside his scheme of life.
+Did you see anyone pass early this morning?
+There was a bare possibility of overtaking them if pursued instantly.
+All maps can be colored with only four colors.
+I discovered the framework of what might be made a splendid spectacle.
+A sorceress runs about beating the air with a stick.
+The teacher was found to be a paedophile.
+The weight of the crop comes in July or August.
+Tropical grassland occurs chiefly as savannah, more rarely as steppe.
+Cuss rapped at the parlour door and entered.
+Americans have grown up with Italian opera.
+I shall try to domesticate in some antique feudal castle.
+He always brought her one spray, the best he could find.
+Those that exchange ideas, like the middle classes.
+It was in Persia that the rose found its true home.
+We shall be flooded with silver and all gold will go out of circulation.
+The discovery of the motorcar had raised his spirits.
+The ceremony was repeated for all the other quarters of the sky.
+One of the beasts appeared and dragged the girl down into the water.
+The offense was probably horseplay of an animal nature.
+You are wanted in the other room, Miss Rose.
+No one seems to have been aware of his misfortune.
+Some of the Fijians thought that man has two souls.
+At last Miriam let the bird peck from her hand.
+Then it began miaowing in different parts of the room.
+The meaning assigned to the word here is merely contextual.
+A partition is effected between the civil and the religious aspect of the kingship.
+For about six years I managed to control myself.
+The sticks are kept in the house of the great wife.
+They are having eggs and bacon and champagne.
+Mr Tod opened the door cautiously and went in.
+Your speed is not reduced by wearing heavy armor.
+They refused to take off their hats to anyone but the Most High.
+When the Siamese need rain, they set their idols in the blazing sun.
+He must describe the habits of the deceased Grand Lama.
+Never speak of her wealth, if you would keep her favour.
+I fancy she was wanted about the mince pies.
+What is required in the sixth commandment?
+Six months ago he would have read it simply.
+These walls are paper thin, I can hear everyone next door.
+The boys of each street used to erect a Maypole.
+Data is a vital ingredient of training machine learning models.
+The magician deals him a terrible blow, sometimes felling him to the ground.
+Every year a sacrificial festival was held in his honor.
+Let me use my mind, Cousin; tell me from the beginning.
+There are independent reasons for holding that this is so.
+Most commonly the scene occupies the middle distance.
+I gazed round for a means of diverting her thoughts.
+Painters and connoisseurs are the only competent judges.
+Autocracy has always been the archenemy of freedom and human rights.
+Are you truly stronger, Linton, than when we separated in winter?
+The soul is brought home in a piece of wax.
+It was very quiet in the little square that was filled with nursemaids.
+Within a few brief seconds, Striver lost all sounds of the pursuer.
+What was the effect of the financial crisis on your community?
+Neptune and his queen are standing in a scallop shell.
+Celia, her cheeks rosy, her eyes bright.
+He carried his law with him and looked to have it respected.
+And then you go on about how twilight always makes you sad.
+Some people seek to propitiate him before or after they occupy the new house.
+Hemophilia is inherited almost exclusively by males.
+No gold should be found beyond the riffle.
+Where was the woman ever seen who resembled you?
+A traveller is nowadays called a tourist.
+They are thus broken up into elongated grains.
+There is a disproportionate amount of people dropping out of school.
+The aim of the whole conspiracy was to get Russia and Germany at loggerheads.
+This answers to the way in which I visualize for them.
+The rushes should start from both flanks, and perhaps from the center as well.
+Then she saw that in his face which reassured her.
+Accountability must be baked into the design of automated systems.
+One could condemn the sin, and yet do justice to the sinner.
+Bertie, you abysmal chump, I appeal to you once more.
+Silica, when dried, is a soft white powder, without either taste or smell.
+She acquired a power over her which was unassailable.
+Business, he said, required his immediate attendance.
+How did Christ, being the Son of God, become man?
+And each year something happened, and I did not go.
+The image of Juno was annually carried in procession from her sacred grove.
+I think after that she will need no further help.
+What ever she might feel, she betrayed nothing.
+That is to say, some time after midnight.
+She shall reign in righteousness in all the earth, for my soul is hers.
+He glanced at the door and back to the figure.
+In the middle of the hollow is a small worn block of stone.
+She had discovered another kindred spirit.
+I wish I had nerves like Jane Sanderson.
+I shall expect a pile of letters at Little Rock.
+You see I had to pile up some evidence for the inquest.
+The waxing moon draws the sap up through the trunk and branches.
+You can use them if the new form is physically capable of doing so.
+The sight of a beautiful youth awakens astonishment in the lover.
+Two or more girls attend the cattle on their migration.
+For twenty minutes I sat there, wondering what I was to do next.
+For many years no Dakota would consent to have his picture taken.
+You wanted to see me on a personal matter?
+The dessert was sprinkled with icing sugar.
+In a maze of wild fancies I heard the street door close behind him.
+Thus only could suspicion be averted from herself.
+They cover the looking glasses in their bedrooms before retiring to rest.
+The architect said the house does not conform to building regulations.
+We all have the power to help at least one person.
+How dreary to meet death, surrounded by their cold faces!
+If the strangers were admitted by day the devil would enter behind them.
+Why were you reluctant to tell the rascal your real name?
+He knew that his contempt was unreasonable.
+The redemptive work is transferred to this secondary Messiah.
+Bicarbonate soda is also known as baking soda, an ingredient of cake.
+He did not think we ever walked this road.
+An indefinite alteration had come over his whole person and manner.
+It appears never to have reached full and conscious development.
+Catherine and Lydia had information for them of a different sort.
+They had crossed the bridge; they were in Switzerland.
+This was the signal for putting out all the other fires in the country.
+Colonel sanders has his face painted on many buildings.
+I could not go beyond that, sir, without wronging some one.
+He was trying his hardest, but kept forgetting things.
+A car becomes twisted and mangled in a high speed crash.
+But I want you to know that we are going to be okay.
+All the villager took part in the marriage ceremony, which lasted three days.
+Articled clerks go a good deal on the water.
+The arches are transitional, two being round and two pointed.
+One little stipulation she made, that she should bring Carlo.
+A before e must be accentuated with the acute accent, and pronounced accordingly.
+His whiskers bristled and his collar stood on end with rage.
+Matters were not very different in other Latin towns which kept a Vestal fire.
+By process of elimination we could determine who the real culprit was.
+Despite the name, toad in the hole contains no toads.
+Have you reported the whole of the sale, or just a part?
+The aeronaut sat behind a glass that sheltered his face.
+Hall made gestures of silence and invitation.
+So his mother thumped him, and he cried melodiously.
+Brick and mortar shops have been slow to adopt digital transformation.
+Look here, you have surprised my secret.
+You will need an additional adapter to use your old earphones.
+But it was quite truthfully the only answer he could give.
+From the beginning I showed a strong artistic bent.
+It is quite all right, Jeeves, quite all right.
+I have an aunt who is as beefy as her neighbors.
+When a tree or plant is cut it is sometimes thought to bleed.
+It was soon rumored that there had been a fight in the cabinet.
+A person who lives to one hundred is called a centenary or centennial.
+How could I ever be worthy of those tears?
+The following collation was served to the royal party.
+He would destroy all things that are fixed.
+And we must demand that government continue to perform and achieve and accomplish.
+We shall be able to deal with them all the more thoroughly.
+We must have independent, moving, living soul power and nerve force.
+That was a serious act of insubordination.
+Taro and other vegetables never thrive if they are planted after full moon.
+One might almost call his ensemble slovenly today.
+Eight and six in half a sovereign, Polly, and eighteen pence out!
+But in my opinion it is foolery, nothing else.
+It was not far, only at the summit of the hill.
+Massage and sun cure and passive movements are loosening up the knee.
+I am not going to spend a penny in a bogus contest.
+Spiller and Robinson and Stone, and some other people.
+Pears are definitely my favourite fruit.
+Every house and every room is adorned with boughs.
+Manohar apathetically states that he has no interest.
+And so the state of the car is explained.
+There was a coldness between him and her.
+Many sheep will fight dogs and stand their ground fairly well.
+A parent is a nurturer of positive energy.
+The fine appearance of the clerks was impressive.
+Clara was kneeling, breathing some scent from the cowslips.
+I do not blame you for anything; remember that.
+The Basque nation is certainly the first that settled in the Spanish peninsula.
+This last rule seems to be a mitigation of an older custom.
+The former instinct, the primary and more fundamental, is capable of overmastering the latter.
+A temper was evidently one of his numerous qualities.
+She clasped the verandah post to keep her from falling in a swoon.
+The car was taken into the garage for a Wheel Alignment.
+I saw you pursue your friendship with her.
+I have known this to happen before in the Wooster home.
+Those fellows in red you notice are prisoners.
+Solo tenor and soprano singers will exceed the altitude here specified.
+He dashed in and took cover behind a tree.
+A wretched evening is beginning to close in.
+There was a scream and a clatter of pans.
+I should rather enjoy the brickbats and hooting, I think.
+You need to vary your approach when tackling difficult problems.
+Tommy Brock squeezed himself into the rabbit hole with alacrity.
+The Monkey wound many coils about his body.
+Tom sneaked up behind Molly and stuck some stickyweed on her back.
+He confessed that the sketch had startled him.
+But at the end of the riding was a fence to climb.
+Now show me the first drawer she touched.
+I ought not to have said a word about it.
+It was not in that pocket, nor in his knickers.
+Cookies must be baked at the right temperature.
+I could almost have jumped for joy when he was gone.
+Edgar Linton, after an inquisitive stare, collected sufficient wit to recognise her.
+The sufferer appeared to have a high voice.
+Presently the lad stood in front of her, wildly excited.
+They are taken from their bag and placed behind the frame.
+A living will, leaves little room for dispute.
+And the letters are destroyed with the person?
+The uniquenesses of Christ are manifold and indubitable.
+When we came back we entered the wrong theatre.
+The soul is too large for him and is tearing his insides.
+The hyaena may be equally certain that it has.
+They had frequently been staying with her in town.
+This feverish uncertainty in human conduct seems unavoidable.
+He was not home again until a quarter to eleven.
+The value of our dollar fell considerably.
+Her noble father and mother would soon come to give them half the kingdom.
+Without a doubt, some of them have dinner engagements.
+The whole country would be frittered down into potato gardens.
+The solemnity of his manner impressed him.
+This soft drink brewery has survived generations.
+That night, they and the foul fiends hold their greatest gathering, or sabbath.
+He pegged several butts, and gave me a glass of each to taste.
+Thus was momentum gained in the Younger World.
+The two men stood on the landing perplexed.
+And that was the last of Francois and Perrault.
+Yet, in reality, you are worse a scourge than the Black Death.
+The bird scooped up the worm and fed the hatchlings.
+A piano, one fiddle, and a floor like sandpaper.
+I told you to learn that prayer and not talk.
+I used to have a friend from Germany once.
+There are many gaps in the first half of the fourteenth century.
+A man had been hardy enough to cut a branch of the tree.
+He has our directions, and all will be completed in a week.
+The light was tepid, the temperature of warm blood.
+There was condensed moisture on the wall and the area become mouldy.
+Consider how the water looks and how to filter it if needed.
+Kemp stared at the devouring dressing gown.
+Ice hockey players literally walk on water.
+He is mentally bright, though not highly educated.
+It was formerly customary to reunite the messages at some intermediate station.
+I became insensible and woke languid in the darkness.
+And now, let me talk to you of something else.
+May I go also, and take for you the bundles?
+The restaurant had a health inspection and rated highly.
+They have solidarity, or responsibleness, and trust in each other.
+The compliment to herself and her sister was not unfelt.
+I did not attribute the death of the patient to the instrumentation.
+Samuel collects shiny football stickers.
+Would you like to connect with a friend?
+There are many reasons why this subject should receive more extended notice.
+The majority of the colonists are essentially snobs.
+The river should be shallow enough to wade across.
+The gnarled roots sheltered a hundred varieties of poisonous reptiles and insects.
+That is my highest ideal of earthly bliss.
+We got into a Scotch mist, and were dropping wet.
+The dog became docile after eating food.
+Anybody who has lost or misplaced his soul can always have another one.
+We all three went home together next day.
+There is nothing more fascinating on earth than such a union.
+The man took his charge stealthily across the grass towards the stable.
+Every person has the ability to demonstrate compassion to a stranger.
+There never can have been, there never can be, a pleasanter manner.
+It is a sacred tree all over Africa and India.
+They came home for holiday and for rest.
+The biggest obstacle to space travel is cost.
+The ordinary of course grants administration to such appointee of the crown.
+In short, a notable outsider, shunned by all.
+The earliest and crudest system of evaporation was the copper wall.
+He seems to have had the authority of the pontifical books themselves.
+He points again, in great agitation, at the two words.
+They took a bike ride on the forest trails.
+The giant fennel is still known in Greece by its ancient name.
+She might have just turned out the pocket of an old dress.
+On Midsummer Eve, witches are very busy holding their nocturnal assemblies.
+We have had trouble since I saw you last.
+Could you pass on our phone number to your parents?
+The company saved millions on its corporation tax bill.
+Well, simply ask him for the money to pay the printers.
+But you see, everything turns out for the best.
+It is passed through a hole in an iron or steel puppet.
+A Gypsy tart is a traditional Kentish dessert.
+Slowly, I calm down, my breathes evening out.
+I simply said nothing, and stood there looking brave.
+The prisoner was truculent toward the guards.
+In his right hand, in lieu of a sword, he holds an Indian club.
+You may like a little picnic of scandal.
+We should try to carry the water from the river.
+This train of thought is hardly likely to carry conviction.
+There is hardly a respectable Hindu family that does not possess one.
+It needs a new daubing every quarter hour or so.
+A dense justice in a corner is beguiled into a wink.
+This model incorporates a touch feature.
+I shall change copy from a duke to a king.
+Such is the course of the words that came forth from thy mouth.
+It was wild and tussocky, given over to rabbits.
+The chain to the west wears a different aspect to that in the east.
+He had pneumonia dangerously, the doctor said.
+Things were being shouted at him, questions, warnings.
+Her avarice had got the better of her hatred.
+Wizards of the Coast has a fantastic seclection of tools.
+The tomahawk knives robbed mothers and innocent babes of their lives.
+My man Paddock had given the alarm and had the milkman arrested.
+The lot of a prince consort is not a happy one.
+How do you spend your recreational time?
+These virgins were regarded as the wives of the Sun.
+The patient is suffering from acute cardiac pain.
+Barman, cabman, and policeman faced about.
+The garlands are generally in the form of hoops intersecting at right angles.
+Some persons seem to be possessed naturally with a color sense.
+Do you have the Collins Dictionary on hand?
+The stones destined to multiply cattle had the shape of sheep.
+He produced a brown kid glove from his pocket.
+I will take you there and show you what I have found.
+My parents have approved of having you come over tomorrow after school.
+Humans are not descended from apes but share a common ancestor.
+And every step seemed like a weight on his chest.
+There seems to be a sentence or paragraph missing on page three.
+And at dinner you will push, as arranged?
+He drew in a deep breath as he looked at them.
+The train was late; the afternoon would be wasted, and the evening.
+The aim of their union would be to promote the fruitfulness of the earth.
+Be was the first of his son of the Puzo.
+The police were informed of what had taken place.
+She has produced some delightful pieces, herself, sir.
+They represent him under the form of a lamp made of coconut leaves.
+The girl faced him, her eyes shining with sudden fear.
+Oh, I do hope it will be fine next Wednesday.
+It is incomprehensible that someone would pick a Beetle over a Porsche.
+Charms based on the Law of Similarity may be called homeopathic or imitative magic.
+Youth had come back to her, freed from the yoke of oppression.
+We will design tech so the winners are not concentrated to the few.
+Whosoever believes in him shall not perish, but have eternal life.
+They were designed so that the bayonet fit into the muzzle of the musket.
+Some one just tried to get into the room!
+If all citizens do their role of putting votes to the right person.
+He spoke in a homely, rustic way and with great vehemence.
+The sausage squirmed, spluttered, and sang as the lively flames leapt around it.
+The pathos of the thing gave me the pip.
+Paul went to meet his friends the next afternoon.
+Suddenly he clenched his fist, and crouched.
+Comrade Jellicoe must stand out of the game altogether.
+I am an artist by temperament and choice.
+While their mother was searching the house, the kittens had got into mischief.
+You are charmingly grouped, and appear to uncommon advantage.
+The people hold that rulers must have power over nature and her phenomena.
+He published a scathing critique of the whole genre.
+The women during the whaling season remain in comparative idleness.
+I scrunched the muddy gravel beneath the boughs of budding trees.
+The place was now brilliantly lit again.
+Suddenly they came to a halt on top of the hill.
+This particular spud remained as hard as adamant.
+He did not contradict me; perhaps he had fallen into a doze.
+The following result was the consequence of the directions of the oracle.
+What if there was a mechanical way to absorb harmful pollution from the atmosphere?
+God save the king! The prince remained to hear no more.
+I used a sieve to filter out the larger pieces.
+Surely no wild beast could wish a pleasanter home.
+Oh, she was with you all the time at Cannes, was she?
+I think the shaking hurt his feelings very much.
+Deacon or Priest: Let us offer each other a sign of peace.
+The weekly meetings were always full of life and excitement.
+Jeeves is a great believer in the moral effect of clothes.
+The process of development goes on as at present.
+Symonds is right, no doubt, to ask the questions.
+At its core, the abuse arose from lack of command.
+A scratcher is a round brush made of steel wire.
+The fire crackled and danced, and something sizzled.
+She now resolved to keep him no longer in the dark.
+But Miss Barker managed her arduous task well.
+This is the consignment number for your order.
+His brows are knit and his lips move painfully.
+He was that rare type, the natural leader.
+Alas, for the effects of bad tea and bad temper!
+Will you pick me up in it at three at my hotel?
+Those arcades we see in the early Norman or Saxon buildings or walls.
+Every Englishman is an embryonic chancellor.
+I shall sleep with your letter under my pillow tonight.
+The radio suffered from signal attenuation.
+The animal is busiest at certain hours of the day.
+You have reason in shutting it up, I assure you.
+But the Brinkley Court fire bell was too much for me.
+He and his brother James used to go back there when they were boys.
+There had been no seance as yet held in the Villa Rose.
+And this extraordinary man took up his pen again.
+That would be one of the biggest investments in manufacturing in American history.
+In the final chapter of his life, he pursued philanthropy projects.
+Every table was full, and he had neglected to secure one.
+The Dow Jones was down this period by three percent.
+The sticks for making fire by friction are not taken from the same tree.
+At that he turned and hurried down to her.
+Samyukt Kisan Morcha announced a series of actions to ensure justice.
+When did you ever mention any device to me?
+The earth that day appeared to be covered with a dense, low cloud.
+Everybody has forgotten about me and John.
+Her sorrows were known to man; her virtues to God.
+There was a long garden that ran to a field.
+Three or four young girls are appointed to feed it.
+It was an imposing fleet for the outfit was large.
+It scarcely deserves the serious attention which it appears to have received.
+The episode was still green in my memory.
+It is very useful for late sowings and for early frame work.
+You have found a solid foundation for your high hope of man.
+Yes, and it worries me, and I must let it out!
+I hope you will drink to our good journey.
+Now please give a plain statement of what occurred.
+I listened in silence and looked attentively at him.
+He can easily pick things off the ground with his toes.
+And they found it, as people generally do, difficult to believe.
+Controversialists have a vast advantage over militants in a more sanguinary warfare.
+My heart leaped with an enormous relief, but I went on wheeling my stones.
+But with Gussie, the position was entirely different.
+The Voice was on his left front, he thought.
+A woman shampoos your body all over with nimble skill.
+They think that the ghost loves to decoy away the souls of his kinsfolk.
+The next has no date whatever, which is in itself suspicious.
+Antarctica is cold at this time of year.
+For at times, no doubt, he is wrong too.
+Quickly the fire spread among the clouds and scattered them.
+His brows were knitting, his eyes dilating passionately.
+I want to know your real thoughts, my dear.
+What is forbidden in the eighth commandment?

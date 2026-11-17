@@ -1,0 +1,1271 @@
+# Spanish sentences from Mozilla Common Voice.
+# Source: https://github.com/common-voice/common-voice/blob/605c25e48f9fb87cb25ca794cb39bf91d3741f29/server/data/es/sentence-collector.txt
+# Commit: 605c25e48f9fb87cb25ca794cb39bf91d3741f29
+# License: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+# Filters: NFC, trimmed, 40-120 chars; only Spanish letters, space and . , ; : ? ! ¿ ¡; typeable on es-qwerty; capital start; ends with . ? or !; no inner dots; no word-list profanity; no duplicates
+# Selection: the first 2000 survivors by SHA-256 of the sentence, by scripts/import-commonvoice.py
+# Count: 1264
+Los niños optan por el juego psicomotor.
+Júntate con mis criados, hasta que hayan acabado toda mi siega.
+Gerardo está enganchado a Juego de tronos.
+No han de estar ni dentro ni junto a los barrios históricos.
+Más vale dar que recibir, si te lo puedes permitir.
+La curiosidad de tu hijo es inconveniente.
+Pero que no nos engañen: queda mucho por hacer.
+Tú lo que quieres es matarme a disgustos.
+De repente se encontró haciendo de ministro.
+Sea Dios con él, y suba á Jerusalem que está en Judá.
+Cuando quieres darte cuenta, ya es tarde y no hay vuelta atrás.
+Suegros, ricos y tacaños, no se mueren ni en cien años.
+En prisión y enfermedad, se conoce la amistad.
+Aprender a sonreír es aprender a ser libres.
+Era un bar de ambiente y ambos teníamos ganas de comernos el mundo.
+Ni la actualidad trepidante le distraía cuando leía poesía.
+Aterrizaje forzoso en un extraño planeta.
+Dios le da pan, al que no tiene dientes.
+No se puede estar al plato y a las tajadas.
+Orden y prisa no son de la misma familia.
+¿Alguien sabe de quién es esta chaqueta tan linda?
+Merced, ¡haz el favor de recoger las muñecas!
+El agrado en la persona, cuantos bienes proporciona.
+Grijalba está en la costa, y hubiérale sido mejor continuar embarcado.
+Se puso el nuevo vestido que se compró en Zara.
+El pueblo de los hijos de Israel es mayor y más fuerte que nosotros.
+Y Tenia Noemi un pariente de su marido, varón poderoso y de hecho.
+Entonces ella vino calladamente, y descubrió los pies, y acostóse.
+Los siguientes capítulos harán pensar en ansias de poder.
+Un gran cuadro con un retrato al óleo de un capitán del ejército.
+A qué buscar la dicha por suelos extranjeros.
+No almacenan ningún tipo de información personal.
+Y los hijos de Aarón sacerdote pondrán fuego sobre el altar.
+Orpha besó á su suegra, mas Ruth se quedó con ella.
+Unos nacen con estrella y otros nacen estrellados.
+En zonas costeras existe un mayor acúmulo de moléculas de agua en el aire.
+No es el único proyecto que tenemos entre manos.
+Las princesas Disney no llevan nunca corona.
+Bueno, tenemos formas de hacerte hablar.
+Retrata también, en sus versos, el sufrimiento del campesino.
+La ternera de Mollerussa tiene un gustito especial.
+Da siempre lo mejor de ti y el resto vendrá.
+Si me tocara la lotería, me compraría un coche.
+Es imprescindible un golpe de timón en la empresa.
+Un grano no hace granero, pero ayuda al compañero.
+Éste es un sistema de sonido de calidad.
+Cuando una puerta se cierra, ciento se abren.
+La verdad es que sí me apetece despejarme un poco.
+Los turistas usan apps de realidad aumentada.
+Cada día que pasa de enero, un ajo pierde el ajero.
+Me parece que no va a haber suficiente pan para la cena.
+Lo menos que puedo hacer por ti es darte tres euros.
+En la que describe la belleza de El Salvador.
+No llores, mañana haremos la suscripción a Netflix.
+El Prat de Llobregat es un municipio que ha crecido mucho.
+Adonde el corazón se inclina, el pie camina.
+En noviembre tomaremos una castaña que no te la puedes ni imaginar.
+Es un caso, vamos a la playa y se deja el bañador.
+Desciende coronada de plumas de quetzales.
+Tenemos que mirar los servicios mínimos.
+La web de los filatélicos tiene un botón para mojar el dedo.
+Fuimos al Museo del Prado para ver la exposición.
+¿Le secuestraron en Quino o en Maradona?
+¿Es posible que el proveedor de servicio pueda eludir el cifrado?
+¿No comprendes, acaso, que en nuestra situación necesitamos de todo el mundo?
+Las cuentas claras y el chocolate espeso.
+Estamos construyendo una plataforma de lanzamiento.
+Las normas me inquietaban profundamente.
+Asistió a un acto organizado por el Rotary Club.
+No hay mejor lotería que una buena economía.
+El colectivo más afectado es el de los pinchadiscos.
+Mirando en detalle vi que ni podía ver los libros.
+Y sienta el olor de la tierra, el aroma de las flores.
+Es una zona con mucha actividad sísmica.
+El que con niños se acuesta, meado amanece.
+Bébete el zumo que se le van las vitaminas.
+Y á más de esto, el holocausto continuo, toda ofrenda voluntaria á Jehova.
+A nosotros no nos gusta que nos hagan explotar.
+Ni tengo padre, ni madre, ni perro que me ladre.
+Los protestantes han abierto un templo nuevo.
+Los taxistas han cortado los accesos al aeropuerto de El Prat.
+Como un hilo de plata que enhebrara esmeraldas.
+Hace tres días que están fuera y todavía no han llamado.
+Allá va el niño, donde le tratan con cariño.
+Nunca se pudo saber de donde procedía aquella pelea.
+El que siembra vientos recoge tempestades.
+Julia, no soy el tipo de hombre que tiene mascotas.
+Los juegos que más me gustan son los simbólicos.
+Sus piernas parecían las columnas del Partenón.
+No siempre es el mejor camino el más corto.
+Niño, ve a correr un rato, a ver si te relajas.
+Hace frío en el tren y la megafonía se siente muy mal.
+Pararon el tren antes de que fuera demasiado tarde.
+Con buena gente, trataré yo; con gentuza, no.
+Las banderas ondean a media asta en señal de duelo.
+Los tacos que salen de tu boquita de piñón son deliciosos, Marc.
+En la boca del discreto lo público es secreto.
+Una pantalla de marca buena nunca falla.
+Casa con dos puertas, mala es de guardar.
+Un musical como El Rey León no gusta a todo el mundo.
+Pero quisiera que se disipase el humo denso que te envuelve.
+La Punta de Sitges es una postal típica.
+La verdad como el aceite, quedan encima siempre.
+Abre la vitrina y coge la figura indicada.
+Qué cumpleaños más triste que he pasado sin ti.
+El valiente de palabras es muy ligero de pies.
+Espero que disfrutéis de unas buenas vacaciones.
+En el año mil seiscientos ochenta no había coches.
+En teoría, a las ocho estoy allí, pero igual se retrasa.
+Le entró un virus en el ordenador y perdió los trabajos.
+Si la envidia fuera sarna, cuantos sarnosos habría.
+Para hacer bien el amor hay que venir al sur.
+¿Se te ha ocurrido ya lo que vamos a cenar esta noche?
+Que si no hiera un mar, bien sería otro cielo.
+El texto del pastel se debe hacer con letras de chocolate.
+Se hacen llamar raperos, los primos de Torrelavit.
+Me parece que tenemos una plaga de mosquitos tigre.
+¿No es Booz nuestro pariente, con cuyas mozas tú has estado?
+La alergía hizo que la cara se le pusiese roja.
+Piensa el ladrón que todos son de su condición.
+Vilma, puedes, claro que puedes confiar.
+Las fotografías reproducidas en el presente son solo a título ilustrativo.
+Si tuviera buena conectividad iría un poco más deprisa.
+El jugador zurdo se llama Linares y juega con la selección nacional.
+A la cara más fea, la alegría la hermosea.
+El azul es el color que han elegido para la habitación de los invitados.
+Su padre hacía de camello y su madre de mula.
+Más vale el bien de lejos que el mal de cerca.
+El primer castillo de diez de la temporada lo han hecho en Vilanova.
+Octubre nos regala sus rosas y vesperales.
+Hoy la pescadilla iba barato, pero las gambas eran carísimas.
+Necesito urgentemente que me toque la lotería.
+El referéndum fue la excusa para abrir el gimnasio de la escuela y limpiarlo.
+Los sectores revolucionarios estaban cada día más motivados.
+Más vale hacer las cosas que no mandarlas.
+Ha quedado segunda en el campeonato de natación.
+Le concedieron el préstamo porque pensaban que era una persona solvente.
+Aplique el producto directamente sobre la frente.
+Los Xiquets de Valls hacen unas actuaciones muy largas.
+Y ellos respondieron: Jehová te bendiga.
+No sabía que ponerse, asi que se puso feliz.
+Ir contracorriente no es de hombre prudente.
+Para el demiurgo, el universo sensible tiene la textura de una oblea muelle.
+Un ratón se coló en mi casa el mes pasado.
+Largos silencios y voces destempladas de corta duración.
+El concurso de paellas no tiene ganador.
+Quitar el palo al loco, no es hacer poco.
+La radio del móvil sólo coge emisoras evangelistas.
+Maria decidió ser voluntaria estas navidades.
+Más moscas se cogen con miel que con hiel.
+¿Cómo se puede tener resaca sin haber bebido?
+No tenemos más que limpiar de vez en cuando.
+Los cafés del Barrio Gótico me estimulan la imaginación.
+En el principio crió Dios los cielos y la tierra.
+Se ha bebido un Red Bull mezclado con ginebra.
+Más vale malo conocido que bueno por conocer.
+El que no se consuela es por que no quiere.
+No por mucho madrugar amanece más temprano.
+¡Es el voto que el alma pronuncia, y que heroicos sabremos cumplir!
+Enseñemos a los chicos nuestro saludo secreto de amigos.
+El trabajo bien hecho da alegría en el pecho.
+¿Puedes recuperar los ahorros invertidos?
+Adela me trae de cabeza y me he enamorado.
+El que juega con fuego siempre sale quemado.
+Vuelve la costumbre de hacerse fotos con los difuntos.
+Alberto tiene en sus manos un tercio de todo el territorio alemán.
+Un entorno limpio y ordenado favorece la salud mental.
+Diles a estos simpáticos juguetes que no estás muerto.
+¿Te parece bien la ubicación del proyecto?
+Cuanto más alto se sube más grande es la caída.
+Y oyendo los enemigos de Judá y de Benjamín.
+Por San Matías se igualan las noches y los días.
+Ricardo, estamos preparados, te escuchamos.
+Una manzana cada día, el médico te ahorraría.
+No sé si se hace así pero yo lo pruebo a ver.
+Y viendo Noemi que estaba tan resuelta á ir con ella, dejó de hablarle.
+Los jóvenes viven conectados a Internet.
+No he comido nada de pescado azul y ya se acaba la temporada.
+Los clásicos de fútbol se me hacen pesados.
+El siglo veinte es el más trágico de la historia.
+Mientras tanto, la hija se le casó con un ocasional.
+Ya estoy completamente recuperado del catarro que me cogí la semana pasada.
+El Salvador se encuentra en centromerica y es un buen país.
+Era un chico muy majo, siempre saludaba.
+Los del ayuntamiento siempre se piensan que tienen razón.
+Abogado en el concejo hace de lo blanco negro.
+Ainhoa, me hizo creer que yo le gustaba a Ulises.
+Durante el día los escorpiones se esconden bajo las piedras.
+El cura se llama Miguel y tiene las mejillas rojas.
+Y estás a millas y millas de tu bonita y tibia cama.
+Que más bien está en el trasfondo de cada uno de sus poemas.
+Cinco minutos de despedida, dijimos todo cuanto callamos.
+La cantante levantó a todo el público en su actuación.
+¿Por qué habéis hecho esto, que habéis reservado la vida á los niños?
+¿Quién podría confirmar la existencia de un Alter Ego?
+Se miran un momento y después, con mucha solemnidad, se besan.
+El nombre del varón con quien hoy he trabajado es Booz.
+Era un chico muy apuesto, un tiarrón, vaya.
+Cuando llegamos a la isla, alquilaremos un coche.
+Los centros de terapia médica se han esparcido por el barrio.
+Se ha dormido en el tren y se ha pasado de parada.
+Al final no he podido leer el periódico.
+No hay manera de que aprenda las tablas de multiplicar.
+Hay que implementar mesas individuales también para zurdos.
+A un ciego, mal se puede mostrar un camino.
+¿Qué hay para desayunar? Tengo un hambre que me muero.
+Yo me fuí llena, mas vacía me ha vuelto Jehová.
+Hizo un arranque de caballo y una parada de burro.
+Se pensaba que las naranjas eran una fruta de verano.
+En largos caminos, se conocen los amigos.
+Nos llegamos a plantear irnos a vivir con ellos pero al final no.
+El perro del hortelano ni come, ni deja comer a su amo.
+Ninguna lectura si el aire es respirable.
+La poética gástrica parte de un modelo teórico interdisciplinario.
+Del hombre los derechos Nariño predicando, el alma de la lucha profético enseñó.
+Antes echaréis á sabiendas de los manojos, y la dejaréis que coja.
+El incendio redujo varias casas a cenizas.
+Todo el mundo habla de dignidad, estos días.
+Te vendrán pesares sin que los buscares.
+Mejor no menear el arroz aunque se pegue.
+Sólo tenemos una semana antes de la mudanza.
+No se encontró bien y no ha podido ir al huerto.
+Cada instante de la vida es un paso hacia la muerte.
+No hay mejor herencia que trabajo y diligencia.
+En mucho más se ha de estimar un diente que un diamante.
+Todos los niños y niñas esperan el verano.
+La corrupción en su partido, hizo que perdiese votos.
+Hay que tener cuidado porque hay riesgo de deslizamientos.
+Si no te lo crees, ve tú pero yo ya te he avisado.
+Mejor es, hija mía, que salgas con sus criadas.
+Si vuelve a suspender, tendremos que castigarlo.
+Incluso tuvieron que llamar a la policía.
+El pan de higos tiene una blandura extraordinaria.
+No se tiñe con sangre de hermanos tu glorioso pendón bicolor.
+Haciendo la maleta, siempre se me olvida algo.
+El vino para los reyes y el agua para los bueyes.
+Salió pues del lugar donde había estado, y con ella sus dos nueras.
+Quería revisar el plan estratégico esta tarde, pero aún no me he podido poner.
+Tengo que cambiar las ruedas ya porque las tengo muy gastadas.
+¿Por qué he hallado gracia en tus ojos para que tú me reconozcas?
+Criaban caballos a las afueras de Ribes.
+La responsabilidad es una cualidad que no tienes.
+El primer coche que tuve fue un seiscientos.
+Sí, es un error, porque, para que veas, la cama es mi lugar.
+¿Vamos a hacer una cerveza bien fresquita?
+Más vale pájaro en mano, que ciento volando.
+Jehová Dios de los cielos me ha dado todos los reinos de la tierra.
+El peine del lavabo de la entrada está llena de piojos.
+Su comida favorita es la tortilla con cebolla.
+La información es clave en este proyecto.
+Estaban contentos con los resultados del proyecto.
+Las prácticas contarán un cuarenta por ciento de la nota.
+Hay serpientes que son similares a otras para parecer más peligrosas.
+Pito, pito, colorito, ¿dónde vas tú tan bonito?
+Que la venganza no es una idea que promocionemos en mi planeta.
+Los caminos de la Dehesa tienen una grava que entra en las sandalias.
+Si no te gusta planchar, no te compres ropa de hilo.
+Me he dejado las gafas de sol encima de la mesa del comedor.
+¿Qué territorios adscribirán a la comarca del Molinés?
+La prolijidad suele engendrar el fastidio.
+A la chita callando, hay quien se va aprovechando.
+Las piernas me pesan y eso se me ha hinchado mucho.
+No puedo venir porque tengo que acompañar a mi madre al médico.
+En los malos momentos tienes que contar con tus amigos.
+La alta contaminación se centra en el centro de la ciudad.
+La música estridente me alegra las mañanas.
+Es la mejor tortilla de patatas que he probado nunca.
+El ayuntamiento suele estar en el centro de la ciudad.
+Tendré que realizar una de mis operaciones.
+Golondrina anticipada, primavera templada.
+Ha resuelto la ecuación mucho más deprisa de lo que se pensaba.
+La primera etapa fue entre Nantes y Toulouse.
+No hay cinturones de seguridad en la zona de carga.
+Las noticias de la fábrica me empiezan a hacer sufrir.
+Ostras, qué grave, no podremos venir a la ceremonia.
+Ha plegado temprano porque quiere ir en bicicleta toda la tarde.
+Más vale camino viejo que sendero nuevo.
+En el examen sólo se permite un bolígrafo azul o negro.
+Un edificio bien diseñado no debería tener estos problemas.
+Cada vez que usa la cámara se le descarga la batería.
+Que fuerte, Ernesto va de cabeza de lista.
+¿Es el modelo el más indicado para los huevos fritos con patatas?
+Oh, no, no puedo aguantar ver eso otra vez.
+El tren pasaba por los túneles haciendo un estruendo horroroso.
+Más vale caer en gracia que ser gracioso.
+A caballo que vuela, ¿para qué la espuela?
+La cuenta regresiva comenzará momentáneamente.
+Si el pimentonero se acerca a tu casa, la nieve baja.
+A las cuatro de la madrugada se ha disparado la alarma.
+El servicio del restaurante era bastante bueno.
+En el mes de enero, los ojos de las muchachas campesinas, el amor.
+¡Qué no me líes! Estamos hablando del domingo.
+Volveos, hijas mías: ¿para qué habéis de ir conmigo?
+Las cortinas rojas hacían que la habitación pareciera el infierno.
+Bebe dos litros de agua, todos los días.
+Cuando bailaba sardanas le tintineaban los duros en el bolsillo.
+El viernes por la tarde vamos a la playa y luego cenamos allí.
+La vida está llena de nuevas experiencias cada día.
+Que a sus bravos en fieras batallas de entusiasmo sublime inflamó.
+Recuerda, sólo estoy a unos bloques de aquí.
+Y cuando lleguemos allí, encontraremos un modo de llevarte a tu hogar.
+No hagas experimentos con la resistencia.
+El perro había sido adoptado y era muy bueno.
+Tarragona y Girona no son nada provincianas.
+El origen de estas croquetas es una receta de la abuela.
+Me gusta cuando haces el pino puente en el césped.
+Inicia la actualización del sistema actualizando los paquetes instalados.
+Si quieres vivir sano, madruga en el verano.
+Buen porte y buenos modales abren puertas principales.
+Yo soy Ruth tu sierva: extiende el borde de tu capa sobre tu sierva.
+¡Páginas y páginas de poesías ridículas me ha dejado en herencia!
+Esta tarde, en la cumbre, casi las he tenido.
+Habrá querido dar la fiesta antes de la mudanza.
+Un médico cura, dos dudan y tres muerte segura.
+El impacto me debió despertar de mi hipersueño.
+Los lavacristales eléctricos delanteros no funcionan.
+Esta noche han quemado un contenedor frente a su casa.
+Trabaja para vivir y no vivas para trabajar.
+Nunca vi mayor afán, que muchos hijos y poco pan.
+Sólo nos queda el jaleo de una noche que no vendrá.
+Yo Darío puse el decreto: sea hecho prestamente.
+Las calles están a rebosar en navidades.
+No todo es susceptible de ser una propiedad privada.
+Y fué la tarde y la mañana el día quinto.
+Nosotros somos cuatro y si viene Juan seremos cinco.
+Loado sea Jehová, que hizo que no te faltase hoy pariente.
+Cuando haga vacaciones iré cada día a la playa.
+Más vale libertad con pobreza, que prisión con riquezas.
+Deberías comer más fruta porque tienen muchos nutrientes.
+La niña decidió dejar atrás las muñecas, y jugar al fútbol.
+El que tenga tienda que la atienda, y si no que la venda.
+Uno de enero, dos de febrero, tres de marzo, cuatro de abril.
+La cuenta de los varones del pueblo de Israel.
+La plataforma petrolera se hundía en el mar.
+En campaña necesito maquillarme cada dos horas.
+Si el ocio te causa tedio, el trabajo es buen remedio.
+¡Mujer, de de alta a todos los usuarios!
+Leyendo, leyendo, se me hicieron las doce.
+La distancia entre la verdad y la verosimilitud es ínfima.
+¿Quién os dió mandameinto para edificar esta casa, y para restablecer estos muros?
+En serio, sígueme, tengo una corazonada.
+Tenemos que mirar bien qué bus debemos coger.
+Ni el grito horripilante con que aúlla el deseo.
+Los cuales vinieron con Zorobabel, Jesuá, Nehemías, y Baana.
+¿Cuál es el condimento especial de este plato?
+Mi profesor dice que la inteligencia artificial acabará con la especie humana.
+Mérida es la capital y ciudad más poblada del estado de Yucatán, México.
+La ligereza de sus opiniones estaba fuera de toda duda.
+Su sensibilidad capta el paisaje y el ambiente salvadoreño.
+¡Qué poco dura la alegría en casa del pobre!
+Seamos realistas y hagamos lo imposible.
+Cumbres, divinas cumbres, excelsos miradores.
+No nos hacemos los graciosos, que nos pegan en la calle.
+De momento se ha prorrogado el plazo tras declararse la causa compleja.
+El verbo tiene más interés sintáctico que el nombre.
+El que tarde trilla, la lluvia le pilla.
+La falta de educación es un signo de nuestros días.
+Este ha sido el verano más caluroso en muchos años.
+La prioridad es garantizar la seguridad de los ciudadanos.
+Primero es la obligación que la devoción.
+¡Yo quiero palomitas y una botella de agua!
+De músico, poeta y loco, todos tenemos un poco.
+Caballo que de joven no corre, dentro lleva la carrera.
+La bicicleta estática me toma muchas horas de trabajo.
+Come poco y cena más, duerme en alto y vivirás.
+La vecina del cuarto es un caso como un capazo.
+Huelva solo ha mejorado en algo más de cuatro puntos.
+Feminista es una persona con una fuerte lucha.
+Linares la sigue, dándose vuelta para mirar con curiosidad a doña María.
+Ella sabe tocar el piano, y yo el violín.
+Los locutores del clásico llaman como unos energúmenos.
+Los derechos de autor nacieron con la invención de la imprenta.
+Dediqué la mañana a limpiar los cristales.
+Y por haber las parteras temido á Dios, él les hizo casas.
+Los partidos políticos tradicionales compiten con los populismos y los movimientos asamblearios.
+Ganó el trofeo de la competición de verano.
+Aborto es la interrupción de un embarazo.
+No pases por el bar de Javier o te dejaré antes de Ramos.
+Al borde del estanque, y al doblar la testuz.
+Tu hija me ha pedido amistad en Facebook.
+Ponme doscientos cincuenta gramos de jamón dulce.
+Y qué asco y qué tristeza comenzar a bajar.
+La lingüística es una materia hecha de palabras.
+Lo que no te mata te hace más fuerte y además engorda.
+Tal vez fuera el frío de sus manos lo que no le gustó nada.
+Los sables de San Pablo son dulces y tienen aroma de anís.
+Le escribe con enorme sencillez, a su amada.
+Más vale pájaro en mano que ciento volando.
+Al final el sospechoso, era el mayordomo.
+Cuando dos pleitean un tercero se aprovecha.
+Me parece que con el carné de familia numerosa nos harán descuento.
+Si quieres que te siga el can, dale pan.
+La gente de esta generación está muy confundida.
+Se detiene bruscamente y mira durante un instante con expresión de estupor.
+Si el perro muerde a un ciclista, te pondrán una multa muy merecida.
+Tía Lucía se pasa todo el día compartiendo fotos antiguas en Facebook.
+El casal de los abuelos huele a cerrado.
+Lllamaron a la policía porque hacían mucho ruido.
+Las vacaciones de octubre serán más largas.
+Una aceituna por San Juan, ciento por Navidad.
+Los detectives descubrieron huellas en la ventana.
+Quería darte las gracias por salvar mi rebaño.
+Sólo recuerda lo que tu viejo amigo dijo.
+Tú eres tú, yo soy yo, ¿quién es el más tonto de los dos?
+Cada vez que nos encontramos, se nos escapa la risa por lo bajo.
+El gancho decide quién se va y quién se queda.
+Tenemos que poner en marcha esta caravana.
+Si compras las entradas anticipadas ahorras seis euros.
+Para ser bueno en algo solo necesitas practicar.
+Libertad en la lid clamaremos, y muriendo, ¡también libertad!
+¿Quieres dejar eso y hacerme caso, por favor?
+Lo bueno si breve, dos veces bueno y si malo, menos malo.
+Hacen partidos de fútbol a las cuatro de la madrugada.
+A mi profesora le importa demasiado la gramática y muy poco el contenido.
+No hay guerra más hiriente que entre hermanos y parientes.
+Mi gato tiene miedo hasta de su propia sombra.
+¿Qué experiencias personales valoras más?
+Los dibujos que los presos hacían en las paredes del castillo se conservan todos.
+Más vale llegar a tiempo que rondar cien años.
+En septiembre iremos a cosechar por José de Carro.
+Los ayuntamientos del Garraf no tienen moqueta.
+Los excursionistas se desorientaron y se les hizo de noche.
+Pan y vino andan camino, que no mozo garrido.
+Esta tarde he estado dándole una segunda vida a mi viejo ordenador.
+Quino, hazme un cortado y un bocadillo de calamares con mayonesa.
+No chatees con tu primo, ¡que ya nos conocemos!
+¿Quieres decir que no sería mejor ir a otra playa?
+Después de un momento aparece Carmen por la izquierda y mira a todos lados.
+Cuando el diablo no tiene nada que hacer mata moscas con el rabo.
+Los hábitos de reparación del hurón son aburridos y previsibles.
+El aire más fresco, más límpido, y todo.
+Se llamaba Salamanca y se prestó a asesinar a Fring, el chileno.
+Unos decían nabos y los otros decían coles.
+La salud no está en el plato, sino en el zapato.
+La parra y la higuera, verdean en primavera.
+El que hace un cesto hace ciento, si le dan mimbres y tiempo.
+Cada vez que cojo la moto me hago un viaje largo.
+He estado una temporada sin ir a la misma.
+Más vale al paso andar que correr y tropezar.
+Nunca me gustaron demasiado las obras de Espronceda.
+El arroyo se ha llevado las mesas del restaurante.
+Los recortes empiezan a tocar la pera de verdad.
+Tus siervos de otra la parte del río, etcétera.
+Yo era feliz; el mundo sonreía brindándome amoroso su ternura; Y yo, pobre inexperta.
+¿Quieres decir que el aire acondicionado funciona?
+Mozilla es una fundación que busca la libertad en la web.
+Qué pereza, que salir con el frío que hace.
+Y los de la transmigración hicieron la pascua á los catorce del mes primero.
+La próxima semana ya empiezan a entrenar.
+Cuando llueve y hace sol sale a paseo el caracol.
+No tenía memoria ni gracia interpretativa.
+En fraterna unión, sin discriminar, ¡Cantemos Libertad!
+Cuando la pobreza entra por la puerta, el amor salta por la ventana.
+La intervención de la entidad financiera fue un balón de oxígeno.
+El ordenador hace un ruido bastante feo.
+Habló el rey de Egipto á las parteras de las Hebreas.
+Pensará que nunca habían visto un juguete nuevo antes.
+Es bueno tener amigos hasta en el infierno.
+A ese grupo de amigos les gusta comer helados por la tarde.
+La envidia sigue al mérito, como la sombra al cuerpo.
+Estuvo encerrado en la cárcel por más de cuarenta años.
+La ciudadanía tiene un comportamiento pésimo en este aspecto.
+No actives el altavoz, deja el móvil en modo vibración.
+Predicar con el ejemplo, es el mejor argumento.
+La Luna viene con nosotros, grande, redonda, pura.
+La novela de la Selma describe una Vilafranca lóbrega.
+Podemos leer el porvenir mirando el pasado.
+Bastián tiene una resaca acojonante, pobre.
+¿Ustedes son aquellos chicos tan alegres y divertidos?
+De casta le viene al galgo ser rabilargo.
+He metido mil estrellas dentro de un cajón.
+¡Desde aquí veo el mar, tan azul, tan dormido!
+A enfermo, niño o anciano, hay que tenderles la mano.
+Necesito información sobre los diferentes tipos de curso.
+Y luego se oye un ruido por lomas y floresta.
+Zapatitos de charol, ni para el agua ni para el sol.
+Mantener fuera del alcance de los niños.
+Por San Blas, la cigüeña verás; y si no la vieres año de nieves.
+Dígale muchas gracias, que se las agradezco muchísimo.
+Quería hacer mucho trabajo y entre una cosa y otra no hice nada bueno.
+Así me gusta, Manuel, que te hagas la cama solo.
+El olivar hace el bien, aunque le hagan el mal.
+Las faltas del vecino hanse de conocer, no de aborrecer.
+Toma estos vasos, ve y ponlos en el templo que está en Jerusalem.
+¿Y te han hecho pagar por unos pantalones desgarrados?
+Ahora, otras personas pueden ser un poco más listas que yo.
+No tenemos porqué aguantar tus insultos.
+Tenemos que aprender a pensar por nosotros mismos.
+Sabe mas el diablo por viejo, que por diablo.
+No me toques las palmas que me conozco y me pongo a bailar.
+Al caballo, antes de ponerle freno, hay que darle educación.
+No vendas la piel de oso antes de haberlo cazado.
+A falta de caballos que troten los asnos.
+Cuando empezaste a vivir empezaste a morir.
+Si quieres que te sea sincero, ese es más malo que el hambre.
+Me he de cambiar las gafas, ya no me clichés.
+¿Quién hay entre vosotros de todo su pueblo?
+A buen entendedor, pocas palabras bastan.
+El fuego se inició a las cuatro de la tarde.
+Los vídeos que alquilaba siempre eran de serie B.
+Bebe el agua a chorros y el vino a sorbos.
+Los dolores que debe soportar son terribles.
+Pero me parece que los del año que viene ya nacieron.
+El personal de correos es uno de los colectivos más sufridos.
+En tu suelo, ya no ruge la voz del cañón.
+Todos los días contigo y ahora todos sin ti.
+Eh, ¡que te dejas el móvil al cajero automático!
+El siguiente, tras otra revalida que llamaban Selectividad, sería la Universidad.
+El próximo viernes tendremos los resultados.
+Salta, salta, al final te darás una hostia.
+De ganado vacuno ú ovejuno haréis vuestra ofrenda.
+Más sabe el diablo por viejo que por diablo.
+Aunque la mona se vista de seda, mona se queda.
+Al perro y al gato no les pongas en el mismo plato.
+Más vale vergüenza en cara que dolor de corazón.
+¿Qué salida que tiene esta marca de cervezas?
+Sólo nos queda el jaleo de una noche que no va a venir.
+Cada vez hay menos gente que compre lotería.
+Un río entre verdores se pierde a mis espaldas.
+Dijo el gitano, pleitos te dé Dios, y los ganes.
+El agua brota lenta, y en su remanso brilla.
+Tomas pregunto sobresaltado ¿es el arma del crimen?
+Dime de qué presumes y te diré de lo que careces.
+Para combatir el frío, hay que abrigarse.
+Oye, ve a mirar si las toallas de la playa ya están secas.
+Aunque debe nacer quien me haga pasar por el aro.
+Sus fiestas, sus amores, algunos acontecimientos cotidianos como una tarde en el pueblo.
+Ven en el huerto, Marina, que te quiero enseñar el sistema de riegos.
+Ya pasado lo de atrás, lo de menos es lo demás.
+He mirado por todas partes, pero sólo he encontrado tu sombrero.
+Los ranchos de tejas por el sol doradas.
+Espero que algún día tengas tanto éxito como tu padre.
+El viaje se iba a realizar en septiembre.
+Llegáronse á Zorobabel, y á los cabezas de los padres.
+El chico le había escrito todo tipo de poemas de amor.
+Eso ni lo había confirmado, ni lo había negado.
+Durante las vacaciones no desconectar del trabajo ni un día.
+Pusieron á los sacerdotes vestidos de sus ropas, con trompetas.
+Hay quien dice que viven hadas en esa arboleda.
+Los kilómetros recorridos por la aspiradora no se miden.
+Mas ellas alzando otra vez su voz, lloraron.
+Para otro perro ese hueso, tan descarnado y tan tieso.
+Se había metido dos gintonics y ya le patinaba la neurona; no sabe beber.
+Todas esas pequeñas cosas que rodean la vida en el campo.
+Y conservemos la independencia nacional.
+Pero sabes que él siempre tendrá un lugar de especial para ti.
+Ricaurte en San Mateo en átomos volando, deber antes que vida con llamas escribió.
+Si lo tienes que hacer de cualquier manera, mejor que no lo hagas.
+El primero de octubre fue un día histórico que no olvidaremos nunca.
+Hace treinta años que vivimos juntos y todavía me sorprende.
+De ahora en adelante, debes cuidar bien tus juguetes.
+Visto en perspectiva, tú y yo no nos deberíamos haber casado.
+Si tarda mucho ya no estaremos a tiempo.
+El que roba a un ladrón tiene cien años de perdón.
+La diversidad social del país lo hace más acogedor.
+Jehová galardone tu obra, y tu remuneración sea llena por Jehová Dios de Israel.
+Ha llamado la tía de Calella porque se pensaba que hoy era mi cumpleaños.
+El mundo progresa con la gente que se atreve.
+Animales que vienen con una fiebre extraña.
+Niño, si no bajas ahora mismo te bajo yo de un sopapo.
+Mayab, nombre original de Yucatán en idioma maya.
+De púrpura y de nácar, donde muere la aurora.
+Ha pedido carpaccio de gambas con aromas de mar.
+Los enlaces serán acordados con el juez de paz o el señor cura.
+Que Marta no vaya a Cornellá no significa que tú no tengas que ir.
+Más vale sardina en plato que una sirena en retrato.
+A través de las montañas llegaremos a Francia.
+La niña dice que de mayor quiere ser taxidermista.
+El juez que investiga el caso dice que hay indicios de delito.
+Desde ayer que la tía no se encuentra demasiado bien.
+Nuestro pariente es aquel varón, y de nuestros redentores es.
+La Matilde tiene halitosis, pero canta como los ángeles.
+De los que ya habían ido, mucho hacía que no iban.
+¿De verdad que Adán y Eva fueron los padres de Caín?
+Y oímos las estrofas del murmurante río.
+Por Santa Catalina, la nieve en la cocina.
+¡Un reto como éste no está al alcance de Isabel!
+Cuando las barbas de tu vecino veas pelar, pon las tuyas a remojar.
+Desciende a las estancias de pálidos poetas.
+El lanzamiento se ha retrasado debido al mal tiempo.
+Ahora, gracias todos por su amable bienvenida.
+Congrega a todo el mundo para una reunión, y estate feliz.
+Un abismo llama a otro y un pecado a otro pecado.
+Esta cuestión es irrelevante en este caso.
+No imprime nunca en casa, siempre en la copistería.
+Ainhoa, me hace tan feliz que creas que podemos intentarlo.
+Y después que reposó á sus pies hasta la mañana, levantóse.
+Fue suave, limpio, honesto, sin tacto e inconsistente.
+¡Guíame hasta el centro George Pompidou!
+Rompe los cristales y me golpea en el pecho.
+Haremos un brindis para celebrar sus éxitos.
+Ella es vegana, luego tenemos que pensar en su comida.
+Sólo había una casa habitada en todo el pueblo.
+¿Tenemos suficiente comida en la nevera?
+Quieres demostrar que eres gracioso y todo el mundo te tiene por un cerdo.
+Jehová vuestro Dios os ha dado reposo, y os ha dado esta tierra.
+Tenemos dos ojos para ver mucho y una boca para hablar poco.
+Dice el alcalde que somos unos contestatarios.
+Bueno, no sabia que debíamos tener uno ya.
+Un dibujo autografiado por Dalí puede valer muchos euros.
+Antes del viaje pasaremos esta tarde a despedirnos de mi madre.
+A orillas del caribe hambriento un pueblo lucha, horrores prefiriendo a pérfida salud.
+Es demasiado tarde, el tiempo nos ha ganado.
+Entonces pusieron sobre él comisarios de tributos que los molestasen con sus cargas.
+Aquí he visto una cosa muy más dulce y extraña.
+Se ve que se conocieron en el instituto.
+Podremos encontrar la manera de transportarte a tu casa.
+Un presupuesto tan ajustado nos arruinará.
+¿Piensan que los fantasmas no tienen otra cosa mejor que hacer?
+En un par de días todo volverá a ser como antes.
+¡Los alrededores del Ebro son fantásticos!
+El transporte urbano es muy contaminante.
+Por la noche todos los gatos son pardos.
+Esos ladrones se llevaron todo tipo de aparatos electrónicos.
+Ahora me dedico a los bolos y tengo un futuro prometedor.
+En el país de los ciegos el tuerto es el rey.
+Jueves se va a Londres y no vuelve hasta Navidad.
+Es imposible aparcar en el centro de Calafell.
+Los perros son los amigos más fieles del humano.
+Va, que nos zampa un bocadillo de salchichas.
+Busqué de arriba a abajo, cariño, todo lo que pude encontrar fue su sombrero.
+A caballo corredor y hombre reñidor, poco les dura el honor.
+Saldremos de Barcelona por la C treinta y dos.
+¿Trabajas para vivir o vives para trabajar?
+No hay lugar para polémicas en la familia.
+¿Algún voluntario para lavar los platos?
+Ay madre, y yo que pensaba que nos sobraría tiempo.
+¡Quieto todo el mundo y qué no cunda el pánico!
+Como si una tormenta rodara por la cuesta.
+Ajo, cebolla y limón y déjate de inyección.
+Esta acera no está adaptada para cochecitos.
+Es capaz de rascarse la oreja con el dedo del pie.
+No hay palabra mal dicha si no es mal entendida.
+¿Y si lo discutimos todo tomándonos unas Moritz?
+He visto a Miguel haciendo cola en la taquilla para comprar el billete.
+En enero todo el mundo se apunta al gimnasio.
+No seas acaparador y reparte el regaliz.
+La falta de información no justifica nada.
+Por un perro que maté, mataperros me llamaron.
+Es la moza de Moab, que volvió con Noemi de los campos de Moab.
+Por un mal chiste un buen amigo perdiste.
+Y murió José, y todos sus hermanos, y toda aquella generación.
+Quiero hacer noventa y, a ser posible, cien.
+Es la editorial de los comunistas y los ateos.
+Y cuando asomabas ¡qué linda se hacía la alegre mañana!
+Domingo vamos de boda y todavía no sabemos qué nos pondremos.
+El volante del Lamborghini es de piel de pantera.
+La comarca de las Garrigues tiene un enclave en el Valle.
+La manifestación ha acabado sin incidentes.
+El perro de los vecinos ha bordado toda la noche.
+En agosto y en enero no tomes el sol sin sombrero.
+En julio haremos una excursión al Possets.
+No te rías cuando te riño o tendré que enviarte al rincón de pensar.
+Hay que tener en cuenta los derechos del trabajador.
+Alfredo Espino nació en Ahuachapán en enero.
+Han llegado a Roma con tres horas de retraso.
+Por beber agua limpia, bebe agua y bebe luz.
+Otra maniobra así, vaquero, y harás que nos maten.
+No creo que este hombre alguna vez haya ido a la escuela médica.
+Los bosques de la Masieta no tienen sotobosque.
+El tiempo todo lo cura, menos vejez y locura.
+Estamos muy contentos con nuestro médico de familia.
+Más vale medir y remedir, que cortar y arrepentir.
+Fátima, se llamaba aquella moza que me rompió el corazón.
+Hace más el que quiere que el que puede.
+Ya lo digo yo; de personas como tú, no quedan.
+Encargo un pastel para mañana ¿o ya lo has encargado?
+Otra hazaña como esa, vaquero, va a hacer que nos maten.
+Tenía un yerno informático y una joven ingeniera.
+Mami ha sacado un regalo inesperado del armario.
+Quien más tira, se lleva el gato al agua.
+Es más fácil estudiar un idioma cuando eres un niño.
+Vive rodeado de gatos y perros que recoge de la calle.
+Ni un dedo hace mano, ni una golondrina verano.
+Si tenemos octubres preñados de ilusiones.
+Cien niños del mismo vientre y todos son diferentes.
+Walter y Skyler White deberían tener una estatua humana en la Rambla.
+Aquel hombre no parará hasta que hoy concluya el negocio.
+El chico le dijo a su madre los suspensos.
+Hoy es el cumpleaños de mi hermana pequeña.
+Las Baleares son a pocas millas náuticas.
+Pero no como algo, sencillamente, imposible.
+Hoy ya me he tomado tres cafés, puede que no tome más.
+¿Pero realmente alguien no ve que somos plastilina ante los mass media?
+Y todo el pueblo aclamaba con grande júbilo, alabando á Jehová.
+Produzca la tierra seres vivientes según su género, bestias y serpientes y animales.
+Cada día tienen más productos para celíacos.
+Me busca las cosquillas, pero no sabe que tengo mucha paciencia.
+Haz promoción del apartamento y seguro que te lo alquilarán.
+Comenzaron á caminar para volverse á la tierra de Judá.
+En Castilla, nueve meses de invierno y tres de infierno.
+Abogado, juez y doctor, cuanto más lejos, mejor.
+¿De verdad son ejemplos de cantantes que comen solo a final de mes?
+Los estratos más difíciles son los externos.
+La lengua no tiene hueso, pero corta lo más grueso.
+Ahora ya no sé si tengo hambre o no tengo.
+Ratón que no tiene más que un horado, pronto es cazado.
+Los chiflados están todos encerrados en la antigua lonja.
+Creo que me apetece tortilla de patata y un poco de ensalada.
+La entrada para el teatro es demasiado cara.
+Parientes y trastos viejos, pocos y lejos.
+Para todo hay remedio, si no es para la muerte.
+Esperemos que el físico astral venga a hacerle una visita.
+¿Habíais vosotras de esperarlos hasta que fuesen grandes?
+Ni el clamor desbordante de las malas pasiones.
+Su abuelo siempre decía que era demasiado pobre para comprar barato.
+Y Obed engendró á Isaí, é Isaí engendró á David.
+He perdido la cabeza, ¡qué bonita decepción!
+El José fue de los primeros que encontró trabajo de todo el grupo.
+La base de lanzamiento está siendo construida.
+Sucedió, pues, en aquel tiempo, una lluvia muy copiosa.
+¿Tiene pinta Caco Senante de llevar esa dieta?
+El estímulo neurosensorial no ha tenido la intensidad esperada.
+Ante casa cada día hay más contenedores.
+El sol del mediodía y el sereno de la noche.
+La tierra de Borinquén es un jardín florido de mágico primor.
+Traen ecos perdidos de músicas de arroyos.
+Los planes que hagas no te servirán de nada.
+Nadie sabe lo que tiene hasta que lo pierde.
+Tengo ciento cuarenta y ocho mensajes de correo para abrir.
+Y crió Dios al hombre á su imagen, á imagen de Dios lo crió.
+Al menos podrías haber dejado la galleta.
+Ahora, notorio sea al rey, que si aquella ciudad fuere reedificada.
+El valenciano tenía los brazos tatuados.
+La discoteca tenía unas normas de vestimenta.
+No importa cuánto hayamos jugado con él.
+Mi nave ha impactado aquí por equivocación.
+Mar se compró una Rumba para el apartamento.
+Septiembre o seca las fuentes o se lleva los puentes.
+Unos tienen la fama y otros cardan la lana.
+Hay veces que damos la mano, y nos cogen el brazo entero.
+No para de roncar: o vas a ver al médico o pido el divorcio.
+Y todas las almas de los que salieron del muslo de Jacob, fueron setenta.
+Siempre pidiéndome dinero, ¿te crees que soy el Banco de España?
+Nos levantaremos temprano para ir de excursión.
+Era una app muy útil para los turistas alemanes.
+El sol pone en la tierra su alegría de plata y oro.
+Pero sabes que siempre tendrá un lugar especial para ti.
+Un buen soldado jamás abandona a sus hombres.
+Estoy buscando el caracol que has perdido.
+Necoxtla, está seguramente en mi camino.
+Por Todos los Santos, la nieve en los altos.
+Hagamos al hombre á nuestra imagen, conforme á nuestra semejanza.
+Y los hijos de Israel crecieron, y multiplicaron.
+Cada hijo de vecino tiene sus hechos por padrino.
+Comenzaba una carrera desbocada hacia la invitación al pánico.
+Con la barriga vacía, ninguno muestra alegría.
+El juego que practicaremos tiene un componente didáctico.
+Y susurras en mi oído que me quieres, pero lejos.
+¿Los poderes telepáticos pueden transmitir la letra de una canción?
+Migraciones masivas es una realidad actualmente.
+¿Viste el amanecer en este pueblo entre montañas?
+La miel tiene aroma de tomillo e hinojo.
+Los viejos de casa saben una canción muy bonita.
+Si no conseguimos un trato habrá que entrar por la fuerza.
+Como es la de haber visto llorando una montaña.
+Estoy un poco de deprimido, eso es todo.
+A beberse las lágrimas que llora la montaña.
+Y ahora, aunque es cierto que yo soy pariente cercano.
+Cada hombre cuerdo lleva un loco dentro.
+Pedro viajaba a Suecia día sí, día también.
+En el mismo proceso ¿cuánto se quedan los intermediarios?
+Edificaremos con vosotros, porque como vosotros buscaremos á vuestro Dios.
+Maria dejó de tomar leche de vaca y pasó a leche de soja.
+Trabaja como si vivieres siempre y vive como si murieses hoy.
+Risto me ha regalado un Swatch con retroiluminación.
+Por el humo se sabe donde está el fuego.
+Los artistas de la plaza se manifestaron desnudos.
+Marzo ventoso y abril lluvioso hacen de mayo florido y hermoso.
+Puedo volar por el cuarto con los ojos cerrados.
+En fraternidad, sin separación, ¡Cantemos Libertad!
+Esto de la adolescencia no se puede resistir.
+Produzcan las aguas reptil de ánima viviente.
+Entro en casa, me quito la ropa y, reventado, me tiro en el sofá.
+Ni primavera sin golondrina, ni despensa sin harina.
+Hoy se celebran cien años de la muerte de Cervantes.
+En abril aguas mil y todas caben en un barril.
+¿Crees que es necesario que haga tanto ruido?
+Y en los tamarindos, con los clarineros.
+Dice que quiere adelgazar antes del verano.
+La posibilidad del olvido, cada día era más fuerte.
+He aquí que él avienta esta noche la parva de las cebadas.
+Más vale ser cabeza de ratón que cola de león.
+Me aburro como una ostra, pero pronto haré vacaciones.
+Yo soy quien debería estar atado a ese cohete.
+Los taxistas quieren hacer huelga durante el congreso.
+Programar te da habiliades de organización.
+Todas las anteriores ediciones de Jicaras tristes se agotaron.
+Manténgase detrás de la línea divisoria.
+¿Ganan mucho los cantantes por la venta de sus discos?
+Ten cuidado con las escaleras, están recién fregadas.
+Los cuales tomaron para sí mujeres de Moab.
+En esta playa, antes había muchas conchas.
+La subida a la ermita se hacía de rodillas.
+Tengo un tractor amarillo, que es lo que se lleva ahora.
+No es más limpio el que más limpia, sino el que menos ensucia.
+Las comunidades eremíticas cada día son más escasas.
+Mira, en esa casa hay un niño que piensa que eres lo mejor.
+No puedes dejar que las pesadillas te hagan mella.
+La esperanza es lo último que se pierde.
+¡Ten en consideración su buena voluntad!
+Al alguacil local y yo parecemos estar en algún tipo de estación de combustible.
+Se perdió por la montaña y tuvieron que llamar a los Mossos.
+Las películas de acción siempre me parecen violentas.
+Siempre he querido hacerlo pero nunca me he atrevido.
+El primer paso es reconocer que tienes un problema.
+Está es la última vez que te presto algo.
+Creo que las dos tienen demasiadas figuritas.
+Julia, no vamos a aguantar demasiado tiempo.
+Y lo hace tan descriptivo, que hace que el lector, al leer sus versos.
+Nos equivocamos de tren y fuimos a parar al aeropuerto.
+Al que entre la miel anda, algo se le pega.
+Más vale lo malo conocido que lo bueno por conocer.
+Cualquier otro juguete daría sus partes por ser tú.
+Lleva unos pantalones muy ajustados, este chico.
+Y fué la tarde y la mañana el día sexto.
+Para que ofrezcan olores de holganza al Dios del cielo.
+Esta frutería es muy cara, Por favor ¿a cuánto está el kilo de manzanas?
+De grandes cenas están las sepulturas llenas.
+Y no pueden enseñarte nada nuevo, nada nuevo.
+Ya hace días que coger el tren es un deporte de riesgo.
+Perdimos una oportunidad de oro, ¡que no vuelva a pasar!
+Que los pilotos aéreos hagan huelga durante el verano, ya es un clásico.
+Las políticas públicas son poco imaginativas.
+Si no te entusiasma, puedo pensar en otra cosa.
+Tú entras en el salón y me miras con tu sonrisa particular.
+Él siempre venía los jueves después de cenar.
+Esa bolsa de plástico parece una medusa.
+He cambiado mi láser de aturdir a matar.
+Ha salido del infierno y no quiere volver.
+¿El cerebro de la derecha es el del señor Ambrosio?
+A falta de hombres buenos, a mi padre hicieron alcalde.
+Estoy harta de tener que repetir siempre el mismo.
+No se hizo la miel para la boca del asno.
+A Dios, al padre y al maestro, tenga el niño gran respeto.
+Ser vegano o vegetariano son cosas distintas.
+Quien el puchero del vecino quiere probar, deje el suyo sin tapar.
+Dentro de un rato conectarán en directo con la rueda de prensa.
+Vendrán por lana y saldrán trasquilados.
+Han dicho que no tendrán que entrar en prisión.
+La operación de actualización debe ejecutarse con privilegios de superusuario.
+¿Te importaría acercarte al supermercado a comprar?
+Se me han muerto todos los rosales del balcón.
+Más te vale espabilar si no quieres arrepentirte luego.
+Las hojas secas danzan con las bolsas de plástico y los pañuelos de papel.
+Y fué la tarde y la mañana el día cuarto.
+¡Léete todo de una vez o no aprobarás nunca!
+El hombre y el oso cuanto más feo más hermoso.
+No pienso que deberíamos darle oportunidad.
+Pendiente una conversación, quizá algo más por hablar.
+Un rincón como este no se encuentra todos los días.
+Los socialistas llevaban ordenador los plenos.
+Cada loco con su tema y cada lobo por su senda.
+Y música de nidos, como mansos instrumentos.
+Un buen cartel incluiría los Gansos Grasas.
+No me llaméis Noemi, sino llamadme Mara.
+Los premios siempre los ganan los mediocres.
+Ponte en pie, alza el puño y ven a la fiesta pagana.
+Acabo de ver un jabalí cruzar por el paso de cebra.
+Con virtud y bondad se adquiere autoridad.
+Pretendía sorprendernos, pero al final pasó lo contrario.
+Hace demasiado tiempo que no vamos al teatro.
+Estamos obteniendo las varas de ignición.
+Era un chaval muy atractivo, física e intelectualmente.
+Algunos montan a caballo para que no los muerdan los perros.
+Al que al cielo escupe, en la cara le cae.
+La abuela se quedaba dormida mientras leía.
+San Juan trae el infierno, y San Andrés el invierno.
+Despídete de tu mujer y de tus patatitas.
+Soy yo el que debería estar en ese cohete.
+Ni siquiera puedo salir volando por una ventana.
+Trabaja en la Agencia Catalana del Agua, Iván.
+Aquel caserío tenía un modo de ser especial.
+Te prometo que no voy a poner otra peli de zombis.
+Se ve que ha habido dos víctimas mortales por la ola de calor.
+Por favor, conecte el dispositivo a la corriente.
+En cualquier trabajo u obra, el que no ayuda estorba.
+Un concurso literario es, siempre, una esperanza.
+De cualquier manera mejor que le de una mirada.
+Con ciertos amigos, no se necesitan enemigos.
+Siempre le ha gustado mucho la cultura popular.
+Amor por interés, se acaba en un dos por tres.
+Hace millones de años, los dinosaurios caminaban por la tierra.
+Entonces les dijimos en orden á esto cuáles eran los nombres.
+Echar por el atajo no siempre ahorra trabajo.
+Y si su ofrenda para holocausto fuere de ovejas, macho sin defecto lo ofrecerá.
+Ha caído un chaparrón ¡y hemos quedado bien empapados!
+Mas el pueblo de la tierra debilitaba las manos del pueblo de Judá.
+¡Pasaremos unos días en el balneario, Marta!
+¡Recoge todo lo que has esparcido, Ernesto!
+Palabra o piedra suelta, no tiene vuelta.
+De hecho, la propiedad intelectual es una ficción.
+Bueno, yo traje mi dinosaurio que come perros con campos de fuerza.
+He aquí, pues, una nueva edición de Jicaras tristes.
+La deuda de Alberto con los Fugger era de treinta mil ducados.
+La creación es, en realidad, un proceso colectivo.
+Los locos y los niños dicen las verdades.
+Las fotografías que cuelga en Instagram me hacen pasar vergüenza.
+Ni siquiera puedo salir volando por la ventana.
+Esta ciudad no es lo suficientemente grande para nosotros dos.
+Arrieros somos y en el camino nos encontraremos.
+Siempre he querido poner en órbita a un astronauta.
+La entrañable abuela abrazó con ternura a su nieta.
+¿Como se llama el protagonista de Mad Men?
+Podríamos ir a Figureros antes de la fiesta mayor, ¿Luisa?
+¡Todo era un paisaje pintado en cristal!
+Y entre un intenso aroma de lirios y albahacas.
+Más vale ponerse una vez colorado que ciento amarillo.
+De la actual situación política no quiero saber nada.
+No conozco ninguna editorial que le quiera publicar los poemas.
+Bueno, tenemos medios para hacerte hablar.
+No te lo pienses tanto y ¡A vivir que son dos días!
+La preinscripción se realizará antes del día dieciséis.
+Estos dos pasan cada día a la misma hora.
+Vilma, lo limpiamos esto a fondo, me ayudaron todos.
+Cada uno en su casa, y Dios en la de todos.
+Estos fideos a la cazuela son deliciosos.
+¡No era un buen complot para involucrar a Gloria!
+El que más habla es el que más tiene porqué callar.
+Ostras, con este corte de pelo no te conocía.
+El padre lo único que tenía que hacer era sentarse en un cojín.
+El presupuesto tiene una validez de dos días hábiles.
+Los dados tienen seis caras, al menos en mi pueblo.
+La fundación requiere una gestión cuidadosa.
+Las lecturas eran cada vez más espaciadas.
+La próxima sardana será obligada de flautín.
+Tita Cervera es la heredera moral de los Medici.
+Hay chocolate en la nevera y también turrón.
+El periodista Jordi Evole vive cerca de casa.
+Todos los vasos de oro y de plata, cinco mil y cuatrocientos.
+Gente haciendo cola para comprar un iPhone.
+De fuera vendrá quien de casa te echará.
+El consumo de higos se ha estancado, dicen los cooperativistas.
+La temporada de fútbol comienza antes de que acabe la anterior temporada de fútbol.
+La tasca de Telma siempre tenía parroquianos.
+E hizo Dios animales de la tierra según su género.
+La red de maestros organiza un seminario en Torelló.
+Tienes razón, sólo estoy un poco deprimido.
+Pensé que estaba en el campamento de verano.
+Cuando termina la vida de la escuela, comienza la escuela de la vida.
+Esta mañana me he despertado muy cansado.
+Quiero visitar un agregado con alcalde pedáneo.
+Hemos hecho una comida rápida; un par de bocadillos y una caña.
+¡Qué contenido tan chapucero que hay en la revista de la escuela!
+Estuvieron hablando hasta las tres, más o menos.
+El viaje a China lo dejaremos para pasado fiestas.
+Memoria selectiva para recordar lo bueno, prudencia lógica para no arruinar el presente.
+Esta película es apta para todos los públicos.
+El valor de toma definitivo será el que surja del peritaje efectuado.
+La carta que nos enviasteis claramente fué leída delante de mí.
+Le gusta la chica de la falda de cuadros.
+Manolito ha comprado cuatro kilos de fruta.
+Es joven, pero ya tiene mucha experiencia.
+La policía tardó cinco minutos en personarse.
+Vale más caer en gracia, que ser gracioso.
+Otra vez conduzco yo; he llegado bien mareada.
+La nueva publicación tiene una redacción infecta.
+Prefiero una botella de Font Vella que dos latas de Fanta.
+Intentaba recoger basura de la calle y venderlos, pero no lo conseguía.
+¿La tradición consiste en tocarse el mentón con el talón?
+A pocos pasos, en actitud de espera, un muchacho.
+Como consumidores somos completamente moldeables.
+Debemos estar aquí para él cuando nos necesite.
+Entonces se levantaron los cabezas de las familias de Judá.
+Quien a buen árbol se arrima buena sombra le cobija.
+Una declaración de principios es exigible, en este caso.
+Al mal trabajador no le viene bien ningún azadón.
+El pago se abona el día cinco de cada mes.
+Sacarse el carné de conducir es una ruina.
+Es decir, ahora se protege al medio a costa del fin.
+Elisabet y Martín se van de vacaciones a Japón.
+Me duele la espalda si estoy mucho tiempo sentado.
+Lo pasado, pasado, y lo mal hecho, perdonado.
+Hace días que duermo con la ventana abierta.
+Los trabajadores más eficaces cobrarán más.
+Hay que tomar tres piezas de fruta al día.
+Jehová había visitado á su pueblo para darles pan.
+Zapatero, haz tus zapatos, y déjate de otros tratos.
+Con amigos así, ¿quién necesita enemigos?
+¡Vaya fauna! ¿Es qué ha llegado el circo a la ciudad?
+Si quieres con tu familia reñir, echa algo a repartir.
+El párrafo inicial asustaba a los lectores.
+Entonces Faraón mandó á todo su pueblo, diciendo.
+¡Qué suerte! las rebajas han empezado ¿todavía te queda dinero?
+¿Qué paté te gusta más, el de escalivada o el de finas hierbas?
+El sarcófago contenía un cadáver de mujer.
+En la sala de espera no cabía nadie más.
+Son influencias culturales a tener en cuenta.
+He oído que en ese país no se celebra la Navidad.
+La mitocondria es la central de energía de la célula.
+¿Sabes algún remedio casero para las picaduras de medusa?
+Es nuestra indiana musa que, desde su cabaña.
+Mis abuelos se conocieron yendo a cosechar uvas.
+La zona de contacto entre los dos territorios está llena de torres.
+Y el rey de Egipto hizo llamar á las parteras.
+¿Lo dices de verdad que irás a Barcelona con el coche particular?
+Nosotros somos siervos de Dios del cielo y de la tierra.
+Se le consideraba el rey de los piratas.
+Un fracaso tan grande poco que nos lo imaginábamos.
+El golfo de Morbihan es un mar interior localizado en la costa atlántica.
+Instagram es la aplicación más usada por los jóvenes.
+Esta interfaz tiene un diseño muy intuitivo.
+Al buen entendedor, pocas palabras bastan.
+El que con vino cena, con agua desayuna.
+A veces los buenos nadadores se ahogan, y los mejores jinetes caen del caballo.
+En poemas que pertenecen a nuevas y viejas generaciones.
+Si vas al súper, lleva jabón para la lavadora.
+Y lo devuelve con fuerza expresiva, sin olvidar la ternura.
+Salvador, ¡sube a la azotea y bájame las sábanas extra!
+Y si vamos a comprar antes de ir a la playa.
+Seremos cinco a comer, tres adultos y dos niños.
+Parece que he sido aceptado en su cultura.
+Todos los papeles de envolver están arrugados.
+Se están abriendo nuevos espacios de acogida, pero no son suficientes.
+Morbihan es un departamento francés situado en la región de Bretaña.
+Tener la boca cerrada, vale mucho y cuesta nada.
+Los valencianos hacen girar la campana entera.
+Habla, no cuando quieras, sino cuando puedas.
+Este proyecto no tiene ni pies ni cabeza.
+No hay mañana que deje de convertirse en ayer.
+El anticiclón se prolongará hasta la semana que viene.
+¡Las otras radios son mucho más resistentes, Pau!
+A quien trabaja, el día nunca le parece largo.
+El que adelante no mira, atrás se queda.
+La próxima semana vamos a vivir en el piso nuevo.
+Un parque como el de Terramar es un privilegio.
+Y desollará el holocausto, y lo dividirá en sus piezas.
+De Tortosa me gusta la catedral, ¡que no gusta a nadie!
+¿Me podrías decir las respuestas del test?
+La temática de Alfredo Espino está hecha de todas las cosas.
+A partir de mañana por la tarde bajarán las temperaturas.
+Un homenaje a Cabré era más que necesario.
+Pon una canción de Doctor Prats para animarles.
+No podemos pretender que no ha pasado nada.
+Y habitaron los sacerdotes, y los Levitas, y los del pueblo.
+El número de guerras en el mundo es más bajo que nunca.
+Pienso que has tomado suficiente té por hoy.
+La verdad, intento ser aterrador, pero no lo consigo.
+Elsa sale de la reunión con los vecinos del cuarto segunda.
+Se fue de la discoteca porque no le gustaba la música.
+Siempre he querido poner a un hombre del espacio en órbita.
+Pasan las horas y nadie ha hecho el gesto de lavar los platos.
+La alegría rejuvenece; la tristeza envejece.
+El médico se mudó a un pueblo del norte.
+Parece mentira como se pudo hacer en tan poco tiempo.
+Theix era una comuna francesa situada en el departamento de Morbihan.
+Quien tarde se levanta, todo el día trota.
+Realmente soy de una compañía más pequeña que fue comprada en una subasta.
+Así que, ya sabes, ¡coge el tranvía y ve a por ella!
+El que parte y reparte se queda con la mejor parte.
+Sensibilizados es el nombre que reciben los que huyen espantados.
+MusicBrainz es una enciclopedia abierta de música que recoge metadatos sobre música.
+Gallo que no canta, algo tiene en la garganta.
+A la cama no te irás sin saber una cosa más.
+Dani, ¿has llevado los toldos a la chica de las hamacas?
+Agrestes surgían entre el rumoroso verdor de las cañas.
+Asociación de Compositores es un lugar de referencia para todos los aficionados al humor.
+Llegaron pues á los campos de Moab, y asentaron allí.
+Porque las mujeres Hebreas no son como las Egipcias.
+La alcaldesa ha hablado con el sector para encontrar vías de solución.
+Soy el único que tiene información que revela la única debilidad de esta arma.
+El premio que recibió es una copa dorada con incrustaciones plateadas.
+Los mensajes que me enviaba el abogado me confundían.
+Llover sobre mojado mil veces ha pasado.
+Señores y señoras, bienvenidos a está nueva aventura.
+La profesora puso muchos deberes al final de la clase.
+¡Javier es el responsable de este desorden!
+Empero cuanto más los oprimían, tanto más se multiplicaban y crecían.
+Y también les preguntamos sus nombres para hacértelo saber.
+El procesador de texto hace cosas extrañas con los guiones.
+La buena hilandera, en invierno acaba la tela.
+Gamboa quiere enrollarse con Estela y no puedo permitirlo.
+Más vale buena amistad que ruin parentesco.
+Con queso, pan y vino, se anda mejor el camino.
+¿Te piensas que devolveré el importe de la deuda?
+Así volvió Noemi y Ruth Moabita su nuera con ella.
+¡Cuéntame uno de esos cuentos tan tristes!
+Creía que me había llevado el móvil y resulta que me lo dejé aquí.
+Cuenta hasta diez e intenta no echar más leña al fuego.
+A mí me hacen eso mismo y me quedo toda loca.
+Ciertamente nosotras volveremos contigo á tu pueblo.
+Tengo demasiada hambre para ir a montar en bici ahora.
+Baile que en burla empieza, acaba en boda.
+Estos buscaron su registro de genealogías, y no fué hallado.
+Se podría estar atento a todo, menos a aquello.
+La venganza no es algo que fomentemos en mi planeta.
+Hemos sudado mucho y nos merecemos una clara.
+Las aves iniciaron la migración a tierras cálidas.
+Hay mucha más gente implicada en este caso.
+A perro viejo, no hay quien le enseñe trucos nuevos.
+Julia, me gusta que me hagas los mismos juegos que ella.
+Su cantante favorito iba a hacer un concierto.
+¿Me enviarás aquel libro que me dejé en tu casa?
+De Josés, Juanes y asnos, los hay en todas las casas.
+Quedan sólo dos ensayos para el concierto, ya es necesario que nos despertemos.
+Tu pueblo será mi pueblo, y tu Dios mi Dios.
+Al caballo más manso le ponen más montura.
+Al balcón abierto frente a las montañas.
+Lo que el médico yerra, cúbrelo la tierra.
+Nadie te podrá hacer frente en todos los días de tu vida.
+Un cielo dan arrullos plácidos las olas a sus pies.
+Los humanos han llegado a la Luna de Valencia.
+Enviáronle carta, y de esta manera estaba escrito en ella.
+En esa casa hay un niño que piensa que eres el mejor.
+Tenía un vacío inmenso en la barriga y no era de hambre.
+Bueno, entonces, tenemos que hacer algo.
+Esta semana estoy de un humor insuperable.
+Estás un poco papanatas, pero me haces reír.
+Dice que estudia en la Universidad Autónoma de Barcelona.
+Cantemos siempre, Libre Guinea, y conservemos siempre la unidad.
+Han alquilado un apartamento en Figueres.
+Lo de salir del suelo ha sido una idea genial.
+No sabemos por qué hoy no ha venido a trabajar.
+Porque es bueno, porque para siempre es su misericordia sobre Israel.
+Cierra la puerta que hay corriente de aire.
+Es especialista en la obra de Joanot Martorell.
+¡Qué pérdida de interés tan grande, Manolo!
+¡Me han dedicado una canción de los Gansos Grasas!
+Estaba tan sonado que pudo ser el protagonista de la cena de los idiotas.
+Actualmente los alquileres están por las nubes.
+A mi amiga Sara, le acaban de robar la mochila.
+Si nos mantenemos unidos lo podemos hacer.
+Siempre me han fascinado las historias de marcianos.
+Las colas para coger un taxi son cada vez más largas.
+La convocatoria electoral los sorprendió haciendo el amor.
+Y si nos gusta la zona podemos quedarnos un par de añitos.
+Siempre llegamos tarde a todas partes por su culpa.
+Tienes un chisporroteo sospechoso a la mirada.
+Mi abuelo siempre decía que cada año nacen más tontos.
+¿A qué hora llega esta tarde tu autobús?
+Practicaba la narrativa en horas perdidas.
+El día que no me afeité, vino a mi casa quien no pensé.
+Por el puente de la Purísima iremos a Finlandia.
+El golpe me ha despertado del hipersueño.
+Las habas rehogadas con butifarra negra me vuelven loco.
+Te lavarás pues, y te ungirás, y vistiéndote tus vestidos, pasarás á la era.
+La fiesta se alargó bien entrada la noche.
+Lo rastrero no sube: esta cumbre es el reino.
+Su abuelo no se aclara nada con los medicamentos.
+Un candidato demasiado joven no nos conviene.
+El programa de fiestas vale tres euros y medio.
+Ríos era un cómico fenomenal, ¡el mejor actor de la comarca!
+Esa salida de la carretera, estaba mal señalizada.
+Levantóse entretanto un nuevo rey sobre Egipto, que no conocía á José.
+Trabajas menos que la chaqueta de un guardia.
+Muy bien, el primer punto del orden del día.
+Siento que alguien me está mirando ahora mismo.
+Otro tiempo vendrá, y el que hoy no puede, podrá.
+Si tenemos diciembres cuajados de luceros.
+Los toros se ven mejor desde la barrera.
+Hoy que no llevo paraguas seguro que llueve.
+El espionaje ruso es heredero del soviético; ¡ríete!
+Sin duda Alfredo Espino es un poeta cautivador.
+Ostras, hace dos meses que me ha caducado el carnet de conducir.
+En la radio han dicho que mañana lloverá.
+Está obsesionado con el deporte: es adicto a ejercicio físico.
+A ver si quedamos un día para el almuerzo.
+Cuando el agua empiece a hervir añada la pasta.
+Sacó también luego lo que le había sobrado después de harta, y dióselo.
+Hay muchos delincuentes en esa parte de la ciudad.
+Presentará su ofrenda de tórtolas, ó de palominos.
+Hasta el cuarenta de mayo no te quites el sayo.
+Llega el lienzo que traes sobre ti, y ten de él.
+¿La lotería ha tocado en La bruja de oro?
+¿Has visto el nuevo pavimento del paseo?
+Más vale prevenir que tener que lamentar.
+Más sabe el necio en su casa que el cuerdo en la ajena.
+Jehová haga con vosotras misericordia, como la habéis hecho con los muertos y conmigo.
+Los taxistas mantienen la huelga indefinida.
+Este resfriado es por culpa del aire acondicionado.
+Y cuando él se acostare, repara tú el lugar donde él se acostar.
+Que esto fué solamente una gran equivocación.
+La manifestación de los corsetera me cogió desprevenido.
+La música que más se escucha es del género reggaeton.
+No vendré temprano porque me gusta dormir.
+La luz; un ternerito viene, y luego se arrodilla.
+Introduzca el número secreto y siga las indicaciones de la pantalla.
+El que quiere interesar a los demás tiene que provocarlos.
+Es un asunto que no tiene ninguna trascendencia.
+El pavimento del paseo resbala y la abuela ha tomado mal.
+¡Qué palo de anuncios que pasan en el cine!
+Gamboa, quiero a todo el mundo prevenido, con chalecos y juntos.
+Todo era silencio, no se sentía ni un alma.
+Al amigo y al caballo, no hay que cansarlos.
+Después de comer siempre me apetece tomarme un café con leche.
+No del Pagano Monte la musa inspiradora.
+Teclear todos los dias en el computador, una frase más.
+Y muchos de los sacerdotes, ancianos que habían visto la casa primera.
+Te refrescarás con un Aquarius de naranja.
+En la época en que le tocó vivir, el poeta.
+En trece y martes ni te cases ni te embarques.
+Cuando parteareis á las Hebreas, y mirareis los asientos, si fuere hijo, matadlo.
+Esta semana voy a entrar media hora antes cada día.
+¿Has puesto el pescado en el congelador?
+Una obra juvenil escrita junto al latido del corazón del pueblo.
+A inspirarnos sencillos y tiernos madrigales.
+A caballo regalado no le mires el dentado.
+Está celebrando que ha conseguido un ascenso en el trabajo.
+Se tienen en remojo desde la noche anterior.
+Cada año, en julio, se van unos días en el Pirineo.
+¿Sabéis donde puedo comprar un clarinete de segunda mano?
+El amigo, lo escojo yo, el pariente, no.
+A comer, beber, bailar y gozar que el mundo se va acabar.
+Quizás no somos muchos, pero tenemos muchas ganas de trabajar.
+No se sepa que haya venido mujer á la era.
+Y murieron también los dos, Mahalón y Chelión.
+Por favor, ¿podéis bajar el volumen de la música?
+¡Me parece genial que la hayas conocido!
+No te enteraste de nada, ¿estás en Babia o qué?
+Dime con quién andas y te diré quién eres.
+Bibi lleva un traje que la hace más alta.
+Y cantaban, alabando y confesando á Jehová.
+Miramos los corrales donde mugen las vacas.
+Jícaras Tristes es una recopilación de seis poemarios del poeta Alfredo Espino.
+Python como un legunaje de programación.
+¿Qué instituciones dices que estarán presentes?
+Dicen que este año el exámen ha sido más difícil que nunca.
+Martín es un mozo que se casó con una amiga mía.
+La fiesta de la Merced es el patíbulo del verano.
+Ricardo, si no hay rocas en el fondo, estamos bien jodidos.
+Me subleva que me digan que hago faltas.
+Pero ninguno de ellos te querrá como lo hago yo.
+Dime, Sebastián, ¿has cambiado las bombillas del cuarteto de debajo de la escalera?
+Se necesitan dos años para aprender a hablar y sesenta para aprender a callar.
+¿Quién os dió mandamiento para edificar esta casa, y restablecer estos muros?
+Vase la piedra de la honda y la palabra de la boca.
+La belleza está en el interior de un Ferrero Rocher.
+Si la envidia fuera tiña, ¡cuántos tiñosos habría!
+José llegó a la Formentera hippy de los setenta y se quedó.
+¿No querías caldo? ¡Pues toma tres tazas!
+En su expansivo empuje la libertad se estrena, del cielo americano formando un pabellón.
+Diciembre las miríadas de todos sus luceros.
+Cuanto más seamos, menos teca nos tocará por barba.
+Más fácil es la obra juzgar que en ella trabajar.
+Una figura emergente nos eclipsará enseguida.
+Agua que no has de beber, déjala correr.
+Tanto va el cántaro a la fuente que al fin se rompe.
+Se transporte a la campiña salvadoreña, muy similar a la centroamericana.
+Donde no hay cabeza, todo se vuelven patas.
+¡Es lento este programa, muy lento, no se puede aguantar!
+Si vas a Nueva York te recomiendo que vayas a ver un musical.
+Cada cual sabe donde le aprieta el zapato.
+En realidad a los toros no les enfada el color rojo.
+No nos va a dar tiempo a acabar el trabajo.
+La primera noche dormirán en un refugio y el resto en tienda de campaña.
+Este año haremos un viaje por los trópicos.
+Noemi, b, vende una parte de las tierras que tuvo nuestro hermano.
+Susana batió el récord de atletismo de la escuela esta mañana.
+Un dedo no hace mano, pero sí con sus hermanos.
+Ahora dice que se quiere cambiar el coche.
+Ellos hacen buena pareja, se van a casar en mayo.
+Y fué la tarde y la mañana el día tercero.
+Los niños podían andar por allí libremente.
+Al que asa dos conejos a la vez, uno se le quema.
+Estaban presentes todos, cuando lo hizo.
+Donde menos se piensa, se levanta la liebre.
+Piensa mal y acertarás, aunque alguna vez te equivocarás.
+Cuando era pequeño no teníamos teléfonos móviles.
+Amigos al prestar, enemigos al devolver.
+El contexto de la disputa era peligroso.
+¡De la exposición no quiero saber nada más!
+Mezclan Fanta y Eristoff en una cazuela.
+Más vale una mala pierna que dos buenas muletas.
+Máximo perdió hasta la camisa, haciendo política.
