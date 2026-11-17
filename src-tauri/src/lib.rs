@@ -3,6 +3,7 @@ pub mod code;
 pub mod commands;
 pub mod history;
 pub mod metronome;
+pub mod oauth;
 pub mod secrets;
 
 use std::sync::{Arc, MutexGuard};
@@ -318,6 +319,9 @@ pub fn run() {
                 AiClient::new(Endpoints::production()),
             ));
             app.manage(MetronomeState::audio());
+            // Sign in with ChatGPT keeps its private record in the app config dir.
+            let config_dir = app.path().app_config_dir().ok();
+            app.manage(oauth::chatgpt_auth(config_dir.as_deref()));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

@@ -18,6 +18,7 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
+pub mod chatgpt_auth;
 mod client;
 mod opencode;
 mod parse;
@@ -333,8 +334,9 @@ impl ProviderConfig {
 }
 
 /// Endpoint roots. [`Endpoints::production`] is the only allowlist (PRD §6:
-/// no network access except the four providers, plus the models.dev catalogue
-/// that says which API format each OpenCode Go model uses).
+/// no network access except the four providers, the models.dev catalogue
+/// that says which API format each OpenCode Go model uses, and OpenAI's
+/// sign-in service for Sign in with ChatGPT).
 #[derive(Clone, Debug)]
 pub struct Endpoints {
     /// Anthropic API root (`/messages`, `/models`).
@@ -347,6 +349,9 @@ pub struct Endpoints {
     pub(crate) opencode_go: String,
     /// Full models.dev catalogue URL.
     pub(crate) models_dev: String,
+    /// Sign in with ChatGPT root, also the ID-token issuer
+    /// (`/api/accounts/authorize`, `/api/accounts/oauth/token`, `/.well-known/…`).
+    pub(crate) auth: String,
     /// Plain `http://` allowed; only [`Endpoints::loopback`] sets it.
     pub(crate) allow_http: bool,
 }
@@ -360,13 +365,14 @@ impl Endpoints {
             openai: "https://api.openai.com/v1".into(),
             opencode_go: "https://opencode.ai/inference/go/v1".into(),
             models_dev: "https://models.dev/api.json".into(),
+            auth: "https://auth.openai.com".into(),
             allow_http: false,
         }
     }
 
     /// Test-only: every root under `base` (e.g. `http://127.0.0.1:PORT`), with
-    /// the production paths (`/v1`, `/v1beta`, `/inference/go/v1`, `/api.json`),
-    /// plain http allowed.
+    /// the production paths (`/v1`, `/v1beta`, `/inference/go/v1`, `/api.json`;
+    /// the sign-in service at `base` itself), plain http allowed.
     ///
     /// Exists only under `cfg(test)` or the `test-endpoints` feature, which
     /// dependents enable in `[dev-dependencies]` only: production builds
@@ -381,6 +387,7 @@ impl Endpoints {
             openai: format!("{base}/v1"),
             opencode_go: format!("{base}/inference/go/v1"),
             models_dev: format!("{base}/api.json"),
+            auth: base.to_string(),
             allow_http: true,
         }
     }
@@ -396,14 +403,16 @@ mod tests {
     }
 
     #[test]
-    fn production_hosts_are_exactly_the_four_providers_and_models_dev() {
+    fn production_hosts_are_exactly_the_providers_models_dev_and_openai_sign_in() {
         let e = Endpoints::production();
+        assert!(!e.allow_http, "production is https only");
         let mut hosts: Vec<&str> = [
             &e.anthropic,
             &e.gemini,
             &e.openai,
             &e.opencode_go,
             &e.models_dev,
+            &e.auth,
         ]
         .iter()
         .map(|u| host(u))
@@ -414,6 +423,7 @@ mod tests {
             [
                 "api.anthropic.com",
                 "api.openai.com",
+                "auth.openai.com",
                 "generativelanguage.googleapis.com",
                 "models.dev",
                 "opencode.ai",
