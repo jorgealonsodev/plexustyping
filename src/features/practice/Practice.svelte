@@ -32,6 +32,7 @@
   import { type TokenClass, codeKeyEvent, tokenClasses } from "../code/syntax";
   import { focusTyping, setTypingField } from "./focus";
   import { Prefetcher, generationKey, provisionalFailedChars, sourceLabel } from "./prefetch";
+  import { type Phase, indentChangeRestarts, shouldApply } from "./replies";
   import Results from "./Results.svelte";
   import { metronomeApi } from "../metronome/api";
   import { type BeatAnchor, type MetronomeSettings, beatOffsetMs, toConfig } from "../metronome/beat";
@@ -82,7 +83,6 @@
   type Track = { offsets: (number | null)[]; bpms: Set<number> };
   let track: Track = { offsets: [], bpms: new Set() };
 
-  type Phase = "loading" | "typing" | "scoring" | "results" | "error";
   let phase = $state<Phase>("loading");
   let text = $state("");
   // Weak units the current text practises, and whether it is the diagnostic text.
@@ -113,6 +113,8 @@
   let retry: () => void = loadFirst;
   // Invalidates in-flight IPC results when the user restarts or moves on.
   let run = 0;
+  // Latest heatmap request: an older reply (e.g. of the previous mode) is stale.
+  let heatmapRun = 0;
   let field = $state<HTMLTextAreaElement>();
   let layout = $state.raw<Layout | null>(null);
   // Key presses for each char of `text`, fetched once per text.
@@ -205,10 +207,12 @@
   // Of the model of `of`: prose and code statistics are kept apart (S5).
   function refreshModel(id = run, of: PracticeMode = textMode) {
     weaknesses(5, of)
-      .then((next) => id === run && (weak = next))
+      .then((next) => shouldApply(id, run) && (weak = next))
       .catch((err) => console.warn("weaknesses failed", err));
+    // Not tied to `run`: a restart or the text loaded after a switch keeps the mode's heatmap.
+    const heatId = ++heatmapRun;
     fetchHeatmap(of)
-      .then((next) => (charScores = next))
+      .then((next) => shouldApply(heatId, heatmapRun) && (charScores = next))
       .catch((err) => console.warn("heatmap failed", err));
   }
 
@@ -355,10 +359,10 @@
     untrack(restart);
   });
 
-  // Changing the code indentation restarts a code text.
+  // Changing the code indentation restarts a code text being typed; otherwise it applies to the next one.
   $effect(() => {
     void indent;
-    untrack(() => isCode && restart());
+    untrack(() => indentChangeRestarts(phase, isCode) && restart());
   });
 
   // Switching prose/code or the language drops the prefetch and loads a text of the new mode.
