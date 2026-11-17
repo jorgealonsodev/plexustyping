@@ -54,6 +54,7 @@ async fn first_valid_provider_wins() {
 
     assert_eq!(got.provider, ProviderId::Openai);
     assert_eq!(server.hits(GEMINI), 0);
+    assert!(got.failed_attempts.is_empty());
 }
 
 #[tokio::test]
@@ -75,6 +76,14 @@ async fn invalid_text_is_retried_once_then_next_provider() {
     assert_eq!(got.provider, ProviderId::Gemini);
     assert_eq!(got.text, "Zorro veloz");
     assert_eq!(server.hits(OPENAI), 2, "one retry only");
+    // The rejected attempts that came before are kept, so the app can log why.
+    assert_eq!(
+        got.failed_attempts,
+        vec![
+            (ProviderId::Openai, low_density()),
+            (ProviderId::Openai, low_density())
+        ]
+    );
 }
 
 #[tokio::test]

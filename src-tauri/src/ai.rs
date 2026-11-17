@@ -609,6 +609,10 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
                 if let Err(e) = cached.and(counted) {
                     eprintln!("PlexusTyping: could not store the AI text or its usage: {e}");
                 }
+                // Earlier rejected attempts were billed too: log why, as when all fail.
+                for line in rejection_lines(&generated.failed_attempts) {
+                    eprintln!("{line}");
+                }
                 return Ok(plan.finish(NextText {
                     source: TextSource::Ai,
                     provider: Some(provider.to_owned()),

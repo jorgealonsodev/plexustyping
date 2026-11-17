@@ -99,6 +99,7 @@ impl AiClient {
             provider: cfg.id,
             model: cfg.model.trim().to_string(),
             usage,
+            failed_attempts: Vec::new(),
         })
     }
 
@@ -162,7 +163,12 @@ impl AiClient {
                         .unwrap_or(Err(ProviderError::Timeout))
                 };
                 match result {
-                    Ok(generated) => return Ok(generated),
+                    Ok(generated) => {
+                        return Ok(Generated {
+                            failed_attempts: errors,
+                            ..generated
+                        });
+                    }
                     Err(err) => {
                         let retry = attempt == 0
                             && matches!(

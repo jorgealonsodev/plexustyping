@@ -143,6 +143,10 @@ pub struct Generated {
     pub model: String,
     /// Tokens consumed by this call.
     pub usage: Usage,
+    /// Attempts of the fallback chain that failed before this one, in order
+    /// (empty for a single [`AiClient::generate`]).
+    #[serde(skip)]
+    pub failed_attempts: Vec<(ProviderId, ProviderError)>,
 }
 
 /// Provider failure, serialized as `{ "kind": ..., ... }`. Messages never
