@@ -73,16 +73,20 @@ describe("isMetronomeShortcut", () => {
 
 describe("tempoChangeFor", () => {
   it("adapts a text typed entirely to one tempo", () => {
-    expect(tempoChangeFor(60, 0.97, [150, -150])).toEqual({ from: 60, to: 63 });
-    expect(tempoChangeFor(60, 0.969, [10, -10])).toEqual({ from: 60, to: 60 });
+    expect(tempoChangeFor(60, 0.97, [150, -150], false)).toEqual({ from: 60, to: 63 });
+    expect(tempoChangeFor(60, 0.969, [10, -10], false)).toEqual({ from: 60, to: 60 });
   });
 
-  it("does not apply without one tempo, without keystrokes or when the metronome was switched mid-text", () => {
-    expect(tempoChangeFor(null, 1, [10, -10])).toBeNull();
-    expect(tempoChangeFor(60, 1, [])).toBeNull();
-    expect(tempoChangeFor(60, 1, [null, null])).toBeNull();
-    expect(tempoChangeFor(60, 1, [null, 10, -10])).toBeNull();
-    expect(tempoChangeFor(60, 1, [10, -10, null])).toBeNull();
+  it("still adapts when the first keystrokes came before the first beat was known", () => {
+    expect(tempoChangeFor(60, 0.97, [null, 150, -150], false)).toEqual({ from: 60, to: 63 });
+  });
+
+  it("does not apply without one tempo, without measured keystrokes or when the metronome was switched mid-text", () => {
+    expect(tempoChangeFor(null, 1, [10, -10], false)).toBeNull();
+    expect(tempoChangeFor(60, 1, [], false)).toBeNull();
+    expect(tempoChangeFor(60, 1, [null, null], false)).toBeNull();
+    expect(tempoChangeFor(60, 1, [null, 10, -10], true)).toBeNull();
+    expect(tempoChangeFor(60, 1, [10, -10, null], true)).toBeNull();
   });
 });
 

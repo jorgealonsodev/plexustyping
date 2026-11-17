@@ -195,6 +195,9 @@ describe("custom theme storage", () => {
     expect(added.themes).toEqual([owl, added.theme]);
     const third = addCustomTheme(added.themes, { ...owl, name: "night owl" })!;
     expect(third.theme.id).toBe(`${owl.id}-3`);
+    const storage = memoryStorage();
+    saveCustomThemes(third.themes, storage);
+    expect(loadCustomThemes(storage)).toEqual(third.themes);
   });
 });
 

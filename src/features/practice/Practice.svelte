@@ -92,8 +92,8 @@
     metronomeError = controller.error;
   });
   /** Metronome offset of each event of the current session (aligned with `session.events`) and the tempos heard. */
-  type Track = { offsets: (number | null)[]; bpms: Set<number> };
-  let track: Track = { offsets: [], bpms: new Set() };
+  type Track = { offsets: (number | null)[]; bpms: Set<number>; switched: boolean };
+  let track: Track = { offsets: [], bpms: new Set(), switched: false };
 
   let phase = $state<Phase>("loading");
   let text = $state("");
@@ -157,7 +157,7 @@
     if (!text) return;
     run++;
     session = new TypingSession(text, mode, textMode === "prose" ? "manual" : indent);
-    track = { offsets: [], bpms: new Set() };
+    track = { offsets: [], bpms: new Set(), switched: false };
     scored = null;
     phase = "typing";
     tick++;
@@ -247,7 +247,7 @@
       const result = await scoreSession(textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
-      tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs) : null;
+      tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
       if (tempo && tempo.to !== tempo.from) onTempo(tempo.to);
       weak = [];
       phase = "results";
@@ -410,6 +410,16 @@
       const again = () => void load(fresh, again, "Generando texto…", chosen);
       again();
       refreshModel(run, chosen);
+    });
+  });
+
+  // Switching the metronome on or off after the first keystroke rules out a tempo change.
+  let wasEnabled = untrack(() => metronome.enabled);
+  $effect(() => {
+    const enabled = metronome.enabled;
+    untrack(() => {
+      if (enabled !== wasEnabled && phase === "typing" && session?.firstT != null) track.switched = true;
+      wasEnabled = enabled;
     });
   });
 

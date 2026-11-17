@@ -111,11 +111,17 @@ export interface TempoChange {
 }
 
 /**
- * What the adaptive metronome sets after a scored text: `null` unless the text had one tempo
- * (`bpm`) and every keystroke was measured, i.e. the metronome was not switched mid-text.
+ * What the adaptive metronome sets after a scored text: `null` when the metronome was switched
+ * on or off mid-text (`switched`), the text had no single tempo (`bpm`) or no measured keystroke.
+ * Keystrokes before the first beat was known are unmeasured but do not stop the change.
  */
-export function tempoChangeFor(bpm: number | null, accuracy: number, offsets: (number | null)[]): TempoChange | null {
-  if (bpm === null || offsets.length === 0 || offsets.some((o) => o === null)) return null;
+export function tempoChangeFor(
+  bpm: number | null,
+  accuracy: number,
+  offsets: (number | null)[],
+  switched: boolean,
+): TempoChange | null {
+  if (switched || bpm === null || !offsets.some((o) => o !== null)) return null;
   return { from: bpm, to: adaptTempo(bpm, accuracy, offsets) };
 }
 
