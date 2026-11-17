@@ -4,6 +4,7 @@ import {
   type ProviderInfo,
   MAX_CHAIN,
   addEntry,
+  aiToggleTitle,
   densityLabel,
   failureMessage,
   modelChoices,
@@ -12,6 +13,7 @@ import {
   removeEntry,
   setModel,
   setProvider,
+  toggleEnabled,
   usageCells,
 } from "./ai";
 
@@ -105,5 +107,19 @@ describe("labels", () => {
     };
     expect(usageCells(row, PROVIDERS)).toEqual({ name: "Gemini", calls: 3, today: 40, total: 1350 });
     expect(usageCells({ ...row, provider: "otro" }, PROVIDERS).name).toBe("otro");
+  });
+});
+
+describe("header AI toggle", () => {
+  it("titles the button by the AI state", () => {
+    expect(aiToggleTitle(true)).toBe("IA activada: los textos nuevos se generan con IA");
+    expect(aiToggleTitle(false)).toBe("IA desactivada: textos guardados");
+  });
+
+  it("flips only enabled and keeps the rest of the settings", () => {
+    const s = { enabled: false, chain: [claude], density: 3, topic: "comida" };
+    expect(toggleEnabled(s)).toEqual({ ...s, enabled: true });
+    expect(toggleEnabled({ ...s, enabled: true })).toEqual(s);
+    expect(s.enabled).toBe(false);
   });
 });

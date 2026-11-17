@@ -549,7 +549,8 @@ impl Plan {
 }
 
 /// The next practice text: AI when enabled and usable, else a cached AI
-/// text, else the corpus; `notice` says why the AI was not used. Code texts
+/// text, else the corpus; `notice` says why the AI was not used. With the AI
+/// disabled, a rotating cached text (no notice), else the corpus. Code texts
 /// use the code model, are cached per language and come with syntax tokens.
 pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, String> {
     let (model, settings) = {
@@ -580,10 +581,27 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
             &p.fallback,
         )?),
     };
+    let cache_mode = p.mode.cache_mode();
     if !settings.enabled {
+        // AI off: a saved text, rotating so consecutive texts differ, else the corpus.
+        let cached = {
+            let store = lock_store(&state.store);
+            store.take_cached_text(&p.language, &cache_mode, plan.targets())
+        };
+        match cached {
+            Ok(Some(c)) => {
+                return Ok(plan.finish(NextText {
+                    source: TextSource::Cache,
+                    provider: Some(c.provider),
+                    model: Some(c.model),
+                    ..NextText::corpus(c.text, c.targets)
+                }));
+            }
+            Ok(None) => {}
+            Err(e) => eprintln!("PlexusTyping: could not read the text cache: {e}"),
+        }
         return plan.corpus(p.seed);
     }
-    let cache_mode = p.mode.cache_mode();
     let (chain, missing) = usable_chain(&state.secrets, &settings).await;
     let reason = if chain.is_empty() {
         missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned())

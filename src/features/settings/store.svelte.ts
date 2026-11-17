@@ -73,6 +73,8 @@ export class SettingsStore {
   codeLines = $state(loadCodeLines());
   /** Bumped whenever AI settings or keys change: a prefetched next text is then stale. */
   aiRevision = $state(0);
+  /** The stored `AiSettings.enabled`, shared by the header "IA" toggle and Ajustes → IA; `null` until loaded. */
+  aiEnabled = $state<boolean | null>(null);
 
   bumpAi() {
     this.aiRevision++;

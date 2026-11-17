@@ -90,7 +90,14 @@
   function apply(s: AiSettings) {
     ai = s;
     density = s.density;
+    settings.aiEnabled = s.enabled;
   }
+
+  // The header "IA" toggle saves `enabled` itself: show it here too.
+  $effect(() => {
+    const enabled = settings.aiEnabled;
+    if (ai && enabled !== null && ai.enabled !== enabled) ai = { ...ai, enabled };
+  });
 
   /** Validated by the backend; on failure the previous settings stay on screen. */
   async function commit(next: AiSettings) {

@@ -493,6 +493,81 @@ async fn disabled_ai_gives_the_corpus_text_without_any_request() {
     );
 }
 
+/// Caches an unused `text` of language es and `mode` with no targets, created at `at`.
+fn cache_unused(state: &AppState, mode: &str, text: &str, at: i64) {
+    lock_store(&state.store)
+        .cache_text(&NewCachedText {
+            provider: "claude",
+            model: "claude-haiku-5-5",
+            language: "es",
+            mode,
+            targets: &[],
+            text,
+            created_at_ms: at,
+            used: false,
+        })
+        .unwrap();
+}
+
+#[tokio::test]
+async fn disabled_ai_rotates_the_cached_texts_without_any_request() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    cache_unused(&state, "prose", "primer texto guardado", 1);
+    cache_unused(&state, "prose", "segundo texto guardado", 2);
+    cache_unused(&state, "code:rust", "let x = 1;", 3);
+    let mut shown = Vec::new();
+    for seed in 0..4 {
+        let got = next_text(&state, &params(seed)).await.unwrap();
+        assert_eq!(got.source, TextSource::Cache);
+        assert_eq!(got.notice, None);
+        assert_eq!(got.provider.as_deref(), Some("claude"));
+        assert_eq!((got.syntax.clone(), got.tokens.clone()), (None, None));
+        shown.push(got.text);
+    }
+    assert_eq!(
+        shown,
+        [
+            "primer texto guardado",
+            "segundo texto guardado",
+            "primer texto guardado",
+            "segundo texto guardado"
+        ]
+    );
+    assert!(srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
+}
+
+#[tokio::test]
+async fn disabled_ai_in_code_mode_rotates_its_own_language_cache_then_the_corpus() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(AI_CODE))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_brace(&state);
+    cache_unused(&state, "prose", "texto de prosa", 1);
+    cache_unused(&state, "code:python", "print(1)", 2);
+    // No rust text yet: the corpus snippet, without a notice.
+    let got = next_text(&state, &code_params(4)).await.unwrap();
+    assert_eq!((got.source, got.notice.clone()), (TextSource::Corpus, None));
+    assert_eq!(got.syntax.as_deref(), Some("rust"));
+    cache_unused(&state, "code:rust", "let x = 1;", 3);
+    cache_unused(&state, "code:rust", "let y = 2;", 4);
+    let mut shown = Vec::new();
+    for seed in 0..3 {
+        let got = next_text(&state, &code_params(seed)).await.unwrap();
+        assert_eq!((got.source, got.notice.clone()), (TextSource::Cache, None));
+        assert_eq!(got.syntax.as_deref(), Some("rust"));
+        assert_contiguous(&got);
+        shown.push(got.text);
+    }
+    assert_eq!(shown, ["let x = 1;", "let y = 2;", "let x = 1;"]);
+    assert!(srv.requests().is_empty());
+}
+
 #[tokio::test]
 async fn a_prose_ai_text_only_lists_the_targets_it_really_contains() {
     // Prose no longer asks for targets (S9), so "Practicando" must not claim them.

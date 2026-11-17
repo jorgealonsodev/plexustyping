@@ -12,6 +12,8 @@
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
   import { focusTyping } from "./features/practice/focus";
+  import { aiSettingsGet, aiSettingsSet } from "./features/settings/aiApi";
+  import { aiToggleTitle, toggleEnabled } from "./features/settings/ai";
 
   const settings = new SettingsStore();
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
@@ -23,7 +25,26 @@
   // Why sessions are not kept on disk; `null` while persistent or unknown.
   let storageError = $state<string | null>(null);
 
+  let aiSaving = $state(false);
+
+  /** Flips the stored AI setting (the same as Ajustes → IA) and drops the prefetched text. */
+  async function toggleAi() {
+    aiSaving = true;
+    try {
+      const saved = await aiSettingsSet(toggleEnabled(await aiSettingsGet()));
+      settings.aiEnabled = saved.enabled;
+      settings.bumpAi();
+    } catch (err) {
+      console.warn("ai_settings_set failed", err);
+    } finally {
+      aiSaving = false;
+    }
+  }
+
   onMount(() => {
+    aiSettingsGet()
+      .then((s) => (settings.aiEnabled ??= s.enabled))
+      .catch((err) => console.warn("ai_settings_get failed", err));
     storageStatus()
       .then((s) => (storageError = s.persistent ? null : (s.error ?? "")))
       .catch((err) => console.warn("storage_status failed", err));
@@ -103,6 +124,18 @@
     {/if}
   </div>
   <ModeSwitch {settings} />
+  <button
+    type="button"
+    class="ai-toggle"
+    class:active={settings.aiEnabled === true}
+    aria-pressed={settings.aiEnabled === true}
+    title={aiToggleTitle(settings.aiEnabled === true)}
+    disabled={settings.aiEnabled === null || aiSaving}
+    onclick={() => {
+      void toggleAi();
+      focusTyping();
+    }}>IA</button
+  >
   <button
     type="button"
     class="gear"
@@ -212,6 +245,29 @@
     display: flex;
     padding: 0.35rem;
     color: var(--muted);
+  }
+  /* Lit like the active Prosa/Código button while the AI generates new texts. */
+  .ai-toggle {
+    flex: none;
+    box-sizing: border-box;
+    height: 2rem;
+    padding: 0 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .ai-toggle:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .ai-toggle.active {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .ai-toggle.active:focus-visible {
+    outline-color: var(--on-accent);
+    outline-offset: -3px;
   }
   /* While a new text is generated the arrows turn. */
   .spinning svg {

@@ -115,3 +115,10 @@ export function usageCells(row: UsageRow, providers: readonly ProviderInfo[]) {
     total: row.inputTokensTotal + row.outputTokensTotal,
   };
 }
+
+/** Title of the header "IA" toggle (ai-toggle S1). */
+export const aiToggleTitle = (enabled: boolean) =>
+  enabled ? "IA activada: los textos nuevos se generan con IA" : "IA desactivada: textos guardados";
+
+/** `s` with the AI turned on or off, everything else kept. */
+export const toggleEnabled = (s: AiSettings): AiSettings => ({ ...s, enabled: !s.enabled });
