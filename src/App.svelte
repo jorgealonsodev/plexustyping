@@ -10,6 +10,7 @@
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
+  import logo from "../assets/logo.svg";
 
   const settings = new SettingsStore();
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
@@ -52,6 +53,7 @@
 
 <header>
   <div class="brand">
+    <img class="logo" src={logo} alt="" width="28" height="28" />
     <h1>PlexusTyping</h1>
     <span>Del cerebro a los dedos.</span>
     {#if storageError !== null}
@@ -111,6 +113,10 @@
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
+  }
+  .logo {
+    align-self: center;
+    margin-right: -0.25rem;
   }
   h1 {
     margin: 0;
