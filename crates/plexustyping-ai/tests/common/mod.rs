@@ -44,6 +44,8 @@ pub struct Reply {
     pub delay: Duration,
     /// Extra raw header lines, each without the trailing CRLF.
     pub headers: Vec<String>,
+    /// The route keeps answering instead of being used up by one request.
+    pub repeat: bool,
 }
 
 impl Reply {
@@ -57,7 +59,14 @@ impl Reply {
             body: body.to_string(),
             delay: Duration::ZERO,
             headers: Vec::new(),
+            repeat: false,
         }
+    }
+
+    /// The same reply for every matching request.
+    pub fn repeated(mut self) -> Self {
+        self.repeat = true;
+        self
     }
 
     pub fn delayed(mut self, delay: Duration) -> Self {
@@ -71,13 +80,22 @@ impl Reply {
     }
 }
 
-/// A running mock server; requests are logged in arrival order.
+type Routes = Arc<Mutex<Vec<(String, Reply)>>>;
+
+/// A running mock server; requests are logged in arrival order. Clones share it.
+#[derive(Clone)]
 pub struct Mock {
     pub base: String,
     log: Arc<Mutex<Vec<Captured>>>,
+    routes: Routes,
 }
 
 impl Mock {
+    /// Adds a route after start (e.g. a reply that depends on the request flow).
+    pub fn route(&self, path: &str, reply: Reply) {
+        self.routes.lock().unwrap().push((path.to_string(), reply));
+    }
+
     pub fn requests(&self) -> Vec<Captured> {
         self.log.lock().unwrap().clone()
     }
@@ -109,7 +127,8 @@ pub async fn mock(routes: Vec<(&str, Reply)>) -> Mock {
         .into_iter()
         .map(|(p, r)| (p.to_string(), r))
         .collect();
-    let routes = Arc::new(Mutex::new(routes));
+    let routes: Routes = Arc::new(Mutex::new(routes));
+    let task_routes = routes.clone();
     let task_log = log.clone();
     tokio::spawn(async move {
         loop {
@@ -117,7 +136,7 @@ pub async fn mock(routes: Vec<(&str, Reply)>) -> Mock {
                 return;
             };
             let log = task_log.clone();
-            let routes = routes.clone();
+            let routes = task_routes.clone();
             tokio::spawn(async move {
                 let Some(captured) = read_request(&mut sock).await else {
                     return;
@@ -127,6 +146,7 @@ pub async fn mock(routes: Vec<(&str, Reply)>) -> Mock {
                 let reply = {
                     let mut routes = routes.lock().unwrap();
                     match routes.iter().position(|(p, _)| *p == path) {
+                        Some(i) if routes[i].1.repeat => routes[i].1.clone(),
                         Some(i) => routes.remove(i).1,
                         None => Reply::status(404, "{}"),
                     }
@@ -148,7 +168,7 @@ pub async fn mock(routes: Vec<(&str, Reply)>) -> Mock {
             });
         }
     });
-    Mock { base, log }
+    Mock { base, log, routes }
 }
 
 async fn read_request(sock: &mut TcpStream) -> Option<Captured> {
