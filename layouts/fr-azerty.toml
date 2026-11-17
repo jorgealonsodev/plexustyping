@@ -1,0 +1,218 @@
+# French (France) AZERTY keyboard layout: what Windows and XKB `fr(basic)` agree on.
+# Keys are `KeyboardEvent.code` values; layers are `normal`, `shift` and `altgr`.
+name = "Français (France)"
+dead_keys = ["^", "¨"]
+
+# Number row: symbols and accented letters, digits on Shift
+[keys.Backquote]
+normal = "²"
+
+[keys.Digit1]
+normal = "&"
+shift = "1"
+
+# AltGr ~ (and ` on Digit7) are plain characters: dead on Windows, plain on XKB.
+[keys.Digit2]
+normal = "é"
+shift = "2"
+altgr = "~"
+
+[keys.Digit3]
+normal = "\""
+shift = "3"
+altgr = "#"
+
+[keys.Digit4]
+normal = "'"
+shift = "4"
+altgr = "{"
+
+[keys.Digit5]
+normal = "("
+shift = "5"
+altgr = "["
+
+[keys.Digit6]
+normal = "-"
+shift = "6"
+altgr = "|"
+
+[keys.Digit7]
+normal = "è"
+shift = "7"
+altgr = "`"
+
+[keys.Digit8]
+normal = "_"
+shift = "8"
+altgr = "\\"
+
+# AltGr ^ is plain on both, but shares its character with the dead key, so it is treated as dead.
+[keys.Digit9]
+normal = "ç"
+shift = "9"
+altgr = "^"
+
+[keys.Digit0]
+normal = "à"
+shift = "0"
+altgr = "@"
+
+[keys.Minus]
+normal = ")"
+shift = "°"
+altgr = "]"
+
+[keys.Equal]
+normal = "="
+shift = "+"
+altgr = "}"
+
+# Top row
+[keys.KeyQ]
+normal = "a"
+shift = "A"
+
+[keys.KeyW]
+normal = "z"
+shift = "Z"
+
+[keys.KeyE]
+normal = "e"
+shift = "E"
+altgr = "€"
+
+[keys.KeyR]
+normal = "r"
+shift = "R"
+
+[keys.KeyT]
+normal = "t"
+shift = "T"
+
+[keys.KeyY]
+normal = "y"
+shift = "Y"
+
+[keys.KeyU]
+normal = "u"
+shift = "U"
+
+[keys.KeyI]
+normal = "i"
+shift = "I"
+
+[keys.KeyO]
+normal = "o"
+shift = "O"
+
+[keys.KeyP]
+normal = "p"
+shift = "P"
+
+# ^ and ¨ are dead keys.
+[keys.BracketLeft]
+normal = "^"
+shift = "¨"
+
+[keys.BracketRight]
+normal = "$"
+shift = "£"
+altgr = "¤"
+
+# Home row
+[keys.KeyA]
+normal = "q"
+shift = "Q"
+
+[keys.KeyS]
+normal = "s"
+shift = "S"
+
+[keys.KeyD]
+normal = "d"
+shift = "D"
+
+[keys.KeyF]
+normal = "f"
+shift = "F"
+
+[keys.KeyG]
+normal = "g"
+shift = "G"
+
+[keys.KeyH]
+normal = "h"
+shift = "H"
+
+[keys.KeyJ]
+normal = "j"
+shift = "J"
+
+[keys.KeyK]
+normal = "k"
+shift = "K"
+
+[keys.KeyL]
+normal = "l"
+shift = "L"
+
+[keys.Semicolon]
+normal = "m"
+shift = "M"
+
+[keys.Quote]
+normal = "ù"
+shift = "%"
+
+[keys.Backslash]
+normal = "*"
+shift = "µ"
+
+# Bottom row
+[keys.IntlBackslash]
+normal = "<"
+shift = ">"
+
+[keys.KeyZ]
+normal = "w"
+shift = "W"
+
+[keys.KeyX]
+normal = "x"
+shift = "X"
+
+[keys.KeyC]
+normal = "c"
+shift = "C"
+
+[keys.KeyV]
+normal = "v"
+shift = "V"
+
+[keys.KeyB]
+normal = "b"
+shift = "B"
+
+[keys.KeyN]
+normal = "n"
+shift = "N"
+
+[keys.KeyM]
+normal = ","
+shift = "?"
+
+[keys.Comma]
+normal = ";"
+shift = "."
+
+[keys.Period]
+normal = ":"
+shift = "/"
+
+[keys.Slash]
+normal = "!"
+shift = "§"
+
+[keys.Space]
+normal = " "

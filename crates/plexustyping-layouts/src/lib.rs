@@ -25,10 +25,20 @@ const BUILTINS: &[(&str, &str)] = &[
         include_str!("../../../layouts/latam-qwerty.toml"),
     ),
     ("us-qwerty", include_str!("../../../layouts/us-qwerty.toml")),
+    ("pt-abnt2", include_str!("../../../layouts/pt-abnt2.toml")),
+    ("fr-azerty", include_str!("../../../layouts/fr-azerty.toml")),
+    ("de-qwertz", include_str!("../../../layouts/de-qwertz.toml")),
 ];
 
 /// Built-in layout ids, in the same order as [`BUILTINS`].
-const BUILTIN_IDS: &[&str] = &["es-qwerty", "latam-qwerty", "us-qwerty"];
+const BUILTIN_IDS: &[&str] = &[
+    "es-qwerty",
+    "latam-qwerty",
+    "us-qwerty",
+    "pt-abnt2",
+    "fr-azerty",
+    "de-qwertz",
+];
 
 /// The key that types `'\n'` when a layout does not map it explicitly.
 const ENTER_CODE: &str = "Enter";

@@ -185,7 +185,17 @@ fn compose_requires_a_declared_dead_key() {
 
 #[test]
 fn builtin_es_qwerty_is_listed_and_valid() {
-    assert_eq!(builtin_ids(), &["es-qwerty", "latam-qwerty", "us-qwerty"]);
+    assert_eq!(
+        builtin_ids(),
+        &[
+            "es-qwerty",
+            "latam-qwerty",
+            "us-qwerty",
+            "pt-abnt2",
+            "fr-azerty",
+            "de-qwertz"
+        ]
+    );
     for id in builtin_ids() {
         assert_eq!(builtin(id).map(|layout| layout.id), Some((*id).to_owned()));
     }
@@ -422,4 +432,238 @@ fn builtin_us_qwerty_is_ansi_without_dead_keys_or_altgr() {
         assert!(allowed.contains(&ch), "missing {ch:?}");
     }
     assert_eq!(allowed.len(), 96);
+}
+
+fn layers(normal: Option<char>, shift: Option<char>, altgr: Option<char>) -> KeyLayers {
+    KeyLayers {
+        normal,
+        shift,
+        altgr,
+    }
+}
+
+fn assert_allowed(layout: &Layout, chars: &str) {
+    let allowed = layout.allowed_chars();
+    for ch in chars.chars() {
+        assert!(allowed.contains(&ch), "{}: missing {ch:?}", layout.id);
+    }
+}
+
+#[test]
+fn builtin_pt_abnt2_has_the_brazilian_keys_and_dead_keys() {
+    let layout = builtin("pt-abnt2").expect("pt-abnt2 is built in");
+    assert_eq!(layout.name, "Português (Brasil)");
+    assert_eq!(layout.dead_keys, vec!['´', '`', '^', '~', '¨']);
+    assert_eq!(layout.keys.len(), 50);
+    let k = &layout.keys;
+    assert_eq!(k["BracketLeft"], layers(Some('´'), Some('`'), None));
+    assert_eq!(k["Quote"], layers(Some('~'), Some('^'), None));
+    assert_eq!(k["Digit6"], layers(Some('6'), Some('¨'), Some('¬')));
+    assert_eq!(k["Semicolon"], layers(Some('ç'), Some('Ç'), None));
+    assert_eq!(k["BracketRight"], layers(Some('['), Some('{'), Some('ª')));
+    assert_eq!(k["Backslash"], layers(Some(']'), Some('}'), Some('º')));
+    assert_eq!(k["IntlBackslash"], layers(Some('\\'), Some('|'), None));
+    assert_eq!(k["IntlRo"], layers(Some('/'), Some('?'), Some('°')));
+    assert_eq!(k["Backquote"], layers(Some('\''), Some('"'), None));
+    assert_eq!(k["Slash"], layers(Some(';'), Some(':'), None));
+    assert_eq!(k["Digit2"], layers(Some('2'), Some('@'), Some('²')));
+    assert_eq!(k["Equal"], layers(Some('='), Some('+'), Some('§')));
+    assert_eq!(k["KeyQ"], layers(Some('q'), Some('Q'), Some('/')));
+
+    assert_eq!(layout.compose('~', 'a'), Some('ã'));
+    assert_eq!(layout.compose('~', 'o'), Some('õ'));
+    assert_eq!(layout.compose('^', 'a'), Some('â'));
+    assert_eq!(layout.compose('^', 'e'), Some('ê'));
+    assert_eq!(layout.compose('^', 'o'), Some('ô'));
+    assert_eq!(layout.compose('´', 'a'), Some('á'));
+    assert_eq!(
+        layout.locate('ç'),
+        Some(vec![press("Semicolon", Layer::Normal)])
+    );
+    assert_eq!(
+        layout.locate('ã'),
+        Some(vec![
+            press("Quote", Layer::Normal),
+            press("KeyA", Layer::Normal)
+        ])
+    );
+    assert_eq!(
+        layout.locate('Ô'),
+        Some(vec![
+            press("Quote", Layer::Shift),
+            press("KeyO", Layer::Shift)
+        ])
+    );
+    assert_eq!(
+        layout.locate('/'),
+        Some(vec![press("IntlRo", Layer::Normal)])
+    );
+    assert_eq!(
+        layout.locate('?'),
+        Some(vec![press("IntlRo", Layer::Shift)])
+    );
+    assert_eq!(layout.locate('~'), None);
+    assert_allowed(
+        &layout,
+        "áâãàéêíóôõúüçÁÂÃÀÉÊÍÓÔÕÚÜÇ?!,.;:/\\|[]{}()'\"@#$%&*-_=+",
+    );
+}
+
+#[test]
+fn builtin_fr_azerty_has_letters_on_azerty_positions_and_digits_on_shift() {
+    let layout = builtin("fr-azerty").expect("fr-azerty is built in");
+    assert_eq!(layout.name, "Français (France)");
+    assert_eq!(layout.dead_keys, vec!['^', '¨']);
+    assert_eq!(layout.keys.len(), 49);
+    let k = &layout.keys;
+    assert_eq!(k["KeyQ"], layers(Some('a'), Some('A'), None));
+    assert_eq!(k["KeyW"], layers(Some('z'), Some('Z'), None));
+    assert_eq!(k["KeyA"], layers(Some('q'), Some('Q'), None));
+    assert_eq!(k["KeyZ"], layers(Some('w'), Some('W'), None));
+    assert_eq!(k["Semicolon"], layers(Some('m'), Some('M'), None));
+    assert_eq!(k["KeyM"], layers(Some(','), Some('?'), None));
+    assert_eq!(k["Comma"], layers(Some(';'), Some('.'), None));
+    assert_eq!(k["Period"], layers(Some(':'), Some('/'), None));
+    assert_eq!(k["Slash"], layers(Some('!'), Some('§'), None));
+    let row: Vec<(Option<char>, Option<char>)> = [
+        "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9",
+        "Digit0", "Minus", "Equal",
+    ]
+    .iter()
+    .map(|code| (k[*code].normal, k[*code].shift))
+    .collect();
+    let expected: Vec<(Option<char>, Option<char>)> = "&é\"'(-è_çà)="
+        .chars()
+        .zip("1234567890°+".chars())
+        .map(|(normal, shift)| (Some(normal), Some(shift)))
+        .collect();
+    assert_eq!(row, expected);
+    let altgr: String = [
+        "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0",
+        "Minus", "Equal",
+    ]
+    .iter()
+    .filter_map(|code| k[*code].altgr)
+    .collect();
+    assert_eq!(altgr, "~#{[|`\\^@]}");
+    assert_eq!(k["BracketLeft"], layers(Some('^'), Some('¨'), None));
+    assert_eq!(k["BracketRight"], layers(Some('$'), Some('£'), Some('¤')));
+    assert_eq!(k["Quote"], layers(Some('ù'), Some('%'), None));
+    assert_eq!(k["Backslash"], layers(Some('*'), Some('µ'), None));
+    assert_eq!(k["IntlBackslash"], layers(Some('<'), Some('>'), None));
+    assert_eq!(k["Backquote"], layers(Some('²'), None, None));
+    assert_eq!(k["KeyE"].altgr, Some('€'));
+
+    for (dead, base, composed) in [
+        ('^', 'e', 'ê'),
+        ('^', 'i', 'î'),
+        ('^', 'u', 'û'),
+        ('¨', 'e', 'ë'),
+        ('¨', 'i', 'ï'),
+        ('¨', 'u', 'ü'),
+        ('¨', 'y', 'ÿ'),
+    ] {
+        assert_eq!(layout.compose(dead, base), Some(composed));
+    }
+    for (ch, code) in [
+        ('é', "Digit2"),
+        ('è', "Digit7"),
+        ('à', "Digit0"),
+        ('ç', "Digit9"),
+        ('ù', "Quote"),
+    ] {
+        assert_eq!(layout.locate(ch), Some(vec![press(code, Layer::Normal)]));
+    }
+    assert_eq!(
+        layout.locate('1'),
+        Some(vec![press("Digit1", Layer::Shift)])
+    );
+    assert_eq!(
+        layout.locate('~'),
+        Some(vec![press("Digit2", Layer::Altgr)])
+    );
+    assert_eq!(
+        layout.locate('ê'),
+        Some(vec![
+            press("BracketLeft", Layer::Normal),
+            press("KeyE", Layer::Normal)
+        ])
+    );
+    assert_eq!(
+        layout.locate('ÿ'),
+        Some(vec![
+            press("BracketLeft", Layer::Shift),
+            press("KeyY", Layer::Normal)
+        ])
+    );
+    assert_allowed(
+        &layout,
+        "àâçéèêëîïôùûüÿÂÊÎÔÛËÏÜŸ0123456789?!,.;:/\\|[]{}()'\"@#$%&*-_=+<>~`€",
+    );
+    let allowed = layout.allowed_chars();
+    // Neither Windows nor XKB basic types these on AZERTY: they stay out of practice texts.
+    for ch in "æœÆŒÉÈÀÇÙ".chars() {
+        assert!(!allowed.contains(&ch), "unexpected {ch:?}");
+    }
+    // The AltGr `^` shares its char with the dead key, so the model treats it as dead.
+    assert!(!allowed.contains(&'^'));
+}
+
+#[test]
+fn builtin_de_qwertz_has_umlauts_and_dead_accents() {
+    let layout = builtin("de-qwertz").expect("de-qwertz is built in");
+    assert_eq!(layout.name, "Deutsch (Deutschland)");
+    assert_eq!(layout.dead_keys, vec!['^', '´', '`']);
+    assert_eq!(layout.keys.len(), 49);
+    let k = &layout.keys;
+    assert_eq!(k["KeyY"], layers(Some('z'), Some('Z'), None));
+    assert_eq!(k["KeyZ"], layers(Some('y'), Some('Y'), None));
+    assert_eq!(k["Minus"], layers(Some('ß'), Some('?'), Some('\\')));
+    assert_eq!(k["Equal"], layers(Some('´'), Some('`'), None));
+    assert_eq!(k["Backquote"], layers(Some('^'), Some('°'), None));
+    assert_eq!(k["BracketLeft"], layers(Some('ü'), Some('Ü'), None));
+    assert_eq!(k["Semicolon"], layers(Some('ö'), Some('Ö'), None));
+    assert_eq!(k["Quote"], layers(Some('ä'), Some('Ä'), None));
+    assert_eq!(k["BracketRight"], layers(Some('+'), Some('*'), Some('~')));
+    assert_eq!(k["Backslash"], layers(Some('#'), Some('\''), None));
+    assert_eq!(k["IntlBackslash"], layers(Some('<'), Some('>'), Some('|')));
+    assert_eq!(k["KeyQ"], layers(Some('q'), Some('Q'), Some('@')));
+    assert_eq!(k["KeyE"].altgr, Some('€'));
+    let braces: String = ["Digit7", "Digit8", "Digit9", "Digit0"]
+        .iter()
+        .filter_map(|code| k[*code].altgr)
+        .collect();
+    assert_eq!(braces, "{[]}");
+    assert_eq!(k["Slash"], layers(Some('-'), Some('_'), None));
+
+    for (ch, code) in [
+        ('ä', "Quote"),
+        ('ö', "Semicolon"),
+        ('ü', "BracketLeft"),
+        ('ß', "Minus"),
+        ('z', "KeyY"),
+        ('y', "KeyZ"),
+    ] {
+        assert_eq!(layout.locate(ch), Some(vec![press(code, Layer::Normal)]));
+    }
+    assert_eq!(layout.compose('^', 'a'), Some('â'));
+    assert_eq!(layout.compose('´', 'e'), Some('é'));
+    assert_eq!(layout.compose('`', 'e'), Some('è'));
+    assert_eq!(
+        layout.locate('é'),
+        Some(vec![
+            press("Equal", Layer::Normal),
+            press("KeyE", Layer::Normal)
+        ])
+    );
+    assert_eq!(
+        layout.locate('è'),
+        Some(vec![
+            press("Equal", Layer::Shift),
+            press("KeyE", Layer::Normal)
+        ])
+    );
+    assert_eq!(layout.locate('@'), Some(vec![press("KeyQ", Layer::Altgr)]));
+    assert_eq!(layout.locate('ã'), None);
+    assert_allowed(&layout, "äöüßÄÖÜâéèêô?!,.;:/\\|[]{}()'\"@#$%&*-_=+<>~€");
 }

@@ -17,6 +17,9 @@ export const LAYOUTS: { id: string; label: string }[] = [
   { id: "latam-qwerty", label: "Español (Latinoamérica)" },
   { id: "us-qwerty", label: "English (US)" },
 ];
+  { id: "pt-abnt2", label: "Português (Brasil)" },
+  { id: "fr-azerty", label: "Français (France)" },
+  { id: "de-qwertz", label: "Deutsch (Deutschland)" },
 
 export const DEFAULT_LAYOUT = LAYOUTS[0].id;
 

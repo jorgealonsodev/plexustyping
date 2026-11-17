@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ANSI_ROWS, ISO_ROWS, NAMED_LABELS, fingerOf, handOf, rowsFor } from "./geometry";
+import { ABNT_ROWS, ANSI_ROWS, ISO_ROWS, NAMED_LABELS, fingerOf, handOf, rowsFor } from "./geometry";
 import { highlightsFor, keyForChar, keyLabels } from "./keys";
 import type { KeyPress, Layout } from "./types";
 
@@ -105,6 +105,31 @@ describe("ISO geometry", () => {
     expect(rowsFor(null)).toBe(ISO_ROWS);
     expect(rowsFor({ ...LAYOUT, keys: { ...ansiKeys, IntlBackslash: { normal: "<", shift: ">", altgr: null } } })).toBe(ISO_ROWS);
     expect(rowsFor({ ...LAYOUT, keys: ansiKeys })).toBe(ANSI_ROWS);
+  });
+
+  it("has an ABNT2 shape: ISO with the `IntlRo` key between Slash and a shorter right Shift", () => {
+    for (const row of ABNT_ROWS) expect(row.reduce((sum, k) => sum + k.width, 0)).toBe(15);
+    const codes = ABNT_ROWS.flat().map((k) => k.code);
+    expect(codes.filter((c) => c === "Enter")).toHaveLength(2);
+    expect(new Set(codes).size).toBe(codes.length - 1);
+    expect(ABNT_ROWS[3].slice(-3)).toEqual([
+      { code: "Slash", width: 1 },
+      { code: "IntlRo", width: 1 },
+      { code: "ShiftRight", width: 1.75 },
+    ]);
+    expect(ABNT_ROWS[3].slice(0, -2)).toEqual(ISO_ROWS[3].slice(0, -1));
+    for (const i of [0, 1, 2, 4]) expect(ABNT_ROWS[i]).toEqual(ISO_ROWS[i]);
+    for (const { code } of ABNT_ROWS.flat()) expect(fingerOf(code), code).not.toBeNull();
+    expect(fingerOf("IntlRo")).toBe("r-pinky");
+  });
+
+  it("draws ABNT2 for a layout with `IntlRo`, before checking the ISO key", () => {
+    const intlRo = { normal: "/", shift: "?", altgr: "°" };
+    const iso = { ...LAYOUT.keys, IntlBackslash: { normal: "\\", shift: "|", altgr: null } };
+    expect(rowsFor({ ...LAYOUT, keys: { ...iso, IntlRo: intlRo } })).toBe(ABNT_ROWS);
+    expect(rowsFor({ ...LAYOUT, keys: { ...LAYOUT.keys, IntlRo: intlRo } })).toBe(ABNT_ROWS);
+    expect(rowsFor({ ...LAYOUT, keys: iso })).toBe(ISO_ROWS);
+    expect(rowsFor({ ...LAYOUT, keys: LAYOUT.keys })).toBe(ANSI_ROWS);
   });
 
   it("knows the hand of each finger", () => {

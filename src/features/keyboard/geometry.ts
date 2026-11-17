@@ -1,6 +1,6 @@
 import type { Layout } from "./types";
 
-// Physical ISO and ANSI keyboards: rows of `KeyboardEvent.code` with widths in key units, and the
+// Physical ISO, ANSI and ABNT2 keyboards: rows of `KeyboardEvent.code` with widths in key units, and the
 // standard touch-typing finger for each key. Characters come from the active layout.
 
 export type Finger =
@@ -55,9 +55,19 @@ export const ANSI_ROWS: KeySpec[][] = [
   ISO_ROWS[4],
 ];
 
-/** ANSI for a loaded layout without the key beside the left Shift; ISO otherwise. */
-export const rowsFor = (layout: Layout | null): KeySpec[][] =>
-  layout && !("IntlBackslash" in layout.keys) ? ANSI_ROWS : ISO_ROWS;
+/** ABNT2: ISO with the extra `IntlRo` key between Slash and a shorter right Shift. */
+export const ABNT_ROWS: KeySpec[][] = [
+  ...ISO_ROWS.slice(0, 3),
+  [...ISO_ROWS[3].slice(0, -1), { code: "IntlRo", width: 1 }, { code: "ShiftRight", width: 1.75 }],
+  ISO_ROWS[4],
+];
+
+/** ABNT2 for a loaded layout with `IntlRo`, ANSI for one without the key beside the left Shift, ISO otherwise. */
+export const rowsFor = (layout: Layout | null): KeySpec[][] => {
+  if (!layout) return ISO_ROWS;
+  if ("IntlRo" in layout.keys) return ABNT_ROWS;
+  return "IntlBackslash" in layout.keys ? ISO_ROWS : ANSI_ROWS;
+};
 
 const FINGER_KEYS: Record<Finger, string[]> = {
   "l-pinky": ["Backquote", "Digit1", "Tab", "KeyQ", "CapsLock", "KeyA", "ShiftLeft", "IntlBackslash", "KeyZ", "ControlLeft", "MetaLeft"],
@@ -80,6 +90,7 @@ const FINGER_KEYS: Record<Finger, string[]> = {
     "Quote",
     "Backslash",
     "Slash",
+    "IntlRo",
     "ShiftRight",
     "ControlRight",
   ],
