@@ -261,7 +261,8 @@
     color: var(--text);
     border-color: var(--accent);
   }
-  .ai-toggle.active {
+  .ai-toggle.active,
+  .ai-toggle.active:hover {
     color: var(--on-accent);
     background: var(--accent);
     border-color: var(--accent);
