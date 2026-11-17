@@ -26,9 +26,9 @@ Branch `feat/phase-3-history`. Backend and frontend are written in parallel agai
 
 | ID | Specs | Task | Status | Commit |
 |----|-------|------|--------|--------|
-| T1 | S6, S7 | Backend: store query + `session_history` + `export_sessions_csv` (CSV writer, local ISO dates, unique file name) with tests — writer A (parallel) | pending | — |
-| T2 | S1–S5, S7 (UI), S8 | Frontend: header button + Ctrl+H, HistoryModal (filter, summary, SVG chart, table, export button and notices), API bindings, vitest, README — writer B (parallel) | pending | — |
-| T3 | all | Close: suite, real-app check, review, main, Trello | pending | — |
+| T1 | S6, S7 | Backend: store query + `session_history` + `export_sessions_csv` (CSV writer, local ISO dates, unique file name) with tests — writer A (parallel) | done | d2dd5c6 |
+| T2 | S1–S5, S7 (UI), S8 | Frontend: header button + Ctrl+H, HistoryModal (filter, summary, SVG chart, table, export button and notices), API bindings, vitest, README — writer B (parallel) | done | 6c26b75, 1cd564f |
+| T3 | all | Close: suite, real-app check, review, main, Trello | done | 3697ab9 |
 
 ## Log
 
@@ -36,3 +36,4 @@ Branch `feat/phase-3-history`. Backend and frontend are written in parallel agai
 - **L2 (user decisions, verbatim):** "¿Dónde guarda el CSV? — Directo en Descargas"; "¿Qué formato de CSV? — Estándar"; "¿Apruebas el resto de la especificación (botón Historial con resumen, gráfica, tabla y filtro)? — Sí, adelante".
 - **L3 (exploration):** sessions table already stores `started_at_ms, mode, code_language, language, layout, duration_ms, gross_wpm, net_wpm, accuracy, keystrokes, bpm`; `recent_sessions` exists in store and Tauri but has no filter and no frontend caller; no router (App renders header + Practice + SettingsModal); no dialog/fs plugin, capabilities only `core:default`; no chart lib; CSP `style-src 'self'`; schema v2.
 - **L4 (decision):** the parent changed the success notice to the singular "(1 sesión)" for one row (the S7 wording read "(1 sesiones)"); reported to the user.
+- **L5 (evidence):** T1 `d2dd5c6` (store `sessions(mode, limit)`, `session_history`, `export_sessions_csv`, `src-tauri/src/history.rs` with hand-written civil-date conversion, `create_new` + suffix, 15 tests); T2 `6c26b75` (HistoryModal, Ctrl+H, pure `history.ts`, README) + `1cd564f` (singular notice). Native review of `ba1e842..1cd564f` approved (`review-959d9a6ca4abe8a6`, risk+readability+reliability); its advisories fixed in `3697ab9` (caption "Última sesión", partial CSV removed on write failure, stale export replies ignored), approved (`review-f51215df70c58043`). Suite: 303 Rust (4 ignored) + 173 vitest, clippy/fmt/svelte-check clean, build ok. Real app (720×480): clock button opens the window, empty state "Aún no hay sesiones guardadas." with no export, filter buttons, Escape closes without restarting the text. Not checked: populated view and a real export to Downloads (no sessions on this machine; covered by Rust tests with temp dirs). Follow-ups: export feedback dropped / button re-enabled when the filter changes mid-export, `sync_all` instead of `flush`, no component test of the modal wiring, `tz_offset_min` bound and 1970 clock fallback undocumented.
