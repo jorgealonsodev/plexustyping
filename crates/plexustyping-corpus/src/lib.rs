@@ -1,8 +1,9 @@
 //! Local offline corpus and AI-free text generator.
 //!
-//! Each language bundles a frequency-ordered word list, everyday sentences and
-//! a diagnostic text, embedded at compile time. [`Corpus::generate`] builds
-//! practice text from them without any network or AI service. Code mode
+//! Each language bundles a frequency-ordered word list, everyday sentences
+//! (original plus Mozilla Common Voice) and a diagnostic text, embedded at
+//! compile time. [`Corpus::generate`] builds practice text from them without
+//! any network or AI service. Code mode
 //! bundles original snippets per programming language; see [`generate_code`].
 
 mod code;
@@ -76,12 +77,15 @@ pub struct GenerateOptions {
     pub seed: u64,
 }
 
-/// One bundled language: its code and its three embedded data files.
+/// One bundled language: its code and its embedded data files.
 struct LanguageData {
     id: &'static str,
     diagnostic: &'static str,
     words: &'static str,
+    /// Original sentences.
     sentences: &'static str,
+    /// Mozilla Common Voice sentences (CC0), loaded after the original ones.
+    sentences_cv: &'static str,
 }
 
 /// Bundled languages in display order; a new language is one entry here.
@@ -91,30 +95,35 @@ const LANGUAGES: &[LanguageData] = &[
         diagnostic: include_str!("../data/es/diagnostic.txt"),
         words: include_str!("../data/es/words.txt"),
         sentences: include_str!("../data/es/sentences.txt"),
+        sentences_cv: include_str!("../data/es/sentences-cv.txt"),
     },
     LanguageData {
         id: "en",
         diagnostic: include_str!("../data/en/diagnostic.txt"),
         words: include_str!("../data/en/words.txt"),
         sentences: include_str!("../data/en/sentences.txt"),
+        sentences_cv: include_str!("../data/en/sentences-cv.txt"),
     },
     LanguageData {
         id: "pt",
         diagnostic: include_str!("../data/pt/diagnostic.txt"),
         words: include_str!("../data/pt/words.txt"),
         sentences: include_str!("../data/pt/sentences.txt"),
+        sentences_cv: include_str!("../data/pt/sentences-cv.txt"),
     },
     LanguageData {
         id: "fr",
         diagnostic: include_str!("../data/fr/diagnostic.txt"),
         words: include_str!("../data/fr/words.txt"),
         sentences: include_str!("../data/fr/sentences.txt"),
+        sentences_cv: include_str!("../data/fr/sentences-cv.txt"),
     },
     LanguageData {
         id: "de",
         diagnostic: include_str!("../data/de/diagnostic.txt"),
         words: include_str!("../data/de/words.txt"),
         sentences: include_str!("../data/de/sentences.txt"),
+        sentences_cv: include_str!("../data/de/sentences-cv.txt"),
     },
 ];
 
@@ -123,7 +132,8 @@ static CORPORA: LazyLock<Vec<Corpus>> = LazyLock::new(|| {
     LANGUAGES
         .iter()
         .map(|data| {
-            let sentences = data_lines(data.sentences);
+            let mut sentences = data_lines(data.sentences);
+            sentences.extend(data_lines(data.sentences_cv));
             Corpus {
                 language: data.id,
                 diagnostic: data.diagnostic.trim(),
@@ -171,7 +181,8 @@ impl Corpus {
         &self.words
     }
 
-    /// Everyday sentences, one per entry.
+    /// Everyday sentences, one per entry: the original ones, then the
+    /// Mozilla Common Voice ones (`sentences-cv.txt`).
     pub fn sentences(&self) -> &[&'static str] {
         &self.sentences
     }

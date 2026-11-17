@@ -202,7 +202,9 @@ to the text.
 "Ajustes → Práctica → Idioma" chooses the language of prose texts: Español
 (default), English, Português (Brasil), Français or Deutsch. Each language has
 its own offline corpus (5,000 frequent words, everyday sentences and a
-diagnostic paragraph) and the AI is asked for texts in that language. Changing
+diagnostic paragraph) and the AI is asked for texts in that language. The
+sentences include up to 2,000 per language from Mozilla Common Voice (CC0),
+filtered to plain text typeable on the language's layout. Changing
 it loads a new text; each saved session records its language (history and the
 CSV `idioma` column). Code practice is not affected.
 

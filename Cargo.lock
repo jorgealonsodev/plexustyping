@@ -3041,6 +3041,7 @@ dependencies = [
 name = "plexustyping-corpus"
 version = "0.1.0"
 dependencies = [
+ "plexustyping-layouts",
  "serde",
  "serde_json",
 ]

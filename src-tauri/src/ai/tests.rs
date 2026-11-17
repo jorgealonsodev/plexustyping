@@ -1226,7 +1226,7 @@ fn a_prose_request_carries_the_corpus_frequency_of_each_target() {
     // Rare targets need a few; a frequent letter needs more than its natural share
     // but at most 5 points over it, so the text stays writable.
     let counts = req.min_counts(340);
-    assert_eq!(&counts[..3], &[("ntr", 2), ("ú", 1), ("ti", 3)]);
+    assert_eq!(&counts[..3], &[("ntr", 1), ("ú", 1), ("ti", 4)]);
     let natural = es.frequency("a") * 340.0;
     assert!(counts[3].1 as f64 > natural, "{counts:?}");
     assert!(

@@ -339,3 +339,142 @@ fn every_language_has_frequencies() {
         assert!(c.frequency("e") > 0.03, "{language}");
     }
 }
+
+/// One language's Common Voice sentence file and what S2 allows in it.
+struct CommonVoice {
+    id: &'static str,
+    original: &'static str,
+    cv: &'static str,
+    layout: &'static str,
+    /// Lowercase letters of the language (the word-list alphabet).
+    letters: &'static str,
+    /// Signs besides letters and the space.
+    signs: &'static str,
+    /// Word-list profanity that must not appear as a whole word.
+    profanity: &'static [&'static str],
+}
+
+const COMMON_VOICE: [CommonVoice; 5] = [
+    CommonVoice {
+        id: "es",
+        original: include_str!("../data/es/sentences.txt"),
+        cv: include_str!("../data/es/sentences-cv.txt"),
+        layout: "es-qwerty",
+        letters: SPANISH_LOWER,
+        signs: ".,;:?!¿¡",
+        profanity: &["mierda", "puta", "joder", "coño", "cabrón"],
+    },
+    CommonVoice {
+        id: "en",
+        original: include_str!("../data/en/sentences.txt"),
+        cv: include_str!("../data/en/sentences-cv.txt"),
+        layout: "us-qwerty",
+        letters: "abcdefghijklmnopqrstuvwxyz",
+        signs: ".,;:?!",
+        profanity: &["fuck", "shit", "bitch", "damn", "bastard"],
+    },
+    CommonVoice {
+        id: "pt",
+        original: include_str!("../data/pt/sentences.txt"),
+        cv: include_str!("../data/pt/sentences-cv.txt"),
+        layout: "pt-abnt2",
+        letters: "abcdefghijklmnopqrstuvwxyzáâãàéêíóôõúüç",
+        signs: ".,;:?!",
+        profanity: &["merda", "porra", "caralho", "puta"],
+    },
+    CommonVoice {
+        id: "fr",
+        original: include_str!("../data/fr/sentences.txt"),
+        cv: include_str!("../data/fr/sentences-cv.txt"),
+        layout: "fr-azerty",
+        letters: "abcdefghijklmnopqrstuvwxyzàâæçéèêëîïôœùûüÿ",
+        signs: ".,;:?!",
+        profanity: &["merde", "putain", "salope", "connard"],
+    },
+    CommonVoice {
+        id: "de",
+        original: include_str!("../data/de/sentences.txt"),
+        cv: include_str!("../data/de/sentences-cv.txt"),
+        layout: "de-qwertz",
+        letters: "abcdefghijklmnopqrstuvwxyzäöüß",
+        signs: ".,;:?!",
+        profanity: &["scheiße", "arschloch", "ficken", "hure"],
+    },
+];
+
+/// Non-empty, non-`#` lines, trimmed: what the corpus loads from a data file.
+fn lines(text: &str) -> Vec<&str> {
+    text.lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .collect()
+}
+
+#[test]
+fn common_voice_files_name_source_commit_licence_and_count() {
+    for cv in &COMMON_VOICE {
+        let header: Vec<&str> = cv.cv.lines().take_while(|l| l.starts_with('#')).collect();
+        let text = header.join("\n");
+        for needle in [
+            "github.com/common-voice/common-voice",
+            "Commit: ",
+            "CC0 1.0",
+            "Filters: ",
+        ] {
+            assert!(text.contains(needle), "{} header lacks {needle:?}", cv.id);
+        }
+        let count = lines(cv.cv).len();
+        assert!(
+            text.contains(&format!("Count: {count}")),
+            "{} header count",
+            cv.id
+        );
+        assert!((1000..=2000).contains(&count), "{} has {count}", cv.id);
+    }
+}
+
+#[test]
+fn common_voice_sentences_pass_the_filters_and_are_typeable() {
+    for cv in &COMMON_VOICE {
+        let layout = plexustyping_layouts::builtin(cv.layout).expect("native layout");
+        let typeable = layout.allowed_chars();
+        let sentences = lines(cv.cv);
+        let unique: BTreeSet<&str> = sentences.iter().copied().collect();
+        assert_eq!(unique.len(), sentences.len(), "{} duplicates", cv.id);
+        for s in sentences {
+            let id = cv.id;
+            let count = s.chars().count();
+            assert!((40..=120).contains(&count), "{id} {count} chars: {s}");
+            assert!(!s.contains("  "), "{id} double space: {s}");
+            for c in s.chars() {
+                let letter = c.is_alphabetic() && c.to_lowercase().all(|l| cv.letters.contains(l));
+                assert!(
+                    letter || c == ' ' || cv.signs.contains(c),
+                    "{id} {c:?} in {s}"
+                );
+                assert!(
+                    typeable.contains(&c),
+                    "{id} {c:?} not on {}: {s}",
+                    cv.layout
+                );
+            }
+            let first = s.trim_start_matches(['¿', '¡']).chars().next().unwrap();
+            assert!(first.is_uppercase(), "{id} capital: {s}");
+            assert!(s.ends_with(['.', '?', '!']), "{id} end: {s}");
+            assert!(!s[..s.len() - 1].contains('.'), "{id} inner dot: {s}");
+            let lower = s.to_lowercase();
+            for word in lower.split(|c: char| !c.is_alphabetic()) {
+                assert!(!cv.profanity.contains(&word), "{id} profanity: {s}");
+            }
+        }
+    }
+}
+
+#[test]
+fn sentences_load_the_original_then_the_common_voice_files() {
+    for cv in &COMMON_VOICE {
+        let c = corpus(cv.id).unwrap();
+        let expected: Vec<&str> = lines(cv.original).into_iter().chain(lines(cv.cv)).collect();
+        assert_eq!(c.sentences(), expected.as_slice(), "{}", cv.id);
+    }
+}

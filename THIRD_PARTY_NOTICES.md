@@ -90,6 +90,10 @@ The copyright/license for each individual theme belongs to the author of that th
 
 `crates/plexustyping-corpus/data/de/words.txt` is adapted from `content/2018/de/de_50k.txt` of [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/de/LICENSE.md`](crates/plexustyping-corpus/data/de/LICENSE.md).
 
+## Common Voice sentences
+
+`crates/plexustyping-corpus/data/<lang>/sentences-cv.txt` (es, en, pt, fr, de) are selected from `server/data/<lang>/sentence-collector.txt` of [Mozilla Common Voice](https://github.com/common-voice/common-voice) (commit `605c25e48f9fb87cb25ca794cb39bf91d3741f29`), dedicated to the public domain under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/). They are filtered and selected by `scripts/import-commonvoice.py`; the filters are listed in each file's header and in `crates/plexustyping-corpus/data/<lang>/LICENSE.md`.
+
 ## Syntax highlighting
 
 Code mode highlights snippets with [syntect](https://github.com/trishume/syntect) and the syntax definitions bundled by [two-face](https://codeberg.org/CosmicHarper/two-face), which are curated by the [bat](https://github.com/sharkdp/bat) project.

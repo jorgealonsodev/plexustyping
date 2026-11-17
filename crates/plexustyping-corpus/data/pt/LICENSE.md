@@ -24,6 +24,23 @@ Modifications, made with `scripts/import-frequencywords.py`:
 
 The adapted list is shared under the same license, CC BY-SA 4.0.
 
+## `sentences-cv.txt`
+
+`sentences-cv.txt` is dedicated to the public domain under
+[CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
+
+It is selected from `server/data/pt/sentence-collector.txt` of
+[Mozilla Common Voice](https://github.com/common-voice/common-voice)
+(commit `605c25e48f9fb87cb25ca794cb39bf91d3741f29`) with `scripts/import-commonvoice.py`:
+
+- kept only sentences of 40 to 120 chars made of the letters of the word
+  list, spaces and `. , ; : ? !`, typeable on the native layout, starting with a
+  capital letter, ending with `.`, `?` or `!`, without inner dots, word-list
+  profanity or duplicates (of each other or of `sentences.txt`);
+- took up to 2,000 survivors ordered by the SHA-256 of the sentence
+  (2,000 sentences);
+- added `#` header lines stating source, commit, license, filters and count.
+
 ## Everything else
 
 The rest of the `plexustyping-corpus` crate, including its code,

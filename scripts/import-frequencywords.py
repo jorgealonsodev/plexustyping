@@ -140,6 +140,7 @@ class Language:
         self.two_letters = two_letters
         self.foreign = foreign
         self.foreign_allowlist = foreign_allowlist
+        self.profanity = profanity
         self.blocklist = profanity | proper_names | noise
 
     def classify(self, word):
