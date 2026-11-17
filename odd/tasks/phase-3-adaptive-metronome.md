@@ -20,10 +20,12 @@ Branch `feat/phase-3-adaptive-metronome`. Delivery: one work unit, frontend only
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S5 | Pure `adaptTempo` + setting + toggle + apply on results + results line + README, with vitest | inline (one unit, ~150 lines; no writer reason) | in progress | — |
+| T1 | S1–S5 | Pure `adaptTempo` + setting + toggle + apply on results + results line + README, with vitest | inline (one unit, ~150 lines; no writer reason) | done | 24879f9 |
 
 ## Log
 
 - **L1 (user, verbatim):** "donde estabamos" / "continua con lo que consideres mas optimo". Trello card "Fase 3 · Completo": "Metrónomo adaptativo, todos los layouts e idiomas, todos los temas, importar temas VS Code, histórico y exportar CSV, perfiles." History + CSV is done (`odd/tasks/phase-3-history.md`); the agent chose "Metrónomo adaptativo" next because the metronome, the per-key offset metric and the session tempo already exist.
 - **L2 (exploration):** `MetronomeSettings` (`src/features/metronome/beat.ts`) is persisted as JSON by `src/features/settings/settings.ts` (`checkMetronome`); `Practice.svelte` `finish()` knows the single session tempo (`measured.bpms`) and receives `ScoredSession` with `result.stats.accuracy` (0–1) and `offsetsMs`; `rhythmSummary` gives the mean absolute offset; `toConfig` picks fields explicitly, so a new setting does not reach the audio backend. No backend change needed.
 - **L3 (decision):** thresholds are relative to the beat interval because random typing averages 25 % of it; 15 % / 20 % leave a dead band so the tempo does not oscillate.
+- **L4 (evidence):** T1 `24879f9`. RED: 8 vitest failures (missing `adaptTempo`, `tempoNotice`, `adaptive` field) before the change; GREEN: 179 vitest, `pnpm check` 0 errors, `pnpm build` ok. No Rust change. Not checked: the real app (toggle, tempo change after a typed text, results line) — the wiring in `Practice.svelte` has no component test.
+- **L5 (review):** native assess of `main..24879f9`: risk medium, `review_due` false (`under_budget`); no review started. Not merged to main: S2 is an assumption pending the user.
