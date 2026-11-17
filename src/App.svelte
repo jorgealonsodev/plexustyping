@@ -104,7 +104,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: clamp(0.5rem, 2vh, 1rem) clamp(1rem, 3vw, 2rem);
+    /* Fixed height: the same bar in prose and code, whatever the engine draws the selects at. */
+    box-sizing: border-box;
+    height: clamp(3.4rem, calc(2.4rem + 4vh), 4.4rem);
+    padding: 0 clamp(1rem, 3vw, 2rem);
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
