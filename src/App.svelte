@@ -164,8 +164,10 @@
     fill: #5b6078;
     transition: fill 150ms ease-out;
   }
+  /* A vivid LED green with a glow, the same in every theme. */
   .led.on {
-    fill: var(--success);
+    fill: #2bff6a;
+    filter: drop-shadow(0 0 6px #2bff6a);
   }
   h1 {
     margin: 0;
