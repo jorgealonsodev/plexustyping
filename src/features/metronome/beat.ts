@@ -110,6 +110,15 @@ export interface TempoChange {
   to: number;
 }
 
+/**
+ * What the adaptive metronome sets after a scored text: `null` unless the text had one tempo
+ * (`bpm`) and every keystroke was measured, i.e. the metronome was not switched mid-text.
+ */
+export function tempoChangeFor(bpm: number | null, accuracy: number, offsets: (number | null)[]): TempoChange | null {
+  if (bpm === null || offsets.length === 0 || offsets.some((o) => o === null)) return null;
+  return { from: bpm, to: adaptTempo(bpm, accuracy, offsets) };
+}
+
 export const tempoNotice = ({ from, to }: TempoChange) =>
   from === to ? `Tempo: se mantiene en ${from} BPM` : `Tempo: ${from} → ${to} BPM`;
 

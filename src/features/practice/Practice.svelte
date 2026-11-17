@@ -38,8 +38,8 @@
     type BeatAnchor,
     type MetronomeSettings,
     type TempoChange,
-    adaptTempo,
     beatOffsetMs,
+    tempoChangeFor,
     toConfig,
   } from "../metronome/beat";
   import BeatDot from "../metronome/BeatDot.svelte";
@@ -247,11 +247,8 @@
       const result = await scoreSession(textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
-      tempo = null;
-      if (metronome.adaptive && bpm !== null && result.offsetsMs.some((o) => o !== null)) {
-        tempo = { from: bpm, to: adaptTempo(bpm, result.result.stats.accuracy, result.offsetsMs) };
-        if (tempo.to !== bpm) onTempo(tempo.to);
-      }
+      tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs) : null;
+      if (tempo && tempo.to !== tempo.from) onTempo(tempo.to);
       weak = [];
       phase = "results";
       refreshModel(id);
@@ -366,6 +363,8 @@
   $effect(() => {
     const id = layoutId;
     let live = true;
+    // Until it loads (or if it fails) the keyboard has no labels, never the previous layout's.
+    layout = null;
     getLayout(id)
       .then((next) => live && (layout = next))
       .catch((err) => console.warn("get_layout failed; keyboard without labels", err));

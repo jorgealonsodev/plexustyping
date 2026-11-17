@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adaptTempo, beatAt, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
+import { adaptTempo, beatAt, tempoChangeFor, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
 
 describe("beatOffsetMs", () => {
   it("is the time from the nearest beat, negative when early", () => {
@@ -68,6 +68,21 @@ describe("isMetronomeShortcut", () => {
     expect(isMetronomeShortcut(key("F4", { altKey: true }))).toBe(false);
     expect(isMetronomeShortcut(key("F4", { ctrlKey: true }))).toBe(false);
     expect(isMetronomeShortcut(key("F2"))).toBe(false);
+  });
+});
+
+describe("tempoChangeFor", () => {
+  it("adapts a text typed entirely to one tempo", () => {
+    expect(tempoChangeFor(60, 0.97, [150, -150])).toEqual({ from: 60, to: 63 });
+    expect(tempoChangeFor(60, 0.969, [10, -10])).toEqual({ from: 60, to: 60 });
+  });
+
+  it("does not apply without one tempo, without keystrokes or when the metronome was switched mid-text", () => {
+    expect(tempoChangeFor(null, 1, [10, -10])).toBeNull();
+    expect(tempoChangeFor(60, 1, [])).toBeNull();
+    expect(tempoChangeFor(60, 1, [null, null])).toBeNull();
+    expect(tempoChangeFor(60, 1, [null, 10, -10])).toBeNull();
+    expect(tempoChangeFor(60, 1, [10, -10, null])).toBeNull();
   });
 });
 

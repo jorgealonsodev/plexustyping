@@ -180,10 +180,26 @@ export function loadCustomThemes(storage: Storage = localStorage): ThemeEntry[] 
 export const saveCustomThemes = (themes: ThemeEntry[], storage: Storage = localStorage) =>
   storage.setItem(KEY, JSON.stringify(themes));
 
-/** `themes` with `theme` replacing the import of the same id, or appended; `null` when the list is full. */
-export function addCustomTheme(themes: ThemeEntry[], theme: ThemeEntry): ThemeEntry[] | null {
-  if (themes.some((t) => t.id === theme.id)) return themes.map((t) => (t.id === theme.id ? theme : t));
-  return themes.length >= MAX_CUSTOM_THEMES ? null : [...themes, theme];
+/**
+ * `themes` with `theme` replacing the import of the same name, or appended, and the theme as
+ * stored: a different name whose id is taken gets the next free `-2`, `-3`… id.
+ * `null` when the list is full.
+ */
+export function addCustomTheme(
+  themes: ThemeEntry[],
+  theme: ThemeEntry,
+): { themes: ThemeEntry[]; theme: ThemeEntry } | null {
+  const same = themes.find((t) => t.name === theme.name);
+  if (same) {
+    const stored = { ...theme, id: same.id };
+    return { themes: themes.map((t) => (t === same ? stored : t)), theme: stored };
+  }
+  if (themes.length >= MAX_CUSTOM_THEMES) return null;
+  const taken = new Set(themes.map((t) => t.id));
+  let id = theme.id;
+  for (let n = 2; taken.has(id); n++) id = `${theme.id}-${n}`;
+  const stored = { ...theme, id };
+  return { themes: [...themes, stored], theme: stored };
 }
 
 /** Loads the stored imports and makes them known to `themeById`; call before reading the saved theme id. */

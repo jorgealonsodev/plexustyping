@@ -173,15 +173,28 @@ describe("custom theme storage", () => {
     expect(loadCustomThemes(memoryStorage({ "plexustyping.customThemes": '{"a": 1}' }))).toEqual([]);
   });
 
-  it("replaces an import with the same id, appends a new one and refuses more than the maximum", () => {
+  it("replaces an import with the same name, appends a new one and refuses more than the maximum", () => {
     const night = parsed(NIGHT);
     const other = { ...night, id: "custom-other", name: "Other" };
     const retuned = { ...night, dark: false };
-    expect(addCustomTheme([night, other], retuned)).toEqual([retuned, other]);
-    expect(addCustomTheme([night], other)).toEqual([night, other]);
-    const full = Array.from({ length: MAX_CUSTOM_THEMES }, (_, i) => ({ ...night, id: `custom-${i}` }));
+    expect(addCustomTheme([night, other], retuned)).toEqual({ themes: [retuned, other], theme: retuned });
+    expect(addCustomTheme([night], other)).toEqual({ themes: [night, other], theme: other });
+    const full = Array.from({ length: MAX_CUSTOM_THEMES }, (_, i) => ({ ...night, id: `custom-${i}`, name: `T${i}` }));
     expect(addCustomTheme(full, other)).toBeNull();
-    expect(addCustomTheme(full, { ...night, id: "custom-0", name: "Again" })).toHaveLength(MAX_CUSTOM_THEMES);
+    const again = { ...night, id: "custom-0", name: "T0", dark: false };
+    expect(addCustomTheme(full, again)?.themes).toHaveLength(MAX_CUSTOM_THEMES);
+    expect(addCustomTheme(full, again)?.themes[0]).toEqual(again);
+  });
+
+  it("keeps two names that slug to the same id apart", () => {
+    const owl = { ...parsed(NIGHT), id: "custom-night-owl", name: "Night Owl" };
+    const dashed = { ...owl, name: "Night-Owl" };
+    expect(parsed(NIGHT.replace(/"name": "[^"]*"/, '"name": "Night-Owl"')).id).toBe(owl.id);
+    const added = addCustomTheme([owl], dashed)!;
+    expect(added.theme).toEqual({ ...dashed, id: `${owl.id}-2` });
+    expect(added.themes).toEqual([owl, added.theme]);
+    const third = addCustomTheme(added.themes, { ...owl, name: "night owl" })!;
+    expect(third.theme.id).toBe(`${owl.id}-3`);
   });
 });
 

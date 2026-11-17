@@ -93,9 +93,9 @@ export class SettingsStore {
     if (!parsed.ok) return parsed;
     const next = addCustomTheme(this.customThemes, parsed.theme);
     if (!next) return { ok: false, error: TOO_MANY };
-    this.storeCustomThemes(next);
-    this.setTheme(parsed.theme.id);
-    return { ok: true, name: parsed.theme.name };
+    this.storeCustomThemes(next.themes);
+    this.setTheme(next.theme.id);
+    return { ok: true, name: next.theme.name };
   }
 
   /** Removes an imported theme; the default theme takes over when it was the active one. */

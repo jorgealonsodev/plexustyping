@@ -114,7 +114,7 @@ fn score_session(
     practice: Option<PracticeMode>,
     indent: Option<IndentMode>,
     layout: Option<String>,
-) -> ScoredSession {
+) -> Result<ScoredSession, String> {
     let mut store = store(&state);
     let metronome = MetronomeTrack { bpm, offsets_ms };
     let practice = practice.unwrap_or_default();
@@ -127,8 +127,8 @@ fn score_session(
         started_at_ms,
         metronome: &metronome,
     };
-    let profile = commands::typing_profile(&state.profile, layout.as_deref());
-    commands::score_practice(&mut store, &profile, &req)
+    let profile = commands::typing_profile(&state.profile, layout.as_deref())?;
+    Ok(commands::score_practice(&mut store, &profile, &req))
 }
 
 /// Runs a metronome call off the main thread: opening the device blocks.

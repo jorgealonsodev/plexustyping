@@ -411,13 +411,17 @@ pub fn diagnostic_for_new_profile(
 }
 
 /// `profile` as it types now: with the chosen built-in `layout`, or with its
-/// own when none is given or it is unknown.
-pub fn typing_profile(profile: &Profile, layout: Option<&str>) -> Profile {
-    let known = layout.filter(|id| plexustyping_layouts::builtin_ids().contains(id));
-    Profile {
-        layout: known.unwrap_or(&profile.layout).to_owned(),
+/// own when none is given; an unknown `layout` is an error, as in `first_text`.
+pub fn typing_profile(profile: &Profile, layout: Option<&str>) -> Result<Profile, String> {
+    let layout = match layout {
+        Some(id) if plexustyping_layouts::builtin_ids().contains(&id) => id,
+        Some(id) => return Err(format!("unknown layout: {id}")),
+        None => &profile.layout,
+    };
+    Ok(Profile {
+        layout: layout.to_owned(),
         ..profile.clone()
-    }
+    })
 }
 
 /// Replays a session; a completed one with keystrokes is stored and folded
@@ -1329,20 +1333,20 @@ mod tests {
     }
 
     #[test]
-    fn typing_profile_takes_a_known_layout_and_keeps_its_own_otherwise() {
+    fn typing_profile_takes_a_known_layout_rejects_an_unknown_one_and_defaults_to_its_own() {
         let (_, profile) = memory();
         assert_eq!(profile.layout, "es-qwerty");
-        let us = typing_profile(&profile, Some("us-qwerty"));
+        let us = typing_profile(&profile, Some("us-qwerty")).unwrap();
         assert_eq!(us.layout, "us-qwerty");
         assert_eq!((us.id, &us.language), (profile.id, &profile.language));
-        assert_eq!(typing_profile(&profile, Some("xx")), profile);
-        assert_eq!(typing_profile(&profile, None), profile);
+        assert_eq!(typing_profile(&profile, Some("xx")), Err("unknown layout: xx".to_owned()));
+        assert_eq!(typing_profile(&profile, None), Ok(profile));
     }
 
     #[test]
     fn a_session_records_the_layout_of_the_typing_profile() {
         let (mut store, profile) = memory();
-        let latam = typing_profile(&profile, Some("latam-qwerty"));
+        let latam = typing_profile(&profile, Some("latam-qwerty")).unwrap();
         let events = typing("hola");
         let scored = score_session(
             &mut store,
