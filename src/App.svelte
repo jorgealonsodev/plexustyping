@@ -126,7 +126,7 @@
   <ModeSwitch {settings} />
   <button
     type="button"
-    class="ai-toggle"
+    class="gear ai-toggle"
     class:active={settings.aiEnabled === true}
     aria-pressed={settings.aiEnabled === true}
     title={aiToggleTitle(settings.aiEnabled === true)}
@@ -134,7 +134,7 @@
     onclick={() => {
       void toggleAi();
       focusTyping();
-    }}>IA</button
+    }}><span class="ai-label">IA</span></button
   >
   <button
     type="button"
@@ -247,14 +247,15 @@
     color: var(--muted);
   }
   /* Lit like the active Prosa/Código button while the AI generates new texts. */
-  .ai-toggle {
-    flex: none;
-    box-sizing: border-box;
-    height: 2rem;
-    padding: 0 0.7rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--muted);
+  /* The same box as the icon buttons: "IA" fills the 20 px an icon takes. */
+  .ai-label {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
   }
   .ai-toggle:hover {
     color: var(--text);
