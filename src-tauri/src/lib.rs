@@ -46,18 +46,29 @@ fn code_languages() -> Vec<CodeLanguage> {
     plexustyping_corpus::code_languages().to_vec()
 }
 
-/// `mode` is `"prose"` (default) or `{ kind: "code", lang }`.
+/// `mode` is `"prose"` (default) or `{ kind: "code", lang }`; `layout` defaults to the profile's.
 #[tauri::command]
 async fn first_text(
     state: State<'_, AppState>,
     language: String,
+    layout: Option<String>,
     day: String,
     mode: Option<PracticeMode>,
     max_lines: Option<usize>,
 ) -> Result<FirstText, String> {
     let mode = mode.unwrap_or_default();
     let max_lines = max_lines.unwrap_or(code::DEFAULT_MAX_LINES);
-    ai::first_text(&state, &language, &mode, max_lines, time_seed(), &day).await
+    let layout = layout.unwrap_or_else(|| state.profile.layout.clone());
+    ai::first_text(
+        &state,
+        &language,
+        &layout,
+        &mode,
+        max_lines,
+        time_seed(),
+        &day,
+    )
+    .await
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -88,7 +99,8 @@ async fn next_text(
     ai::next_text(&state, &params).await
 }
 
-/// `mode` is the error mode; `practice` is prose (default) or the code language.
+/// `mode` is the error mode; `practice` is prose (default) or the code language;
+/// `layout` is the layout typed with, recorded with the session (default: the profile's).
 #[allow(clippy::too_many_arguments)]
 #[tauri::command]
 fn score_session(
@@ -101,6 +113,7 @@ fn score_session(
     bpm: Option<u32>,
     practice: Option<PracticeMode>,
     indent: Option<IndentMode>,
+    layout: Option<String>,
 ) -> ScoredSession {
     let mut store = store(&state);
     let metronome = MetronomeTrack { bpm, offsets_ms };
@@ -114,7 +127,8 @@ fn score_session(
         started_at_ms,
         metronome: &metronome,
     };
-    commands::score_practice(&mut store, &state.profile, &req)
+    let profile = commands::typing_profile(&state.profile, layout.as_deref());
+    commands::score_practice(&mut store, &profile, &req)
 }
 
 /// Runs a metronome call off the main thread: opening the device blocks.

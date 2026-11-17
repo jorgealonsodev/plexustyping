@@ -1,4 +1,6 @@
-// Physical ISO keyboard: rows of `KeyboardEvent.code` with widths in key units, and the
+import type { Layout } from "./types";
+
+// Physical ISO and ANSI keyboards: rows of `KeyboardEvent.code` with widths in key units, and the
 // standard touch-typing finger for each key. Characters come from the active layout.
 
 export type Finger =
@@ -16,6 +18,8 @@ export interface KeySpec {
   code: string;
   /** Width in key units; every row adds up to 15. */
   width: number;
+  /** The lower part of the two-row ISO Enter: it repeats no label. */
+  unlabelled?: boolean;
 }
 
 const keys = (codes: string[]): KeySpec[] => codes.map((code) => ({ code, width: 1 }));
@@ -26,7 +30,7 @@ export const ISO_ROWS: KeySpec[][] = [
   [...digits, { code: "Backspace", width: 2 }],
   [{ code: "Tab", width: 1.5 }, ...keys([...letters("QWERTYUIOP"), "BracketLeft", "BracketRight"]), { code: "Enter", width: 1.5 }],
   // The ISO Enter spans two rows: its lower part closes the home row.
-  [{ code: "CapsLock", width: 1.75 }, ...keys([...letters("ASDFGHJKL"), "Semicolon", "Quote", "Backslash"]), { code: "Enter", width: 1.25 }],
+  [{ code: "CapsLock", width: 1.75 }, ...keys([...letters("ASDFGHJKL"), "Semicolon", "Quote", "Backslash"]), { code: "Enter", width: 1.25, unlabelled: true }],
   [
     { code: "ShiftLeft", width: 1.25 },
     ...keys(["IntlBackslash", ...letters("ZXCVBNM"), "Comma", "Period", "Slash"]),
@@ -41,6 +45,19 @@ export const ISO_ROWS: KeySpec[][] = [
     { code: "ControlRight", width: 2.5 },
   ],
 ];
+
+/** ANSI: one-row Enter with the backslash above it, and a long left Shift (no ISO key). */
+export const ANSI_ROWS: KeySpec[][] = [
+  ISO_ROWS[0],
+  [{ code: "Tab", width: 1.5 }, ...keys([...letters("QWERTYUIOP"), "BracketLeft", "BracketRight"]), { code: "Backslash", width: 1.5 }],
+  [{ code: "CapsLock", width: 1.75 }, ...keys([...letters("ASDFGHJKL"), "Semicolon", "Quote"]), { code: "Enter", width: 2.25 }],
+  [{ code: "ShiftLeft", width: 2.25 }, ...keys([...letters("ZXCVBNM"), "Comma", "Period", "Slash"]), { code: "ShiftRight", width: 2.75 }],
+  ISO_ROWS[4],
+];
+
+/** ANSI for a loaded layout without the key beside the left Shift; ISO otherwise. */
+export const rowsFor = (layout: Layout | null): KeySpec[][] =>
+  layout && !("IntlBackslash" in layout.keys) ? ANSI_ROWS : ISO_ROWS;
 
 const FINGER_KEYS: Record<Finger, string[]> = {
   "l-pinky": ["Backquote", "Digit1", "Tab", "KeyQ", "CapsLock", "KeyA", "ShiftLeft", "IntlBackslash", "KeyZ", "ControlLeft", "MetaLeft"],

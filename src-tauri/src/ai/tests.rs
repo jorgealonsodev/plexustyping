@@ -742,6 +742,7 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
     let first = first_text(
         &state,
         "es",
+        "es-qwerty",
         &PracticeMode::Prose,
         DEFAULT_MAX_LINES,
         1,
@@ -775,6 +776,7 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
     let next = first_text(
         &state,
         "es",
+        "es-qwerty",
         &PracticeMode::Prose,
         DEFAULT_MAX_LINES,
         1,
@@ -793,6 +795,7 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
         first_text(
             &state,
             "xx",
+            "es-qwerty",
             &PracticeMode::Prose,
             DEFAULT_MAX_LINES,
             1,
@@ -975,9 +978,38 @@ async fn html_css_ai_texts_are_highlighted_as_html() {
 }
 
 #[tokio::test]
+async fn first_text_skips_the_diagnostic_a_layout_cannot_type() {
+    let state = state(MemoryStore::shared(), offline());
+    let first = first_text(
+        &state,
+        "es",
+        "us-qwerty",
+        &PracticeMode::Prose,
+        DEFAULT_MAX_LINES,
+        1,
+        DAY,
+    )
+    .await
+    .unwrap();
+    assert!(!first.diagnostic);
+    let us = commands::get_layout("us-qwerty").unwrap().allowed_chars();
+    assert!(!first.text.text.is_empty());
+    assert!(first.text.text.chars().all(|ch| us.contains(&ch)));
+    let p = TextParams {
+        layout: "us-qwerty".into(),
+        target_count: DEFAULT_TARGETS,
+        length: DEFAULT_LENGTH,
+        ..params(1)
+    };
+    assert_eq!(first.text, next_text(&state, &p).await.unwrap());
+}
+
+#[tokio::test]
 async fn first_text_in_code_mode_skips_the_prose_diagnostic() {
     let state = state(MemoryStore::shared(), offline());
-    let first = first_text(&state, "es", &rust(), 5, 1, DAY).await.unwrap();
+    let first = first_text(&state, "es", "es-qwerty", &rust(), 5, 1, DAY)
+        .await
+        .unwrap();
     assert!(!first.diagnostic);
     assert_eq!(first.text.syntax.as_deref(), Some("rust"));
     let p = TextParams {
@@ -1000,6 +1032,7 @@ fn generation_futures_hold_no_store_lock_across_await() {
     assert_send(first_text(
         &state,
         "es",
+        "es-qwerty",
         &PracticeMode::Prose,
         DEFAULT_MAX_LINES,
         1,

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   CODE_INDENTS,
+  DEFAULT_LAYOUT,
   ERROR_MODES,
+  LAYOUTS,
+  loadLayout,
+  saveLayout,
   MAX_CODE_LINES,
   MIN_CODE_LINES,
   checkMetronome,
@@ -225,5 +229,31 @@ describe("code settings", () => {
       storage.setItem("plexustyping.codeLines", bad);
       expect(loadCodeLines(storage), bad).toBe(12);
     }
+  });
+});
+
+describe("keyboard layout setting", () => {
+  it("lists the bundled layout files with their names, Spain first", () => {
+    const files = import.meta.glob<string>("../../../layouts/*.toml", { query: "?raw", import: "default", eager: true });
+    const bundled = Object.entries(files).map(([path, toml]) => ({
+      id: path.replace(/^.*\/|\.toml$/g, ""),
+      label: /^name = "(.*)"$/m.exec(toml)?.[1],
+    }));
+    expect(LAYOUTS).toEqual([
+      { id: "es-qwerty", label: "Español (España)" },
+      { id: "latam-qwerty", label: "Español (Latinoamérica)" },
+      { id: "us-qwerty", label: "English (US)" },
+    ]);
+    expect([...LAYOUTS].sort((a, b) => a.id.localeCompare(b.id))).toEqual(bundled.sort((a, b) => a.id.localeCompare(b.id)));
+    expect(DEFAULT_LAYOUT).toBe("es-qwerty");
+  });
+
+  it("defaults to the Spanish layout, ignores unknown stored ids and persists the choice", () => {
+    const storage = memoryStorage();
+    expect(loadLayout(storage)).toBe("es-qwerty");
+    expect(loadLayout(memoryStorage({ "plexustyping.layout": "dvorak" }))).toBe("es-qwerty");
+    saveLayout("us-qwerty", storage);
+    expect(storage.getItem("plexustyping.layout")).toBe("us-qwerty");
+    expect(loadLayout(storage)).toBe("us-qwerty");
   });
 });

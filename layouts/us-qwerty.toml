@@ -1,0 +1,199 @@
+# English (US) ANSI keyboard layout: no dead keys and no AltGr layer.
+# Keys are `KeyboardEvent.code` values; layers are `normal`, `shift` and `altgr`.
+name = "English (US)"
+
+# Number row
+[keys.Backquote]
+normal = "`"
+shift = "~"
+
+[keys.Digit1]
+normal = "1"
+shift = "!"
+
+[keys.Digit2]
+normal = "2"
+shift = "@"
+
+[keys.Digit3]
+normal = "3"
+shift = "#"
+
+[keys.Digit4]
+normal = "4"
+shift = "$"
+
+[keys.Digit5]
+normal = "5"
+shift = "%"
+
+[keys.Digit6]
+normal = "6"
+shift = "^"
+
+[keys.Digit7]
+normal = "7"
+shift = "&"
+
+[keys.Digit8]
+normal = "8"
+shift = "*"
+
+[keys.Digit9]
+normal = "9"
+shift = "("
+
+[keys.Digit0]
+normal = "0"
+shift = ")"
+
+[keys.Minus]
+normal = "-"
+shift = "_"
+
+[keys.Equal]
+normal = "="
+shift = "+"
+
+# Top row
+[keys.KeyQ]
+normal = "q"
+shift = "Q"
+
+[keys.KeyW]
+normal = "w"
+shift = "W"
+
+[keys.KeyE]
+normal = "e"
+shift = "E"
+
+[keys.KeyR]
+normal = "r"
+shift = "R"
+
+[keys.KeyT]
+normal = "t"
+shift = "T"
+
+[keys.KeyY]
+normal = "y"
+shift = "Y"
+
+[keys.KeyU]
+normal = "u"
+shift = "U"
+
+[keys.KeyI]
+normal = "i"
+shift = "I"
+
+[keys.KeyO]
+normal = "o"
+shift = "O"
+
+[keys.KeyP]
+normal = "p"
+shift = "P"
+
+[keys.BracketLeft]
+normal = "["
+shift = "{"
+
+[keys.BracketRight]
+normal = "]"
+shift = "}"
+
+[keys.Backslash]
+normal = "\\"
+shift = "|"
+
+# Home row
+[keys.KeyA]
+normal = "a"
+shift = "A"
+
+[keys.KeyS]
+normal = "s"
+shift = "S"
+
+[keys.KeyD]
+normal = "d"
+shift = "D"
+
+[keys.KeyF]
+normal = "f"
+shift = "F"
+
+[keys.KeyG]
+normal = "g"
+shift = "G"
+
+[keys.KeyH]
+normal = "h"
+shift = "H"
+
+[keys.KeyJ]
+normal = "j"
+shift = "J"
+
+[keys.KeyK]
+normal = "k"
+shift = "K"
+
+[keys.KeyL]
+normal = "l"
+shift = "L"
+
+[keys.Semicolon]
+normal = ";"
+shift = ":"
+
+[keys.Quote]
+normal = "'"
+shift = "\""
+
+# Bottom row
+[keys.KeyZ]
+normal = "z"
+shift = "Z"
+
+[keys.KeyX]
+normal = "x"
+shift = "X"
+
+[keys.KeyC]
+normal = "c"
+shift = "C"
+
+[keys.KeyV]
+normal = "v"
+shift = "V"
+
+[keys.KeyB]
+normal = "b"
+shift = "B"
+
+[keys.KeyN]
+normal = "n"
+shift = "N"
+
+[keys.KeyM]
+normal = "m"
+shift = "M"
+
+[keys.Comma]
+normal = ","
+shift = "<"
+
+[keys.Period]
+normal = "."
+shift = ">"
+
+[keys.Slash]
+normal = "/"
+shift = "?"
+
+# Space
+[keys.Space]
+normal = " "

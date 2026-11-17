@@ -7,7 +7,6 @@
   import type { KeyPress, Layout } from "../keyboard/types";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
   import {
-    LAYOUT,
     type PracticeText,
     type ScoredSession,
     type Weakness,
@@ -60,6 +59,7 @@
     practice,
     indent,
     codeLines,
+    layoutId,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -79,6 +79,8 @@
     indent: IndentMode;
     /** Lines per code snippet, from the next text. */
     codeLines: number;
+    /** Keyboard layout id (S1–S4); a change loads a new text. */
+    layoutId: string;
   } = $props();
 
   // The metronome plays only while a text is ready or being typed and the window is visible (S7).
@@ -107,11 +109,15 @@
   let classes = $state.raw<TokenClass[]>([]);
   const isCode = $derived(textMode !== "prose");
   const practiceId = $derived(practiceKey(practice));
-  // Mode of the latest requested text: a different `practice` loads a new one.
-  let requestedKey = untrack(() => practiceKey(practice));
+  // Mode and layout of the latest requested text: a different `practice` or layout loads a new one.
+  const requestKey = (p: PracticeMode, layoutOf: string) => `${practiceKey(p)}|${layoutOf}`;
+  const wantedKey = $derived(requestKey(practice, layoutId));
+  let requestedKey = untrack(() => requestKey(practice, layoutId));
+  // Layout the current text was generated for; the scored session records it (S5).
+  let textLayout = untrack(() => layoutId);
   // The next text, requested in the background while this one is typed (S6).
   const prefetch = new Prefetcher<PracticeText>();
-  const genKey = $derived(generationKey(targetCount, textLength, aiRevision, practiceId, codeLines));
+  const genKey = $derived(generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId));
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
   let session = $state.raw<TypingSession | null>(null);
@@ -164,13 +170,15 @@
     textPractice: PracticeMode = practice,
   ) {
     const id = ++run;
-    requestedKey = practiceKey(textPractice);
+    const forLayout = layoutId;
+    requestedKey = requestKey(textPractice, forLayout);
     loadingLabel = label;
     phase = "loading";
     try {
       const next = await fetch();
       if (id !== run) return;
       textMode = textPractice;
+      textLayout = forLayout;
       classes = tokenClasses([...next.text].length, next.tokens);
       text = next.text;
       targets = next.targets;
@@ -187,8 +195,8 @@
   }
 
   function loadFirst() {
-    const [chosen, lines] = [practice, codeLines];
-    void load(() => firstText(chosen, lines), loadFirst, "Cargando texto…", chosen);
+    const [chosen, lines, lay] = [practice, codeLines, layoutId];
+    void load(() => firstText(lay, chosen, lines), loadFirst, "Cargando texto…", chosen);
   }
 
   const randomSeed = () => Math.floor(Math.random() * 2 ** 32);
@@ -199,8 +207,8 @@
     // Failed chars of a text in another mode say nothing about this one.
     const fallback = practiceKey(textMode) === practiceId ? (scored?.failedChars ?? []) : [];
     const seed = randomSeed();
-    const [count, length, chosen, lines] = [targetCount, textLength, practice, codeLines];
-    const fresh = () => nextText(seed, count, length, fallback, chosen, lines);
+    const [count, length, chosen, lines, lay] = [targetCount, textLength, practice, codeLines, layoutId];
+    const fresh = () => nextText(lay, seed, count, length, fallback, chosen, lines);
     const again = () => void load(fresh, again, "Generando texto…", chosen);
     const ready = prefetch.take(genKey);
     if (ready) void load(() => ready.catch(fresh), again, "Generando texto…", chosen);
@@ -211,8 +219,8 @@
   function startPrefetch() {
     if (!session || diagnostic) return;
     const fallback = provisionalFailedChars(session.result().records);
-    const [count, length, chosen, lines] = [targetCount, textLength, practice, codeLines];
-    prefetch.start(genKey, () => nextText(randomSeed(), count, length, fallback, chosen, lines));
+    const [count, length, chosen, lines, lay] = [targetCount, textLength, practice, codeLines, layoutId];
+    prefetch.start(genKey, () => nextText(lay, randomSeed(), count, length, fallback, chosen, lines));
   }
 
   // Weaknesses and heatmap scores from the stored model; missing ones only hide those views.
@@ -236,7 +244,7 @@
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
       const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
       const typed = { mode: textMode, indent: done.indent };
-      const result = await scoreSession(text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
+      const result = await scoreSession(textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
       tempo = null;
@@ -342,15 +350,25 @@
   }
 
   $effect(() => {
-    const current = text;
+    const [current, lay] = [text, layoutId];
     sequences = null;
     if (!current) return;
     let live = true;
-    keySequences(LAYOUT, current)
+    keySequences(lay, current)
       .then((next) => {
         if (live) sequences = next;
       })
       .catch((err) => console.warn("key_sequences failed; no key highlight", err));
+    return () => (live = false);
+  });
+
+  // The drawn keyboard follows the chosen layout; an older reply is stale.
+  $effect(() => {
+    const id = layoutId;
+    let live = true;
+    getLayout(id)
+      .then((next) => live && (layout = next))
+      .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
     return () => (live = false);
   });
 
@@ -364,8 +382,8 @@
   $effect(() => {
     void genKey;
     untrack(() => {
-      // A practice switch loads a new text instead: no request for the old one.
-      if (practiceId !== requestedKey) return;
+      // A practice or layout switch loads a new text instead: no request for the old one.
+      if (wantedKey !== requestedKey) return;
       if (phase === "typing" && session?.firstT != null) startPrefetch();
     });
   });
@@ -382,14 +400,14 @@
     untrack(() => indentChangeRestarts(phase, isCode) && restart());
   });
 
-  // Switching prose/code or the language drops the prefetch and loads a text of the new mode.
+  // Switching prose/code, the language or the layout drops the prefetch and loads a new text.
   $effect(() => {
-    const key = practiceId;
+    const key = wantedKey;
     untrack(() => {
       if (key === requestedKey) return;
       prefetch.clear();
-      const [count, length, chosen, lines] = [targetCount, textLength, practice, codeLines];
-      const fresh = () => nextText(randomSeed(), count, length, [], chosen, lines);
+      const [count, length, chosen, lines, lay] = [targetCount, textLength, practice, codeLines, layoutId];
+      const fresh = () => nextText(lay, randomSeed(), count, length, [], chosen, lines);
       const again = () => void load(fresh, again, "Generando texto…", chosen);
       again();
       refreshModel(run, chosen);
@@ -414,9 +432,6 @@
     loadFirst();
     refreshModel(run, practice);
     void LANGUAGES.load();
-    getLayout(LAYOUT)
-      .then((next) => (layout = next))
-      .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
     return () => {
       setTypingField(null);
       void controller.set(null);

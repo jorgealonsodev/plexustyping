@@ -385,22 +385,39 @@ pub fn corpus_text(plan: &TextPlan, seed: u64) -> Result<NextText, String> {
     })
 }
 
-/// The diagnostic text while `profile` has no saved session.
+/// The diagnostic text while `profile` has no saved session, unless `layout`
+/// cannot type all of it.
 pub fn diagnostic_for_new_profile(
     store: &Store,
     profile: &Profile,
     language: &str,
+    layout: &str,
 ) -> Result<Option<FirstText>, String> {
+    let allowed = get_layout(layout)?.allowed_chars();
     let sessions = store
         .recent_sessions(profile.id, 1)
         .map_err(|e| e.to_string())?;
     if !sessions.is_empty() {
         return Ok(None);
     }
+    let text = diagnostic_text(language)?;
+    if !text.chars().all(|ch| allowed.contains(&ch)) {
+        return Ok(None);
+    }
     Ok(Some(FirstText {
-        text: NextText::corpus(diagnostic_text(language)?, Vec::new()),
+        text: NextText::corpus(text, Vec::new()),
         diagnostic: true,
     }))
+}
+
+/// `profile` as it types now: with the chosen built-in `layout`, or with its
+/// own when none is given or it is unknown.
+pub fn typing_profile(profile: &Profile, layout: Option<&str>) -> Profile {
+    let known = layout.filter(|id| plexustyping_layouts::builtin_ids().contains(id));
+    Profile {
+        layout: known.unwrap_or(&profile.layout).to_owned(),
+        ..profile.clone()
+    }
 }
 
 /// Replays a session; a completed one with keystrokes is stored and folded
@@ -1312,6 +1329,64 @@ mod tests {
     }
 
     #[test]
+    fn typing_profile_takes_a_known_layout_and_keeps_its_own_otherwise() {
+        let (_, profile) = memory();
+        assert_eq!(profile.layout, "es-qwerty");
+        let us = typing_profile(&profile, Some("us-qwerty"));
+        assert_eq!(us.layout, "us-qwerty");
+        assert_eq!((us.id, &us.language), (profile.id, &profile.language));
+        assert_eq!(typing_profile(&profile, Some("xx")), profile);
+        assert_eq!(typing_profile(&profile, None), profile);
+    }
+
+    #[test]
+    fn a_session_records_the_layout_of_the_typing_profile() {
+        let (mut store, profile) = memory();
+        let latam = typing_profile(&profile, Some("latam-qwerty"));
+        let events = typing("hola");
+        let scored = score_session(
+            &mut store,
+            &latam,
+            "hola",
+            ErrorMode::AllowContinue,
+            &events,
+            1,
+        );
+        assert!(scored.saved);
+        let sessions = store.sessions(profile.id, None, None).unwrap();
+        assert_eq!(sessions[0].layout.as_deref(), Some("latam-qwerty"));
+    }
+
+    #[test]
+    fn the_diagnostic_is_only_for_layouts_that_can_type_it() {
+        let (store, profile) = memory();
+        for layout in ["es-qwerty", "latam-qwerty"] {
+            let first = diagnostic_for_new_profile(&store, &profile, "es", layout).unwrap();
+            assert!(first.is_some_and(|f| f.diagnostic), "{layout}");
+        }
+        assert_eq!(
+            diagnostic_for_new_profile(&store, &profile, "es", "us-qwerty"),
+            Ok(None)
+        );
+        assert_eq!(
+            diagnostic_for_new_profile(&store, &profile, "es", "xx"),
+            Err("unknown layout: xx".to_owned())
+        );
+    }
+
+    #[test]
+    fn next_text_only_uses_chars_of_the_chosen_layout() {
+        let us = get_layout("us-qwerty").unwrap().allowed_chars();
+        let req = NextTextRequest {
+            layout: "us-qwerty",
+            ..request(7, 3, 300)
+        };
+        let text = next_text(&model(&[("a", 0.5)]), &req).unwrap().text;
+        assert!(!text.is_empty());
+        assert!(text.chars().all(|ch| us.contains(&ch)), "{text}");
+    }
+
+    #[test]
     fn key_sequences_and_get_layout_reject_an_unknown_layout() {
         assert_eq!(
             key_sequences("xx", "a"),
@@ -1325,7 +1400,7 @@ mod tests {
         let layout = get_layout("es-qwerty").expect("es-qwerty is bundled");
         assert_eq!(layout, plexustyping_layouts::builtin("es-qwerty").unwrap());
         let json = serde_json::to_value(&layout).unwrap();
-        assert_eq!(json["name"], "Español QWERTY");
+        assert_eq!(json["name"], "Español (España)");
         assert_eq!(json["deadKeys"], serde_json::json!(["´", "`", "^", "¨"]));
         assert_eq!(
             json["keys"]["Semicolon"],

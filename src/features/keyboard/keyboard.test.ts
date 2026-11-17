@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ISO_ROWS, NAMED_LABELS, fingerOf, handOf } from "./geometry";
+import { ANSI_ROWS, ISO_ROWS, NAMED_LABELS, fingerOf, handOf, rowsFor } from "./geometry";
 import { highlightsFor, keyForChar, keyLabels } from "./keys";
 import type { KeyPress, Layout } from "./types";
 
@@ -72,6 +72,39 @@ describe("ISO geometry", () => {
       "r-pinky",
     ]);
     expect(fingerOf("F2")).toBeNull();
+  });
+
+  it("marks only the lower part of the ISO Enter as unlabelled", () => {
+    expect(ISO_ROWS.flat().filter((k) => k.unlabelled)).toEqual([{ code: "Enter", width: 1.25, unlabelled: true }]);
+    expect(ANSI_ROWS.flat().some((k) => k.unlabelled)).toBe(false);
+  });
+
+  it("has an ANSI shape: one-row Enter, backslash above it and no key beside the left Shift", () => {
+    expect(ANSI_ROWS.map((row) => [row[0].code, row.at(-1)!.code])).toEqual([
+      ["Backquote", "Backspace"],
+      ["Tab", "Backslash"],
+      ["CapsLock", "Enter"],
+      ["ShiftLeft", "ShiftRight"],
+      ["ControlLeft", "ControlRight"],
+    ]);
+    for (const row of ANSI_ROWS) expect(row.reduce((sum, k) => sum + k.width, 0)).toBe(15);
+    const codes = ANSI_ROWS.flat().map((k) => k.code);
+    expect(new Set(codes).size).toBe(codes.length);
+    expect(codes).not.toContain("IntlBackslash");
+    expect(ANSI_ROWS[3].slice(0, 2)).toEqual([
+      { code: "ShiftLeft", width: 2.25 },
+      { code: "KeyZ", width: 1 },
+    ]);
+    expect(ANSI_ROWS[0]).toEqual(ISO_ROWS[0]);
+    expect(ANSI_ROWS[4]).toEqual(ISO_ROWS[4]);
+    for (const { code } of ANSI_ROWS.flat()) expect(fingerOf(code), code).not.toBeNull();
+  });
+
+  it("draws ANSI only for a loaded layout without the ISO key", () => {
+    const { IntlBackslash: _, ...ansiKeys } = { ...LAYOUT.keys, IntlBackslash: { normal: "<", shift: ">", altgr: null } };
+    expect(rowsFor(null)).toBe(ISO_ROWS);
+    expect(rowsFor({ ...LAYOUT, keys: { ...ansiKeys, IntlBackslash: { normal: "<", shift: ">", altgr: null } } })).toBe(ISO_ROWS);
+    expect(rowsFor({ ...LAYOUT, keys: ansiKeys })).toBe(ANSI_ROWS);
   });
 
   it("knows the hand of each finger", () => {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, untrack } from "svelte";
-  import { ISO_ROWS, NAMED_LABELS, fingerOf } from "./geometry";
+  import { NAMED_LABELS, fingerOf, rowsFor } from "./geometry";
   import { heatLevel } from "./heat";
   import { type Flash, type Highlight, keyLabels } from "./keys";
   import type { Layout } from "./types";
@@ -21,15 +21,14 @@
   const FLASH_MS = 150;
 
   const rows = $derived(
-    ISO_ROWS.map((row, r) =>
+    rowsFor(layout).map((row) =>
       row.map((spec) => ({
         ...spec,
         // Classes, not style attributes: widths are a fixed set of key units.
         widthClass: `w${spec.width * 100}`,
         finger: fingerOf(spec.code),
         labels: keyLabels(layout?.keys[spec.code], layout?.deadKeys ?? []),
-        // The lower part of the two-row Enter repeats no label.
-        name: r === 2 && spec.code === "Enter" ? null : (NAMED_LABELS[spec.code] ?? null),
+        name: spec.unlabelled ? null : (NAMED_LABELS[spec.code] ?? null),
       })),
     ),
   );
@@ -124,6 +123,7 @@
   .w150 { width: calc(var(--u) * 1.5 - var(--gap)); }
   .w175 { width: calc(var(--u) * 1.75 - var(--gap)); }
   .w200 { width: calc(var(--u) * 2 - var(--gap)); }
+  .w225 { width: calc(var(--u) * 2.25 - var(--gap)); }
   .w250 { width: calc(var(--u) * 2.5 - var(--gap)); }
   .w275 { width: calc(var(--u) * 2.75 - var(--gap)); }
   .w675 { width: calc(var(--u) * 6.75 - var(--gap)); }

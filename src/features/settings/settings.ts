@@ -9,6 +9,24 @@ const FLASHES_KEY = "plexustyping.flashes";
 const HEATMAP_KEY = "plexustyping.heatmap";
 const TARGETS_KEY = "plexustyping.targetCount";
 const LENGTH_KEY = "plexustyping.textLength";
+const LAYOUT_KEY = "plexustyping.layout";
+
+/** Built-in keyboard layouts (`layouts/*.toml`) in display order; the first is the default. */
+export const LAYOUTS: { id: string; label: string }[] = [
+  { id: "es-qwerty", label: "Español (España)" },
+  { id: "latam-qwerty", label: "Español (Latinoamérica)" },
+  { id: "us-qwerty", label: "English (US)" },
+];
+
+export const DEFAULT_LAYOUT = LAYOUTS[0].id;
+
+/** The stored layout id if it is a built-in one, else Spain's. */
+export function loadLayout(storage: Storage = localStorage): string {
+  const id = storage.getItem(LAYOUT_KEY);
+  return LAYOUTS.find((l) => l.id === id)?.id ?? DEFAULT_LAYOUT;
+}
+
+export const saveLayout = (id: string, storage: Storage = localStorage) => storage.setItem(LAYOUT_KEY, id);
 
 /** Error modes in display order; the first is the default (S3). */
 export const ERROR_MODES: { id: ErrorMode; label: string }[] = [

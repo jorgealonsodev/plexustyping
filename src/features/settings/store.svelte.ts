@@ -29,6 +29,8 @@ import {
   savePracticeKind,
   loadErrorMode,
   loadFlashes,
+  loadLayout,
+  saveLayout,
   loadHeatmap,
   loadLiveStats,
   loadMetronome,
@@ -55,6 +57,8 @@ export class SettingsStore {
   customThemes = $state.raw(initCustomThemes());
   themeId = $state(loadThemeId());
   heatmap = $state(loadHeatmap());
+  /** Drawn keyboard and the chars texts may contain (S1–S4). */
+  layout = $state(loadLayout());
   targetCount = $state(loadTargetCount());
   textLength = $state(loadTextLength());
   metronome = $state.raw(loadMetronome());
@@ -119,6 +123,12 @@ export class SettingsStore {
   setFlashes(on: boolean) {
     this.flashes = on;
     saveFlashes(on);
+  }
+
+  /** Loads a new text for the layout (the practice screen watches it). */
+  setLayout(id: string) {
+    this.layout = id;
+    saveLayout(id);
   }
 
   setHeatmap(on: boolean) {

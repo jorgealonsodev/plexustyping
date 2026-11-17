@@ -86,6 +86,7 @@
   onTempo={(bpm) => settings.setMetronome({ bpm })}
   {practice}
   indent={settings.codeIndent}
+  layoutId={settings.layout}
   codeLines={settings.codeLines}
 />
 

@@ -601,11 +601,12 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     Ok(text)
 }
 
-/// The diagnostic text for a new profile practising prose, otherwise like
-/// [`next_text`] with the default target count and length.
+/// The diagnostic text for a new profile practising prose on a `layout` that
+/// can type it, otherwise like [`next_text`] with the default target count and length.
 pub async fn first_text(
     state: &AppState,
     language: &str,
+    layout: &str,
     mode: &PracticeMode,
     max_lines: usize,
     seed: u64,
@@ -614,7 +615,7 @@ pub async fn first_text(
     if *mode == PracticeMode::Prose {
         let diagnostic = {
             let store = lock_store(&state.store);
-            commands::diagnostic_for_new_profile(&store, &state.profile, language)?
+            commands::diagnostic_for_new_profile(&store, &state.profile, language, layout)?
         };
         if let Some(first) = diagnostic {
             return Ok(first);
@@ -622,7 +623,7 @@ pub async fn first_text(
     }
     let params = TextParams {
         language: language.to_owned(),
-        layout: state.profile.layout.clone(),
+        layout: layout.to_owned(),
         seed,
         target_count: DEFAULT_TARGETS,
         length: DEFAULT_LENGTH,

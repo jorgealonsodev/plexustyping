@@ -1,11 +1,26 @@
 <script lang="ts">
   import SettingField from "./SettingField.svelte";
+  import { LAYOUTS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
 
   type Change = Event & { currentTarget: HTMLInputElement };
+  type SelectChange = Event & { currentTarget: HTMLSelectElement };
 </script>
+
+<SettingField
+  label="Distribución"
+  hint="Debe coincidir con la del sistema; cambiarla carga un texto nuevo."
+>
+  {#snippet children({ id, hintId })}
+    <select {id} aria-describedby={hintId} onchange={(e: SelectChange) => settings.setLayout(e.currentTarget.value)}>
+      {#each LAYOUTS as l (l.id)}
+        <option value={l.id} selected={l.id === settings.layout}>{l.label}</option>
+      {/each}
+    </select>
+  {/snippet}
+</SettingField>
 
 <SettingField toggle label="Teclado visual" shortcut="F2" hint="Teclado en pantalla que resalta la siguiente tecla.">
   {#snippet children({ id, hintId })}

@@ -38,6 +38,8 @@ describe("generationKey", () => {
     expect(rust).not.toBe(base);
     expect(generationKey(3, 300, 0, "code:python", 12)).not.toBe(rust);
     expect(generationKey(3, 300, 0, "code:rust", 20)).not.toBe(rust);
+    expect(generationKey(3, 300, 0, "prose", 12, "es-qwerty")).toBe(base);
+    expect(generationKey(3, 300, 0, "prose", 12, "us-qwerty")).not.toBe(base);
   });
 });
 

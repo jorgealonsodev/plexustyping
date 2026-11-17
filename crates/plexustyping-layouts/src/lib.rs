@@ -18,10 +18,17 @@ use serde::{Deserialize, Serialize};
 use unicode_normalization::UnicodeNormalization;
 
 /// Built-in layouts as `(id, TOML source)`.
-const BUILTINS: &[(&str, &str)] = &[("es-qwerty", include_str!("../../../layouts/es-qwerty.toml"))];
+const BUILTINS: &[(&str, &str)] = &[
+    ("es-qwerty", include_str!("../../../layouts/es-qwerty.toml")),
+    (
+        "latam-qwerty",
+        include_str!("../../../layouts/latam-qwerty.toml"),
+    ),
+    ("us-qwerty", include_str!("../../../layouts/us-qwerty.toml")),
+];
 
 /// Built-in layout ids, in the same order as [`BUILTINS`].
-const BUILTIN_IDS: &[&str] = &["es-qwerty"];
+const BUILTIN_IDS: &[&str] = &["es-qwerty", "latam-qwerty", "us-qwerty"];
 
 /// The key that types `'\n'` when a layout does not map it explicitly.
 const ENTER_CODE: &str = "Enter";

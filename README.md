@@ -18,14 +18,14 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   "Siguiente texto" (`Enter`) generates a new adaptive text (see below).
 - Accents and dead keys work: typing goes through a hidden text field, so the
   system input method composes `´` + `a` into one `á`.
-- On-screen ISO keyboard at the bottom, labelled from the active layout (normal,
+- On-screen keyboard at the bottom (ISO, or ANSI for US), labelled from the chosen layout (normal,
   Shift, AltGr; dead keys underlined): it highlights the next key, plus Shift or
   AltGr, coloured by finger, and flashes typed keys green or red. `F2` shows or hides it.
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
   window, with one section per topic. "Práctica": error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
   targets per text (3–5), text length (100–600 characters) and live stats.
-  "Teclado": on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
+  "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
   colour themes, dark and light, switched live, plus themes imported from
   VS Code (see below). Everything is remembered
   locally; targets and length apply from the next text. `Escape`, `×` or a
@@ -172,6 +172,26 @@ everything below follows it:
 Without saved sessions (or in temporary mode) the window shows "Aún no hay
 sesiones guardadas.". `Escape`, `×` or a click outside closes it and returns
 to the text.
+
+### Keyboard layouts
+
+"Ajustes → Teclado → Distribución" chooses one of three built-in layouts:
+
+| Layout | Id | Shape | Dead keys | AltGr |
+|---|---|---|---|---|
+| Español (España) (default) | `es-qwerty` | ISO | `` ´ ¨ ^ ` `` | yes |
+| Español (Latinoamérica) | `latam-qwerty` | ISO | `` ´ ¨ ^ ` `` | `@` on Q, `\` on `'`, `~` on `+` |
+| English (US) | `us-qwerty` | ANSI | none | none |
+
+The layout drives the drawn keyboard (labels, next-key highlight, heatmap) and
+the characters generated texts may contain: on the US layout texts have no
+`ñ` or accents, and a new profile skips the Spanish diagnostic text. Changing
+the layout loads a new text; each saved session records its layout (history
+and the CSV `layout` column).
+
+Limits: the keystrokes themselves come from the system keyboard layout, so the
+layout chosen in the app must match the one set in the operating system. Texts
+stay in Spanish on every layout.
 
 ### Where data lives
 

@@ -185,13 +185,13 @@ fn compose_requires_a_declared_dead_key() {
 
 #[test]
 fn builtin_es_qwerty_is_listed_and_valid() {
-    assert_eq!(builtin_ids(), &["es-qwerty"]);
+    assert_eq!(builtin_ids(), &["es-qwerty", "latam-qwerty", "us-qwerty"]);
     for id in builtin_ids() {
         assert_eq!(builtin(id).map(|layout| layout.id), Some((*id).to_owned()));
     }
     let layout = es();
     assert_eq!(layout.id, "es-qwerty");
-    assert_eq!(layout.name, "Español QWERTY");
+    assert_eq!(layout.name, "Español (España)");
     assert_eq!(layout.dead_keys, vec!['´', '`', '^', '¨']);
     assert_eq!(
         layout.keys["KeyQ"],
@@ -311,4 +311,115 @@ fn rejects_dead_key_without_known_composition() {
         err.to_string(),
         "layout `cedilla`: dead key `¸` has no known composition"
     );
+}
+
+#[test]
+fn builtin_latam_qwerty_types_spanish_and_code_signs() {
+    let layout = builtin("latam-qwerty").expect("latam-qwerty is built in");
+    assert_eq!(layout.name, "Español (Latinoamérica)");
+    assert_eq!(layout.dead_keys, vec!['´', '¨', '^', '`']);
+    assert_eq!(layout.keys.len(), 49);
+    assert_eq!(
+        layout.keys["Backquote"],
+        KeyLayers {
+            normal: Some('|'),
+            shift: Some('°'),
+            altgr: Some('¬')
+        }
+    );
+    assert_eq!(
+        layout.locate('ñ'),
+        Some(vec![press("Semicolon", Layer::Normal)])
+    );
+    assert_eq!(layout.locate('@'), Some(vec![press("KeyQ", Layer::Altgr)]));
+    assert_eq!(
+        layout.locate('\\'),
+        Some(vec![press("Minus", Layer::Altgr)])
+    );
+    assert_eq!(
+        layout.locate('~'),
+        Some(vec![press("BracketRight", Layer::Altgr)])
+    );
+    assert_eq!(
+        layout.locate('{'),
+        Some(vec![press("Quote", Layer::Normal)])
+    );
+    assert_eq!(
+        layout.locate(']'),
+        Some(vec![press("Backslash", Layer::Shift)])
+    );
+    assert_eq!(
+        layout.locate('¿'),
+        Some(vec![press("Equal", Layer::Normal)])
+    );
+    assert_eq!(
+        layout.locate('á'),
+        Some(vec![
+            press("BracketLeft", Layer::Normal),
+            press("KeyA", Layer::Normal)
+        ])
+    );
+    assert_eq!(
+        layout.locate('ü'),
+        Some(vec![
+            press("BracketLeft", Layer::Shift),
+            press("KeyU", Layer::Normal)
+        ])
+    );
+    assert_eq!(
+        layout.locate('ê'),
+        Some(vec![
+            press("Quote", Layer::Altgr),
+            press("KeyE", Layer::Normal)
+        ])
+    );
+    assert_eq!(layout.locate('^'), None);
+    assert_eq!(layout.locate('ç'), None);
+    let allowed = layout.allowed_chars();
+    for ch in "ñÑáéíóúÁÉÍÓÚü¿?¡!,.;:<>()[]{}=+-*/_#$%&|@'\"".chars() {
+        assert!(allowed.contains(&ch), "missing {ch:?}");
+    }
+}
+
+#[test]
+fn builtin_us_qwerty_is_ansi_without_dead_keys_or_altgr() {
+    let layout = builtin("us-qwerty").expect("us-qwerty is built in");
+    assert_eq!(layout.name, "English (US)");
+    assert!(layout.dead_keys.is_empty());
+    assert_eq!(layout.keys.len(), 48);
+    assert!(!layout.keys.contains_key("IntlBackslash"));
+    assert!(layout.keys.values().all(|key| key.altgr.is_none()));
+    assert_eq!(
+        layout.keys["Backquote"],
+        KeyLayers {
+            normal: Some('`'),
+            shift: Some('~'),
+            altgr: None
+        }
+    );
+    assert_eq!(
+        layout.locate('@'),
+        Some(vec![press("Digit2", Layer::Shift)])
+    );
+    assert_eq!(
+        layout.locate('^'),
+        Some(vec![press("Digit6", Layer::Shift)])
+    );
+    assert_eq!(
+        layout.locate('`'),
+        Some(vec![press("Backquote", Layer::Normal)])
+    );
+    assert_eq!(
+        layout.locate('|'),
+        Some(vec![press("Backslash", Layer::Shift)])
+    );
+    assert_eq!(layout.locate('"'), Some(vec![press("Quote", Layer::Shift)]));
+    assert_eq!(layout.locate('?'), Some(vec![press("Slash", Layer::Shift)]));
+    assert_eq!(layout.locate('ñ'), None);
+    assert_eq!(layout.locate('á'), None);
+    let allowed = layout.allowed_chars();
+    for ch in (' '..='~').chain(['\n']) {
+        assert!(allowed.contains(&ch), "missing {ch:?}");
+    }
+    assert_eq!(allowed.len(), 96);
 }

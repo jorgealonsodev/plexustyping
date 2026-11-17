@@ -1,6 +1,6 @@
 # Spanish (Spain) ISO keyboard layout.
 # Keys are `KeyboardEvent.code` values; layers are `normal`, `shift` and `altgr`.
-name = "Español QWERTY"
+name = "Español (España)"
 dead_keys = ["´", "`", "^", "¨"]
 
 # Number row
