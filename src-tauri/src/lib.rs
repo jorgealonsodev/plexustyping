@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod code;
 pub mod commands;
+pub mod history;
 pub mod metronome;
 pub mod secrets;
 
@@ -12,6 +13,7 @@ use commands::{
     AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoreRequest, ScoredSession,
     StorageStatus, Weakness, lock_store,
 };
+use history::CsvExport;
 use metronome::{MetronomeStarted, MetronomeState};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
 use plexustyping_audio::MetronomeConfig;
@@ -175,6 +177,45 @@ fn recent_sessions(state: State<AppState>, limit: usize) -> Result<Vec<SessionSu
     commands::recent_sessions(&store(&state), &state.profile, limit)
 }
 
+/// `mode`: `"prose"` | `"code"` | none (all); newest first; empty in temporary mode (S6).
+#[tauri::command]
+fn session_history(
+    state: State<AppState>,
+    mode: Option<String>,
+    limit: Option<u32>,
+) -> Result<Vec<SessionSummary>, String> {
+    let persistent = state.status.persistent;
+    let store = store(&state);
+    history::session_history(&store, &state.profile, persistent, mode.as_deref(), limit)
+}
+
+/// Writes the sessions of `mode` to the Downloads directory (S7);
+/// `tz_offset_min` is minutes east of UTC (`-new Date().getTimezoneOffset()`).
+#[tauri::command]
+fn export_sessions_csv(
+    app: tauri::AppHandle,
+    state: State<AppState>,
+    mode: Option<String>,
+    tz_offset_min: i32,
+) -> Result<CsvExport, String> {
+    let persistent = state.status.persistent;
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0);
+    let downloads = || app.path().download_dir().map_err(|e| e.to_string());
+    let store = store(&state);
+    history::export_sessions_csv(
+        &store,
+        &state.profile,
+        persistent,
+        mode.as_deref(),
+        tz_offset_min,
+        now_ms,
+        downloads,
+    )
+}
+
 #[tauri::command]
 fn storage_status(state: State<AppState>) -> StorageStatus {
     state.status.clone()
@@ -272,6 +313,8 @@ pub fn run() {
             weaknesses,
             heatmap,
             recent_sessions,
+            session_history,
+            export_sessions_csv,
             storage_status,
             get_layout,
             key_sequences,

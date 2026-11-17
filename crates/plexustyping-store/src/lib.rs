@@ -461,13 +461,26 @@ impl Store {
 
     /// Up to `limit` sessions of `profile_id`, newest first.
     pub fn recent_sessions(&self, profile_id: i64, limit: usize) -> Result<Vec<SessionSummary>> {
+        self.sessions(profile_id, None, Some(limit))
+    }
+
+    /// Sessions of `profile_id`, newest first: only those of `mode`
+    /// (e.g. `"prose"`, `"code"`) when given, and at most `limit` when given.
+    pub fn sessions(
+        &self,
+        profile_id: i64,
+        mode: Option<&str>,
+        limit: Option<usize>,
+    ) -> Result<Vec<SessionSummary>> {
+        // A negative SQLite LIMIT means no limit.
+        let limit = limit.map(to_i64).transpose()?.unwrap_or(-1);
         let mut stmt = self.conn.prepare(
             "SELECT id, started_at_ms, mode, language, layout, duration_ms,
                  gross_wpm, net_wpm, accuracy, keystrokes, bpm, code_language
-             FROM sessions WHERE profile_id = ?1
-             ORDER BY started_at_ms DESC, id DESC LIMIT ?2",
+             FROM sessions WHERE profile_id = ?1 AND (?2 IS NULL OR mode = ?2)
+             ORDER BY started_at_ms DESC, id DESC LIMIT ?3",
         )?;
-        let rows = stmt.query_map(params![profile_id, to_i64(limit)?], |r| {
+        let rows = stmt.query_map(params![profile_id, mode, limit], |r| {
             Ok((
                 SessionSummary {
                     id: r.get(0)?,

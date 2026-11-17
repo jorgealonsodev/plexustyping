@@ -276,6 +276,44 @@ fn recent_sessions_newest_first_limited_and_filtered_by_profile() {
 }
 
 #[test]
+fn sessions_filter_by_mode_and_limit_newest_first() {
+    let mut store = Store::open_in_memory().unwrap();
+    let pid = store.default_profile().unwrap().id;
+    let records = [rec(0, 'a', 'a', None)];
+    let code_session = |started| NewSession {
+        mode: "code",
+        code_language: Some("rust"),
+        ..session(pid, started, &records)
+    };
+    let p1 = store.save_session(&session(pid, 100, &records)).unwrap();
+    let c1 = store.save_session(&code_session(150)).unwrap();
+    let p3 = store.save_session(&session(pid, 300, &records)).unwrap();
+    let p2 = store.save_session(&session(pid, 200, &records)).unwrap();
+    let c2 = store.save_session(&code_session(250)).unwrap();
+    let ids = |mode: Option<&str>, limit: Option<usize>| -> Vec<i64> {
+        let rows = store.sessions(pid, mode, limit).unwrap();
+        rows.iter().map(|s| s.id).collect()
+    };
+
+    assert_eq!(ids(None, None), vec![p3, c2, p2, c1, p1]);
+    assert_eq!(ids(Some("prose"), None), vec![p3, p2, p1]);
+    assert_eq!(ids(Some("code"), None), vec![c2, c1]);
+    assert_eq!(ids(None, Some(2)), vec![p3, c2]);
+    assert_eq!(ids(Some("prose"), Some(2)), vec![p3, p2]);
+    assert_eq!(ids(Some("code"), Some(0)), Vec::<i64>::new());
+    let code = store.sessions(pid, Some("code"), Some(1)).unwrap();
+    assert_eq!(
+        (code[0].mode.as_str(), code[0].code_language.as_deref()),
+        ("code", Some("rust"))
+    );
+    assert_eq!(
+        store.sessions(pid, None, Some(5)).unwrap(),
+        store.recent_sessions(pid, 5).unwrap()
+    );
+    assert!(store.sessions(pid + 1, None, None).unwrap().is_empty());
+}
+
+#[test]
 fn stats_replace_semantics_and_per_mode_isolation() {
     let mut store = Store::open_in_memory().unwrap();
     let pid = store.default_profile().unwrap().id;
