@@ -21,10 +21,11 @@ Branch `feat/phase-3-vscode-themes`. Delivery: one work unit, frontend only. Run
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S7 | `themes/custom.ts` (JSONC, mapping, storage) + registry in `themes.ts` + store + Apariencia UI + README, with vitest | inline (one unit; no writer reason) | in progress | — |
+| T1 | S1–S7 | `themes/custom.ts` (JSONC, mapping, storage) + registry in `themes.ts` + store + Apariencia UI + README, with vitest | inline (one unit; no writer reason) | done | b90a6e6 |
 
 ## Log
 
 - **L1 (user, verbatim):** "continua con lo que consideres mas optimo" (after the adaptive metronome). Remaining on the Trello card "Fase 3 · Completo": "todos los layouts e idiomas, todos los temas, importar temas VS Code, … perfiles". The agent chose the VS Code import: self-contained, no external data. "Todos los temas" is taken as covered by the 57 built-in schemes (phase 0).
 - **L2 (exploration):** themes are `ThemeEntry { id, name, dark, palette }` with a terminal-style `Palette` (`src/features/themes/themes.ts`); `typingColors` derives every CSS variable, syntax colours included, from the ANSI palette (`colors.ts`); the theme id is stored in `plexustyping.theme` and validated by `isThemeId`; `main.ts` applies the theme before mount; no dialog/fs plugin and capabilities are `core:default`.
 - **L3 (decision):** ANSI colours come only from `terminal.ansi*` because the app colours code from the ANSI palette; deriving them from `tokenColors` scopes is left out.
+- **L4 (evidence):** T1 `b90a6e6`. RED: `custom.test.ts` failed to load (no `./custom`); GREEN: 187 vitest (8 new), `pnpm check` 0 errors, `pnpm build` ok. Existing `themes.test.ts` and `storage.test.ts` pass unchanged. Native assess of `main..b90a6e6`: risk medium, `review_due` false (`under_budget`); no review started. Not checked: the real app (WebKitGTK file chooser from the hidden `<input type="file">`, the "Importados" group, removal) — the section has no component test.
