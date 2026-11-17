@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { beatAt, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, toConfig } from "./beat";
+import { adaptTempo, beatAt, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
 
 describe("beatOffsetMs", () => {
   it("is the time from the nearest beat, negative when early", () => {
@@ -42,7 +42,7 @@ describe("rhythmSummary", () => {
 
 describe("toConfig", () => {
   it("maps the settings to the backend config, volume as a 0–1 gain", () => {
-    expect(toConfig({ enabled: true, bpm: 90, sound: "wood", volume: 40, accentEvery: 3 })).toEqual({
+    expect(toConfig({ enabled: true, bpm: 90, sound: "wood", volume: 40, accentEvery: 3, adaptive: true })).toEqual({
       bpm: 90,
       sound: "wood",
       volume: 0.4,
@@ -68,5 +68,47 @@ describe("isMetronomeShortcut", () => {
     expect(isMetronomeShortcut(key("F4", { altKey: true }))).toBe(false);
     expect(isMetronomeShortcut(key("F4", { ctrlKey: true }))).toBe(false);
     expect(isMetronomeShortcut(key("F2"))).toBe(false);
+  });
+});
+
+describe("adaptTempo", () => {
+  // 60 BPM: interval 1000 ms, so 15 % = 150 ms and 20 % = 200 ms.
+  const at = (ms: number) => [ms, -ms, ms, -ms];
+
+  it("raises the tempo by 5 % (at least 2 BPM) when accurate and on the beat", () => {
+    expect(adaptTempo(60, 0.97, at(150))).toBe(63);
+    expect(adaptTempo(200, 1, at(10))).toBe(210);
+    expect(adaptTempo(30, 1, at(10))).toBe(32);
+  });
+
+  it("lowers the tempo when accuracy is under 90 % or the rhythm is lost", () => {
+    expect(adaptTempo(60, 0.899, at(10))).toBe(57);
+    expect(adaptTempo(60, 1, at(201))).toBe(57);
+    expect(adaptTempo(200, 0.5, at(10))).toBe(190);
+  });
+
+  it("keeps the tempo between the two rules", () => {
+    expect(adaptTempo(60, 0.969, at(10))).toBe(60);
+    expect(adaptTempo(60, 0.9, at(200))).toBe(60);
+    expect(adaptTempo(60, 1, at(151))).toBe(60);
+  });
+
+  it("stays within 30–300 BPM", () => {
+    expect(adaptTempo(299, 1, at(1))).toBe(300);
+    expect(adaptTempo(300, 1, at(1))).toBe(300);
+    expect(adaptTempo(31, 0, at(1))).toBe(30);
+    expect(adaptTempo(30, 0, at(1))).toBe(30);
+  });
+
+  it("does not change without measured offsets", () => {
+    expect(adaptTempo(60, 1, [])).toBe(60);
+    expect(adaptTempo(60, 0, [null, null])).toBe(60);
+  });
+});
+
+describe("tempoNotice", () => {
+  it("tells the change, or that the tempo stays", () => {
+    expect(tempoNotice({ from: 60, to: 63 })).toBe("Tempo: 60 → 63 BPM");
+    expect(tempoNotice({ from: 60, to: 60 })).toBe("Tempo: se mantiene en 60 BPM");
   });
 });

@@ -99,7 +99,7 @@ Kotlin or Swift. Switching loads a new text at once.
 
 ### Metronome
 
-In "Ajustes → Metrónomo" (or with `F4` from anywhere), turn on the fixed
+In "Ajustes → Metrónomo" (or with `F4` from anywhere), turn on the
 metronome: 30–300 BPM (default 60; one click = one expected keystroke), sound
 "Clic", "Madera" or "Bip", volume 0–100 % and an accent every N beats (0 = no
 accent, up to 16). Changes apply live. It plays from Rust (`cpal`, the default
@@ -107,6 +107,14 @@ output device) only while a text is ready or being typed, and stops on the
 results screen and when the window is hidden. A dot next to the live stats
 flashes on each beat (accented beats in another colour).
 
+- **Adaptive tempo:** with "Tempo adaptativo" on (off by default), each
+  finished text that was typed entirely at one tempo retunes the "Tempo"
+  setting for the next one: up one step when accuracy is at least 97 % and the
+  mean absolute offset is at most 15 % of the beat interval, down one step when
+  accuracy is under 90 % or the mean offset is over 20 % of the interval,
+  unchanged otherwise. A step is 5 % of the tempo (at least 2 BPM), within
+  30–300 BPM. Results show "Tempo: 60 → 63 BPM" or "Tempo: se mantiene en
+  60 BPM". Changing the tempo by hand sets the new starting point.
 - **Offset metric:** each typed character records how many ms before
   (negative, "adelantada") or after (positive, "atrasada") the nearest click
   it fell. Results show "Ritmo: desvío medio ±X ms" (mean absolute offset) and

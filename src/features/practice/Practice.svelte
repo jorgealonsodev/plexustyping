@@ -35,7 +35,14 @@
   import { type Phase, indentChangeRestarts, shouldApply } from "./replies";
   import Results from "./Results.svelte";
   import { metronomeApi } from "../metronome/api";
-  import { type BeatAnchor, type MetronomeSettings, beatOffsetMs, toConfig } from "../metronome/beat";
+  import {
+    type BeatAnchor,
+    type MetronomeSettings,
+    type TempoChange,
+    adaptTempo,
+    beatOffsetMs,
+    toConfig,
+  } from "../metronome/beat";
   import BeatDot from "../metronome/BeatDot.svelte";
   import { MetronomeController } from "../metronome/controller";
 
@@ -49,6 +56,7 @@
     textLength,
     aiRevision,
     metronome,
+    onTempo,
     practice,
     indent,
     codeLines,
@@ -63,6 +71,8 @@
     /** Changes when AI settings or keys change. */
     aiRevision: number;
     metronome: MetronomeSettings;
+    /** The adaptive metronome chose a new tempo for the next text. */
+    onTempo: (bpm: number) => void;
     /** Prose or code of a language (S1); a change loads a new text. */
     practice: PracticeMode;
     /** Code indentation (S4); a change restarts a code text. */
@@ -109,6 +119,8 @@
   let tick = $state(0);
   let now = $state(0);
   let scored = $state.raw<ScoredSession | null>(null);
+  /** What the adaptive metronome decided after the scored text; `null` when it did not apply. */
+  let tempo = $state.raw<TempoChange | null>(null);
   let message = $state("");
   let retry: () => void = loadFirst;
   // Invalidates in-flight IPC results when the user restarts or moves on.
@@ -227,6 +239,11 @@
       const result = await scoreSession(text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
+      tempo = null;
+      if (metronome.adaptive && bpm !== null && result.offsetsMs.some((o) => o !== null)) {
+        tempo = { from: bpm, to: adaptTempo(bpm, result.result.stats.accuracy, result.offsetsMs) };
+        if (tempo.to !== bpm) onTempo(tempo.to);
+      }
       weak = [];
       phase = "results";
       refreshModel(id);
@@ -454,7 +471,7 @@
         <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
       </div>
     {:else if phase === "results" && scored}
-      <Results {scored} {weak} language={textMode === "prose" ? null : LANGUAGES.name(textMode.lang)} onNext={loadNext} onRepeat={restart} />
+      <Results {scored} {weak} {tempo} language={textMode === "prose" ? null : LANGUAGES.name(textMode.lang)} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
       <p class="kind">
         {#if textMode !== "prose"}{LANGUAGES.name(textMode.lang)} ·{/if}

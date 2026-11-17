@@ -76,13 +76,14 @@ export const saveTextLength = (length: number, storage: Storage = localStorage) 
 
 const METRONOME_KEY = "plexustyping.metronome";
 
-/** Off, 60 BPM (S7: one beat = one expected keystroke), click, 80 %, accent every 4. */
+/** Off, 60 BPM (S7: one beat = one expected keystroke), click, 80 %, accent every 4, fixed tempo. */
 export const DEFAULT_METRONOME: MetronomeSettings = {
   enabled: false,
   bpm: 60,
   sound: SOUNDS[0].id,
   volume: 80,
   accentEvery: 4,
+  adaptive: false,
 };
 
 const intIn = (value: unknown, min: number, max: number) =>
@@ -110,6 +111,7 @@ export function checkMetronome(
     sound: SOUNDS.find((s) => s.id === stored.sound)?.id ?? d.sound,
     volume: intIn(stored.volume, 0, 100) ? (stored.volume as number) : d.volume,
     accentEvery: intIn(stored.accentEvery, 0, MAX_ACCENT_EVERY) ? (stored.accentEvery as number) : d.accentEvery,
+    adaptive: typeof stored.adaptive === "boolean" ? stored.adaptive : d.adaptive,
   };
 }
 

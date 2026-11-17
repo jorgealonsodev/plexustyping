@@ -83,6 +83,7 @@
   textLength={settings.textLength}
   aiRevision={settings.aiRevision}
   metronome={settings.metronome}
+  onTempo={(bpm) => settings.setMetronome({ bpm })}
   {practice}
   indent={settings.codeIndent}
   codeLines={settings.codeLines}

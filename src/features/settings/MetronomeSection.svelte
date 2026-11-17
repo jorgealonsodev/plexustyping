@@ -45,6 +45,22 @@
   {/snippet}
 </SettingField>
 
+<SettingField
+  toggle
+  label="Tempo adaptativo"
+  hint="Tras cada texto sube el tempo si aciertas y sigues el ritmo, y lo baja si fallas o lo pierdes."
+>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={m.adaptive}
+      onchange={(e: Change<HTMLInputElement>) => settings.setMetronome({ adaptive: e.currentTarget.checked })}
+    />
+  {/snippet}
+</SettingField>
+
 <SettingField label="Sonido" hint="Sonido de cada pulsación.">
   {#snippet children({ id, hintId })}
     <select

@@ -3,12 +3,13 @@
   import type { ScoredSession, Weakness } from "./api";
   import { focusTyping } from "./focus";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
-  import { rhythmSummary } from "../metronome/beat";
+  import { type TempoChange, rhythmSummary, tempoNotice } from "../metronome/beat";
 
   let {
     scored,
     weak,
     language = null,
+    tempo = null,
     onNext,
     onRepeat,
   }: {
@@ -16,6 +17,8 @@
     weak: Weakness[];
     /** Name of the code language; `null` for prose. */
     language?: string | null;
+    /** What the adaptive metronome decided after this text; `null` when it did not apply. */
+    tempo?: TempoChange | null;
     onNext: () => void;
     onRepeat: () => void;
   } = $props();
@@ -43,6 +46,7 @@
       <span class="note">· adelantadas {Math.round(rhythm.earlyPct)}% / atrasadas {Math.round(rhythm.latePct)}%</span>
     </p>
   {/if}
+  {#if tempo}<p class="rhythm">{tempoNotice(tempo)}</p>{/if}
   {#if scored.failedChars.length > 0}
     <p class="failed">
       Caracteres fallados:

@@ -20,6 +20,8 @@ export interface MetronomeSettings {
   sound: Sound;
   volume: number;
   accentEvery: number;
+  /** Retune the tempo after each text from its accuracy and rhythm. */
+  adaptive: boolean;
 }
 
 export const toConfig = (s: MetronomeSettings): MetronomeConfig => ({
@@ -73,6 +75,43 @@ export function rhythmSummary(offsets: (number | null)[]): RhythmSummary | null 
     latePct: share(measured.filter((o) => o > 0).length),
   };
 }
+
+/** Adaptive tempo: raise at or above this accuracy when on the beat, lower below `LOWER_ACCURACY`. */
+const RAISE_ACCURACY = 0.97;
+const LOWER_ACCURACY = 0.9;
+/**
+ * Mean absolute offset as a share of the beat interval: on the beat up to `ON_BEAT`, lost above
+ * `OFF_BEAT`. Typing unrelated to the beat averages 0.25; the gap between both keeps the tempo
+ * from oscillating.
+ */
+const ON_BEAT = 0.15;
+const OFF_BEAT = 0.2;
+const TEMPO_STEP = 0.05;
+const MIN_TEMPO_STEP = 2;
+
+/**
+ * The tempo for the next text after one typed entirely at `bpm` with `accuracy` (0–1) and
+ * `offsets`: a step up when accurate and on the beat, a step down when inaccurate or off the
+ * beat, else the same. Unchanged without measured offsets.
+ */
+export function adaptTempo(bpm: number, accuracy: number, offsets: (number | null)[]): number {
+  const rhythm = rhythmSummary(offsets);
+  if (!rhythm) return bpm;
+  const drift = rhythm.meanAbsMs / (60_000 / bpm);
+  const step = Math.max(Math.round(bpm * TEMPO_STEP), MIN_TEMPO_STEP);
+  if (accuracy < LOWER_ACCURACY || drift > OFF_BEAT) return Math.max(bpm - step, MIN_BPM);
+  if (accuracy >= RAISE_ACCURACY && drift <= ON_BEAT) return Math.min(bpm + step, MAX_BPM);
+  return bpm;
+}
+
+/** The tempo a finished text was typed at and the one the adaptive metronome set for the next. */
+export interface TempoChange {
+  from: number;
+  to: number;
+}
+
+export const tempoNotice = ({ from, to }: TempoChange) =>
+  from === to ? `Tempo: se mantiene en ${from} BPM` : `Tempo: ${from} → ${to} BPM`;
 
 type ShortcutKey = Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey" | "shiftKey" | "repeat">;
 
