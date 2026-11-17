@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" role="img" aria-labelledby="plexustyping-wordmark-title">
-  <title id="plexustyping-wordmark-title">PlexusTyping — Del cerebro a los dedos.</title>
+  <title id="plexustyping-wordmark-title">PlexusTyping — Mecanografía adaptativa</title>
   <defs>
     <linearGradient id="wm-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b4cdff"/><stop offset="1" stop-color="#7aa2f7"/></linearGradient>
     <linearGradient id="wm-side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f6fa8"/><stop offset="1" stop-color="#2a3b66"/></linearGradient>
@@ -16,5 +16,5 @@
   </g>
   <!-- name and tagline -->
   <text x="182" y="88" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="64" font-weight="800" letter-spacing="-1.5"><tspan fill="#7aa2f7">Plexus</tspan><tspan fill="#8a8fa8">Typing</tspan></text>
-  <text x="185" y="124" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="21" font-style="italic" fill="#8a8fa8">Del cerebro a los dedos.</text>
+  <text x="185" y="124" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="21" font-style="italic" fill="#8a8fa8">Mecanografía adaptativa</text>
 </svg>

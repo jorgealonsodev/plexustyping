@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="assets/logo-wordmark.svg" alt="PlexusTyping — Del cerebro a los dedos." width="420">
+  <img src="assets/logo-wordmark.svg" alt="PlexusTyping — Mecanografía adaptativa" width="420">
 </p>
 
 # PlexusTyping
 
-*Del cerebro a los dedos.* An adaptive typing tutor built with Rust and Tauri 2.
+An adaptive typing tutor built with Rust and Tauri 2.
 
 Status: phase 2 in progress (code mode). See `PRD-PlexusTyping.v0.1.md` for the product plan.
 
