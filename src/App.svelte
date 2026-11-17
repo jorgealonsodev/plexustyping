@@ -4,6 +4,8 @@
   import Practice from "./features/practice/Practice.svelte";
   import { practiceMode } from "./features/code/api";
   import ModeSwitch from "./features/code/ModeSwitch.svelte";
+  import HistoryModal from "./features/history/HistoryModal.svelte";
+  import { isHistoryShortcut } from "./features/history/history";
   import { isMetronomeShortcut } from "./features/metronome/beat";
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
@@ -12,6 +14,7 @@
   const settings = new SettingsStore();
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
   let modal: SettingsModal | undefined = $state();
+  let history: HistoryModal | undefined = $state();
   // Why sessions are not kept on disk; `null` while persistent or unknown.
   let storageError = $state<string | null>(null);
 
@@ -22,11 +25,16 @@
   });
 
   // F2 shows or hides the keyboard from anywhere (S11), F4 turns the metronome on or off (S7) and
-  // Ctrl+, opens the settings (S8); none reaches the practice text.
+  // Ctrl+, opens the settings (S8) and Ctrl+H the history; none reaches the practice text.
   function onKeydown(e: KeyboardEvent) {
     if (isSettingsShortcut(e)) {
       e.preventDefault();
       modal?.open();
+      return;
+    }
+    if (isHistoryShortcut(e)) {
+      e.preventDefault();
+      history?.open();
       return;
     }
     if (isMetronomeShortcut(e)) {
@@ -51,6 +59,12 @@
     {/if}
   </div>
   <ModeSwitch {settings} />
+  <button type="button" class="gear" aria-label="Historial" title="Historial" onclick={() => history?.open()}>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="8.5" stroke-width="2" />
+      <path d="M12 7v5l3.5 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
   <button type="button" class="gear" aria-label="Ajustes" title="Ajustes" onclick={() => modal?.open()}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.4" stroke-width="3" stroke-dasharray="3.3 3.3" />
@@ -75,6 +89,7 @@
 />
 
 <SettingsModal bind:this={modal} {settings} />
+<HistoryModal bind:this={history} />
 
 <style>
   header {

@@ -117,6 +117,35 @@ flashes on each beat (accented beats in another colour).
   device's own output latency (a few ms) is not included: the click is heard
   that much later, so keys in time with it read a few ms late.
 
+### History and CSV export
+
+The clock button in the header (next to the gear), or `Ctrl+H`, opens the
+"Historial" window. A filter "Todo / Prosa / Código" picks the sessions shown;
+everything below follows it:
+
+- **Summary:** number of sessions, mean and best net WPM, and mean accuracy.
+- **Chart:** net WPM and accuracy of the last 50 sessions, oldest on the left,
+  drawn in plain SVG.
+- **Table:** every session, newest first: date, mode and language, net WPM,
+  accuracy, time and BPM (empty without a metronome). It scrolls inside the
+  window.
+- **"Exportar CSV"** writes all sessions of the active filter straight to your
+  Downloads directory as `plexustyping-sesiones-AAAAMMDD.csv` (local date; an
+  existing file is never overwritten, `-2`, `-3`… is appended instead) and
+  shows "Exportado: <ruta> (N sesiones)". The file is standard CSV: UTF-8
+  without BOM, `,` separator, `.` decimal point, RFC 4180 quoting, `\n` line
+  ends, newest first, with the header
+  `fecha,modo,lenguaje_codigo,idioma,layout,duracion_s,ppm_brutas,ppm_netas,precision,pulsaciones,bpm`.
+  `fecha` is local ISO 8601 time with offset (`2026-11-17T09:30:05+01:00`),
+  `modo` is `prose` or `code`, durations, WPM and `precision` (0–100) have one
+  decimal, and `lenguaje_codigo` (prose) and `bpm` (no metronome) may be empty.
+  With no sessions nothing is written and "No hay sesiones que exportar." is
+  shown.
+
+Without saved sessions (or in temporary mode) the window shows "Aún no hay
+sesiones guardadas.". `Escape`, `×` or a click outside closes it and returns
+to the text.
+
 ### Where data lives
 
 Sessions, keystrokes and statistics are stored only on this machine, in
