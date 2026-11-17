@@ -55,13 +55,16 @@ in order, each with its model (picked from the provider's list, or typed by
 hand), its API key ("Guardar clave" / "Borrar clave") and "Probar conexión".
 "Densidad" (2×–5×, default 3×) sets how much more often the targets appear and
 "Tema" an optional topic. Each target must appear at least
-`max(1, ceil(density × natural frequency × length))` times, where the natural
+`max(1, ceil(min(density × natural frequency, natural frequency + 5 %) × length))`
+times, where the natural
 frequency is how often it occurs per character in the bundled sentences of the
 language (or the bundled snippets in code mode), case-insensitively; the prompt
 states that count for the longest allowed length. When sensible sentences
 cannot reach the counts, the prompt lets the model finish with a run of real
-words that contain the targets. A rejected text logs its validation issues to
-stderr (never the key). The usage table counts calls and tokens per provider,
+words that contain the targets. If a provider's text is rejected (too few
+targets or otherwise invalid), its retry asks for any text in the language,
+without targets; such a text practises no particular unit. A rejected text
+logs its validation issues to stderr (never the key). The usage table counts calls and tokens per provider,
 today and in total, so you can watch your spending.
 
 - **Keys** are stored only in the system keychain (Keychain on macOS,

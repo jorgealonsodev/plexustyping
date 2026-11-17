@@ -588,13 +588,19 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
         match state.ai.generate_with_fallback(&chain, &request).await {
             Ok(generated) => {
                 let provider = slug(generated.provider);
+                // A text from the retry without targets practises none of them.
+                let targets: &[String] = if generated.free_text {
+                    &[]
+                } else {
+                    plan.targets()
+                };
                 let store = lock_store(&state.store);
                 let cached = store.cache_text(&NewCachedText {
                     provider,
                     model: &generated.model,
                     language: &p.language,
                     mode: &cache_mode,
-                    targets: plan.targets(),
+                    targets,
                     text: &generated.text,
                     created_at_ms: now_ms(),
                     used: true,
@@ -617,7 +623,7 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
                     source: TextSource::Ai,
                     provider: Some(provider.to_owned()),
                     model: Some(generated.model),
-                    ..NextText::corpus(generated.text, plan.targets().to_vec())
+                    ..NextText::corpus(generated.text, targets.to_vec())
                 }));
             }
             Err(errors) => {

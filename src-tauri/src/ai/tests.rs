@@ -709,6 +709,36 @@ async fn an_invalid_ai_text_is_retried_once_then_the_corpus_is_used() {
 }
 
 #[tokio::test]
+async fn a_text_without_the_targets_is_retried_as_any_text_and_practises_none() {
+    // "si no hay letras suficientes o no hay una respuesta valida pide un texto cualquiera"
+    const NO_N: &str = "La casa del lago tiene una puerta roja y dos ventanas.";
+    let srv = server(vec![
+        (OPENAI, 200, chat_reply(NO_N)),
+        (OPENAI, 200, chat_reply(NO_N)),
+    ])
+    .await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let got = next_text(&state, &params(4)).await.unwrap();
+    let requests = srv.requests();
+    assert_eq!(requests.len(), 2);
+    let prompt = |i: usize| {
+        let sent: serde_json::Value = serde_json::from_str(&requests[i].body).unwrap();
+        sent["messages"][0]["content"].as_str().unwrap().to_owned()
+    };
+    assert!(prompt(0).contains("Caracteres objetivo"), "{}", prompt(0));
+    assert!(!prompt(1).contains("Caracteres objetivo"), "{}", prompt(1));
+    assert_eq!(
+        (got.source, got.text.as_str(), got.targets.len()),
+        (TextSource::Ai, NO_N, 0)
+    );
+    assert_eq!(got.notice, None);
+}
+
+#[tokio::test]
 async fn a_missing_key_or_model_or_keychain_falls_back_with_a_notice() {
     let srv = server(vec![]).await;
     let cases: [(SharedSecrets, (ProviderId, &str), &str); 3] = [

@@ -145,6 +145,10 @@ pub struct Generated {
     pub usage: Usage,
     /// Attempts of the fallback chain that failed before this one, in order
     /// (empty for a single [`AiClient::generate`]).
+    /// The text answers the retry without targets (any text in the language,
+    /// length and characters asked), so it practises no particular unit.
+    #[serde(skip)]
+    pub free_text: bool,
     #[serde(skip)]
     pub failed_attempts: Vec<(ProviderId, ProviderError)>,
 }

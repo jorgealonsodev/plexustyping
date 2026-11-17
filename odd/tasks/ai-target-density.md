@@ -10,13 +10,14 @@ Branch `fix/ai-target-density`. Runners: `cargo test --workspace`, `pnpm test`, 
 - **S3 — Visible reason.** When a generated text is rejected, the concrete validation issues (length, characters not allowed, Markdown, low density per target with found/needed) are written to stderr, without any part of the API key or the prompt secrets. The user-facing notice stays "La IA no devolvió un texto válido".
 - **S5 — Simpler prompt with a word-run fallback.** The prose prompt is shorter and easier to satisfy (a few plain Spanish instructions). It allows: natural sentences first and, when the targets cannot be reached with sentences that make sense, the rest may be a run of real words of the language containing the targets, separated by spaces (like the corpus pseudo-sentences). Such a text passes validation.
 - **S6 — Fewer targets.** Each text practises the 2 or 3 worst units (setting "Objetivos por texto": 2 or 3, default 2; earlier stored 4 or 5 load as 2; backend clamps to 2..=3).
+- **S7 — Any text on retry.** When a provider's first text is rejected or malformed, its retry asks for any text: same language, length and allowed characters, no targets. A text accepted that way is shown and cached with no targets (no "Practicando").
 - **S4 — Code mode** keeps working (code targets use the code corpus or, if none applies, a minimum of 1 per target); no regression in existing AI tests.
 
 ## Tasks
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S6 | Natural-frequency requirement shared by prompt and validator, stderr reason, tests | worker (context backstop) | pending | |
+| T1 | S1–S7 | Natural-frequency requirement shared by prompt and validator, stderr reason, tests | worker (context backstop) | pending | |
 
 ## Log
 
@@ -27,3 +28,5 @@ Branch `fix/ai-target-density`. Runners: `cargo test --workspace`, `pnpm test`, 
 - **L5 (worker evidence + parent fix, 2026-11-17):** requirement = `max(1, ceil(min(density × frequency, frequency + 0.05) × len))`, frequency from the language's corpus sentences; without the 5-point cap a frequent letter like `a` would need 123 of 340 chars. Log example now needs ntr 2, ú 1, ti 3. Prompt rewritten (7 short lines, per-target counts, word-run fallback). Rejections logged to stderr. `cargo test --workspace` 330 passed, vitest 201 passed, `pnpm check` 0, `cargo fmt` applied.
 - **L6 (user, verbatim, 2026-11-17):** "para el tema de generera texto, con que coja las 2 o 3 letras que mas se fallan llega" → S6.
 - **L7 (native review, 2026-11-17):** lineage `review-288fec47f6804dcb` over `37adfe3` approved (reliability + resilience), four advisory findings. Fixed: rejected attempts are now also logged when a later provider succeeds (`Generated.failed_attempts`, test in `tests/fallback.rs`). Kept by design: a frequent-letter target (e.g. `a`) needs its natural share + 5 points (58 of 340 chars instead of the old 21); the prompt's word-run fallback makes that reachable.
+- **L8 (verify, 2026-11-17):** independent verification of `8677a33`: S1–S6 met; cargo 330, vitest 201, check 0; probes of the formula grid, the Log example, prompt = validator counts, word run and serde default all passed.
+- **L9 (user, verbatim, 2026-11-17):** "si no hay letras suficientes o no hay una respuesta valida pide un texto cualquiera" → S7: the retry drops the targets (`Generated.free_text`); tests in `tests/fallback.rs` and `ai/tests.rs`.

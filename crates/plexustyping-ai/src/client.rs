@@ -99,6 +99,7 @@ impl AiClient {
             provider: cfg.id,
             model: cfg.model.trim().to_string(),
             usage,
+            free_text: false,
             failed_attempts: Vec::new(),
         })
     }
@@ -152,19 +153,27 @@ impl AiClient {
     ) -> Result<Generated, Vec<(ProviderId, ProviderError)>> {
         let end = Instant::now() + self.deadline;
         let mut errors = Vec::new();
+        // The retry after a rejected or malformed text asks for any text: no targets.
+        let free = GenerationRequest {
+            targets: Vec::new(),
+            frequencies: Vec::new(),
+            ..req.clone()
+        };
         for cfg in chain {
             for attempt in 0..2 {
+                let asked = if attempt == 0 { req } else { &free };
                 let left = end.saturating_duration_since(Instant::now());
                 let result = if left.is_zero() {
                     Err(ProviderError::Timeout)
                 } else {
-                    tokio::time::timeout(left, self.generate(cfg, req))
+                    tokio::time::timeout(left, self.generate(cfg, asked))
                         .await
                         .unwrap_or(Err(ProviderError::Timeout))
                 };
                 match result {
                     Ok(generated) => {
                         return Ok(Generated {
+                            free_text: attempt == 1 && !req.targets.is_empty(),
                             failed_attempts: errors,
                             ..generated
                         });

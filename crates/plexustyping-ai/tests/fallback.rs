@@ -57,11 +57,56 @@ async fn first_valid_provider_wins() {
     assert!(got.failed_attempts.is_empty());
 }
 
+/// Fails validation even without targets: Markdown.
+fn invalid_anyway() -> Reply {
+    chat_reply(&text_json("**sin la letra**"))
+}
+
+#[tokio::test]
+async fn a_rejected_text_is_retried_once_without_targets() {
+    // "si no hay letras suficientes o no hay una respuesta valida pide un texto cualquiera"
+    let server = mock(vec![
+        (OPENAI, invalid()),
+        (OPENAI, invalid()),
+        (GEMINI, gemini_reply("Zorro veloz")),
+    ])
+    .await;
+
+    let got = server
+        .client()
+        .generate_with_fallback(&chain(), &small_request())
+        .await
+        .unwrap();
+
+    // The second answer lacks the target too, but the retry asked for any text.
+    assert_eq!(
+        (got.provider, got.text.as_str()),
+        (ProviderId::Openai, "sin la letra")
+    );
+    assert!(got.free_text, "the retry drops the targets");
+    assert_eq!(
+        got.failed_attempts,
+        vec![(ProviderId::Openai, low_density())]
+    );
+    assert_eq!(server.hits(GEMINI), 0);
+}
+
+#[tokio::test]
+async fn a_first_answer_that_passes_keeps_its_targets() {
+    let server = mock(vec![(OPENAI, chat_reply(&text_json("Zapatos azules")))]).await;
+    let got = server
+        .client()
+        .generate_with_fallback(&chain(), &small_request())
+        .await
+        .unwrap();
+    assert!(!got.free_text);
+}
+
 #[tokio::test]
 async fn invalid_text_is_retried_once_then_next_provider() {
     let server = mock(vec![
         (OPENAI, invalid()),
-        (OPENAI, invalid()),
+        (OPENAI, invalid_anyway()),
         (OPENAI, chat_reply(&text_json("Zapatos azules"))),
         (GEMINI, gemini_reply("Zorro veloz")),
     ])
@@ -77,13 +122,12 @@ async fn invalid_text_is_retried_once_then_next_provider() {
     assert_eq!(got.text, "Zorro veloz");
     assert_eq!(server.hits(OPENAI), 2, "one retry only");
     // The rejected attempts that came before are kept, so the app can log why.
-    assert_eq!(
-        got.failed_attempts,
-        vec![
-            (ProviderId::Openai, low_density()),
-            (ProviderId::Openai, low_density())
-        ]
-    );
+    assert_eq!(got.failed_attempts.len(), 2);
+    assert_eq!(got.failed_attempts[0], (ProviderId::Openai, low_density()));
+    assert!(matches!(
+        &got.failed_attempts[1],
+        (ProviderId::Openai, ProviderError::Invalid { issues }) if issues.contains(&ValidationIssue::Markdown)
+    ));
 }
 
 #[tokio::test]
@@ -128,7 +172,7 @@ async fn other_errors_move_on_without_retry() {
 async fn every_error_is_returned_in_order_when_all_fail() {
     let server = mock(vec![
         (OPENAI, invalid()),
-        (OPENAI, invalid()),
+        (OPENAI, invalid_anyway()),
         (GEMINI, Reply::status(429, "{}")),
     ])
     .await;
@@ -141,7 +185,10 @@ async fn every_error_is_returned_in_order_when_all_fail() {
 
     assert_eq!(errors.len(), 3, "{errors:?}");
     assert_eq!(errors[0], (ProviderId::Openai, low_density()));
-    assert_eq!(errors[1], (ProviderId::Openai, low_density()));
+    assert!(matches!(
+        &errors[1],
+        (ProviderId::Openai, ProviderError::Invalid { issues }) if issues.contains(&ValidationIssue::Markdown)
+    ));
     assert_eq!(errors[2].0, ProviderId::Gemini);
     assert!(matches!(errors[2].1, ProviderError::RateLimit { .. }));
 }
