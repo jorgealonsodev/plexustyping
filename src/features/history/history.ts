@@ -140,3 +140,21 @@ export function chartGeometry(sessions: SessionSummary[], box: ChartBox): ChartG
 /** Success notice of the CSV export (S7). */
 export const exportNotice = (r: CsvExport) =>
   `Exportado: ${r.path} (${r.rows} ${r.rows === 1 ? "sesión" : "sesiones"})`;
+
+/** Caption of the evolution chart (S4): singular for one session, as the export notice (L4). */
+export const chartCaption = (n: number) => (n === 1 ? "Última sesión" : `Últimas ${n} sesiones`);
+
+/**
+ * Lets only the newest request fill the window: `next()` starts one, `invalidate()` drops every
+ * request in flight (filter change, close and reopen), `isCurrent(id)` says whether a reply applies.
+ */
+export function requestGuard() {
+  let latest = 0;
+  return {
+    next: () => ++latest,
+    invalidate: () => {
+      latest++;
+    },
+    isCurrent: (id: number) => id === latest,
+  };
+}

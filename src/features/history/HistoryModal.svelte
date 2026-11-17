@@ -3,12 +3,14 @@
   import { focusTyping } from "../practice/focus";
   import { exportSessionsCsv, sessionHistory, type SessionSummary } from "./api";
   import {
+    chartCaption,
     chartGeometry,
     exportNotice,
     FILTERS,
     formatSummary,
     isHistoryShortcut,
     modeArg,
+    requestGuard,
     summarize,
     tableRow,
     type ChartBox,
@@ -24,8 +26,10 @@
   let loadError = $state<string | null>(null);
   let notice = $state<{ text: string; error: boolean } | null>(null);
   let exporting = $state(false);
-  // Only the newest request may fill the window (filters can change faster than replies).
-  let request = 0;
+  // Only the newest request may fill the window (filters can change faster than replies), and an
+  // export reply only applies to the filter and opening it was started from.
+  const loads = requestGuard();
+  const exports = requestGuard();
 
   const BOX: ChartBox = { width: 600, height: 180, left: 36, right: 44, top: 10, bottom: 14 };
   const summary = $derived(summarize(sessions));
@@ -36,6 +40,8 @@
     if (!dialog || dialog.open) return;
     void LANGUAGES.load();
     notice = null;
+    exports.invalidate();
+    exporting = false;
     dialog.showModal();
     void load();
   }
@@ -45,14 +51,14 @@
   }
 
   async function load() {
-    const id = ++request;
+    const id = loads.next();
     loadError = null;
     try {
       const list = await sessionHistory(modeArg(filter));
-      if (id !== request) return;
+      if (!loads.isCurrent(id)) return;
       sessions = list;
     } catch (err) {
-      if (id !== request) return;
+      if (!loads.isCurrent(id)) return;
       sessions = [];
       loadError = String(err);
     }
@@ -63,17 +69,21 @@
     if (f === filter) return;
     filter = f;
     notice = null;
+    exports.invalidate();
+    exporting = false;
     void load();
   }
 
   async function exportCsv() {
+    const id = exports.next();
     exporting = true;
     try {
-      notice = { text: exportNotice(await exportSessionsCsv(modeArg(filter))), error: false };
+      const result = await exportSessionsCsv(modeArg(filter));
+      if (exports.isCurrent(id)) notice = { text: exportNotice(result), error: false };
     } catch (err) {
-      notice = { text: String(err), error: true };
+      if (exports.isCurrent(id)) notice = { text: String(err), error: true };
     } finally {
-      exporting = false;
+      if (exports.isCurrent(id)) exporting = false;
     }
   }
 
@@ -137,7 +147,7 @@
 
         <figure class="chart">
           <figcaption>
-            Últimas {chart.wpm.length} sesiones:
+            {chartCaption(chart.wpm.length)}:
             <span class="key wpm">PPM netas</span>
             <span class="key accuracy">Precisión</span>
           </figcaption>

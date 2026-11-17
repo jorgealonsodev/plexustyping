@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import type { SessionSummary } from "./api";
 import {
   CHART_LIMIT,
+  chartCaption,
   chartGeometry,
   exportNotice,
   formatDate,
   formatSummary,
   isHistoryShortcut,
   modeArg,
+  requestGuard,
   summarize,
   tableRow,
 } from "./history";
@@ -169,5 +171,33 @@ describe("export notice", () => {
 
   it("uses the singular for one session", () => {
     expect(exportNotice({ path: "/tmp/a.csv", rows: 1 })).toBe("Exportado: /tmp/a.csv (1 sesión)");
+  });
+});
+
+describe("chart caption", () => {
+  it("uses the singular for one session and the plural for several", () => {
+    expect(chartCaption(1)).toBe("Última sesión");
+    expect(chartCaption(2)).toBe("Últimas 2 sesiones");
+    expect(chartCaption(50)).toBe("Últimas 50 sesiones");
+  });
+});
+
+describe("request guard", () => {
+  it("accepts only the newest request", () => {
+    const g = requestGuard();
+    const a = g.next();
+    expect(g.isCurrent(a)).toBe(true);
+    const b = g.next();
+    expect(g.isCurrent(a)).toBe(false);
+    expect(g.isCurrent(b)).toBe(true);
+  });
+
+  it("drops an in-flight request when invalidated (filter change, close and reopen)", () => {
+    const g = requestGuard();
+    const a = g.next();
+    g.invalidate();
+    expect(g.isCurrent(a)).toBe(false);
+    const b = g.next();
+    expect(g.isCurrent(b)).toBe(true);
   });
 });

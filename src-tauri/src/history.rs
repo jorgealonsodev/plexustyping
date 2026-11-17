@@ -1,6 +1,6 @@
 //! Session history and CSV export (phase 3, S6–S7), testable without a Tauri runtime.
 
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
@@ -148,6 +148,19 @@ pub fn sessions_csv(sessions: &[SessionSummary], tz_offset_min: i32) -> String {
 /// Writes `contents` to `dir/plexustyping-sesiones-<date>.csv`, or `-2`, `-3`…
 /// when taken; never overwrites. Returns the path written.
 pub fn write_unique(dir: &Path, date: &str, contents: &str) -> Result<PathBuf, String> {
+    write_unique_with(dir, date, contents, |file, bytes| {
+        file.write_all(bytes)?;
+        file.flush()
+    })
+}
+
+/// [`write_unique`] with the write step injected, so tests can make it fail.
+fn write_unique_with(
+    dir: &Path,
+    date: &str,
+    contents: &str,
+    write: impl Fn(&mut File, &[u8]) -> std::io::Result<()>,
+) -> Result<PathBuf, String> {
     let fail = |e: std::io::Error| format!("No se pudo exportar el CSV: {e}");
     for n in 1u32.. {
         let name = match n {
@@ -158,7 +171,12 @@ pub fn write_unique(dir: &Path, date: &str, contents: &str) -> Result<PathBuf, S
         // `create_new` fails instead of replacing a file that appeared meanwhile.
         match OpenOptions::new().write(true).create_new(true).open(&path) {
             Ok(mut file) => {
-                file.write_all(contents.as_bytes()).map_err(fail)?;
+                if let Err(e) = write(&mut file, contents.as_bytes()) {
+                    // Only this call created `path`: never leave a truncated export behind.
+                    drop(file);
+                    let _ = std::fs::remove_file(&path);
+                    return Err(fail(e));
+                }
                 return Ok(path);
             }
             Err(e) if e.kind() == ErrorKind::AlreadyExists => continue,
@@ -467,6 +485,35 @@ mod tests {
         assert_eq!(std::fs::read_to_string(&second).unwrap(), "dos\n");
         assert_eq!(std::fs::read_to_string(&third).unwrap(), "tres\n");
         assert_eq!(dir.files().len(), 3);
+    }
+
+    #[test]
+    fn write_unique_removes_the_file_it_created_when_the_write_fails() {
+        let dir = TempDir::new();
+        // A file that was already there is skipped and left untouched.
+        let taken = dir.0.join("plexustyping-sesiones-20261117.csv");
+        std::fs::write(&taken, "previo\n").unwrap();
+        let result = write_unique_with(&dir.0, "20261117", "uno\n", |file, bytes| {
+            file.write_all(&bytes[..1])?;
+            Err(std::io::Error::other("disco lleno"))
+        });
+        assert_eq!(
+            result,
+            Err("No se pudo exportar el CSV: disco lleno".to_owned())
+        );
+        assert_eq!(dir.files(), ["plexustyping-sesiones-20261117.csv"]);
+        assert_eq!(std::fs::read_to_string(&taken).unwrap(), "previo\n");
+    }
+
+    #[test]
+    fn write_unique_reports_a_missing_directory() {
+        let dir = TempDir::new();
+        let missing = dir.0.join("no-existe");
+        let result = write_unique(&missing, "20261117", "uno\n");
+        let err = result.unwrap_err();
+        assert!(err.starts_with("No se pudo exportar el CSV: "), "{err}");
+        assert!(!missing.exists());
+        assert_eq!(dir.files(), Vec::<String>::new());
     }
 
     #[test]
