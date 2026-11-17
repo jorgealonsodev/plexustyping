@@ -644,6 +644,28 @@ impl Store {
         mode: &str,
         targets: &[String],
     ) -> Result<Option<CachedText>> {
+        self.take_cached(language, mode, targets, true)
+    }
+
+    /// Like [`Store::take_cached_text`] but never a text already shown: `None`
+    /// once every cached text of `language` and `mode` was used, so the caller
+    /// can fall back to the corpus instead of repeating the same texts.
+    pub fn take_unused_cached_text(
+        &self,
+        language: &str,
+        mode: &str,
+        targets: &[String],
+    ) -> Result<Option<CachedText>> {
+        self.take_cached(language, mode, targets, false)
+    }
+
+    fn take_cached(
+        &self,
+        language: &str,
+        mode: &str,
+        targets: &[String],
+        reuse: bool,
+    ) -> Result<Option<CachedText>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, targets FROM text_cache
              WHERE language = ?1 AND mode = ?2 AND used = 0 ORDER BY id",
@@ -665,6 +687,7 @@ impl Store {
         }
         let id = match best {
             Some((id, _)) => Some(id),
+            None if !reuse => None,
             None => self
                 .conn
                 .query_row(

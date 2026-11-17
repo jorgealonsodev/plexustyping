@@ -643,7 +643,8 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     };
     let cached = {
         let store = lock_store(&state.store);
-        store.take_cached_text(&p.language, &cache_mode, plan.targets())
+        // Never a text already shown: the corpus gives a new one instead.
+        store.take_unused_cached_text(&p.language, &cache_mode, plan.targets())
     };
     match cached {
         Ok(Some(c)) => {

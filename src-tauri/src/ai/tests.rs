@@ -634,7 +634,12 @@ async fn the_chain_falls_back_to_the_next_provider_in_order() {
 
 #[tokio::test]
 async fn an_ai_failure_uses_a_cached_text_then_the_corpus() {
-    let srv = server(vec![(OPENAI, 500, "{}".into()), (OPENAI, 500, "{}".into())]).await;
+    let srv = server(vec![
+        (OPENAI, 500, "{}".into()),
+        (OPENAI, 500, "{}".into()),
+        (OPENAI, 500, "{}".into()),
+    ])
+    .await;
     let memory = MemoryStore::shared();
     with_key(&memory, ProviderId::Openai).await;
     let state = state(memory, srv.client());
@@ -667,6 +672,15 @@ async fn an_ai_failure_uses_a_cached_text_then_the_corpus() {
             tokens: None,
         }
     );
+    // That text was shown: the next failure uses the corpus instead of repeating it
+    // ("cuando sale error de ia siempre sale el mismo texto").
+    let again = next_text(&state, &params(5)).await.unwrap();
+    assert_eq!(again.source, TextSource::Corpus);
+    assert_eq!(
+        again.notice.as_deref(),
+        Some("Sin conexión con la IA: texto del corpus local")
+    );
+    assert_ne!(again.text, "zumo de zanahoria");
     // An empty cache: the corpus comes next.
     let state = self::state(state.secrets.clone(), srv.client());
     weak_in_n(&state);

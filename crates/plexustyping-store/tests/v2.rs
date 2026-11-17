@@ -196,6 +196,27 @@ fn a_newer_schema_is_still_refused() {
 }
 
 #[test]
+fn take_unused_never_repeats_a_shown_text() {
+    let store = Store::open_in_memory().unwrap();
+    let unused = |targets: &[&str]| {
+        store
+            .take_unused_cached_text("es", "prose", &strings(targets))
+            .unwrap()
+            .map(|c| c.text)
+    };
+    assert_eq!(unused(&["ñ"]), None);
+    cache(&store, "es", &["v"], "first", false);
+    cache(&store, "es", &["ñ"], "second", false);
+    cache(&store, "es", &["ñ"], "shown", true);
+    // The unused text sharing the most targets, then any unused one, then nothing.
+    assert_eq!(unused(&["ñ"]).as_deref(), Some("second"));
+    assert_eq!(unused(&["ñ"]).as_deref(), Some("first"));
+    assert_eq!(unused(&["ñ"]), None);
+    // The reusing variant still cycles through the shown texts.
+    assert!(take(&store, &["ñ"]).is_some());
+}
+
+#[test]
 fn take_returns_the_full_entry_and_marks_it_used() {
     let store = Store::open_in_memory().unwrap();
     let id = cache(&store, "es", &["ñ", "qu"], "queso añejo", false);
