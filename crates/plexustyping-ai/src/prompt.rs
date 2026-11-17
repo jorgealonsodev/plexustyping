@@ -2,15 +2,6 @@
 
 use crate::{GenerationRequest, Mode};
 
-/// Builds the Spanish prompt for `req`. Only the request's own fields go into
-/// it.
-///
-/// Prose asks only for a text in the language, its length range and topic
-/// (no targets or allowed characters; [`crate::validate`] checks no density
-/// for prose). Code also names the language, the targets with their minimum
-/// counts and the allowed characters; each count is
-/// [`GenerationRequest::min_counts`] at the longest accepted length, so a
-/// snippet that meets it always meets [`crate::validate`].
 /// Topics drawn at random when the user leaves the topic free, so models do not
 /// write the same "El amanecer en la montaña…" text again and again.
 pub const FREE_TOPICS: [&str; 24] = [
@@ -50,6 +41,16 @@ pub fn free_topic(nonce: u64) -> &'static str {
     FREE_TOPICS[(z % FREE_TOPICS.len() as u64) as usize]
 }
 
+/// Builds the Spanish prompt for `req`. Only the request's own fields go into
+/// it.
+///
+/// Prose asks only for a text in the language, its length range and topic
+/// (no targets or allowed characters; [`crate::validate`] checks no density
+/// for prose). Code also names the language, the targets with their minimum
+/// counts and the allowed characters; each count is
+/// [`GenerationRequest::min_counts`] at the longest accepted length, so a
+/// snippet that meets it always meets [`crate::validate`]. Prose also asks
+/// for a varied start (not «El» or «La»).
 pub fn build_prompt(req: &GenerationRequest) -> String {
     const ANSWER: &str = "Responde solo con JSON: {\"text\": \"...\"}";
     let language = language_name(&req.language);
