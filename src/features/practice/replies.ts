@@ -11,3 +11,9 @@ export const shouldApply = (replyRun: number, currentRun: number): boolean => re
  * A text loading, being scored or reviewed keeps that work; the new mode applies to the next one.
  */
 export const indentChangeRestarts = (phase: Phase, isCode: boolean): boolean => isCode && phase === "typing";
+
+type ShortcutKey = Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey" | "shiftKey" | "repeat">;
+
+/** A bare F5 loads a new text (instead of reloading the app window). */
+export const isNewTextShortcut = (k: ShortcutKey) =>
+  k.key === "F5" && !k.ctrlKey && !k.altKey && !k.metaKey && !k.shiftKey && !k.repeat;

@@ -61,6 +61,7 @@
     codeLines,
     layoutId,
     languageId,
+    loadingText = $bindable(null),
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -84,6 +85,8 @@
     layoutId: string;
     /** Prose language id (S1, S4); a change loads a new prose text. */
     languageId: string;
+    /** Out: the loading label ("Cargando texto…", "Generando texto…") while a text loads, else `null`. */
+    loadingText?: string | null;
   } = $props();
 
   // The metronome plays only while a text is ready or being typed and the window is visible (S7).
@@ -379,6 +382,17 @@
       .catch((err) => console.warn("get_layout failed; keyboard without labels", err));
     return () => (live = false);
   });
+
+  $effect(() => {
+    loadingText = phase === "loading" ? loadingLabel : null;
+  });
+
+  /** Drops the current text (unscored) and loads a new one; ignored while a text loads or is scored. */
+  export function newText() {
+    if (phase === "loading" || phase === "scoring") return;
+    loadNext();
+    focusTyping();
+  }
 
   // Keeps the cursor line, and the next one, in view: the text scrolls when typing reaches its hidden part.
   let proseText = $state<HTMLElement>();

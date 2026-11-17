@@ -7,6 +7,7 @@
   import HistoryModal from "./features/history/HistoryModal.svelte";
   import { isHistoryShortcut } from "./features/history/history";
   import { isMetronomeShortcut } from "./features/metronome/beat";
+  import { isNewTextShortcut } from "./features/practice/replies";
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
@@ -16,6 +17,9 @@
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
   let modal: SettingsModal | undefined = $state();
   let history: HistoryModal | undefined = $state();
+  let practiceScreen: Practice | undefined = $state();
+  /** "Cargando texto…" or "Generando texto…" while a text loads; `null` otherwise. */
+  let loadingText = $state<string | null>(null);
   // Why sessions are not kept on disk; `null` while persistent or unknown.
   let storageError = $state<string | null>(null);
 
@@ -36,6 +40,11 @@
     if (isHistoryShortcut(e)) {
       e.preventDefault();
       history?.open();
+      return;
+    }
+    if (isNewTextShortcut(e)) {
+      e.preventDefault();
+      practiceScreen?.newText();
       return;
     }
     if (isMetronomeShortcut(e)) {
@@ -94,6 +103,23 @@
     {/if}
   </div>
   <ModeSwitch {settings} />
+  <button
+    type="button"
+    class="gear"
+    class:spinning={loadingText !== null}
+    aria-label={loadingText ?? "Nuevo texto"}
+    title={loadingText ?? "Nuevo texto (F5)"}
+    disabled={loadingText !== null}
+    onclick={() => practiceScreen?.newText()}
+  >
+    <!-- Two arrows chasing each other round a circle. -->
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
+      <path d="M19.5 12a7.5 7.5 0 0 1-12.8 5.3" stroke-width="2" stroke-linecap="round" />
+      <path d="M4.5 12a7.5 7.5 0 0 1 12.8-5.3" stroke-width="2" stroke-linecap="round" />
+      <path d="M17.8 2.8v4h-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M6.2 21.2v-4h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
   <button type="button" class="gear" aria-label="Historial" title="Historial" onclick={() => history?.open()}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.5" stroke-width="2" />
@@ -109,6 +135,8 @@
 </header>
 
 <Practice
+  bind:this={practiceScreen}
+  bind:loadingText
   mode={settings.mode}
   liveStats={settings.liveStats}
   showKeyboard={settings.showKeyboard}
@@ -184,6 +212,23 @@
     display: flex;
     padding: 0.35rem;
     color: var(--muted);
+  }
+  /* While a new text is generated the arrows turn. */
+  .spinning svg {
+    animation: spin 0.9s linear infinite;
+  }
+  .gear:disabled {
+    cursor: progress;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinning svg {
+      animation: none;
+    }
   }
   .gear:hover {
     color: var(--text);

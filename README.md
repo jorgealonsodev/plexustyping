@@ -15,7 +15,10 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 - Each character turns correct or wrong as you type; optional live bar with WPM,
   keystrokes per minute, accuracy and time.
 - Results show gross and net WPM, accuracy, time, errors and the failed characters.
-  "Siguiente texto" (`Enter`) generates a new adaptive text (see below).
+  "Siguiente texto" (`Enter`) generates a new adaptive text (see below). The
+  round-arrows button in the header (or `F5`) drops the current text and loads a
+  new one at any time; its arrows turn while the text loads ("Cargando texto…"
+  at start, "Generando texto…" afterwards).
 - Accents and dead keys work: typing goes through a hidden text field, so the
   system input method composes `´` + `a` into one `á`.
 - On-screen keyboard at the bottom (ISO, or ANSI for US), labelled from the chosen layout (normal,

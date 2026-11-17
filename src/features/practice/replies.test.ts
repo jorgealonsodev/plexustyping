@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { indentChangeRestarts, shouldApply } from "./replies";
+import { indentChangeRestarts, isNewTextShortcut, shouldApply } from "./replies";
+
+describe("isNewTextShortcut", () => {
+  const key = (k: string, mods: Partial<Record<"ctrlKey" | "altKey" | "metaKey" | "shiftKey" | "repeat", boolean>> = {}) => ({
+    key: k,
+    ctrlKey: false,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+    repeat: false,
+    ...mods,
+  });
+
+  it("is a bare F5, not held down nor with modifiers", () => {
+    expect(isNewTextShortcut(key("F5"))).toBe(true);
+    expect(isNewTextShortcut(key("F5", { repeat: true }))).toBe(false);
+    for (const mod of ["ctrlKey", "altKey", "metaKey", "shiftKey"] as const) {
+      expect(isNewTextShortcut(key("F5", { [mod]: true }))).toBe(false);
+    }
+    expect(isNewTextShortcut(key("F4"))).toBe(false);
+    expect(isNewTextShortcut(key("r", { ctrlKey: true }))).toBe(false);
+  });
+});
 
 describe("shouldApply", () => {
   it("applies a reply only to the request it answers", () => {
