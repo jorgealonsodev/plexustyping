@@ -424,8 +424,10 @@ fn common_voice_files_name_source_commit_licence_and_count() {
             assert!(text.contains(needle), "{} header lacks {needle:?}", cv.id);
         }
         let count = lines(cv.cv).len();
+        // The exact header line, so "Count: 12640" cannot pass for 1264 lines.
         assert!(
-            text.contains(&format!("Count: {count}")),
+            text.lines()
+                .any(|l| l.trim_end().ends_with(&format!("Count: {count}"))),
             "{} header count",
             cv.id
         );
@@ -439,8 +441,10 @@ fn common_voice_sentences_pass_the_filters_and_are_typeable() {
         let layout = plexustyping_layouts::builtin(cv.layout).expect("native layout");
         let typeable = layout.allowed_chars();
         let sentences = lines(cv.cv);
-        let unique: BTreeSet<&str> = sentences.iter().copied().collect();
-        assert_eq!(unique.len(), sentences.len(), "{} duplicates", cv.id);
+        // No duplicates, also against the original sentences they are merged with.
+        let merged = corpus(cv.id).expect("registered").sentences();
+        let unique: BTreeSet<&str> = merged.iter().copied().collect();
+        assert_eq!(unique.len(), merged.len(), "{} duplicates", cv.id);
         for s in sentences {
             let id = cv.id;
             let count = s.chars().count();
