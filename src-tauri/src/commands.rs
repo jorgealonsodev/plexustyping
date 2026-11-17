@@ -25,8 +25,8 @@ use crate::secrets::SharedSecrets;
 
 /// Mode of practice sessions and of their statistics.
 pub const STATS_MODE: &str = "prose";
-/// Targets per text when the user has not chosen (S2: 3–5).
-pub const DEFAULT_TARGETS: usize = 3;
+/// Targets per text when the user has not chosen (2 or 3).
+pub const DEFAULT_TARGETS: usize = 2;
 /// Wanted text length in chars when the user has not chosen.
 pub const DEFAULT_LENGTH: usize = 300;
 
@@ -186,7 +186,7 @@ pub struct NextTextRequest<'a> {
     pub language: &'a str,
     pub layout: &'a str,
     pub seed: u64,
-    /// Clamped to 3..=5.
+    /// Clamped to 2..=3.
     pub target_count: usize,
     /// Clamped to 50..=600.
     pub length: usize,
@@ -354,7 +354,7 @@ pub fn next_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<NextTex
 pub fn plan_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<TextPlan, String> {
     let corpus = corpus(req.language).ok_or_else(|| unknown_language(req.language))?;
     let layout = get_layout(req.layout)?;
-    let count = req.target_count.clamp(3, 5);
+    let count = req.target_count.clamp(2, 3);
     let length = req.length.clamp(50, 600);
     let mut targets = model.select_targets(count, req.seed);
     if targets.is_empty() {
@@ -1201,7 +1201,8 @@ mod tests {
             ("x", 0.3),
         ];
         let model = model(&units);
-        for (count, length, targets, range) in [(1, 10, 3, 50..61), (9, 5000, 5, 600..721)] {
+        // 2 or 3 targets per text: "con que coja las 2 o 3 letras que mas se fallan llega".
+        for (count, length, targets, range) in [(1, 10, 2, 50..61), (9, 5000, 3, 600..721)] {
             let next = next_text(&model, &request(3, count, length)).unwrap();
             assert_eq!(next.targets.len(), targets, "count {count}");
             let len = next.text.chars().count();
@@ -1352,10 +1353,15 @@ mod tests {
             ("fr", "fr-azerty"),
             ("de", "de-qwertz"),
         ] {
-            let allowed = plexustyping_layouts::builtin(layout).unwrap().allowed_chars();
+            let allowed = plexustyping_layouts::builtin(layout)
+                .unwrap()
+                .allowed_chars();
             let text = diagnostic_text(language).unwrap_or_else(|e| panic!("{language}: {e}"));
             let missing: String = text.chars().filter(|c| !allowed.contains(c)).collect();
-            assert!(missing.is_empty(), "{language} on {layout} cannot type {missing:?}");
+            assert!(
+                missing.is_empty(),
+                "{language} on {layout} cannot type {missing:?}"
+            );
         }
     }
 
@@ -1390,7 +1396,10 @@ mod tests {
         );
         assert_eq!(typing_profile(&other, None, None), Ok(other.clone()));
         let both = typing_profile(&other, Some("us-qwerty"), Some("es")).unwrap();
-        assert_eq!((both.layout.as_str(), both.language.as_str()), ("us-qwerty", "es"));
+        assert_eq!(
+            (both.layout.as_str(), both.language.as_str()),
+            ("us-qwerty", "es")
+        );
     }
 
     #[test]

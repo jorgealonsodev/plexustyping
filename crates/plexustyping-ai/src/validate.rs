@@ -6,9 +6,46 @@ use unicode_normalization::UnicodeNormalization;
 use crate::prompt::clamped_density;
 use crate::{GenerationRequest, Mode};
 
-/// Normal frequency assumed for any target, per character of text. A target
-/// needs `max(1, ceil(density × BASELINE_PER_CHAR × len))` occurrences.
-pub const BASELINE_PER_CHAR: f64 = 0.02;
+/// Tolerance so an exact product (e.g. `5 × 0.02 × 50`) is not rounded up
+/// by float error.
+const EPSILON: f64 = 1e-9;
+
+/// Most a target's share of the text may be raised over its natural share:
+/// 3× a frequent letter (`a` is about 12 %) would ask for a third of the text.
+pub const MAX_EXTRA_SHARE: f64 = 0.05;
+
+/// Occurrences a target needs in a text of `len` chars:
+/// `max(1, ceil(min(density × frequency, frequency + MAX_EXTRA_SHARE) × len))`,
+/// with the density clamped to `2.0..=5.0` (3 when not a number) and
+/// `frequency` the target's natural per-char frequency (a negative or
+/// non-finite one counts as 0).
+pub fn min_count(density: f32, frequency: f64, len: usize) -> usize {
+    let frequency = if frequency.is_finite() {
+        frequency.max(0.0)
+    } else {
+        0.0
+    };
+    let share = (f64::from(clamped_density(density)) * frequency).min(frequency + MAX_EXTRA_SHARE);
+    let wanted = share * len as f64;
+    ((wanted - EPSILON).ceil().max(0.0) as usize).max(1)
+}
+
+impl GenerationRequest {
+    /// Each non-empty target with the [`min_count`] it needs in a text of
+    /// `len` chars. [`validate`] checks these; the prompt states them for the
+    /// longest accepted length.
+    pub fn min_counts(&self, len: usize) -> Vec<(&str, usize)> {
+        self.targets
+            .iter()
+            .enumerate()
+            .filter(|(_, t)| !t.is_empty())
+            .map(|(i, t)| {
+                let frequency = self.frequencies.get(i).copied().unwrap_or(0.0);
+                (t.as_str(), min_count(self.density, frequency, len))
+            })
+            .collect()
+    }
+}
 
 /// A reason why a generated text was rejected.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -50,7 +87,8 @@ pub enum ValidationIssue {
 ///
 /// Issues, in this order: [`ValidationIssue::Empty`] alone for an empty text;
 /// otherwise `Length`, each distinct `CharNotAllowed` (space always allowed),
-/// `Markdown`, and `LowDensity` per target.
+/// `Markdown`, and `LowDensity` per target below its
+/// [`GenerationRequest::min_counts`] for the text's length.
 pub fn validate(text: &str, req: &GenerationRequest) -> Result<String, Vec<ValidationIssue>> {
     let code = matches!(req.mode, Mode::Code { .. });
     let plain = plain_chars(text);
@@ -93,15 +131,13 @@ pub fn validate(text: &str, req: &GenerationRequest) -> Result<String, Vec<Valid
         issues.push(ValidationIssue::Markdown);
     }
 
-    let density = f64::from(clamped_density(req.density));
-    let needed = ((density * BASELINE_PER_CHAR * len as f64).ceil() as usize).max(1);
     let lower = normalized.to_lowercase();
-    for target in req.targets.iter().filter(|t| !t.is_empty()) {
+    for (target, needed) in req.min_counts(len) {
         let needle: String = target.nfc().collect::<String>().to_lowercase();
         let found = lower.matches(needle.as_str()).count();
         if found < needed {
             issues.push(ValidationIssue::LowDensity {
-                target: target.clone(),
+                target: target.to_owned(),
                 found,
                 needed,
             });
@@ -158,11 +194,82 @@ mod tests {
             language: "es".into(),
             mode: Mode::Prose,
             targets: vec!["z".into()],
+            frequencies: Vec::new(),
             density: 2.0,
             length: 5..60,
             allowed_chars: "abcdefghijklmnopqrstuvwxyzñZ.,'\"-".into(),
             topic: None,
         }
+    }
+
+    #[test]
+    fn min_count_is_density_times_frequency_times_length_at_least_one() {
+        // ceil(3 × 0.002 × 340) = ceil(2.04) = 3.
+        assert_eq!(min_count(3.0, 0.002, 340), 3);
+        // A frequent letter asks for at most 5 points over its natural share, never
+        // 3× of it: ceil((0.12 + 0.05) × 340) = 58, not ceil(3 × 0.12 × 340) = 123.
+        assert_eq!(min_count(3.0, 0.12, 340), 58);
+        // The cap only bites when density × frequency is higher: 3 × 0.02 = 0.06 < 0.07.
+        assert_eq!(min_count(3.0, 0.02, 100), 6);
+        // Exact products are not pushed up by float error: 5 × 0.01 × 100 = 5.
+        assert_eq!(min_count(5.0, 0.01, 100), 5);
+        // Density clamps to 2..=5, 3 when not a number.
+        assert_eq!(min_count(0.1, 0.01, 100), 2);
+        assert_eq!(min_count(9.0, 0.01, 100), 5);
+        assert_eq!(min_count(f32::NAN, 0.01, 100), 3);
+        // At least 1, also for an unknown, negative or broken frequency.
+        assert_eq!(min_count(3.0, 0.0, 340), 1);
+        assert_eq!(min_count(3.0, 0.0001, 10), 1);
+        assert_eq!(min_count(3.0, -0.5, 340), 1);
+        assert_eq!(min_count(3.0, f64::NAN, 340), 1);
+    }
+
+    #[test]
+    fn min_counts_pair_each_non_empty_target_with_its_frequency() {
+        let mut r = req();
+        r.density = 3.0;
+        r.targets = vec!["ntr".into(), "".into(), "ú".into(), "ti".into()];
+        r.frequencies = vec![0.0019, 0.5, 0.0004];
+        assert_eq!(
+            r.min_counts(340),
+            vec![("ntr", 2), ("ú", 1), ("ti", 1)],
+            "ti has no frequency: 1"
+        );
+    }
+
+    #[test]
+    fn the_log_example_needs_small_counts() {
+        // L2: 340 chars, density 3, ntr/ú/ti once or twice no longer fail
+        // because of a fixed 2 % baseline (it asked for 21 each).
+        let mut r = req();
+        r.density = 3.0;
+        r.length = 300..381;
+        r.allowed_chars = "abcdefghijlmnopqrstuvyzáéíóúñDEFLP.,".into();
+        r.targets = vec!["ntr".into(), "ú".into(), "ti".into()];
+        r.frequencies = vec![0.00186, 0.00037, 0.00223];
+        let text = "Entré en la tienda del centro a las nueve. Dentro había poca gente y un señor muy simpático me atendió enseguida. Le pedí un café y un pan tostado, y me senté junto a la ventana para ver la calle. Fuera, la tarde estaba tranquila. Pensé en mi último viaje al norte, en las montañas y en los amigos que dejé allí. Luego pagué y volví a casa.";
+        assert_eq!(text.chars().count(), 340);
+        assert_eq!(r.min_counts(340), vec![("ntr", 2), ("ú", 1), ("ti", 3)]);
+        assert_eq!(validate(text, &r).as_deref(), Ok(text));
+    }
+
+    #[test]
+    fn natural_sentences_then_a_run_of_target_words_pass() {
+        // S5: when sense runs out, real words with the targets fill the rest.
+        let mut r = req();
+        r.density = 3.0;
+        r.length = 80..161;
+        r.allowed_chars = "abcdefghijlmnopqrstuvyzáéíóúñMCN.,".into();
+        r.targets = vec!["ñ".into(), "ci".into()];
+        r.frequencies = vec![0.01, 0.01];
+        let text = "Mi abuela vive en el campo. Cada mañana sale a ver el sol. \
+                    Niño caña piña uña leña cielo cine cifra cien ciudad.";
+        let len = text.chars().count();
+        assert_eq!(r.min_counts(len), vec![("ñ", 4), ("ci", 4)]);
+        assert_eq!(validate(text, &r).as_deref(), Ok(text));
+        // The run on its own line is still one line of prose.
+        let broken = text.replacen(". Niño", ".\nNiño", 1);
+        assert_eq!(validate(&broken, &r).as_deref(), Ok(text));
     }
 
     #[test]
@@ -239,9 +346,10 @@ mod tests {
     fn low_density_per_target_case_insensitive() {
         let mut r = req();
         r.targets = vec!["z".into(), "ci".into()];
+        r.frequencies = vec![0.02, 0.02];
         r.density = 5.0;
         r.length = 1..200;
-        // len 50 → needed = ceil(5 × 0.02 × 50) = 5.
+        // len 50 → 5 × 0.02 = 0.10 is capped at 0.02 + 0.05, so needed = ceil(0.07 × 50) = 4.
         let text = format!("Zaza zzz ci {}", "a".repeat(38));
         assert_eq!(text.chars().count(), 50);
         assert_eq!(
@@ -249,12 +357,13 @@ mod tests {
             Err(vec![ValidationIssue::LowDensity {
                 target: "ci".into(),
                 found: 1,
-                needed: 5
+                needed: 4
             }])
         );
         // density clamps to 2..=5 and needed is at least 1.
         r.density = 0.1;
         r.targets = vec!["ci".into()];
+        r.frequencies = vec![0.02];
         assert!(validate("cici", &r).is_ok());
         assert_eq!(
             validate("abab", &r),

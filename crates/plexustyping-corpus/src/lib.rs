@@ -7,7 +7,10 @@
 
 mod code;
 
-pub use code::{CodeLanguage, CodeOptions, Snippet, code_languages, code_snippets, generate_code};
+pub use code::{
+    CodeLanguage, CodeOptions, Snippet, code_frequency, code_languages, code_snippets,
+    generate_code,
+};
 
 use std::collections::BTreeSet;
 use std::ops::Range;
@@ -29,6 +32,34 @@ pub struct Corpus {
     diagnostic: &'static str,
     words: Vec<&'static str>,
     sentences: Vec<&'static str>,
+    /// The sentences joined by spaces, lowercased: the sample of natural
+    /// text behind [`Corpus::frequency`].
+    sample: Sample,
+}
+
+/// Lowercased natural text and its length in chars, for target frequencies.
+#[derive(Debug)]
+pub(crate) struct Sample {
+    text: String,
+    chars: usize,
+}
+
+impl Sample {
+    pub(crate) fn new(text: &str) -> Self {
+        let text = text.to_lowercase();
+        let chars = text.chars().count();
+        Sample { text, chars }
+    }
+
+    /// Case-insensitive occurrences of `target` per char, counted like
+    /// `str::matches`; 0 for an empty target or sample.
+    pub(crate) fn rate(&self, target: &str) -> f64 {
+        let target = target.to_lowercase();
+        if target.is_empty() || self.chars == 0 {
+            return 0.0;
+        }
+        self.text.matches(target.as_str()).count() as f64 / self.chars as f64
+    }
 }
 
 /// Options for [`Corpus::generate`].
@@ -91,11 +122,15 @@ const LANGUAGES: &[LanguageData] = &[
 static CORPORA: LazyLock<Vec<Corpus>> = LazyLock::new(|| {
     LANGUAGES
         .iter()
-        .map(|data| Corpus {
-            language: data.id,
-            diagnostic: data.diagnostic.trim(),
-            words: data_lines(data.words),
-            sentences: data_lines(data.sentences),
+        .map(|data| {
+            let sentences = data_lines(data.sentences);
+            Corpus {
+                language: data.id,
+                diagnostic: data.diagnostic.trim(),
+                words: data_lines(data.words),
+                sample: Sample::new(&sentences.join(" ")),
+                sentences,
+            }
         })
         .collect()
 });
@@ -139,6 +174,14 @@ impl Corpus {
     /// Everyday sentences, one per entry.
     pub fn sentences(&self) -> &[&'static str] {
         &self.sentences
+    }
+
+    /// Natural frequency of `target`: its case-insensitive occurrences (counted
+    /// like `str::matches`) per char of the [`Corpus::sentences`] joined by
+    /// spaces. Sentences, not the word list, because they are running text
+    /// with real word frequencies. 0 for an empty or absent target.
+    pub fn frequency(&self, target: &str) -> f64 {
+        self.sample.rate(target)
     }
 
     /// Builds practice text; identical options always give identical text.

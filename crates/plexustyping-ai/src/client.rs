@@ -327,6 +327,7 @@ mod tests {
             language: "es".into(),
             mode: Mode::Prose,
             targets: vec!["z".into()],
+            frequencies: Vec::new(),
             density: 3.0,
             length: 5..60,
             allowed_chars: "abcz".into(),

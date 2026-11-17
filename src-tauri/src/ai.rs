@@ -10,6 +10,7 @@ use std::time::Duration;
 
 use plexustyping_ai::{
     AiClient, ApiKey, GenerationRequest, Mode, ProviderConfig, ProviderError, ProviderId,
+    ValidationIssue,
 };
 use plexustyping_store::{NewCachedText, Store, UsageRow};
 use serde::{Deserialize, Serialize};
@@ -174,6 +175,39 @@ pub fn provider_reason(id: ProviderId, err: &ProviderError) -> String {
             format!("{name} rechazó la petición (revisa el modelo)")
         }
     }
+}
+
+/// One stderr line per attempt whose text failed validation, listing every
+/// issue (S3). Issues hold only lengths, characters and targets: never a key.
+fn rejection_lines(errors: &[(ProviderId, ProviderError)]) -> Vec<String> {
+    errors
+        .iter()
+        .filter_map(|(id, err)| match err {
+            ProviderError::Invalid { issues } => Some((id, issues)),
+            _ => None,
+        })
+        .map(|(id, issues)| {
+            let listed: Vec<String> = issues
+                .iter()
+                .map(|issue| match issue {
+                    ValidationIssue::Length { len } => format!("length {len}"),
+                    ValidationIssue::CharNotAllowed { ch } => format!("char not allowed {ch:?}"),
+                    ValidationIssue::Markdown => "markdown".to_owned(),
+                    ValidationIssue::LowDensity {
+                        target,
+                        found,
+                        needed,
+                    } => format!("low density {target:?} found {found} needed {needed}"),
+                    ValidationIssue::Empty => "empty".to_owned(),
+                })
+                .collect();
+            format!(
+                "PlexusTyping: AI text from {} rejected: {}",
+                short_name(*id),
+                listed.join("; ")
+            )
+        })
+        .collect()
 }
 
 /// [`ProviderError`] as a command failure.
@@ -465,13 +499,17 @@ impl Plan {
         }
     }
 
-    /// The generation request: only targets, language, length, allowed chars and topic (S5).
+    /// The generation request: only targets (with their natural frequency in
+    /// the prose or code corpus, 0 when it has none), language, length,
+    /// allowed chars and topic (S5).
     fn request(&self, language: &str, settings: &AiSettings) -> Result<GenerationRequest, String> {
-        let (mode, length, allowed_chars) = match self {
+        let targets = self.targets();
+        let (mode, length, allowed_chars, frequencies) = match self {
             Plan::Prose(plan) => (
                 Mode::Prose,
                 plan.length.clone(),
                 plan.allowed.iter().filter(|c| **c != '\n').collect(),
+                targets.iter().map(|t| plan.corpus.frequency(t)).collect(),
             ),
             Plan::Code(plan) => (
                 Mode::Code {
@@ -479,12 +517,17 @@ impl Plan {
                 },
                 code::code_length(plan.max_lines),
                 code::code_allowed_chars(),
+                targets
+                    .iter()
+                    .map(|t| plexustyping_corpus::code_frequency(&plan.lang, t).unwrap_or(0.0))
+                    .collect(),
             ),
         };
         Ok(GenerationRequest {
             language: language.to_owned(),
             mode,
-            targets: self.targets().to_vec(),
+            targets: targets.to_vec(),
+            frequencies,
             density: settings.density,
             length,
             allowed_chars,
@@ -573,10 +616,15 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
                     ..NextText::corpus(generated.text, plan.targets().to_vec())
                 }));
             }
-            Err(errors) => errors
-                .first()
-                .map(|(id, err)| provider_reason(*id, err))
-                .unwrap_or_else(|| "La IA no respondió".to_owned()),
+            Err(errors) => {
+                for line in rejection_lines(&errors) {
+                    eprintln!("{line}");
+                }
+                errors
+                    .first()
+                    .map(|(id, err)| provider_reason(*id, err))
+                    .unwrap_or_else(|| "La IA no respondió".to_owned())
+            }
         }
     };
     let cached = {

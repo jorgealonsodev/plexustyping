@@ -124,15 +124,16 @@ describe("settings", () => {
     expect(loadHeatmap(memoryStorage({ "plexustyping.heatmap": "yes" }))).toBe(false);
   });
 
-  it("offers 3 to 5 targets, 3 by default, and persists the choice", () => {
-    expect(TARGET_COUNTS).toEqual([3, 4, 5]);
+  it("offers 2 or 3 targets, 2 by default, and persists the choice", () => {
+    expect(TARGET_COUNTS).toEqual([2, 3]);
     const storage = memoryStorage();
+    expect(loadTargetCount(storage)).toBe(2);
+    saveTargetCount(3, storage);
+    expect(storage.getItem("plexustyping.targetCount")).toBe("3");
     expect(loadTargetCount(storage)).toBe(3);
-    saveTargetCount(5, storage);
-    expect(storage.getItem("plexustyping.targetCount")).toBe("5");
-    expect(loadTargetCount(storage)).toBe(5);
-    for (const bad of ["2", "6", "4.5", "x"])
-      expect(loadTargetCount(memoryStorage({ "plexustyping.targetCount": bad }))).toBe(3);
+    // Earlier choices of 4 or 5 fall back to the default.
+    for (const bad of ["1", "4", "5", "2.5", "x"])
+      expect(loadTargetCount(memoryStorage({ "plexustyping.targetCount": bad }))).toBe(2);
   });
 
   it("offers five text lengths, 300 by default, and persists the choice", () => {
@@ -149,10 +150,10 @@ describe("settings", () => {
   it("keeps the new settings apart from the toggles", () => {
     const storage = memoryStorage();
     saveHeatmap(true, storage);
-    saveTargetCount(4, storage);
+    saveTargetCount(3, storage);
     saveTextLength(100, storage);
     expect([loadLiveStats(storage), loadFlashes(storage), loadShowKeyboard(storage)]).toEqual([true, true, true]);
-    expect([loadHeatmap(storage), loadTargetCount(storage), loadTextLength(storage)]).toEqual([true, 4, 100]);
+    expect([loadHeatmap(storage), loadTargetCount(storage), loadTextLength(storage)]).toEqual([true, 3, 100]);
   });
 
   it("keeps the metronome off at 60 BPM by default and persists every field", () => {

@@ -587,7 +587,11 @@ async fn the_request_carries_targets_allowed_chars_and_topic_but_nothing_typed()
     let body = &requests[0].body;
     let sent: serde_json::Value = serde_json::from_str(body).unwrap();
     let prompt = sent["messages"][0]["content"].as_str().unwrap();
-    assert!(prompt.contains("Caracteres objetivo: ñ."), "{prompt}");
+    // ñ: ceil(3 × es frequency × 60) = 1.
+    assert!(
+        prompt.contains("Caracteres objetivo: ñ (al menos 1 vez)."),
+        "{prompt}"
+    );
     assert!(prompt.contains("Tema: comida."), "{prompt}");
     assert!(prompt.contains("Longitud: 50–60 caracteres."), "{prompt}");
     let (_, listed) = prompt.split_once("Usa solo estos caracteres: ").unwrap();
@@ -894,7 +898,11 @@ async fn code_mode_asks_the_ai_for_code_and_caches_it_per_language() {
     let sent: serde_json::Value = serde_json::from_str(&requests[0].body).unwrap();
     let prompt = sent["messages"][0]["content"].as_str().unwrap();
     assert!(prompt.contains("fragmento de código en Rust"), "{prompt}");
-    assert!(prompt.contains("Caracteres objetivo: {."), "{prompt}");
+    // {: ceil(3 × rust code frequency × 480).
+    assert!(
+        prompt.contains("Caracteres objetivo: { (al menos 19 veces)."),
+        "{prompt}"
+    );
     assert!(prompt.contains("Longitud: 80–480 caracteres."), "{prompt}");
     let (_, listed) = prompt.split_once("Usa solo estos caracteres: ").unwrap();
     for ch in ['{', '}', '~', '|', '&', '$', '#', '"', '\''] {
@@ -1045,4 +1053,107 @@ fn generation_futures_hold_no_store_lock_across_await() {
         ProviderId::Claude,
         "",
     ));
+}
+
+/// L2: a natural 340-char Spanish text with ntr, ú and ti.
+const NATURAL_340: &str = "Entré en la tienda del centro a las nueve. Dentro había poca gente y un señor muy simpático me atendió enseguida. Le pedí un café y un pan tostado, y me senté junto a la ventana para ver la calle. Fuera, la tarde estaba tranquila. Pensé en mi último viaje al norte, en las montañas y en los amigos que dejé allí. Luego pagué y volví a casa.";
+
+fn prose_plan(targets: &[&str]) -> Plan {
+    Plan::Prose(commands::TextPlan {
+        corpus: plexustyping_corpus::corpus("es").unwrap(),
+        targets: targets.iter().map(|t| (*t).to_owned()).collect(),
+        length: 300..381,
+        allowed: NATURAL_340.chars().chain(['a']).collect(),
+    })
+}
+
+#[test]
+fn a_prose_request_carries_the_corpus_frequency_of_each_target() {
+    let es = plexustyping_corpus::corpus("es").unwrap();
+    let req = prose_plan(&["ntr", "ú", "ti", "a"])
+        .request("es", &AiSettings::default())
+        .unwrap();
+    assert_eq!(
+        req.frequencies,
+        ["ntr", "ú", "ti", "a"].map(|t| es.frequency(t)).to_vec()
+    );
+    assert_eq!(req.density, 3.0);
+    // Rare targets need a few; a frequent letter needs more than its natural share
+    // but at most 5 points over it, so the text stays writable.
+    let counts = req.min_counts(340);
+    assert_eq!(&counts[..3], &[("ntr", 2), ("ú", 1), ("ti", 3)]);
+    let natural = es.frequency("a") * 340.0;
+    assert!(counts[3].1 as f64 > natural, "{counts:?}");
+    assert!(
+        counts[3].1 as f64 <= natural + 0.05 * 340.0 + 1.0,
+        "{counts:?}"
+    );
+}
+
+#[test]
+fn the_log_example_now_passes_validation() {
+    assert_eq!(NATURAL_340.chars().count(), 340);
+    let req = prose_plan(&["ntr", "ú", "ti"])
+        .request("es", &AiSettings::default())
+        .unwrap();
+    assert_eq!(
+        plexustyping_ai::validate(NATURAL_340, &req).as_deref(),
+        Ok(NATURAL_340)
+    );
+}
+
+#[test]
+fn a_code_request_uses_the_code_corpus_frequency() {
+    let plan = Plan::Code(code::CodePlan {
+        lang: "rust".into(),
+        targets: vec!["{".into(), "ñ".into()],
+        max_lines: 20,
+    });
+    let req = plan.request("es", &AiSettings::default()).unwrap();
+    let brace = plexustyping_corpus::code_frequency("rust", "{").unwrap();
+    assert!(brace > 0.0);
+    assert_eq!(req.frequencies, vec![brace, 0.0]);
+    // A target absent from the code corpus needs one occurrence.
+    assert_eq!(req.min_counts(100)[1], ("ñ", 1));
+}
+
+#[test]
+fn rejections_are_one_line_per_invalid_attempt_without_the_key() {
+    use plexustyping_ai::ValidationIssue;
+    let errors = vec![
+        (
+            ProviderId::Openai,
+            ProviderError::Invalid {
+                issues: vec![
+                    ValidationIssue::Length { len: 412 },
+                    ValidationIssue::CharNotAllowed { ch: '€' },
+                    ValidationIssue::Markdown,
+                    ValidationIssue::LowDensity {
+                        target: "ntr".into(),
+                        found: 1,
+                        needed: 2,
+                    },
+                ],
+            },
+        ),
+        (ProviderId::Gemini, ProviderError::Timeout),
+        (
+            ProviderId::Claude,
+            ProviderError::Invalid {
+                issues: vec![ValidationIssue::Empty],
+            },
+        ),
+    ];
+    let lines = rejection_lines(&errors);
+    assert_eq!(
+        lines,
+        vec![
+            "PlexusTyping: AI text from OpenAI rejected: length 412; char not allowed '€'; \
+             markdown; low density \"ntr\" found 1 needed 2"
+                .to_owned(),
+            "PlexusTyping: AI text from Claude rejected: empty".to_owned(),
+        ]
+    );
+    assert!(lines.iter().all(|l| !l.contains(KEY)));
+    assert!(rejection_lines(&[(ProviderId::Openai, ProviderError::Timeout)]).is_empty());
 }

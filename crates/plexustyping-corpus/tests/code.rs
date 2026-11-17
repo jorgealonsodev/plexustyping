@@ -245,3 +245,27 @@ fn types_serialize_in_camel_case() {
         serde_json::json!({"syntax": snippet.syntax, "code": snippet.code})
     );
 }
+
+#[test]
+fn code_frequency_is_the_per_char_rate_in_the_lowercased_snippets() {
+    let sample = code_snippets("rust")
+        .unwrap()
+        .iter()
+        .map(|s| s.code)
+        .collect::<Vec<_>>()
+        .join("\n")
+        .to_lowercase();
+    let expected = sample.matches('{').count() as f64 / sample.chars().count() as f64;
+    assert!(expected > 0.0);
+    assert_eq!(
+        plexustyping_corpus::code_frequency("rust", "{"),
+        Some(expected)
+    );
+    assert_eq!(
+        plexustyping_corpus::code_frequency("rust", "FN"),
+        plexustyping_corpus::code_frequency("rust", "fn")
+    );
+    assert_eq!(plexustyping_corpus::code_frequency("rust", "ñ"), Some(0.0));
+    assert_eq!(plexustyping_corpus::code_frequency("rust", ""), Some(0.0));
+    assert_eq!(plexustyping_corpus::code_frequency("cobol", "{"), None);
+}

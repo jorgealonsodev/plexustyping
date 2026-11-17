@@ -92,8 +92,8 @@ export const loadHeatmap = (storage: Storage = localStorage) => storage.getItem(
 
 export const saveHeatmap = (on: boolean, storage: Storage = localStorage) => saveFlag(HEATMAP_KEY, on, storage);
 
-/** Choices of weak units practised per text (S2: 3–5); the first is the default. */
-export const TARGET_COUNTS = [3, 4, 5];
+/** Choices of weak units practised per text (2 or 3); the first is the default. */
+export const TARGET_COUNTS = [2, 3];
 
 /** Choices of practice text length in chars; 300 is the default. */
 export const TEXT_LENGTHS = [100, 200, 300, 450, 600];

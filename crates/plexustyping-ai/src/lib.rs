@@ -7,8 +7,8 @@
 //! ([`parse_text_json`]), validation of the generated text ([`validate`]) and a
 //! provider fallback chain ([`AiClient::generate_with_fallback`]).
 //!
-//! Privacy: a [`GenerationRequest`] only carries target characters, language,
-//! mode, length, allowed characters and topic — never what the user typed. API
+//! Privacy: a [`GenerationRequest`] only carries target characters (with
+//! their corpus frequencies), language, mode, length, allowed characters and topic — never what the user typed. API
 //! keys never appear in `Debug` output or error messages, redirects are never
 //! followed, and [`Endpoints::production`] is the only set of hosts used.
 
@@ -28,7 +28,7 @@ mod validate;
 pub use client::{AiClient, TextProvider};
 pub use parse::parse_text_json;
 pub use prompt::build_prompt;
-pub use validate::{BASELINE_PER_CHAR, ValidationIssue, validate};
+pub use validate::{ValidationIssue, min_count, validate};
 
 /// Default per-request timeout (PRD RF2: 10 s).
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -107,6 +107,10 @@ pub struct GenerationRequest {
     pub mode: Mode,
     /// Characters or n-grams to practise, e.g. `["ñ", "ci"]`.
     pub targets: Vec<String>,
+    /// Natural per-char frequency of each target (same index) in the corpus
+    /// of the language; a missing entry counts as 0. See [`min_count`].
+    #[serde(default)]
+    pub frequencies: Vec<f64>,
     /// Multiplier over the normal frequency, clamped to `2.0..=5.0`.
     pub density: f32,
     /// Accepted length in characters (end exclusive, like any `Range`).

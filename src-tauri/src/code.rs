@@ -131,7 +131,7 @@ pub fn plan_code(
     fallback: &[String],
 ) -> Result<CodePlan, String> {
     language(lang)?;
-    let count = target_count.clamp(3, 5);
+    let count = target_count.clamp(2, 3);
     let eligible = |t: &str| !t.is_empty() && t.chars().all(|c| c.is_ascii_graphic());
     // Ineligible units are dropped before selecting, so they never take a slot.
     let units = model.units().into_iter().filter(|(u, _)| eligible(u));

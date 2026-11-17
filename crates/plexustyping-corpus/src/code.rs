@@ -8,7 +8,7 @@ use std::sync::LazyLock;
 
 use serde::Serialize;
 
-use crate::SplitMix64;
+use crate::{Sample, SplitMix64};
 
 /// A programming language with bundled snippets.
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -72,6 +72,17 @@ languages![
 static SNIPPETS: LazyLock<Vec<Vec<Snippet>>> =
     LazyLock::new(|| SOURCES.iter().map(|text| parse(text)).collect());
 
+/// Per language, its snippets joined by newlines, for [`code_frequency`].
+static SAMPLES: LazyLock<Vec<Sample>> = LazyLock::new(|| {
+    SNIPPETS
+        .iter()
+        .map(|snippets| {
+            let codes: Vec<&str> = snippets.iter().map(|s| s.code).collect();
+            Sample::new(&codes.join("\n"))
+        })
+        .collect()
+});
+
 /// Splits a data file at its `%%` header lines. Text before the first header
 /// and empty snippets are skipped, so bad data never panics at runtime.
 fn parse(text: &'static str) -> Vec<Snippet> {
@@ -106,6 +117,14 @@ pub fn code_languages() -> &'static [CodeLanguage] {
 pub fn code_snippets(language: &str) -> Option<&'static [Snippet]> {
     let index = LANGUAGES.iter().position(|l| l.id == language)?;
     Some(&SNIPPETS[index])
+}
+
+/// Natural frequency of `target` in the code of `language`: case-insensitive
+/// occurrences (counted like `str::matches`) per char of its snippets joined
+/// by newlines. 0 for an empty or absent target; `None` for an unknown language.
+pub fn code_frequency(language: &str, target: &str) -> Option<f64> {
+    let index = LANGUAGES.iter().position(|l| l.id == language)?;
+    Some(SAMPLES[index].rate(target))
 }
 
 /// Picks a snippet of `options.language`; identical options give the same one.

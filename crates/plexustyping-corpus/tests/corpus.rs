@@ -65,11 +65,17 @@ fn new_languages_have_5000_words_many_sentences_and_a_full_diagnostic() {
         let alphabet: String = ('a'..='z').chain(extra.chars()).collect();
         assert_eq!(c.words().len(), 5000, "{id} words");
         for word in c.words() {
-            assert!(word.chars().all(|ch| alphabet.contains(ch)), "{id} word {word:?}");
+            assert!(
+                word.chars().all(|ch| alphabet.contains(ch)),
+                "{id} word {word:?}"
+            );
         }
         assert!(c.sentences().len() >= 40, "{id} sentences");
         let diagnostic = c.diagnostic();
-        assert!((280..=340).contains(&diagnostic.chars().count()), "{id} diagnostic length");
+        assert!(
+            (280..=340).contains(&diagnostic.chars().count()),
+            "{id} diagnostic length"
+        );
         let lower = diagnostic.to_lowercase();
         for letter in ('a'..='z').chain(extra.chars().filter(|ch| !"æœ".contains(*ch))) {
             assert!(lower.contains(letter), "{id} diagnostic lacks {letter}");
@@ -83,7 +89,10 @@ fn every_registered_language_resolves_to_its_own_non_empty_corpus() {
         let c = corpus(id).unwrap_or_else(|| panic!("{id} is listed but not found"));
         assert_eq!(c.language(), id);
         assert!(!c.diagnostic().is_empty(), "{id} diagnostic");
-        assert!(!c.words().is_empty() && !c.sentences().is_empty(), "{id} data");
+        assert!(
+            !c.words().is_empty() && !c.sentences().is_empty(),
+            "{id} data"
+        );
     }
     assert!(corpus("").is_none());
 }
@@ -297,5 +306,36 @@ fn unmatched_bigram_and_empty_targets_fall_back_to_sentence_mode() {
         let empty = es().generate(&options(&[], 120..200, seed));
         assert_eq!(es().generate(&options(&["zx"], 120..200, seed)), empty);
         assert_eq!(es().generate(&options(&[""], 120..200, seed)), empty);
+    }
+}
+
+/// Per-char occurrences of `target` in `text`, counted like `str::matches`.
+fn per_char(text: &str, target: &str) -> f64 {
+    text.matches(target).count() as f64 / text.chars().count() as f64
+}
+
+#[test]
+fn frequency_is_the_per_char_rate_in_the_lowercased_sentences() {
+    let sample = es().sentences().join(" ").to_lowercase();
+    for target in ["ntr", "ú", "ti", "a", "ñ", "ci"] {
+        let expected = per_char(&sample, target);
+        assert!(expected > 0.0, "{target} occurs in the Spanish sentences");
+        assert_eq!(es().frequency(target), expected, "{target}");
+    }
+    // Case-insensitive; rare n-grams are rare, frequent letters frequent.
+    assert_eq!(es().frequency("NTR"), es().frequency("ntr"));
+    assert_eq!(es().frequency("Ú"), es().frequency("ú"));
+    assert!(es().frequency("ntr") < 0.005);
+    assert!(es().frequency("a") > 0.08);
+    // Absent or empty targets have no natural frequency.
+    assert_eq!(es().frequency("qqq"), 0.0);
+    assert_eq!(es().frequency(""), 0.0);
+}
+
+#[test]
+fn every_language_has_frequencies() {
+    for language in languages() {
+        let c = corpus(language).unwrap();
+        assert!(c.frequency("e") > 0.03, "{language}");
     }
 }

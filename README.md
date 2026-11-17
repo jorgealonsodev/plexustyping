@@ -28,7 +28,7 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
   window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
-  targets per text (3–5), text length (100–600 characters) and live stats.
+  targets per text (2 or 3), text length (100–600 characters) and live stats.
   "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
   colour themes, dark and light, switched live, plus themes imported from
   VS Code (see below). Everything is remembered
@@ -42,7 +42,7 @@ Type → measure → recalculate weaknesses → generate a text that attacks the
 Every completed session is replayed in Rust and folded into a weakness model:
 each character and bigram («qu», «rr») keeps an exponential moving average of
 errors (weight 0.7) and slowness relative to your own pace (weight 0.3). The
-next text picks the 3–5 worst units, with some randomness, and builds sentences
+next text picks the 2 or 3 worst units, with some randomness, and builds sentences
 from words that contain them ("Practicando: ñ · qu · z" above the text). Results
 list your top weaknesses, and the optional "Mapa de calor" tints each key of
 the on-screen keyboard by its score.
@@ -54,7 +54,14 @@ chain: up to four providers (Claude, OpenAI, Google Gemini, OpenCode Go), tried
 in order, each with its model (picked from the provider's list, or typed by
 hand), its API key ("Guardar clave" / "Borrar clave") and "Probar conexión".
 "Densidad" (2×–5×, default 3×) sets how much more often the targets appear and
-"Tema" an optional topic. The usage table counts calls and tokens per provider,
+"Tema" an optional topic. Each target must appear at least
+`max(1, ceil(density × natural frequency × length))` times, where the natural
+frequency is how often it occurs per character in the bundled sentences of the
+language (or the bundled snippets in code mode), case-insensitively; the prompt
+states that count for the longest allowed length. When sensible sentences
+cannot reach the counts, the prompt lets the model finish with a run of real
+words that contain the targets. A rejected text logs its validation issues to
+stderr (never the key). The usage table counts calls and tokens per provider,
 today and in total, so you can watch your spending.
 
 - **Keys** are stored only in the system keychain (Keychain on macOS,
