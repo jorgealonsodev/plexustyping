@@ -20,7 +20,8 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   system input method composes `´` + `a` into one `á`.
 - On-screen keyboard at the bottom (ISO, or ANSI for US), labelled from the chosen layout (normal,
   Shift, AltGr; dead keys underlined): it highlights the next key, plus Shift or
-  AltGr, coloured by finger, and flashes typed keys green or red. `F2` shows or hides it.
+  AltGr, coloured by finger, and flashes typed keys green or red. `F2` or a click on the logo key in the header
+  shows or hides it; the bar under its P is lit green while the keyboard shows.
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
   window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),

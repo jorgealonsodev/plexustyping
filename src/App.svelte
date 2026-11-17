@@ -10,7 +10,7 @@
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
-  import logo from "../assets/logo.svg";
+  import { focusTyping } from "./features/practice/focus";
 
   const settings = new SettingsStore();
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
@@ -53,7 +53,40 @@
 
 <header>
   <div class="brand">
-    <img class="logo" src={logo} alt="" width="28" height="28" />
+    <!-- The logo key toggles the on-screen keyboard (like F2); its bar lights while the keyboard shows. -->
+    <button
+      type="button"
+      class="logo"
+      aria-pressed={settings.showKeyboard}
+      title={settings.showKeyboard ? "Ocultar teclado (F2)" : "Mostrar teclado (F2)"}
+      onclick={() => {
+        settings.setShowKeyboard(!settings.showKeyboard);
+        focusTyping();
+      }}
+    >
+      <svg viewBox="16 16 224 224" width="28" height="28" aria-hidden="true">
+        <defs>
+          <linearGradient id="hdr-top" x1="0" y1="0" x2="0" y2="1"
+            ><stop offset="0" stop-color="#b4cdff" /><stop offset="1" stop-color="#7aa2f7" /></linearGradient
+          >
+          <linearGradient id="hdr-side" x1="0" y1="0" x2="0" y2="1"
+            ><stop offset="0" stop-color="#4f6fa8" /><stop offset="1" stop-color="#2a3b66" /></linearGradient
+          >
+        </defs>
+        <rect x="16" y="30" width="224" height="210" rx="50" fill="url(#hdr-side)" />
+        <rect x="34" y="16" width="188" height="184" rx="38" fill="url(#hdr-top)" />
+        <text
+          x="128"
+          y="138"
+          text-anchor="middle"
+          font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif"
+          font-size="104"
+          font-weight="800"
+          fill="#1e1e2e">P</text
+        >
+        <rect class="led" class:on={settings.showKeyboard} x="100" y="160" width="56" height="10" rx="5" stroke="#1e1e2e" stroke-width="3" />
+      </svg>
+    </button>
     <h1>PlexusTyping</h1>
     <span>Del cerebro a los dedos.</span>
     {#if storageError !== null}
@@ -119,7 +152,20 @@
   }
   .logo {
     align-self: center;
+    display: flex;
     margin-right: -0.25rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0.3rem;
+  }
+  /* Off: an unlit bar; on: a green light, like Caps Lock. */
+  .led {
+    fill: #5b6078;
+    transition: fill 150ms ease-out;
+  }
+  .led.on {
+    fill: var(--success);
   }
   h1 {
     margin: 0;
