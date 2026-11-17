@@ -380,6 +380,13 @@
     return () => (live = false);
   });
 
+  // Keeps the cursor line, and the next one, in view: the text scrolls when typing reaches its hidden part.
+  let proseText = $state<HTMLElement>();
+  $effect(() => {
+    void view?.cursor;
+    proseText?.querySelector(".cursor")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+
   // A phase change can remove the focused button (e.g. "Siguiente texto").
   $effect(() => {
     void phase;
@@ -465,7 +472,8 @@
   };
 </script>
 
-<svelte:window onkeydown={onKeydown} onclick={onWindowClick} />
+<!-- Back from another window (e.g. the desktop overview the Super key opens): typing resumes. -->
+<svelte:window onkeydown={onKeydown} onclick={onWindowClick} onfocus={refocusIfLost} />
 <svelte:document onfocusout={refocusIfLost} onvisibilitychange={() => (visible = !document.hidden)} />
 
 <textarea
@@ -520,7 +528,7 @@
         <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} />
       {:else}
         <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
-        <p class="text" aria-label="Texto de práctica">{#each session.chars as c, i (i)}<span
+        <p class="text" aria-label="Texto de práctica" bind:this={proseText}>{#each session.chars as c, i (i)}<span
               class="ch {view.states[i]}"
               class:space={c === " "}
               class:cursor={i === view.cursor}>{c}</span
@@ -627,6 +635,8 @@
   }
   /* A soft tint with an underline bar: marks the next char without pulling the eye. */
   .cursor {
+    /* Scrolling into view also shows the following line. */
+    scroll-margin-block: 1.75em;
     color: var(--text);
     background: color-mix(in srgb, var(--cursor) 18%, transparent);
     box-shadow: inset 0 -0.12em var(--cursor);
