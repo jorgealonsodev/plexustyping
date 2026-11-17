@@ -498,10 +498,7 @@ async fn connection_refused_is_network_without_url_or_key() {
 #[tokio::test]
 async fn malformed_and_invalid_texts() {
     let server = mock(vec![
-        (
-            "/v1/chat/completions",
-            chat_reply("Here is your text: hola"),
-        ),
+        ("/v1/chat/completions", chat_reply("{\"text\": \"hola\"")),
         (
             "/v1/chat/completions",
             Reply::ok(json!({"unexpected": true})),

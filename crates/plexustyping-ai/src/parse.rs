@@ -18,12 +18,37 @@ pub fn parse_text_json(raw: &str) -> Result<String, ProviderError> {
         }
         body = rest[info_end..].trim();
     }
-    let value: serde_json::Value = serde_json::from_str(body).map_err(|_| bad())?;
+    if let Ok(value) = serde_json::from_str::<serde_json::Value>(body) {
+        return text_of(&value).ok_or_else(bad);
+    }
+    // Models without JSON mode may put words around the object: read the
+    // outermost {...} if it is a {"text": ...} object.
+    if let (Some(start), Some(end)) = (body.find('{'), body.rfind('}'))
+        && start < end
+        && let Ok(value) = serde_json::from_str::<serde_json::Value>(&body[start..=end])
+    {
+        return text_of(&value).ok_or_else(bad);
+    }
+    // Or answer with the text itself: take it as is (validation still checks
+    // its length, characters and Markdown). Anything that looks like broken
+    // JSON or a broken fence stays a bad response.
+    if body.is_empty() || body.starts_with(['{', '[', '`']) {
+        return Err(bad());
+    }
+    let plain = body
+        .strip_prefix('"')
+        .and_then(|b| b.strip_suffix('"'))
+        .unwrap_or(body);
+    Ok(plain.trim().to_string())
+}
+
+/// The `text` of a `{"text": ...}` object, or a bare JSON string.
+fn text_of(value: &serde_json::Value) -> Option<String> {
     value
         .get("text")
         .and_then(serde_json::Value::as_str)
+        .or_else(|| value.as_str().filter(|s| !s.trim().is_empty()))
         .map(str::to_string)
-        .ok_or_else(bad)
 }
 
 #[cfg(test)]
@@ -51,11 +76,31 @@ mod tests {
     }
 
     #[test]
+    fn an_object_inside_other_words_or_plain_prose_is_read_too() {
+        // Models without JSON mode (Gemma on Gemini) may wrap the object or skip it.
+        assert_eq!(
+            parse_text_json("Here is your text: {\"text\": \"hola\"}").unwrap(),
+            "hola"
+        );
+        assert_eq!(
+            parse_text_json("Aquí tienes:\n{\"text\": \"hola\"}\nSuerte.").unwrap(),
+            "hola"
+        );
+        assert_eq!(
+            parse_text_json("  La casa es azul.  ").unwrap(),
+            "La casa es azul."
+        );
+        assert_eq!(
+            parse_text_json("\"La casa es azul.\"").unwrap(),
+            "La casa es azul."
+        );
+    }
+
+    #[test]
     fn anything_else_is_bad_response() {
         for raw in [
             "",
-            "hola",
-            "Here is your text: {\"text\": \"hola\"}",
+            "   ",
             "{\"text\": 3}",
             "{\"other\": \"hola\"}",
             "[\"hola\"]",

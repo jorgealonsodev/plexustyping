@@ -149,7 +149,7 @@ async fn invalid_text_is_retried_once_then_next_provider() {
 #[tokio::test]
 async fn bad_response_retry_can_succeed() {
     let server = mock(vec![
-        (OPENAI, chat_reply("not json")),
+        (OPENAI, chat_reply("{not json")),
         (OPENAI, chat_reply(&text_json("Zapatos azules"))),
     ])
     .await;
