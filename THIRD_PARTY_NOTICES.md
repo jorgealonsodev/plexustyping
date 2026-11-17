@@ -73,3 +73,36 @@ The copyright/license for each individual theme belongs to the author of that th
 ## Spanish word list
 
 `crates/plexustyping-corpus/data/es/words.txt` is adapted from [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (commit `525f9b560de45753a5ea01069454e72e9aa541c6`), derived from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Its attribution and the list of modifications are in [`crates/plexustyping-corpus/data/es/LICENSE.md`](crates/plexustyping-corpus/data/es/LICENSE.md).
+
+## Syntax highlighting
+
+Code mode highlights snippets with [syntect](https://github.com/trishume/syntect) and the syntax definitions bundled by [two-face](https://codeberg.org/CosmicHarper/two-face), which are curated by the [bat](https://github.com/sharkdp/bat) project.
+
+- **syntect**: MIT License, reproduced below.
+- **two-face**: MIT OR Apache-2.0. Copyright (c) 2023-2025 The `two-face` developers (https://codeberg.org/CosmicHarper/two-face).
+- **bat**: MIT OR Apache-2.0. Copyright (c) 2018-2021 bat-developers (https://github.com/sharkdp/bat). Most of the code that generates the syntax dumps, and the curation of the syntaxes, comes from bat.
+- **Syntax definitions**: each embedded definition keeps its own licence. The licences that require acknowledgement are reproduced in [`crates/plexustyping-highlight/SYNTAX_LICENSES.md`](crates/plexustyping-highlight/SYNTAX_LICENSES.md); the full listing is at <https://codeberg.org/CosmicHarper/two-face/src/tag/v0.5.2+bat-0.26.1/generated/acknowledgements_full.md>.
+
+```text
+MIT License
+
+Copyright (c) 2017 Tristan Hume, Keith Hall, Google Inc and other contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

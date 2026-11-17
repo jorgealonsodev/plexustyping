@@ -3049,6 +3049,7 @@ name = "plexustyping-highlight"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "serde_json",
  "syntect",
  "two-face",
 ]
