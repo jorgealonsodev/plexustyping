@@ -1,20 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t">
-  <title id="t">PlexusTyping</title>
-  <!-- keycap: side and top face -->
-  <rect x="8" y="12" width="112" height="108" rx="26" fill="#4f6fa8"/>
-  <rect x="16" y="10" width="96" height="94" rx="20" fill="#89b4fa"/>
-  <!-- plexus: nerve network converging from the "brain" to the fingers -->
-  <g stroke="#1e1e2e" stroke-width="4" stroke-linecap="round" fill="none">
-    <path d="M38 32 L54 50 M64 26 L54 50 M64 26 L76 50 M90 34 L76 50 M38 32 L64 26 L90 34 M54 50 L76 50 M54 50 L64 70 M76 50 L64 70"/>
-  </g>
-  <g fill="#1e1e2e">
-    <circle cx="38" cy="32" r="5.5"/>
-    <circle cx="64" cy="26" r="5.5"/>
-    <circle cx="90" cy="34" r="5.5"/>
-    <circle cx="54" cy="50" r="5"/>
-    <circle cx="76" cy="50" r="5"/>
-  </g>
-  <circle cx="64" cy="70" r="7" fill="#f5c2e7" stroke="#1e1e2e" stroke-width="4"/>
-  <!-- typing caret -->
-  <rect x="48" y="84" width="32" height="6" rx="3" fill="#1e1e2e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="plexustyping-logo-title">
+  <title id="plexustyping-logo-title">PlexusTyping</title>
+  <defs>
+    <linearGradient id="k-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b4cdff"/><stop offset="1" stop-color="#7aa2f7"/></linearGradient>
+    <linearGradient id="k-side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f6fa8"/><stop offset="1" stop-color="#2a3b66"/></linearGradient>
+    <radialGradient id="k-dish" cx="0.5" cy="0.35" r="0.75"><stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect x="16" y="30" width="224" height="210" rx="50" fill="url(#k-side)"/>
+  <rect x="34" y="16" width="188" height="184" rx="38" fill="url(#k-top)"/>
+  <rect x="34" y="16" width="188" height="184" rx="38" fill="url(#k-dish)"/>
+  <rect x="35" y="17" width="186" height="182" rx="37" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="2"/>
+  <text x="128" y="138" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="104" font-weight="800" fill="#1e1e2e">P</text>
+  <!-- pink homing bump, like F and J -->
+  <rect x="100" y="160" width="56" height="10" rx="5" fill="#f5c2e7" stroke="#1e1e2e" stroke-width="3"/>
 </svg>
