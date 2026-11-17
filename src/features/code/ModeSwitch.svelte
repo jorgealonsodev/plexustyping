@@ -51,14 +51,22 @@
   .mode {
     display: flex;
     align-items: center;
+    /* Room for the native select (WebKitGTK may draw it taller than 2rem) in both modes. */
+    height: 2.4rem;
     gap: 0.5rem;
     margin-left: auto;
   }
   .kinds {
     display: flex;
   }
+  /* One fixed height: showing the language select must not change the header height. */
+  .kinds button,
+  select {
+    box-sizing: border-box;
+    height: 2rem;
+  }
   .kinds button {
-    padding: 0.3rem 0.7rem;
+    padding: 0 0.7rem;
     font-size: 0.85rem;
     color: var(--muted);
   }
@@ -76,7 +84,7 @@
   }
   select {
     max-width: 9rem;
-    padding: 0.3rem 0.4rem;
+    padding: 0 0.4rem;
     font: inherit;
     font-size: 0.85rem;
     color: var(--text);
