@@ -509,6 +509,22 @@ async fn a_prose_ai_text_only_lists_the_targets_it_really_contains() {
 }
 
 #[tokio::test]
+async fn a_prose_ai_text_lists_a_target_it_only_contains_in_uppercase() {
+    const UPPER: &str = "ÑANDÚ Y ÑU corren por la llanura verde del sur hoy.";
+    let srv = server(vec![(OPENAI, 200, chat_reply(UPPER))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let got = next_text(&state, &params(4)).await.unwrap();
+    assert_eq!(
+        (got.source, got.targets),
+        (TextSource::Ai, vec!["ñ".to_owned()])
+    );
+}
+
+#[tokio::test]
 async fn ai_success_is_returned_cached_as_used_and_counted() {
     let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
     let memory = MemoryStore::shared();
