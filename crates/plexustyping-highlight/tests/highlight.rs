@@ -190,6 +190,18 @@ fn php_starting_with_an_open_tag_is_code() {
 }
 
 #[test]
+fn php_template_starting_with_markup_uses_the_html_grammar() {
+    for code in [
+        "<p>Hola</p>\n<?php echo 1; ?>\n",
+        "\u{feff}<p>Hola</p>\n<?php echo 1; ?>\n",
+    ] {
+        let t = tokens("php", code);
+        assert_ne!(class_of(code, &t, "p"), TokenClass::Plain, "{code:?}");
+        assert_eq!(class_of(code, &t, "1"), TokenClass::Number, "{code:?}");
+    }
+}
+
+#[test]
 fn php_open_tag_inside_bare_code_keeps_the_source_grammar() {
     let code = "function f() { return \"<?xml\"; } // <?\n";
     let t = tokens("php", code);
