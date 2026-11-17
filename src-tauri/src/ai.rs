@@ -592,9 +592,20 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
         match state.ai.generate_with_fallback(&chain, &request).await {
             Ok(generated) => {
                 let provider = slug(generated.provider);
-                // A text from the retry without targets practises none of them.
+                // A text from the retry without targets practises none of them; a prose
+                // text (whose prompt names no targets, S9) only those it really contains.
+                let lower = generated.text.to_lowercase();
+                let present: Vec<String>;
                 let targets: &[String] = if generated.free_text {
                     &[]
+                } else if matches!(plan, Plan::Prose(_)) {
+                    present = plan
+                        .targets()
+                        .iter()
+                        .filter(|t| lower.contains(&t.to_lowercase()))
+                        .cloned()
+                        .collect();
+                    &present
                 } else {
                     plan.targets()
                 };

@@ -494,6 +494,21 @@ async fn disabled_ai_gives_the_corpus_text_without_any_request() {
 }
 
 #[tokio::test]
+async fn a_prose_ai_text_only_lists_the_targets_it_really_contains() {
+    // Prose no longer asks for targets (S9), so "Practicando" must not claim them.
+    const NO_N: &str = "La casa del lago tiene una puerta roja y dos ventanas.";
+    let srv = server(vec![(OPENAI, 200, chat_reply(NO_N))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let got = next_text(&state, &params(4)).await.unwrap();
+    assert_eq!((got.source, got.text.as_str()), (TextSource::Ai, NO_N));
+    assert!(got.targets.is_empty(), "{:?}", got.targets);
+}
+
+#[tokio::test]
 async fn ai_success_is_returned_cached_as_used_and_counted() {
     let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
     let memory = MemoryStore::shared();

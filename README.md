@@ -81,8 +81,10 @@ today and in total, so you can watch your spending.
   this machine. Requests go from Rust to the provider hosts only.
 - **Fallback:** each request has a 30 s timeout (60 s for the whole chain); a provider whose text fails
   validation gets one retry, then the next provider is tried. If all fail (or
-  no key is set), a previously generated text from the local cache that has not been shown yet is used,
-  and then the local corpus. A short note above the text says why, and the
+  no key is set), the local corpus generates a new text, so a failure never
+  repeats a text already shown (a cached AI text is only used if it was never
+  shown; the texts the app shows are stored as shown). A short note above the
+  text says why, and the
   source is always shown ("Generado con IA · Claude · …", "Texto del caché",
   "Corpus local").
 - **Latency:** the next text is requested in the background as soon as you

@@ -4,8 +4,9 @@
 //! The format comes from models.dev (`["opencode-go"].models[id].provider.npm`;
 //! a model without one uses the provider default, OpenAI-compatible chat). A
 //! model marked `reasoning: true` whose `reasoning_options` include an `effort`
-//! option listing `none`, `minimal` or `low` is asked for the first of those it
-//! lists, so short practice texts come back quickly. The catalogue is
+//! option listing `none`, `minimal` or `low` is asked for the lowest of them
+//! (in that order, whatever order the catalogue lists them in), so short practice
+//! texts come back quickly. The catalogue is
 //! fetched on the first OpenCode Go generation and kept in memory for 24 hours.
 
 use std::collections::HashMap;

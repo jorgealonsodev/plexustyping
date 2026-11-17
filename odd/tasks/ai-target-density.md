@@ -13,13 +13,14 @@ Branch `fix/ai-target-density`. Runners: `cargo test --workspace`, `pnpm test`, 
 - **S7 — Any text on retry.** When a provider's first text is rejected or malformed, its retry asks for any text: same language, length and allowed characters, no targets. A text accepted that way is shown and cached with no targets (no "Practicando").
 - **S8 — Low reasoning effort.** For OpenCode Go models that the models.dev catalogue marks as reasoning models with a `low` effort option (e.g. `glm-5.3-flash`: `reasoning_options: [{type: effort, values: [low, high, max]}]`), each generation request asks for the lowest effort offered, preferring `none`, then `minimal`, then `low`, in the field the model's wire format uses (chat: `reasoning_effort: "low"`; responses: `reasoning: {effort: "low"}`; messages: none unless the catalogue/format supports it). Models without that option get no extra field. Connection tests and model lists are unchanged.
 - **S9 — Minimal prose prompt.** The prose prompt only asks for a text in the chosen language with the length range and topic, plus the JSON answer line: no target counts, no word-run sentence, no allowed-characters list. Prose validation no longer checks target density; it still checks emptiness, length, characters the layout cannot type and Markdown. Code keeps its prompt and density check.
+- **S10 — No repeated fallback text.** When the AI fails, a cached text is used only if it was never shown; otherwise the local corpus generates a new one. Since the app stores every text it shows as shown, in practice an AI failure uses the corpus. A prose AI text lists in "Practicando" only the targets it really contains.
 - **S4 — Code mode** keeps working (code targets use the code corpus or, if none applies, a minimum of 1 per target); no regression in existing AI tests.
 
 ## Tasks
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S9 | Natural-frequency requirement shared by prompt and validator, stderr reason, tests | worker (context backstop) | pending | |
+| T1 | S1–S10 | Natural-frequency requirement shared by prompt and validator, stderr reason, tests | worker (context backstop) | pending | |
 
 ## Log
 
@@ -38,3 +39,5 @@ Branch `fix/ai-target-density`. Runners: `cargo test --workspace`, `pnpm test`, 
 - **L13 (user, verbatim, 2026-11-17):** screenshot "OpenCode Go no respondió a tiempo: texto del caché", then "dile que genere solo un texto en mi idioma" → S9 (sent to the running worker with S8).
 - **L14 (evidence, 2026-11-17):** worker implemented S8 (lowest effort none > minimal > low from models.dev, chat `reasoning_effort` / responses `reasoning.effort`, not on connection tests) and S9 (3-line prose prompt, no prose density check); parent updated the two app tests. `cargo test --workspace` 339 passed, vitest 201, fmt clean. Not checked against the live OpenCode Go service (needs the user's key).
 - **L15 (user, verbatim, 2026-11-17):** "ahora funciona bien, es posible que fuera opencode go" / "que era muy lento" — with Gemini the app generates prose; Gemini logs show some HTTP 503 and texts rejected for length 295 and 371 (accepted range 300–360 for length 300).
+- **L16 (user, verbatim, 2026-11-17):** "cuando sale error de ia siempre sale el mismo texto" — the user's cache held 11 prose texts, all shown; the fallback reused them → `take_unused_cached_text` (`26af6f8`).
+- **L17 (verify, 2026-11-17):** S8, S9 met; cargo 340, vitest 201, check 0. Finding: the app stores every AI text as used, so the unused-only cache never serves; decision: accept corpus-only fallback (S10), fix README, list only present targets for prose AI texts, fix the opencode.rs doc. S1, S2, S5 now apply to code only (prose is S9).
