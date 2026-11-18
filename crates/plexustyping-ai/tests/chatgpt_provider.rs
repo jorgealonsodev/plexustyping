@@ -163,6 +163,58 @@ fn message(err: &ProviderError) -> String {
     err.to_string()
 }
 
+// ------------------------------------------------------------- chain
+
+const OPENAI_CHAT: &str = "/v1/chat/completions";
+
+/// "si ChatGPT falla por un problema de tu plan … no pasar a otro proveedor" (user
+/// decision, following OpenAI: plan usage errors stop inference and are never
+/// switched silently to another billing path).
+#[tokio::test]
+async fn a_plan_error_stops_the_chain_before_any_other_provider() {
+    for code in [
+        "subscription_sharing_usage_limit_exceeded",
+        "subscription_sharing_usage_unavailable",
+        "subscription_sharing_user_not_eligible",
+        "subscription_sharing_invalid_user",
+    ] {
+        let server = mock(vec![
+            (RESPONSES, failed(code)),
+            (OPENAI_CHAT, chat_reply(&text_json("Zapatos azules"))),
+        ])
+        .await;
+        let chain = [chatgpt(ACCESS), config(ProviderId::Openai, "gpt-5-mini")];
+        let errors = server
+            .client()
+            .generate_with_fallback(&chain, &small_request())
+            .await
+            .unwrap_err();
+        assert_eq!(errors.len(), 1, "{code}: {errors:?}");
+        assert_eq!(errors[0].0, ProviderId::Chatgpt, "{code}");
+        assert_eq!(
+            server.hits(OPENAI_CHAT),
+            0,
+            "{code}: no other provider is billed"
+        );
+    }
+}
+
+#[tokio::test]
+async fn a_chatgpt_network_failure_still_moves_on_to_the_next_provider() {
+    let server = mock(vec![
+        (RESPONSES, Reply::status(502, "{}")),
+        (OPENAI_CHAT, chat_reply(&text_json("Zapatos azules"))),
+    ])
+    .await;
+    let chain = [chatgpt(ACCESS), config(ProviderId::Openai, "gpt-5-mini")];
+    let got = server
+        .client()
+        .generate_with_fallback(&chain, &small_request())
+        .await
+        .unwrap();
+    assert_eq!(got.provider, ProviderId::Openai);
+}
+
 // ------------------------------------------------------------- request
 
 #[tokio::test]
@@ -746,40 +798,6 @@ async fn a_model_list_that_is_not_a_plan_catalogue_is_unreadable() {
 }
 
 // ------------------------------------------------------------- chain
-
-#[tokio::test]
-async fn the_chain_moves_on_to_the_next_provider_when_chatgpt_fails() {
-    let server = mock(vec![
-        (
-            RESPONSES,
-            failed("subscription_sharing_usage_limit_exceeded"),
-        ),
-        (
-            "/v1/chat/completions",
-            chat_reply(&text_json("Zapatos azules")),
-        ),
-    ])
-    .await;
-    let chain = vec![chatgpt(ACCESS), config(ProviderId::Openai, "gpt-5-mini")];
-
-    let got = server
-        .client()
-        .generate_with_fallback(&chain, &small_request())
-        .await
-        .unwrap();
-
-    assert_eq!(got.provider, ProviderId::Openai);
-    assert_eq!(
-        got.failed_attempts,
-        [(
-            ProviderId::Chatgpt,
-            ProviderError::RateLimit {
-                message: "Has alcanzado el límite de tu plan de ChatGPT".into()
-            }
-        )]
-    );
-    assert_eq!(server.hits(RESPONSES), 1, "a plan limit is not retried");
-}
 
 #[tokio::test]
 async fn an_invalid_chatgpt_text_gets_the_free_retry_like_any_provider() {
