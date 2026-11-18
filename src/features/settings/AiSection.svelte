@@ -4,6 +4,9 @@
   import {
     type AiSettings,
     type ChainEntry,
+    type ChatgptStatus,
+    type ModelOption,
+    CHATGPT_USAGE_URL,
     type ProviderId,
     type ProviderInfo,
     type UsageRow,
@@ -12,21 +15,30 @@
     MAX_CHAIN,
     MAX_TOPIC,
     addEntry,
+    chatgptAccount,
+    chatgptReady,
     densityLabel,
     failureMessage,
-    modelChoices,
+    modelOptions,
     moveEntry,
+    needsKey,
     providerChoices,
     removeEntry,
     setModel,
     setProvider,
+    signOutNotice,
     usageCells,
   } from "./ai";
   import {
     aiKeyDelete,
     aiKeySave,
+    aiChatgptCancel,
+    aiChatgptOpenUsage,
+    aiChatgptSignIn,
+    aiChatgptSignOut,
+    aiChatgptStatus,
     aiKeyStatus,
-    aiModels,
+    aiModelOptions,
     aiProviders,
     aiSettingsGet,
     aiSettingsSet,
@@ -48,12 +60,18 @@
   let error = $state("");
   let keyState: Partial<Record<ProviderId, KeyState>> = $state({});
   let keyError: Partial<Record<ProviderId, string>> = $state({});
-  // Listed models per provider; `null` when listing failed (free text instead).
-  let models: Partial<Record<ProviderId, string[] | null>> = $state({});
+  // Listed models per provider (shown by name, stored by id); `null` when listing failed (free text instead).
+  let models: Partial<Record<ProviderId, ModelOption[] | null>> = $state({});
   // Rows whose model is typed by hand.
   let custom: Partial<Record<ProviderId, boolean>> = $state({});
   let tests: Partial<Record<ProviderId, TestState>> = $state({});
   let usage = $state.raw<UsageRow[]>([]);
+  // Sign in with ChatGPT: the account (never a token), a sign-in waiting for the browser,
+  // and the last error or notice.
+  let chatgpt = $state.raw<ChatgptStatus | null>(null);
+  let signingIn = $state(false);
+  let chatgptError = $state("");
+  let chatgptNotice = $state("");
   let density = $state(3);
 
   const KEY_LABELS: Record<KeyState, string> = {
@@ -114,13 +132,77 @@
   const commitChain = (chain: ChainEntry[]) => ai && void commit({ ...ai, chain });
 
   function refreshProvider(id: ProviderId, listModels = true) {
+    if (id === "chatgpt") {
+      refreshChatgpt(listModels);
+      return;
+    }
     aiKeyStatus(id)
-      .then((saved) => (keyState[id] = saved ? "saved" : "none"))
-      .catch(() => (keyState[id] = "unavailable"));
-    if (!listModels) return;
-    aiModels(id)
-      .then((list) => (models[id] = list.length > 0 ? list : null))
-      .catch(() => (models[id] = null));
+      .then((saved) => {
+        keyState[id] = saved ? "saved" : "none";
+      })
+      .catch(() => {
+        keyState[id] = "unavailable";
+      });
+    if (listModels) listModelsOf(id);
+  }
+
+  function listModelsOf(id: ProviderId) {
+    aiModelOptions(id)
+      .then((list) => {
+        models[id] = list.length > 0 ? list : null;
+      })
+      .catch(() => {
+        models[id] = null;
+      });
+  }
+
+  /** The account; its models are listed when it is usable (signed in with plan use). */
+  function refreshChatgpt(listModels = true) {
+    aiChatgptStatus()
+      .then((s) => {
+        chatgpt = s;
+        keyState.chatgpt = chatgptReady(s) ? "saved" : "none";
+        if (!listModels) return;
+        if (chatgptReady(s)) listModelsOf("chatgpt");
+        else models.chatgpt = null;
+      })
+      .catch((err) => {
+        chatgptError = failureMessage(err);
+      });
+  }
+
+  async function signIn() {
+    signingIn = true;
+    chatgptError = "";
+    chatgptNotice = "";
+    try {
+      chatgpt = await aiChatgptSignIn();
+      settings.bumpAi();
+    } catch (err) {
+      chatgptError = failureMessage(err);
+    } finally {
+      signingIn = false;
+    }
+    refreshChatgpt();
+  }
+
+  async function signOut() {
+    chatgptError = "";
+    chatgptNotice = "";
+    try {
+      chatgptNotice = signOutNotice(await aiChatgptSignOut());
+      settings.bumpAi();
+    } catch (err) {
+      chatgptError = failureMessage(err);
+    }
+    refreshChatgpt();
+  }
+
+  function openUsage(e: MouseEvent) {
+    e.preventDefault();
+    aiChatgptOpenUsage().catch((err) => {
+      chatgptError = failureMessage(err);
+    });
   }
 
   function refreshUsage() {
@@ -252,8 +334,8 @@
                 onchange={(e: Change<HTMLSelectElement>) => onModelSelect(i, entry.provider, e.currentTarget.value)}
               >
                 {#if !entry.model}<option value="" selected>Elige un modelo</option>{/if}
-                {#each modelChoices(listed ?? [], entry.model) as m (m)}
-                  <option value={m} selected={m === entry.model}>{m}</option>
+                {#each modelOptions(listed ?? [], entry.model) as m (m.id)}
+                  <option value={m.id} selected={m.id === entry.model}>{m.name}</option>
                 {/each}
                 <option value={OTHER}>Otro…</option>
               </select>
@@ -276,13 +358,39 @@
               >
             </span>
           </div>
-          <form class="row" onsubmit={(e) => void saveKey(e, entry.provider)}>
-            <input name="key" type="password" autocomplete="off" placeholder="Clave de API" aria-label="Clave de {nameOf(entry.provider)}" />
-            <button type="submit">Guardar clave</button>
-            <button type="button" onclick={() => void deleteKey(entry.provider)}>Borrar clave</button>
-            <span class="status" class:ok={keyState[entry.provider] === "saved"}>{KEY_LABELS[keyState[entry.provider] ?? "unknown"]}</span>
-          </form>
-          {#if keyError[entry.provider]}<p class="error" role="alert">{keyError[entry.provider]}</p>{/if}
+          {#if needsKey(entry.provider)}
+            <form class="row" onsubmit={(e) => void saveKey(e, entry.provider)}>
+              <input name="key" type="password" autocomplete="off" placeholder="Clave de API" aria-label="Clave de {nameOf(entry.provider)}" />
+              <button type="submit">Guardar clave</button>
+              <button type="button" onclick={() => void deleteKey(entry.provider)}>Borrar clave</button>
+              <span class="status" class:ok={keyState[entry.provider] === "saved"}>{KEY_LABELS[keyState[entry.provider] ?? "unknown"]}</span>
+            </form>
+            {#if keyError[entry.provider]}<p class="error" role="alert">{keyError[entry.provider]}</p>{/if}
+          {:else}
+            <div class="account" aria-label="Cuenta de ChatGPT">
+              {#if chatgpt}
+                {@const acc = chatgptAccount(chatgpt)}
+                <div class="row">
+                  <span class="status" class:ok={acc.ok}>{acc.account}</span>
+                  {#if acc.plan}<span class="status" class:ok={acc.ok} class:bad={!acc.ok}>{acc.plan}</span>{/if}
+                </div>
+              {/if}
+              <div class="row">
+                {#if signingIn}
+                  <span class="status" role="status">Esperando al navegador…</span>
+                  <button type="button" onclick={() => void aiChatgptCancel()}>Cancelar</button>
+                {:else if chatgpt?.signedIn}
+                  <button type="button" onclick={() => void signOut()}>Cerrar sesión</button>
+                {:else}
+                  <button type="button" onclick={() => void signIn()}>Iniciar sesión con ChatGPT</button>
+                {/if}
+                <a href={CHATGPT_USAGE_URL} onclick={openUsage}>Gestionar uso</a>
+              </div>
+              <p class="hint">Los textos usan tu plan de ChatGPT.</p>
+              {#if chatgptNotice}<p class="error" role="status">{chatgptNotice}</p>{/if}
+              {#if chatgptError}<p class="error" role="alert">{chatgptError}</p>{/if}
+            </div>
+          {/if}
           <div class="row">
             <button type="button" disabled={test_ === "pending"} onclick={() => void test(entry)}>Probar conexión</button>
             {#if test_ === "pending"}
@@ -444,6 +552,18 @@
   }
   .status.bad {
     color: var(--danger);
+  }
+  .account {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .account a {
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+  .account .hint {
+    margin: 0;
   }
   .usage-head {
     display: flex;

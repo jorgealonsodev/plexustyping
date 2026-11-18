@@ -10,7 +10,7 @@
 
 use std::time::Duration;
 
-use plexustyping_ai::chatgpt_auth::AuthError;
+use plexustyping_ai::chatgpt_auth::{AuthError, SignOut, Status};
 use plexustyping_ai::{
     AiClient, ApiKey, GenerationRequest, Mode, ProviderConfig, ProviderError, ProviderId,
     ValidationIssue,
@@ -443,6 +443,89 @@ pub async fn test_connection(
         .test_connection(&cfg)
         .await
         .map_err(|e| provider_failure(id, &e))
+}
+
+/// A Sign in with ChatGPT failure as a command failure: its Spanish message
+/// (never a credential) with a kind the settings can tell apart.
+pub fn auth_failure(err: AuthError) -> AiFailure {
+    let kind = match err {
+        AuthError::Cancelled => "cancelled",
+        AuthError::Timeout => "timeout",
+        AuthError::AccessDenied => "denied",
+        AuthError::KeysUnavailable | AuthError::Unavailable { .. } | AuthError::Network { .. } => {
+            "network"
+        }
+        _ => "config",
+    };
+    AiFailure::new(kind, err.to_string())
+}
+
+/// Signed out, as shown when there is no sign-in or nowhere to keep one.
+const SIGNED_OUT: Status = Status {
+    signed_in: false,
+    email: None,
+    plan_enabled: false,
+};
+
+/// Whether ChatGPT is signed in, with which account and whether plan use is
+/// enabled; signed out when the app has no place to keep a sign-in.
+pub async fn chatgpt_status(client: &AiClient) -> Result<Status, AiFailure> {
+    let Some(auth) = client.chatgpt() else {
+        return Ok(SIGNED_OUT);
+    };
+    match auth.status().await {
+        Err(AuthError::NoStorage) => Ok(SIGNED_OUT),
+        other => other.map_err(auth_failure),
+    }
+}
+
+/// Signs in with ChatGPT: `open` shows the authorization URL in the system
+/// browser; resolves once the browser comes back, is cancelled or times out.
+pub async fn chatgpt_sign_in<F>(client: &AiClient, open: F) -> Result<Status, AiFailure>
+where
+    F: Fn(&str) -> Result<(), String> + Send + Sync,
+{
+    let auth = client
+        .chatgpt()
+        .ok_or_else(|| auth_failure(AuthError::NoStorage))?;
+    auth.sign_in(open).await.map_err(auth_failure)
+}
+
+/// Ends a pending ChatGPT sign-in, if any.
+pub fn chatgpt_cancel(client: &AiClient) {
+    if let Some(auth) = client.chatgpt() {
+        auth.cancel();
+    }
+}
+
+/// Revokes the ChatGPT session and forgets its tokens (even when OpenAI could
+/// not confirm the revocation: `revoked` is then false).
+pub async fn chatgpt_sign_out(client: &AiClient) -> Result<SignOut, AiFailure> {
+    let auth = client
+        .chatgpt()
+        .ok_or_else(|| auth_failure(AuthError::NoStorage))?;
+    auth.sign_out().await.map_err(auth_failure)
+}
+
+/// A listed model: `id` is stored and sent, `name` is shown.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct ModelName {
+    pub id: String,
+    pub name: String,
+}
+
+/// The ChatGPT plan's models with their display names, read with the
+/// signed-in account (the other providers keep `ai_models`).
+pub async fn chatgpt_models(client: &AiClient) -> Result<Vec<ModelName>, AiFailure> {
+    let id = ProviderId::Chatgpt;
+    let listed = client
+        .chatgpt_model_names()
+        .await
+        .map_err(|e| provider_failure(id, &e))?;
+    Ok(listed
+        .into_iter()
+        .map(|(id, name)| ModelName { id, name })
+        .collect())
 }
 
 /// Per-provider usage on `day` and in total.

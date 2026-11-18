@@ -10,7 +10,7 @@ pub mod secrets;
 
 use std::sync::{Arc, MutexGuard};
 
-use ai::{AiFailure, AiSettings, ProviderInfo, TextParams};
+use ai::{AiFailure, AiSettings, ModelName, ProviderInfo, TextParams};
 use code::PracticeMode;
 use commands::{
     AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoreRequest, ScoredSession,
@@ -19,6 +19,7 @@ use commands::{
 use goals::GoalStatus;
 use history::{CharRow, CsvExport, DayRow};
 use metronome::{MetronomeStarted, MetronomeState};
+use plexustyping_ai::chatgpt_auth::{SignOut, Status};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
 use plexustyping_audio::MetronomeConfig;
 use plexustyping_core::{ErrorMode, IndentMode, InputEvent};
@@ -347,6 +348,47 @@ async fn ai_test(
     ai::test_connection(&state.ai, &state.secrets, provider, &model).await
 }
 
+/// Whether ChatGPT is signed in, with which account and whether plan use is enabled.
+#[tauri::command]
+async fn ai_chatgpt_status(state: State<'_, AppState>) -> Result<Status, AiFailure> {
+    ai::chatgpt_status(&state.ai).await
+}
+
+/// Signs in with ChatGPT in the system browser; resolves once the browser comes
+/// back (or the sign-in is cancelled or times out).
+#[tauri::command]
+async fn ai_chatgpt_sign_in(state: State<'_, AppState>) -> Result<Status, AiFailure> {
+    ai::chatgpt_sign_in(&state.ai, oauth::open_browser).await
+}
+
+/// Ends a pending ChatGPT sign-in.
+#[tauri::command]
+fn ai_chatgpt_cancel(state: State<AppState>) {
+    ai::chatgpt_cancel(&state.ai);
+}
+
+/// Revokes the ChatGPT session and forgets its tokens.
+#[tauri::command]
+async fn ai_chatgpt_sign_out(state: State<'_, AppState>) -> Result<SignOut, AiFailure> {
+    ai::chatgpt_sign_out(&state.ai).await
+}
+
+/// The ChatGPT plan's models as `{ id: slug, name: display name }`
+/// (`ai_models` keeps returning plain ids for every provider).
+#[tauri::command]
+async fn ai_chatgpt_models(state: State<'_, AppState>) -> Result<Vec<ModelName>, AiFailure> {
+    ai::chatgpt_models(&state.ai).await
+}
+
+/// Opens the ChatGPT plan usage page in the system browser.
+#[tauri::command]
+fn ai_chatgpt_open_usage() -> Result<(), AiFailure> {
+    oauth::open_usage_page().map_err(|_| AiFailure {
+        kind: "config",
+        message: "No se pudo abrir el navegador".to_owned(),
+    })
+}
+
 #[tauri::command]
 fn ai_usage(state: State<AppState>, day: String) -> Result<Vec<UsageRow>, String> {
     ai::usage(&store(&state), &ai::usage_day(&day))
@@ -460,6 +502,12 @@ pub fn run() {
             ai_key_delete,
             ai_models,
             ai_test,
+            ai_chatgpt_status,
+            ai_chatgpt_sign_in,
+            ai_chatgpt_cancel,
+            ai_chatgpt_sign_out,
+            ai_chatgpt_models,
+            ai_chatgpt_open_usage,
             ai_usage,
             metronome_start,
             metronome_update,

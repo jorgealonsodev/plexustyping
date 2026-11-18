@@ -1,6 +1,6 @@
 //! App glue for Sign in with ChatGPT (`plexustyping_ai::chatgpt_auth`): where
 //! the private credential file lives and how the system browser is opened.
-//! The Tauri commands and the settings UI come later (T3).
+//! The Tauri commands are `ai_chatgpt_*` in `lib.rs` (backed by `ai.rs`).
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -49,6 +49,15 @@ pub fn open_browser(url: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// OpenAI's page with the ChatGPT plan usage ("Gestionar uso" in Ajustes → IA).
+pub const USAGE_URL: &str = "https://chatgpt.com/settings/usage";
+
+/// Opens [`USAGE_URL`] in the system browser (only this fixed page: the
+/// frontend never chooses what is opened).
+pub fn open_usage_page() -> Result<(), String> {
+    open_browser(USAGE_URL)
+}
+
 /// Signs in through the system browser; resolves once the browser comes back.
 pub async fn sign_in(auth: &ChatgptAuth) -> Result<Status, AuthError> {
     auth.sign_in(open_browser).await
@@ -85,6 +94,15 @@ mod tests {
                 "rundll32",
                 vec!["url.dll,FileProtocolHandler".to_string(), url.to_string()]
             )
+        );
+    }
+
+    #[test]
+    fn manage_usage_opens_the_chatgpt_usage_page() {
+        assert_eq!(USAGE_URL, "https://chatgpt.com/settings/usage");
+        assert_eq!(
+            browser_command("linux", USAGE_URL),
+            ("xdg-open", vec![USAGE_URL.to_string()])
         );
     }
 
