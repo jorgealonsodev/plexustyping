@@ -160,7 +160,7 @@ pub(crate) fn build(
     if model.is_empty() {
         return Err(ProviderError::config(format!(
             "Choose a {} model first.",
-            cfg.id.label()
+            cfg.id.error_name()
         )));
     }
     let key = &cfg.api_key;
@@ -232,6 +232,23 @@ pub(crate) fn build(
             }
         }
         ProviderId::OpencodeGo => opencode_go(cfg, endpoints, prompt, format, low_effort)?,
+        // The plan API: a stream, nothing stored, `input` as an array with the prompt as
+        // the user message, and none of the fields it rejects (`max_output_tokens`,
+        // `temperature`, `metadata`, `user`, `previous_response_id`, …; preview-limitations).
+        ProviderId::Chatgpt => Call {
+            url: format!("{}/responses", endpoints.openai),
+            headers: vec![bearer(key)],
+            body: json!({
+                "model": model,
+                "input": user_message(prompt),
+                "store": false,
+                "stream": true,
+            }),
+            shape: Shape {
+                provider,
+                wire: Wire::Responses,
+            },
+        },
     };
     Ok(call)
 }
@@ -304,18 +321,21 @@ fn opencode_go(
 
 fn refused(provider: ProviderId) -> ProviderError {
     ProviderError::Refused {
-        message: format!("{} declined to write this text.", provider.label()),
+        message: format!("{} declined to write this text.", provider.error_name()),
     }
 }
 
 fn truncated(provider: ProviderId) -> ProviderError {
-    ProviderError::bad_response(format!("The answer from {} was cut off.", provider.label()))
+    ProviderError::bad_response(format!(
+        "The answer from {} was cut off.",
+        provider.error_name()
+    ))
 }
 
 fn unreadable(provider: ProviderId) -> ProviderError {
     ProviderError::bad_response(format!(
         "{} sent an answer PlexusTyping could not read.",
-        provider.label()
+        provider.error_name()
     ))
 }
 
@@ -332,7 +352,12 @@ pub(crate) fn parse(
     if !(200..300).contains(&status) {
         return Err(status_error(shape.provider, status, body));
     }
-    let value: Value = serde_json::from_str(body).map_err(|_| unreadable(shape.provider))?;
+    let value: Value = if shape.provider == ProviderId::Chatgpt {
+        // Server-sent events; the terminal `response` reads like a Responses body.
+        crate::chatgpt::stream_response(body)?
+    } else {
+        serde_json::from_str(body).map_err(|_| unreadable(shape.provider))?
+    };
     let reply = match shape.wire {
         Wire::Messages => messages_reply(&value),
         Wire::Gemini => gemini_reply(&value),
@@ -471,6 +496,9 @@ fn error_detail(body: &str) -> Option<String> {
 
 /// Maps a non-2xx status. The caller masks the key in the result.
 pub(crate) fn status_error(provider: ProviderId, status: u16, body: &str) -> ProviderError {
+    if provider == ProviderId::Chatgpt {
+        return crate::chatgpt::status_error(status, body);
+    }
     let name = provider.label();
     let gemini_bad_key = provider == ProviderId::Gemini
         && status == 400
@@ -518,11 +546,13 @@ pub(crate) fn list_request(
                 ("anthropic-version", ANTHROPIC_VERSION.to_string()),
             ],
         ),
-        ProviderId::Openai => (format!("{}/models", endpoints.openai), vec![bearer(key)]),
         ProviderId::Gemini => (
             format!("{}/models?pageSize=1000", endpoints.gemini),
             vec![("x-goog-api-key", key.expose().to_string())],
         ),
+        ProviderId::Openai | ProviderId::Chatgpt => {
+            (format!("{}/models", endpoints.openai), vec![bearer(key)])
+        }
         ProviderId::OpencodeGo => unreachable!("handled above"),
     })
 }
@@ -545,6 +575,11 @@ pub(crate) fn parse_models(
         return Err(status_error(id, status, body));
     }
     let value: Value = serde_json::from_str(body).map_err(|_| unreadable(id))?;
+    if id == ProviderId::Chatgpt {
+        // The plan catalogue (`models[]`), already filtered, deduplicated and in server order.
+        let models = crate::chatgpt::models(&value).ok_or_else(|| unreadable(id))?;
+        return Ok(models.into_iter().map(|(slug, _)| slug).collect());
+    }
     let ids: Vec<String> = if id == ProviderId::Gemini {
         value["models"]
             .as_array()

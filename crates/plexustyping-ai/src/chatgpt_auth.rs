@@ -620,6 +620,19 @@ impl ChatgptAuth {
 
     /// A valid access token for inference, renewed first when it is about to expire.
     pub async fn access_token(&self) -> Result<ApiKey, AuthError> {
+        self.token(None).await
+    }
+
+    /// A new access token after the API rejected `rejected` (HTTP 401): renewed
+    /// now, even before its expiry, unless another request already replaced it
+    /// (then the saved one is returned without a refresh).
+    pub async fn refresh_rejected(&self, rejected: &ApiKey) -> Result<ApiKey, AuthError> {
+        self.token(Some(rejected.expose())).await
+    }
+
+    /// The saved access token while it is valid and is not `rejected`; otherwise
+    /// one refresh (serialized on the record lock).
+    async fn token(&self, rejected: Option<&str>) -> Result<ApiKey, AuthError> {
         let path = self.path()?;
         let guard = self.lock.clone().lock_owned().await;
         let mut record = load_from(&path)?;
@@ -631,6 +644,7 @@ impl ChatgptAuth {
         }
         if let Some(token) = &record.access_token
             && now_secs() + REFRESH_MARGIN_SECS < record.expires_at
+            && rejected != Some(token.as_str())
         {
             return ApiKey::new(token.clone()).map_err(|_| AuthError::NotSignedIn);
         }

@@ -311,10 +311,11 @@ async fn ai_key_status(
     state: State<'_, AppState>,
     provider: ProviderId,
 ) -> Result<bool, AiFailure> {
-    ai::key_status(&state.secrets, provider).await
+    ai::key_status(&state.ai, &state.secrets, provider).await
 }
 
 /// The key goes straight to the keychain; it is never returned or logged.
+/// Refused for ChatGPT, which uses the signed-in account.
 #[tauri::command]
 async fn ai_key_save(
     state: State<'_, AppState>,
@@ -423,15 +424,16 @@ pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let path = app.path().app_data_dir().map_err(|e| e.to_string());
+            // Sign in with ChatGPT keeps its private record in the app config dir;
+            // the AI client holds it (`state.ai.chatgpt()`) for the ChatGPT provider.
+            let config_dir = app.path().app_config_dir().ok();
+            let chatgpt = Arc::new(oauth::chatgpt_auth(config_dir.as_deref()));
             app.manage(commands::open_state(
                 path.map(|dir| dir.join("plexustyping.sqlite3")),
                 Arc::new(KeyringStore::default()),
-                AiClient::new(Endpoints::production()),
+                AiClient::new(Endpoints::production()).with_chatgpt(chatgpt),
             ));
             app.manage(MetronomeState::audio());
-            // Sign in with ChatGPT keeps its private record in the app config dir.
-            let config_dir = app.path().app_config_dir().ok();
-            app.manage(oauth::chatgpt_auth(config_dir.as_deref()));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

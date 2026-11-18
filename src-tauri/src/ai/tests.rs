@@ -202,7 +202,7 @@ fn invalid_settings_are_rejected_and_keep_the_stored_ones() {
                 chain: vec![],
                 ..base()
             },
-            "La cadena de respaldo necesita de 1 a 4 proveedores",
+            "La cadena de respaldo necesita de 1 a 5 proveedores",
         ),
         (
             AiSettings {
@@ -213,7 +213,7 @@ fn invalid_settings_are_rejected_and_keep_the_stored_ones() {
                     .collect(),
                 ..base()
             },
-            "La cadena de respaldo necesita de 1 a 4 proveedores",
+            "La cadena de respaldo necesita de 1 a 5 proveedores",
         ),
         (
             AiSettings {
@@ -298,10 +298,14 @@ fn unreadable_stored_settings_fall_back_to_the_defaults() {
 #[test]
 fn providers_list_ids_names_and_default_models() {
     let list = providers();
-    assert_eq!(list.len(), 4);
+    assert_eq!(list.len(), 5);
     assert_eq!(
         serde_json::to_value(&list[3]).unwrap(),
         json!({"id": "opencode-go", "label": "OpenCode Go", "name": "OpenCode Go", "defaultModel": ""})
+    );
+    assert_eq!(
+        serde_json::to_value(&list[4]).unwrap(),
+        json!({"id": "chatgpt", "label": "ChatGPT (tu suscripción)", "name": "ChatGPT", "defaultModel": ""})
     );
     for p in list {
         assert_eq!(json!(slug(p.id)), serde_json::to_value(p.id).unwrap());
@@ -370,20 +374,23 @@ async fn keys_are_saved_trimmed_in_the_keychain_and_only_their_status_returns() 
     let memory = MemoryStore::shared();
     let secrets: SharedSecrets = memory.clone();
     let id = ProviderId::OpencodeGo;
-    assert_eq!(key_status(&secrets, id).await, Ok(false));
+    assert_eq!(key_status(&offline(), &secrets, id).await, Ok(false));
     key_save(&secrets, id, format!("  {KEY}\n")).await.unwrap();
     assert_eq!(memory.get("ai:opencode-go").unwrap().as_deref(), Some(KEY));
     assert_eq!(
         memory.label("ai:opencode-go").as_deref(),
         Some("PlexusTyping AI key (OpenCode Go)")
     );
-    let status = key_status(&secrets, id).await;
+    let status = key_status(&offline(), &secrets, id).await;
     assert_eq!(status, Ok(true));
     assert_eq!(serde_json::to_string(&status.unwrap()).unwrap(), "true");
-    assert_eq!(key_status(&secrets, ProviderId::Claude).await, Ok(false));
+    assert_eq!(
+        key_status(&offline(), &secrets, ProviderId::Claude).await,
+        Ok(false)
+    );
     key_delete(&secrets, id).await.unwrap();
     key_delete(&secrets, id).await.unwrap();
-    assert_eq!(key_status(&secrets, id).await, Ok(false));
+    assert_eq!(key_status(&offline(), &secrets, id).await, Ok(false));
 }
 
 #[tokio::test]
@@ -400,7 +407,10 @@ async fn an_empty_key_is_rejected_and_nothing_is_stored() {
 async fn an_unavailable_keychain_is_an_error_never_a_plain_text_fallback() {
     let secrets: SharedSecrets = Arc::new(NoStore);
     let unavailable = Err(AiFailure::new("keychain", KEYCHAIN_UNAVAILABLE));
-    assert_eq!(key_status(&secrets, ProviderId::Claude).await, unavailable);
+    assert_eq!(
+        key_status(&offline(), &secrets, ProviderId::Claude).await,
+        unavailable
+    );
     assert_eq!(
         key_save(&secrets, ProviderId::Claude, KEY.into()).await,
         unavailable.clone().map(|_| ())
@@ -1435,4 +1445,390 @@ fn rejections_are_one_line_per_invalid_attempt_without_the_key() {
             "PlexusTyping: AI attempt with OpenCode Go failed: The answer was not a {\"text\": \"...\"} JSON object."
         ]
     );
+}
+
+// ---- ChatGPT (tu suscripción) ----
+
+const RESPONSES: &str = "/v1/responses";
+const CHATGPT_MODEL: &str = "gpt-6.1-sol";
+const CHATGPT_TOKEN: &str = "at-SECRET-chatgpt-1";
+const PLAN_SCOPES: [&str; 6] = [
+    "chatgpt.tokens.use.direct",
+    "email",
+    "offline_access",
+    "openid",
+    "profile",
+    "resource.invoke",
+];
+
+/// A scratch folder under the workspace `target/tmp`, removed when dropped.
+struct Scratch(std::path::PathBuf);
+
+impl Scratch {
+    fn new() -> Self {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static SEQ: AtomicU64 = AtomicU64::new(0);
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../target/tmp")
+            .join(format!(
+                "app-chatgpt-{}-{}",
+                std::process::id(),
+                SEQ.fetch_add(1, Ordering::Relaxed)
+            ));
+        std::fs::create_dir_all(&dir).unwrap();
+        Scratch(dir)
+    }
+}
+
+impl Drop for Scratch {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
+/// How the ChatGPT account is when the test starts.
+#[derive(Clone, Copy)]
+enum Account {
+    SignedIn,
+    PlanOff,
+    SignedOut,
+}
+
+/// The mock's client with a ChatGPT sign-in whose record (if any) is `account`.
+fn chatgpt_client(srv: &Mock, dir: &Scratch, account: Account) -> AiClient {
+    use plexustyping_ai::chatgpt_auth::{CREDENTIALS_FILE, ChatgptAuth};
+    let path = dir.0.join(CREDENTIALS_FILE);
+    let scopes: Vec<&str> = match account {
+        Account::SignedIn => PLAN_SCOPES.to_vec(),
+        _ => PLAN_SCOPES[1..].to_vec(),
+    };
+    if !matches!(account, Account::SignedOut) {
+        let expires = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs() + 3600;
+        let record = json!({
+            "hostId": "urn:uuid:00000000-0000-4000-8000-000000000000",
+            "clientId": "oaiapp_TEST-client-1",
+            "subject": "user-sub-1",
+            "email": "ana@example.com",
+            "accessToken": CHATGPT_TOKEN,
+            "refreshToken": "rt-SECRET-chatgpt-1",
+            "scopes": scopes,
+            "expiresAt": expires
+        });
+        std::fs::write(&path, record.to_string()).unwrap();
+    }
+    let auth = ChatgptAuth::new(&srv.endpoints(), Some(path));
+    srv.client().with_chatgpt(Arc::new(auth))
+}
+
+/// A streamed Responses reply answering `{"text": text}`.
+fn chatgpt_reply(text: &str) -> String {
+    let answer = json!({"text": text}).to_string();
+    let events = [
+        json!({"type": "response.created", "response": {"status": "in_progress"}}),
+        json!({"type": "response.output_text.delta", "delta": answer}),
+        json!({"type": "response.completed", "response": {
+            "status": "completed",
+            "output": [{"type": "message", "content": [{"type": "output_text", "text": answer}]}],
+            "usage": {"input_tokens": 50, "output_tokens": 20}
+        }}),
+    ];
+    events
+        .iter()
+        .map(|e| format!("event: {}\ndata: {e}\n\n", e["type"].as_str().unwrap()))
+        .collect()
+}
+
+fn chatgpt_limit() -> String {
+    let event = json!({"type": "response.failed", "response": {"status": "failed",
+        "error": {"code": "subscription_sharing_usage_limit_exceeded", "message": "limit"}}});
+    format!("event: response.failed\ndata: {event}\n\n")
+}
+
+#[tokio::test]
+async fn a_signed_in_chatgpt_writes_the_text_with_its_token_and_counts_usage() {
+    let srv = server(vec![(RESPONSES, 200, chatgpt_reply(AI_TEXT))]).await;
+    let dir = Scratch::new();
+    let memory = MemoryStore::shared();
+    let state = state(
+        memory.clone(),
+        chatgpt_client(&srv, &dir, Account::SignedIn),
+    );
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Chatgpt, CHATGPT_MODEL)]);
+
+    let got = next_text(&state, &params(4)).await.unwrap();
+
+    assert_eq!(
+        (got.source, got.text.as_str(), got.notice.as_deref()),
+        (TextSource::Ai, AI_TEXT, None)
+    );
+    assert_eq!(got.provider.as_deref(), Some("chatgpt"));
+    assert_eq!(got.model.as_deref(), Some(CHATGPT_MODEL));
+    let requests = srv.requests();
+    assert_eq!(requests.len(), 1);
+    let body: serde_json::Value = serde_json::from_str(&requests[0].body).unwrap();
+    assert_eq!(
+        (body["store"].clone(), body["stream"].clone()),
+        (json!(false), json!(true))
+    );
+    assert_eq!(body["model"], CHATGPT_MODEL);
+    let usage = usage_of(&state);
+    assert_eq!(usage.len(), 1);
+    assert_eq!(
+        (
+            usage[0].provider.as_str(),
+            usage[0].calls_today,
+            usage[0].input_tokens_today,
+            usage[0].output_tokens_today
+        ),
+        ("chatgpt", 1, 50, 20)
+    );
+    assert_eq!(
+        memory.get("ai:chatgpt").unwrap(),
+        None,
+        "no key in the keychain"
+    );
+}
+
+#[tokio::test]
+async fn chatgpt_without_a_usable_sign_in_is_skipped_with_a_notice() {
+    let srv = server(vec![(RESPONSES, 200, chatgpt_reply(AI_TEXT))]).await;
+    let cases = [
+        (
+            Some(Account::SignedOut),
+            "Inicia sesión en ChatGPT: texto del corpus local",
+        ),
+        (None, "Inicia sesión en ChatGPT: texto del corpus local"),
+        (
+            Some(Account::PlanOff),
+            "Tu cuenta de ChatGPT no tiene activado el uso del plan: texto del corpus local",
+        ),
+    ];
+    for (account, notice) in cases {
+        let dir = Scratch::new();
+        let client = match account {
+            Some(account) => chatgpt_client(&srv, &dir, account),
+            None => srv.client(),
+        };
+        let state = state(MemoryStore::shared(), client);
+        weak_in_n(&state);
+        enable(&state, &[(ProviderId::Chatgpt, CHATGPT_MODEL)]);
+        let got = next_text(&state, &params(4)).await.unwrap();
+        assert_eq!(got.source, TextSource::Corpus);
+        assert_eq!(got.notice.as_deref(), Some(notice));
+        assert_eq!(got.text, corpus_expected(&state, 4).text);
+    }
+    assert!(
+        srv.requests().is_empty(),
+        "nothing is sent without a sign-in"
+    );
+}
+
+#[tokio::test]
+async fn a_skipped_chatgpt_leaves_the_rest_of_the_chain_working() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(AI_TEXT))]).await;
+    let dir = Scratch::new();
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, chatgpt_client(&srv, &dir, Account::SignedOut));
+    weak_in_n(&state);
+    enable(
+        &state,
+        &[
+            (ProviderId::Chatgpt, CHATGPT_MODEL),
+            (ProviderId::Openai, "gpt-5-mini"),
+        ],
+    );
+    let got = next_text(&state, &params(4)).await.unwrap();
+    assert_eq!(got.provider.as_deref(), Some("openai"));
+    let paths: Vec<String> = srv.requests().into_iter().map(|r| r.path).collect();
+    assert_eq!(paths, [OPENAI]);
+}
+
+#[tokio::test]
+async fn the_chain_falls_back_from_a_failing_chatgpt_to_the_next_provider() {
+    let srv = server(vec![
+        (RESPONSES, 200, chatgpt_limit()),
+        (OPENAI, 200, chat_reply(AI_TEXT)),
+    ])
+    .await;
+    let dir = Scratch::new();
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, chatgpt_client(&srv, &dir, Account::SignedIn));
+    weak_in_n(&state);
+    enable(
+        &state,
+        &[
+            (ProviderId::Chatgpt, CHATGPT_MODEL),
+            (ProviderId::Openai, "gpt-5-mini"),
+        ],
+    );
+    let got = next_text(&state, &params(4)).await.unwrap();
+    assert_eq!(got.source, TextSource::Ai);
+    assert_eq!(got.provider.as_deref(), Some("openai"));
+    let paths: Vec<String> = srv.requests().into_iter().map(|r| r.path).collect();
+    assert_eq!(paths, [RESPONSES, OPENAI]);
+    let usage = usage_of(&state);
+    assert_eq!(usage.len(), 1, "only the successful call is counted");
+    assert_eq!(usage[0].provider, "openai");
+}
+
+#[tokio::test]
+async fn a_chatgpt_plan_limit_gives_its_own_notice() {
+    let srv = server(vec![(RESPONSES, 200, chatgpt_limit())]).await;
+    let dir = Scratch::new();
+    let state = state(
+        MemoryStore::shared(),
+        chatgpt_client(&srv, &dir, Account::SignedIn),
+    );
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Chatgpt, CHATGPT_MODEL)]);
+    let got = next_text(&state, &params(4)).await.unwrap();
+    assert_eq!(got.source, TextSource::Corpus);
+    assert_eq!(
+        got.notice.as_deref(),
+        Some("Has alcanzado el límite de tu plan de ChatGPT: texto del corpus local")
+    );
+    assert_eq!(srv.requests().len(), 1, "a plan limit is not retried");
+    assert!(usage_of(&state).is_empty());
+}
+
+#[test]
+fn chatgpt_errors_show_their_own_spanish_message() {
+    let id = ProviderId::Chatgpt;
+    let message = |m: &str| m.to_owned();
+    let cases = [
+        (
+            ProviderError::RateLimit {
+                message: message("Has alcanzado el límite de tu plan de ChatGPT"),
+            },
+            "Has alcanzado el límite de tu plan de ChatGPT",
+        ),
+        (
+            ProviderError::Auth {
+                message: message("Inicia sesión en ChatGPT"),
+            },
+            "Inicia sesión en ChatGPT",
+        ),
+        (
+            ProviderError::Config {
+                message: message("ChatGPT no autorizó esta petición de PlexusTyping"),
+            },
+            "ChatGPT no autorizó esta petición de PlexusTyping",
+        ),
+        (
+            ProviderError::Network {
+                message: message("No se pudo conectar con ChatGPT: x."),
+            },
+            "Sin conexión con la IA",
+        ),
+        (ProviderError::Timeout, "ChatGPT no respondió a tiempo"),
+        (
+            ProviderError::BadResponse {
+                message: message("cut"),
+            },
+            "La IA no devolvió un texto válido",
+        ),
+    ];
+    for (err, reason) in cases {
+        assert_eq!(provider_reason(id, &err), reason, "{err:?}");
+    }
+    assert_eq!(short_name(id), "ChatGPT");
+    assert_eq!(slug(id), "chatgpt");
+}
+
+#[tokio::test]
+async fn chatgpt_takes_no_key_and_its_status_is_the_sign_in() {
+    let srv = server(vec![]).await;
+    let memory = MemoryStore::shared();
+    let secrets: SharedSecrets = memory.clone();
+    let id = ProviderId::Chatgpt;
+    let refused = key_save(&secrets, id, KEY.into()).await;
+    assert_eq!(
+        refused,
+        Err(AiFailure::new(
+            "config",
+            "ChatGPT no usa clave: inicia sesión con ChatGPT en Ajustes → IA"
+        ))
+    );
+    assert_eq!(memory.get("ai:chatgpt").unwrap(), None, "nothing stored");
+    for (account, ready) in [
+        (Account::SignedIn, true),
+        (Account::PlanOff, false),
+        (Account::SignedOut, false),
+    ] {
+        let dir = Scratch::new();
+        let client = chatgpt_client(&srv, &dir, account);
+        assert_eq!(key_status(&client, &secrets, id).await, Ok(ready));
+        // Deleting does not touch the keychain nor sign out: sign-out is its own action.
+        assert_eq!(key_delete(&secrets, id).await, Ok(()));
+        assert_eq!(key_status(&client, &secrets, id).await, Ok(ready));
+    }
+    assert_eq!(key_status(&srv.client(), &secrets, id).await, Ok(false));
+    // A keychain that cannot be used does not matter to ChatGPT.
+    let none: SharedSecrets = Arc::new(NoStore);
+    let dir = Scratch::new();
+    let client = chatgpt_client(&srv, &dir, Account::SignedIn);
+    assert_eq!(key_status(&client, &none, id).await, Ok(true));
+    assert!(srv.requests().is_empty());
+}
+
+#[tokio::test]
+async fn chatgpt_models_come_from_the_signed_in_account() {
+    let list = json!({"models": [
+        {"slug": "gpt-6.2-sol", "display_name": "GPT-6.2 Sol", "visibility": "list"},
+        {"slug": "hidden", "visibility": "hide"},
+        {"slug": "gpt-6.1-sol", "display_name": "GPT-6.1 Sol", "visibility": "list"}
+    ]});
+    let srv = server(vec![("/v1/models", 200, list.to_string())]).await;
+    let secrets: SharedSecrets = MemoryStore::shared();
+    let dir = Scratch::new();
+    let signed_out = chatgpt_client(&srv, &dir, Account::SignedOut);
+    assert_eq!(
+        models(&signed_out, &secrets, ProviderId::Chatgpt).await,
+        Err(AiFailure::new("auth", "Inicia sesión en ChatGPT"))
+    );
+    assert!(srv.requests().is_empty());
+    let dir = Scratch::new();
+    let client = chatgpt_client(&srv, &dir, Account::SignedIn);
+    assert_eq!(
+        models(&client, &secrets, ProviderId::Chatgpt).await,
+        Ok(vec!["gpt-6.2-sol".to_owned(), "gpt-6.1-sol".to_owned()])
+    );
+    assert_eq!(srv.requests()[0].path, "/v1/models");
+}
+
+#[tokio::test]
+async fn the_chatgpt_connection_test_is_the_sign_in_without_any_inference() {
+    let srv = server(vec![(RESPONSES, 200, chatgpt_reply(AI_TEXT))]).await;
+    let secrets: SharedSecrets = MemoryStore::shared();
+    let id = ProviderId::Chatgpt;
+    let cases = [
+        (Account::SignedIn, Ok(())),
+        (
+            Account::SignedOut,
+            Err(AiFailure::new("auth", "Inicia sesión en ChatGPT")),
+        ),
+        (
+            Account::PlanOff,
+            Err(AiFailure::new(
+                "auth",
+                "Tu cuenta de ChatGPT no tiene activado el uso del plan",
+            )),
+        ),
+    ];
+    for (account, expected) in cases {
+        let dir = Scratch::new();
+        let client = chatgpt_client(&srv, &dir, account);
+        assert_eq!(
+            test_connection(&client, &secrets, id, CHATGPT_MODEL).await,
+            expected
+        );
+    }
+    assert_eq!(
+        test_connection(&srv.client(), &secrets, id, "").await,
+        Err(AiFailure::new("auth", "Inicia sesión en ChatGPT"))
+    );
+    assert!(srv.requests().is_empty(), "no inference request");
 }
