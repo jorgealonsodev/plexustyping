@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod code;
 pub mod commands;
+pub mod goals;
 pub mod history;
 pub mod metronome;
 pub mod profiles;
@@ -14,6 +15,7 @@ use commands::{
     AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoreRequest, ScoredSession,
     StorageStatus, Weakness, lock_store,
 };
+use goals::GoalStatus;
 use history::CsvExport;
 use metronome::{MetronomeStarted, MetronomeState};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
@@ -355,6 +357,33 @@ fn profile_switch(state: State<AppState>, id: i64) -> Result<Profile, String> {
     profiles::switch(&state, id)
 }
 
+fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0)
+}
+
+/// Sets the active profile's daily goal: `kind` `"off"` (no amount), `"minutes"` or
+/// `"texts"` with an allowed amount (S1, S4). `tz_offset_min` (minutes east of UTC,
+/// default 0) only shapes the returned progress.
+#[tauri::command]
+fn goal_set(
+    state: State<AppState>,
+    kind: String,
+    amount: Option<u32>,
+    tz_offset_min: Option<i32>,
+) -> Result<GoalStatus, String> {
+    goals::set(&state, &kind, amount, tz_offset_min.unwrap_or(0), now_ms())
+}
+
+/// The active profile's goal, today's progress and streak (S2–S4);
+/// `tz_offset_min` is minutes east of UTC (`-new Date().getTimezoneOffset()`).
+#[tauri::command]
+fn goal_status(state: State<AppState>, tz_offset_min: i32) -> Result<GoalStatus, String> {
+    goals::status(&state, tz_offset_min, now_ms())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -398,7 +427,9 @@ pub fn run() {
             profile_create,
             profile_update,
             profile_delete,
-            profile_switch
+            profile_switch,
+            goal_set,
+            goal_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");

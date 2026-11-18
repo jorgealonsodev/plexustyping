@@ -12,7 +12,7 @@ use std::path::Path;
 
 use plexustyping_core::{ErrorMode, KeystrokeRecord};
 use rusqlite::{Connection, OptionalExtension, params};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Ordered schema migrations; migration `i` upgrades `user_version` `i` → `i + 1`.
 /// Released migrations are never edited. v2 adds `text_cache` (`targets` is a
@@ -165,6 +165,61 @@ pub enum StoreError {
     /// No profile has the given id.
     #[error("Ese perfil no existe")]
     ProfileNotFound,
+    /// A daily goal kind or amount outside [`MINUTE_GOALS`] / [`TEXT_GOALS`].
+    #[error("Meta diaria no válida")]
+    InvalidGoal,
+}
+
+/// Allowed daily goals in minutes.
+pub const MINUTE_GOALS: [u32; 9] = [5, 10, 15, 20, 30, 45, 60, 90, 120];
+/// Allowed daily goals in texts (sessions).
+pub const TEXT_GOALS: [u32; 7] = [1, 3, 5, 10, 15, 20, 30];
+
+/// What a daily goal counts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GoalKind {
+    /// Minutes of practice (sum of session durations).
+    Minutes,
+    /// Saved sessions.
+    Texts,
+}
+
+/// A profile's daily goal; build it with [`DailyGoal::new`] to get an allowed amount.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DailyGoal {
+    /// What is counted.
+    pub kind: GoalKind,
+    /// How many minutes or texts a day.
+    pub amount: u32,
+}
+
+impl DailyGoal {
+    /// The goal, if `amount` is allowed for `kind`; else [`StoreError::InvalidGoal`].
+    pub fn new(kind: GoalKind, amount: u32) -> Result<Self> {
+        let goal = DailyGoal { kind, amount };
+        if goal.is_valid() {
+            Ok(goal)
+        } else {
+            Err(StoreError::InvalidGoal)
+        }
+    }
+
+    /// Whether the amount is one of the allowed values of its kind.
+    pub fn is_valid(&self) -> bool {
+        match self.kind {
+            GoalKind::Minutes => MINUTE_GOALS.contains(&self.amount),
+            GoalKind::Texts => TEXT_GOALS.contains(&self.amount),
+        }
+    }
+}
+
+/// The daily goal in a stored `goals` value; `None` when null, absent or unreadable.
+fn parse_daily_goal(raw: Option<&str>) -> Option<DailyGoal> {
+    let value: serde_json::Value = serde_json::from_str(raw?).ok()?;
+    let goal: DailyGoal = serde_json::from_value(value.get("daily")?.clone()).ok()?;
+    goal.is_valid().then_some(goal)
 }
 
 /// Most characters of a profile name (after trimming).
@@ -515,6 +570,37 @@ impl Store {
             ],
         )?;
         Ok(profile)
+    }
+
+    /// The daily goal of profile `id`; `None` (off) when its `goals` value is
+    /// null, absent or unreadable. [`StoreError::ProfileNotFound`] for an unknown id.
+    pub fn daily_goal(&self, id: i64) -> Result<Option<DailyGoal>> {
+        Ok(parse_daily_goal(raw_goals(&self.conn, id)?.as_deref()))
+    }
+
+    /// Sets (or with `None` turns off) the daily goal of profile `id`. Other
+    /// keys of a readable `goals` object are kept; an unreadable value is
+    /// replaced. A goal outside the allowed amounts ([`StoreError::InvalidGoal`])
+    /// or an unknown id changes nothing.
+    pub fn set_daily_goal(&self, id: i64, goal: Option<&DailyGoal>) -> Result<()> {
+        if goal.is_some_and(|g| !g.is_valid()) {
+            return Err(StoreError::InvalidGoal);
+        }
+        let tx = self.conn.unchecked_transaction()?;
+        let raw = raw_goals(&tx, id)?;
+        let mut goals = raw
+            .as_deref()
+            .and_then(|r| serde_json::from_str::<serde_json::Value>(r).ok())
+            .filter(serde_json::Value::is_object)
+            .unwrap_or_else(|| serde_json::json!({}));
+        goals["daily"] =
+            serde_json::to_value(goal).map_err(|e| StoreError::InvalidData(e.to_string()))?;
+        tx.execute(
+            "UPDATE profiles SET goals = ?2 WHERE id = ?1",
+            params![id, goals.to_string()],
+        )?;
+        tx.commit()?;
+        Ok(())
     }
 
     /// Deletes profile `id` with its sessions, keystrokes and statistics;
@@ -911,6 +997,15 @@ impl Store {
         })
         .collect()
     }
+}
+
+/// The stored `goals` value of profile `id`; [`StoreError::ProfileNotFound`] for an unknown id.
+fn raw_goals(conn: &Connection, id: i64) -> Result<Option<String>> {
+    conn.query_row("SELECT goals FROM profiles WHERE id = ?1", [id], |r| {
+        r.get::<_, Option<String>>(0)
+    })
+    .optional()?
+    .ok_or(StoreError::ProfileNotFound)
 }
 
 fn profile_row(r: &rusqlite::Row) -> rusqlite::Result<Profile> {
