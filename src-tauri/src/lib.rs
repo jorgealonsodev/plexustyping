@@ -3,6 +3,7 @@ pub mod code;
 pub mod commands;
 pub mod history;
 pub mod metronome;
+pub mod profiles;
 pub mod secrets;
 
 use std::sync::{Arc, MutexGuard};
@@ -20,7 +21,8 @@ use plexustyping_audio::MetronomeConfig;
 use plexustyping_core::{ErrorMode, IndentMode, InputEvent};
 use plexustyping_corpus::CodeLanguage;
 use plexustyping_layouts::{KeyPress, Layout};
-use plexustyping_store::{SessionSummary, Store, UsageRow};
+use plexustyping_store::{Profile, SessionSummary, Store, UsageRow};
+use profiles::{ProfileDeleted, ProfileList};
 use secrets::KeyringStore;
 use tauri::{Manager, State};
 
@@ -58,7 +60,7 @@ async fn first_text(
 ) -> Result<FirstText, String> {
     let mode = mode.unwrap_or_default();
     let max_lines = max_lines.unwrap_or(code::DEFAULT_MAX_LINES);
-    let layout = layout.unwrap_or_else(|| state.profile.layout.clone());
+    let layout = layout.unwrap_or_else(|| state.active_profile().layout);
     ai::first_text(
         &state,
         &language,
@@ -129,7 +131,8 @@ fn score_session(
         started_at_ms,
         metronome: &metronome,
     };
-    let profile = commands::typing_profile(&state.profile, layout.as_deref(), language.as_deref())?;
+    let active = state.active_profile();
+    let profile = commands::typing_profile(&active, layout.as_deref(), language.as_deref())?;
     Ok(commands::score_practice(&mut store, &profile, &req))
 }
 
@@ -176,7 +179,8 @@ fn weaknesses(
     mode: Option<PracticeMode>,
 ) -> Result<Vec<Weakness>, String> {
     let stats_mode = mode.unwrap_or_default().stats_mode();
-    let model = commands::load_model_for(&store(&state), &state.profile, stats_mode)?;
+    let store = store(&state);
+    let model = commands::load_model_for(&store, &state.active_profile(), stats_mode)?;
     Ok(commands::weaknesses(&model, limit))
 }
 
@@ -184,13 +188,15 @@ fn weaknesses(
 #[tauri::command]
 fn heatmap(state: State<AppState>, mode: Option<PracticeMode>) -> Result<Vec<HeatScore>, String> {
     let stats_mode = mode.unwrap_or_default().stats_mode();
-    let model = commands::load_model_for(&store(&state), &state.profile, stats_mode)?;
+    let store = store(&state);
+    let model = commands::load_model_for(&store, &state.active_profile(), stats_mode)?;
     Ok(commands::heatmap(&model))
 }
 
 #[tauri::command]
 fn recent_sessions(state: State<AppState>, limit: usize) -> Result<Vec<SessionSummary>, String> {
-    commands::recent_sessions(&store(&state), &state.profile, limit)
+    let store = store(&state);
+    commands::recent_sessions(&store, &state.active_profile(), limit)
 }
 
 /// `mode`: `"prose"` | `"words"` | `"code"` | none (all); newest first; empty in temporary mode (S6).
@@ -202,7 +208,8 @@ fn session_history(
 ) -> Result<Vec<SessionSummary>, String> {
     let persistent = state.status.persistent;
     let store = store(&state);
-    history::session_history(&store, &state.profile, persistent, mode.as_deref(), limit)
+    let profile = state.active_profile();
+    history::session_history(&store, &profile, persistent, mode.as_deref(), limit)
 }
 
 /// Writes the sessions of `mode` to the Downloads directory (S7);
@@ -221,9 +228,10 @@ fn export_sessions_csv(
         .unwrap_or(0);
     let downloads = || app.path().download_dir().map_err(|e| e.to_string());
     let store = store(&state);
+    let profile = state.active_profile();
     history::export_sessions_csv(
         &store,
-        &state.profile,
+        &profile,
         persistent,
         mode.as_deref(),
         tz_offset_min,
@@ -307,6 +315,46 @@ fn ai_usage(state: State<AppState>, day: String) -> Result<Vec<UsageRow>, String
     ai::usage(&store(&state), &ai::usage_day(&day))
 }
 
+#[tauri::command]
+fn profiles_list(state: State<AppState>) -> Result<ProfileList, String> {
+    profiles::list(&state)
+}
+
+/// Creates a profile; the active one stays (S3).
+#[tauri::command]
+fn profile_create(
+    state: State<AppState>,
+    name: String,
+    language: String,
+    layout: String,
+) -> Result<Profile, String> {
+    profiles::create(&state, &name, &language, &layout)
+}
+
+/// Missing or `null` fields are left; `theme: ""` clears the theme (S3).
+#[tauri::command]
+fn profile_update(
+    state: State<AppState>,
+    id: i64,
+    name: Option<String>,
+    language: Option<String>,
+    layout: Option<String>,
+    theme: Option<String>,
+) -> Result<Profile, String> {
+    profiles::update(&state, id, name, language, layout, theme)
+}
+
+/// Deletes the profile with its history and statistics (S3).
+#[tauri::command]
+fn profile_delete(state: State<AppState>, id: i64) -> Result<ProfileDeleted, String> {
+    profiles::delete(&state, id)
+}
+
+#[tauri::command]
+fn profile_switch(state: State<AppState>, id: i64) -> Result<Profile, String> {
+    profiles::switch(&state, id)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -345,7 +393,12 @@ pub fn run() {
             ai_usage,
             metronome_start,
             metronome_update,
-            metronome_stop
+            metronome_stop,
+            profiles_list,
+            profile_create,
+            profile_update,
+            profile_delete,
+            profile_switch
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");

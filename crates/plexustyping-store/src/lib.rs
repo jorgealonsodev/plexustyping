@@ -150,7 +150,25 @@ pub enum StoreError {
     /// A stored or supplied value is out of range or malformed.
     #[error("invalid data: {0}")]
     InvalidData(String),
+    /// A profile name is empty after trimming.
+    #[error("El nombre del perfil no puede estar vacío")]
+    EmptyProfileName,
+    /// A profile name has more than [`PROFILE_NAME_MAX`] characters after trimming.
+    #[error("El nombre del perfil admite como máximo 40 caracteres")]
+    ProfileNameTooLong,
+    /// Another profile already has the name, ignoring case.
+    #[error("Ya existe un perfil con ese nombre")]
+    DuplicateProfileName,
+    /// The only remaining profile cannot be deleted.
+    #[error("No se puede borrar el único perfil")]
+    LastProfile,
+    /// No profile has the given id.
+    #[error("Ese perfil no existe")]
+    ProfileNotFound,
 }
+
+/// Most characters of a profile name (after trimming).
+pub const PROFILE_NAME_MAX: usize = 40;
 
 /// Result alias for store operations.
 pub type Result<T> = std::result::Result<T, StoreError>;
@@ -171,6 +189,19 @@ pub struct Profile {
     pub theme: Option<String>,
     /// Creation time, Unix epoch milliseconds.
     pub created_at_ms: i64,
+}
+
+/// Changes to a profile; `None` fields are left as they are.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct ProfileUpdate {
+    /// New display name (trimmed, 1–40 characters, unique ignoring case).
+    pub name: Option<String>,
+    /// New language code.
+    pub language: Option<String>,
+    /// New keyboard layout id.
+    pub layout: Option<String>,
+    /// New theme; `Some(None)` clears it.
+    pub theme: Option<Option<String>>,
 }
 
 /// A finished session to persist together with its keystroke records.
@@ -399,14 +430,10 @@ impl Store {
         if let Some(p) = self.first_profile()? {
             return Ok(p);
         }
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_millis() as i64)
-            .unwrap_or(0);
         self.conn.execute(
             "INSERT INTO profiles (name, language, layout, theme, created_at_ms)
              VALUES ('Principal', 'es', 'es-qwerty', NULL, ?1)",
-            [now],
+            [now_ms()],
         )?;
         self.first_profile()?.ok_or(StoreError::NotFound)
     }
@@ -418,18 +445,120 @@ impl Store {
                 "SELECT id, name, language, layout, theme, created_at_ms
                  FROM profiles ORDER BY id LIMIT 1",
                 [],
-                |r| {
-                    Ok(Profile {
-                        id: r.get(0)?,
-                        name: r.get(1)?,
-                        language: r.get(2)?,
-                        layout: r.get(3)?,
-                        theme: r.get(4)?,
-                        created_at_ms: r.get(5)?,
-                    })
-                },
+                profile_row,
             )
             .optional()?)
+    }
+
+    /// Every profile, by id.
+    pub fn profiles(&self) -> Result<Vec<Profile>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, name, language, layout, theme, created_at_ms
+             FROM profiles ORDER BY id",
+        )?;
+        let rows = stmt.query_map([], profile_row)?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// The profile `id`, if it exists.
+    pub fn profile(&self, id: i64) -> Result<Option<Profile>> {
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT id, name, language, layout, theme, created_at_ms
+                 FROM profiles WHERE id = ?1",
+                [id],
+                profile_row,
+            )
+            .optional()?)
+    }
+
+    /// Creates a profile without theme. `name` is trimmed and must be 1–40
+    /// characters and unique ignoring case; `language` and `layout` are stored
+    /// as given (the caller validates the ids).
+    pub fn create_profile(&self, name: &str, language: &str, layout: &str) -> Result<Profile> {
+        let name = self.valid_profile_name(name, None)?;
+        self.conn.execute(
+            "INSERT INTO profiles (name, language, layout, theme, created_at_ms)
+             VALUES (?1, ?2, ?3, NULL, ?4)",
+            params![name, language, layout, now_ms()],
+        )?;
+        let id = self.conn.last_insert_rowid();
+        self.profile(id)?.ok_or(StoreError::ProfileNotFound)
+    }
+
+    /// Applies `update` to profile `id` and returns it. On any error
+    /// (unknown id, invalid name) nothing changes.
+    pub fn update_profile(&self, id: i64, update: &ProfileUpdate) -> Result<Profile> {
+        let mut profile = self.profile(id)?.ok_or(StoreError::ProfileNotFound)?;
+        if let Some(name) = &update.name {
+            profile.name = self.valid_profile_name(name, Some(id))?;
+        }
+        if let Some(language) = &update.language {
+            profile.language = language.clone();
+        }
+        if let Some(layout) = &update.layout {
+            profile.layout = layout.clone();
+        }
+        if let Some(theme) = &update.theme {
+            profile.theme = theme.clone();
+        }
+        self.conn.execute(
+            "UPDATE profiles SET name = ?2, language = ?3, layout = ?4, theme = ?5
+             WHERE id = ?1",
+            params![
+                id,
+                profile.name,
+                profile.language,
+                profile.layout,
+                profile.theme
+            ],
+        )?;
+        Ok(profile)
+    }
+
+    /// Deletes profile `id` with its sessions, keystrokes and statistics;
+    /// other profiles are untouched. The only remaining profile is refused
+    /// ([`StoreError::LastProfile`]) and an unknown id is
+    /// [`StoreError::ProfileNotFound`]; both change nothing.
+    pub fn delete_profile(&self, id: i64) -> Result<()> {
+        let tx = self.conn.unchecked_transaction()?;
+        let exists: Option<i64> = tx
+            .query_row("SELECT 1 FROM profiles WHERE id = ?1", [id], |r| r.get(0))
+            .optional()?;
+        if exists.is_none() {
+            return Err(StoreError::ProfileNotFound);
+        }
+        let count: i64 = tx.query_row("SELECT count(*) FROM profiles", [], |r| r.get(0))?;
+        if count <= 1 {
+            return Err(StoreError::LastProfile);
+        }
+        // Sessions (and their keystrokes) and statistics go by ON DELETE CASCADE.
+        tx.execute("DELETE FROM profiles WHERE id = ?1", [id])?;
+        tx.commit()?;
+        Ok(())
+    }
+
+    /// `name` trimmed, if it is 1–40 characters and no profile other than
+    /// `except` has it ignoring case.
+    fn valid_profile_name(&self, name: &str, except: Option<i64>) -> Result<String> {
+        let name = name.trim();
+        if name.is_empty() {
+            return Err(StoreError::EmptyProfileName);
+        }
+        if name.chars().count() > PROFILE_NAME_MAX {
+            return Err(StoreError::ProfileNameTooLong);
+        }
+        // SQLite's lower() only folds ASCII: compare in Rust.
+        let lower = name.to_lowercase();
+        let taken = self
+            .profiles()?
+            .into_iter()
+            .any(|p| Some(p.id) != except && p.name.trim().to_lowercase() == lower);
+        if taken {
+            return Err(StoreError::DuplicateProfileName);
+        }
+        Ok(name.to_owned())
     }
 
     /// Stores a session row and all its keystrokes in one transaction and
@@ -782,6 +911,25 @@ impl Store {
         })
         .collect()
     }
+}
+
+fn profile_row(r: &rusqlite::Row) -> rusqlite::Result<Profile> {
+    Ok(Profile {
+        id: r.get(0)?,
+        name: r.get(1)?,
+        language: r.get(2)?,
+        layout: r.get(3)?,
+        theme: r.get(4)?,
+        created_at_ms: r.get(5)?,
+    })
+}
+
+/// Unix epoch milliseconds now (0 if the clock is before the epoch).
+fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0)
 }
 
 fn parse_targets(json: &str) -> Result<Vec<String>> {

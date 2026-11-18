@@ -34,14 +34,33 @@ pub const DEFAULT_LENGTH: usize = 300;
 pub struct AppState {
     /// The database; in memory when the file could not be opened.
     pub store: Mutex<Store>,
-    /// The active profile.
-    pub profile: Profile,
+    /// The active profile (S2). Lock order: the store first, then this; a
+    /// copy is taken with [`AppState::active_profile`], never held across an `.await`.
+    pub profile: Mutex<Profile>,
     /// Whether sessions survive a restart.
     pub status: StorageStatus,
     /// The one AI client (production endpoints in the app).
     pub ai: AiClient,
     /// Where AI keys live (the system keychain in the app).
     pub secrets: SharedSecrets,
+}
+
+impl AppState {
+    /// A copy of the active profile. When the store is also needed, lock it
+    /// first so a profile switch or deletion cannot interleave.
+    pub fn active_profile(&self) -> Profile {
+        lock_profile(&self.profile).clone()
+    }
+
+    /// Makes `profile` the active one (in memory only).
+    pub fn set_active_profile(&self, profile: Profile) {
+        *lock_profile(&self.profile) = profile;
+    }
+}
+
+/// The active profile; a panic while it was held leaves the previous value.
+fn lock_profile(profile: &Mutex<Profile>) -> MutexGuard<'_, Profile> {
+    profile.lock().unwrap_or_else(|e| e.into_inner())
 }
 
 /// The store; a panic while it was held leaves it usable (each write is
@@ -209,7 +228,7 @@ pub struct TextPlan {
 pub fn open_state(path: Result<PathBuf, String>, secrets: SharedSecrets, ai: AiClient) -> AppState {
     let opened = path.and_then(|path| {
         let store = Store::open(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        let profile = store.default_profile().map_err(|e| e.to_string())?;
+        let profile = crate::profiles::active_at_start(&store).map_err(|e| e.to_string())?;
         Ok((store, profile))
     });
     let (store, profile, status) = match opened {
@@ -224,7 +243,7 @@ pub fn open_state(path: Result<PathBuf, String>, secrets: SharedSecrets, ai: AiC
         Err(error) => {
             eprintln!("PlexusTyping: cannot open the database, using a temporary one: {error}");
             let store = Store::open_in_memory().expect("in-memory database");
-            let profile = store.default_profile().expect("in-memory profile");
+            let profile = crate::profiles::active_at_start(&store).expect("in-memory profile");
             let status = StorageStatus {
                 persistent: false,
                 error: Some(error),
@@ -234,7 +253,7 @@ pub fn open_state(path: Result<PathBuf, String>, secrets: SharedSecrets, ai: AiC
     };
     AppState {
         store: Mutex::new(store),
-        profile,
+        profile: Mutex::new(profile),
         status,
         ai,
         secrets,
@@ -696,7 +715,7 @@ mod tests {
             let mut store = state.store.lock().unwrap();
             let scored = score_session(
                 &mut store,
-                &state.profile,
+                &state.active_profile(),
                 "ab",
                 ErrorMode::AllowContinue,
                 &typing("ab"),

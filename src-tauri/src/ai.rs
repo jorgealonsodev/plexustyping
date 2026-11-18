@@ -559,7 +559,7 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     let (model, settings) = {
         let store = lock_store(&state.store);
         (
-            commands::load_model_for(&store, &state.profile, p.mode.stats_mode())?,
+            commands::load_model_for(&store, &state.active_profile(), p.mode.stats_mode())?,
             load_settings(&store),
         )
     };
@@ -713,7 +713,7 @@ pub async fn first_text(
     if *mode == PracticeMode::Prose {
         let diagnostic = {
             let store = lock_store(&state.store);
-            commands::diagnostic_for_new_profile(&store, &state.profile, language, layout)?
+            commands::diagnostic_for_new_profile(&store, &state.active_profile(), language, layout)?
         };
         if let Some(first) = diagnostic {
             return Ok(first);

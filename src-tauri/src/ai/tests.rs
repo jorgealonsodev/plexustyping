@@ -26,7 +26,7 @@ fn state(secrets: SharedSecrets, ai: AiClient) -> AppState {
     let profile = store.default_profile().unwrap();
     AppState {
         store: Mutex::new(store),
-        profile,
+        profile: Mutex::new(profile),
         status: StorageStatus {
             persistent: false,
             error: None,
@@ -55,7 +55,7 @@ fn weak_in_n(state: &AppState) {
     };
     let mut store = lock_store(&state.store);
     store
-        .save_stats(state.profile.id, STATS_MODE, &snapshot)
+        .save_stats(state.active_profile().id, STATS_MODE, &snapshot)
         .unwrap();
 }
 
@@ -106,7 +106,7 @@ fn params(seed: u64) -> TextParams {
 /// The corpus text the same request gets with the AI off.
 fn corpus_expected(state: &AppState, seed: u64) -> NextText {
     let store = lock_store(&state.store);
-    let model = commands::load_model(&store, &state.profile).unwrap();
+    let model = commands::load_model(&store, &state.active_profile()).unwrap();
     let p = params(seed);
     let req = NextTextRequest {
         language: &p.language,
@@ -677,7 +677,7 @@ async fn the_prose_request_only_asks_for_a_text_in_the_language_and_nothing_type
         let events = typing("hqlz mxndo");
         let scored = score_session(
             &mut store,
-            &state.profile,
+            &state.active_profile(),
             "hola mundo",
             ErrorMode::AllowContinue,
             &events,
@@ -911,7 +911,7 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
     {
         let mut store = lock_store(&state.store);
         let events = typing("nanana");
-        let profile = state.profile.clone();
+        let profile = state.active_profile();
         let scored = score_session(
             &mut store,
             &profile,
@@ -968,7 +968,7 @@ fn words_params(seed: u64) -> TextParams {
 /// The words text the corpus gives for `p` with the prose model.
 fn words_expected(state: &AppState, p: &TextParams) -> NextText {
     let store = lock_store(&state.store);
-    let model = commands::load_model(&store, &state.profile).unwrap();
+    let model = commands::load_model(&store, &state.active_profile()).unwrap();
     let req = NextTextRequest {
         language: &p.language,
         layout: &p.layout,
@@ -1110,7 +1110,7 @@ fn weak_in_brace(state: &AppState) {
     };
     let mut store = lock_store(&state.store);
     store
-        .save_stats(state.profile.id, "code", &snapshot)
+        .save_stats(state.active_profile().id, "code", &snapshot)
         .unwrap();
 }
 
