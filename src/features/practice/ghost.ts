@@ -63,3 +63,7 @@ export function recordLines(recordWpm: number, netWpm: number, saved: boolean): 
   if (saved && netWpm > recordWpm) lines.push(NEW_RECORD);
   return lines;
 }
+
+/** Tooltip of the ghost button in the header. */
+export const ghostToggleTitle = (on: boolean) =>
+  on ? "Sesión fantasma activada: corres contra tu mejor sesión con el mismo texto" : "Sesión fantasma desactivada";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GhostRace, formatDelta, ghostPosition, recordLines } from "./ghost";
+import { GhostRace, formatDelta, ghostPosition, ghostToggleTitle, recordLines } from "./ghost";
 
 describe("ghost delta (S4)", () => {
   it("shows behind with +, ahead with − (U+2212), one decimal with a Spanish comma", () => {
@@ -86,5 +86,12 @@ describe("record lines (S5)", () => {
 
   it("is no record when the session was not saved", () => {
     expect(recordLines(52, 60, false)).toEqual(["Récord anterior: 52 PPM"]);
+  });
+});
+
+describe("ghost header button", () => {
+  it("says whether the ghost races and how to change it", () => {
+    expect(ghostToggleTitle(true)).toBe("Sesión fantasma activada: corres contra tu mejor sesión con el mismo texto");
+    expect(ghostToggleTitle(false)).toBe("Sesión fantasma desactivada");
   });
 });

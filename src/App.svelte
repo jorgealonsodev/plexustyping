@@ -12,6 +12,7 @@
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
   import { focusTyping } from "./features/practice/focus";
+  import { ghostToggleTitle } from "./features/practice/ghost";
   import { aiSettingsGet, aiSettingsSet } from "./features/settings/aiApi";
   import { aiToggleTitle, toggleEnabled } from "./features/settings/ai";
   import { goalHeaderText } from "./features/goals/goals";
@@ -153,6 +154,29 @@
       focusTyping();
     }}><span class="ai-label">IA</span></button
   >
+  <button
+    type="button"
+    class="gear ai-toggle"
+    class:active={settings.ghost}
+    aria-pressed={settings.ghost}
+    aria-label="Sesión fantasma"
+    title={ghostToggleTitle(settings.ghost)}
+    onclick={() => {
+      settings.setGhost(!settings.ghost);
+      focusTyping();
+    }}
+  >
+    <!-- A ghost: round head, wavy hem, two eyes. -->
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
+      <path
+        d="M5 20.5V11a7 7 0 0 1 14 0v9.5l-2.33-1.75-2.34 1.75L12 18.75l-2.33 1.75-2.34-1.75z"
+        stroke-width="2"
+        stroke-linejoin="round"
+      />
+      <circle cx="9.5" cy="10.5" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="14.5" cy="10.5" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  </button>
   <button
     type="button"
     class="gear"

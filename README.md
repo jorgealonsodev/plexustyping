@@ -34,8 +34,9 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   this attempt races the next one. The timeline comes from the stored keystrokes
   (`ghost_for_text`), so it works in every error mode and, in temporary mode, with
   the sessions of this run. The time spent deleting with Backspace is not stored per key,
-  so it is shared among the keys typed after each deletion. Turn it off in
-  Ajustes → Práctica → "Sesión fantasma".
+  so it is shared among the keys typed after each deletion. Turn it on or off with
+  the ghost button in the header (lit while on) or in Ajustes → Práctica →
+  "Sesión fantasma".
 - Accents and dead keys work: typing goes through a hidden text field, so the
   system input method composes `´` + `a` into one `á`.
 - On-screen keyboard at the bottom (ISO, or ANSI for US), labelled from the chosen layout (normal,
