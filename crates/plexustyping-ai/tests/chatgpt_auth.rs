@@ -120,11 +120,11 @@ impl Signer {
     }
 }
 
-/// What the simulated browser does with one authorize URL: the callback query
-/// to send (`None`: nothing).
 /// The browser's visit to the callback, answered with `(status, body)`.
 type Visit = tokio::task::JoinHandle<Option<(u16, String)>>;
 
+/// What the simulated browser does with one authorize URL: the callback query
+/// to send (`None`: nothing).
 type Step = Box<dyn FnOnce(&HashMap<String, String>) -> Option<String> + Send>;
 
 struct Fixture {
@@ -1307,7 +1307,7 @@ async fn the_rotated_refresh_token_is_saved_before_the_id_token_is_checked() {
         Some(Reply::ok(discovery("")).repeated()),
         vec![
             Reply::ok(keys.clone()),
-            Reply::ok(keys).delayed(Duration::from_secs(3)).repeated(),
+            Reply::ok(keys).delayed(Duration::from_secs(15)).repeated(),
         ],
     )
     .await;
@@ -1326,16 +1326,17 @@ async fn the_rotated_refresh_token_is_saved_before_the_id_token_is_checked() {
 
     let refreshing = f.auth.access_token();
     tokio::pin!(refreshing);
-    // Polled, not a fixed wait: the save may be slow on a busy disk, but it must land
-    // while the refetch of the keys (3 s) still holds the refresh.
-    let saved = async {
+    // Polled with a generous bound for a slow disk, but well before the refetch of the
+    // keys (15 s) could end: a save only after the ID-token check never lands in time.
+    let saved = tokio::time::timeout(Duration::from_secs(6), async {
         while f.record()["refreshToken"] != REFRESH_2 {
             tokio::time::sleep(Duration::from_millis(20)).await;
         }
-    };
+    });
     tokio::select! {
+        biased;
+        waited = saved => waited.expect("the rotated tokens were not saved during the ID-token check"),
         done = &mut refreshing => panic!("the refresh ended before the save was seen: {done:?}"),
-        () = saved => {}
     }
 
     assert_eq!(f.record()["refreshToken"], REFRESH_2);
