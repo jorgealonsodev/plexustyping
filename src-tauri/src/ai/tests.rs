@@ -1971,10 +1971,10 @@ async fn a_chatgpt_sign_in_can_be_cancelled_while_the_browser_is_open() {
             "Se canceló el inicio de sesión en ChatGPT"
         ))
     );
-    let opened = opened.lock().unwrap();
+    let opened = opened.lock().unwrap().clone();
     assert_eq!(opened.len(), 1, "the browser opened once");
     assert!(opened[0].starts_with(&format!("{}/api/accounts/authorize?", srv.base())));
-    assert_eq!(chatgpt_status(&client).await.unwrap().signed_in, false);
+    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
     // Cancelling with nothing pending, or without a sign-in at all, is harmless.
     chatgpt_cancel(&client);
     chatgpt_cancel(&srv.client());
@@ -1999,7 +1999,7 @@ async fn chatgpt_sign_in_failures_are_spanish_and_sign_nobody_in() {
             "Has rechazado el permiso, así que PlexusTyping no puede usar tu plan de ChatGPT"
         ))
     );
-    assert_eq!(chatgpt_status(&client).await.unwrap().signed_in, false);
+    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
 
     let dir = Scratch::new();
     let client = sign_in_client(&srv, &dir, short);
@@ -2099,7 +2099,7 @@ async fn chatgpt_sign_out_revokes_and_forgets_the_tokens() {
     let revoked = srv.requests();
     let revoke = revoked.iter().find(|r| r.path == "/revoke").unwrap();
     assert!(revoke.body.contains("token=rt-SECRET-chatgpt-1"));
-    assert_eq!(chatgpt_status(&client).await.unwrap().signed_in, false);
+    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
     let file = std::fs::read_to_string(dir.0.join("chatgpt-auth.json")).unwrap();
     assert!(!file.contains("SECRET"), "no token left in the file");
     assert!(file.contains("oaiapp_TEST-client-1"), "the client id stays");
@@ -2124,7 +2124,7 @@ async fn an_unconfirmed_chatgpt_sign_out_still_forgets_the_tokens() {
         chatgpt_sign_out(&client).await.map(|s| s.revoked),
         Ok(false)
     );
-    assert_eq!(chatgpt_status(&client).await.unwrap().signed_in, false);
+    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
     let file = std::fs::read_to_string(dir.0.join("chatgpt-auth.json")).unwrap();
     assert!(!file.contains("SECRET"), "no token left in the file");
     assert_eq!(

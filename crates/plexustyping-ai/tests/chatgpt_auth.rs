@@ -122,6 +122,9 @@ impl Signer {
 
 /// What the simulated browser does with one authorize URL: the callback query
 /// to send (`None`: nothing).
+/// The browser's visit to the callback, answered with `(status, body)`.
+type Visit = tokio::task::JoinHandle<Option<(u16, String)>>;
+
 type Step = Box<dyn FnOnce(&HashMap<String, String>) -> Option<String> + Send>;
 
 struct Fixture {
@@ -234,8 +237,7 @@ impl Fixture {
 
     async fn sign_in(&self, steps: Vec<Step>) -> Attempt {
         let steps = Arc::new(Mutex::new(VecDeque::from(steps)));
-        let opened: Arc<Mutex<Vec<(String, tokio::task::JoinHandle<Option<(u16, String)>>)>>> =
-            Arc::default();
+        let opened: Arc<Mutex<Vec<(String, Visit)>>> = Arc::default();
         let log = opened.clone();
         let result = self
             .auth
@@ -1322,9 +1324,20 @@ async fn the_rotated_refresh_token_is_saved_before_the_id_token_is_checked() {
                          "expires_in": 3600, "scope": PLAN})),
     );
 
-    let gave_up = tokio::time::timeout(Duration::from_secs(1), f.auth.access_token()).await;
+    let refreshing = f.auth.access_token();
+    tokio::pin!(refreshing);
+    // Polled, not a fixed wait: the save may be slow on a busy disk, but it must land
+    // while the refetch of the keys (3 s) still holds the refresh.
+    let saved = async {
+        while f.record()["refreshToken"] != REFRESH_2 {
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        }
+    };
+    tokio::select! {
+        done = &mut refreshing => panic!("the refresh ended before the save was seen: {done:?}"),
+        () = saved => {}
+    }
 
-    assert!(gave_up.is_err(), "still checking the ID token");
     assert_eq!(f.record()["refreshToken"], REFRESH_2);
     assert_eq!(f.record()["accessToken"], ACCESS_2);
 }
