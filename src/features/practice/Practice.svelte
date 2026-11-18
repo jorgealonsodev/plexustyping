@@ -33,6 +33,7 @@
   import { Prefetcher, generationKey, provisionalFailedChars, sourceLabel } from "./prefetch";
   import { type Phase, indentChangeRestarts, shouldApply } from "./replies";
   import Results from "./Results.svelte";
+  import { type Ghost, GhostRace, formatDelta, ghostForText, ghostPosition } from "./ghost";
   import { metronomeApi } from "../metronome/api";
   import {
     type BeatAnchor,
@@ -48,6 +49,7 @@
   let {
     mode,
     liveStats,
+    ghost: ghostEnabled = true,
     showKeyboard,
     flashes,
     heatmap,
@@ -67,6 +69,8 @@
   }: {
     mode: ErrorMode;
     liveStats: boolean;
+    /** Race the ghost of the best earlier session with the same text (ghost S3). */
+    ghost?: boolean;
     showKeyboard: boolean;
     flashes: boolean;
     heatmap: boolean;
@@ -138,6 +142,14 @@
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
   let session = $state.raw<TypingSession | null>(null);
+  // Ghost session (S1–S5): the record of the current text, the user's side of the race and the
+  // record a finished text raced, for its results.
+  let ghost = $state.raw<Ghost | null>(null);
+  let race: GhostRace | null = null;
+  let ghostDelta = $state<number | null>(null);
+  let raced = $state.raw<Ghost | null>(null);
+  let ghostRun = 0;
+  const racing = $derived(ghostEnabled && ghost !== null);
   // Bumped after each applied event: the session object itself is not reactive.
   let tick = $state(0);
   let now = $state(0);
@@ -169,6 +181,16 @@
     if (!session || session.firstT === null) return 0;
     return phase === "typing" ? Math.max(now - session.firstT, 0) : (view?.stats.durationMs ?? 0);
   });
+  // The ghost cursor: waits at the start until the first keystroke, then follows the record's pace;
+  // at the end it stays after the last char (S4).
+  const ghostAt = $derived.by(() => {
+    void tick;
+    if (!racing || !ghost || !session || phase !== "typing") return null;
+    return ghostPosition(ghost.times, session.firstT === null ? null : Math.max(now - session.firstT, 0));
+  });
+  const ghostIndex = $derived(ghostAt === null || !session ? -1 : Math.min(ghostAt, session.chars.length - 1));
+  const ghostEnd = $derived(ghostAt !== null && !!session && ghostAt === session.chars.length);
+  const showDelta = $derived(racing && ghostDelta !== null);
   const heat = $derived(heatmap && layout ? heatScores(layout, charScores) : null);
   const highlights = $derived(phase === "typing" && view && sequences ? highlightsFor(sequences[view.cursor]) : []);
 
@@ -181,6 +203,23 @@
     goalMet = false;
     phase = "typing";
     tick++;
+    fetchGhost(text, textMode);
+  }
+
+  // A record set in this attempt is read by the next restart, so it races the next attempt (S1).
+  function fetchGhost(of: string, practiceOf: PracticeMode) {
+    const id = ++ghostRun;
+    ghost = null;
+    race = null;
+    ghostDelta = null;
+    raced = null;
+    ghostForText(of, practiceOf)
+      .then((next) => {
+        if (id !== ghostRun) return;
+        ghost = next;
+        race = next ? new GhostRace(next.times) : null;
+      })
+      .catch((err) => console.warn("ghost_for_text failed; no ghost", err));
   }
 
   async function load(
@@ -260,6 +299,7 @@
   async function finish(done: TypingSession, measured: Track) {
     const id = ++run;
     phase = "scoring";
+    const against = ghostEnabled ? ghost : null;
     try {
       // Wall-clock start: `performance.now()` stamps are relative to the page's time origin.
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
@@ -268,6 +308,7 @@
       const result = await scoreSession(isCodeMode(textMode) ? null : textLanguage, textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
+      raced = against;
       tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
       if (tempo && tempo.to !== tempo.from) onTempo(tempo.to);
       weak = [];
@@ -301,6 +342,10 @@
     if (!session.apply(event)) return;
     now = event.tMs;
     tick++;
+    if (race && session.firstT !== null) {
+      race.passed(session.cursor, event.tMs - session.firstT);
+      ghostDelta = race.delta;
+    }
     if (first) startPrefetch();
     if (event.kind === "char" && flashes && layout) {
       const code = keyForChar(layout, event.ch);
@@ -472,6 +517,13 @@
     untrack(() => void controller.set(wish));
   });
 
+  // The ghost cursor moves on its own while a raced text is typed.
+  $effect(() => {
+    if (!racing || phase !== "typing") return;
+    const timer = setInterval(() => (now = performance.now()), 50);
+    return () => clearInterval(timer);
+  });
+
   // Live clock while a text is being typed.
   $effect(() => {
     if (!liveStats || phase !== "typing") return;
@@ -518,7 +570,7 @@
 
 <main>
   <section class="practice">
-    {#if phase === "typing" && ((liveStats && view) || anchor)}
+    {#if phase === "typing" && ((liveStats && view) || anchor || showDelta)}
       <div class="top">
         {#if anchor}<BeatDot {anchor} />{/if}
         {#if liveStats && view}
@@ -528,6 +580,10 @@
             <div><dt>Precisión</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
             <div><dt>Tiempo</dt><dd>{formatTime(elapsed)}</dd></div>
           </dl>
+        {/if}
+        {#if showDelta && ghostDelta !== null}
+          {@const delta = formatDelta(ghostDelta)}
+          <p class="ghost-delta" class:behind={delta.startsWith("+")} class:ahead={delta.startsWith("−")} aria-label="Diferencia con tu récord">{delta}</p>
         {/if}
       </div>
     {/if}
@@ -540,7 +596,7 @@
         <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
       </div>
     {:else if phase === "results" && scored}
-      <Results {scored} {weak} {tempo} {goalMet} language={isCodeMode(textMode) ? LANGUAGES.name(textMode.lang) : null} onNext={loadNext} onRepeat={restart} />
+      <Results {scored} {weak} {tempo} {goalMet} record={raced?.netWpm ?? null} language={isCodeMode(textMode) ? LANGUAGES.name(textMode.lang) : null} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
       <p class="kind">
         {#if isCodeMode(textMode)}{LANGUAGES.name(textMode.lang)} ·{/if}
@@ -553,13 +609,15 @@
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
       {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
       {#if isCode}
-        <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} />
+        <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} />
       {:else}
         <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
         <p class="text" aria-label="Texto de práctica" bind:this={proseText}>{#each session.chars as c, i (i)}<span
               class="ch {view.states[i]}"
               class:space={c === " "}
-              class:cursor={i === view.cursor}>{c}</span
+              class:cursor={i === view.cursor}
+              class:ghost={i === ghostIndex}
+              class:ghost-end={ghostEnd && i === ghostIndex}>{c}</span
             >{/each}</p>
       {/if}
       <p class="hint">
@@ -673,6 +731,31 @@
   .cursor.error {
     background: color-mix(in srgb, var(--text-error) 22%, transparent);
     box-shadow: inset 0 -0.12em var(--text-error);
+  }
+  /* The ghost cursor (S4): a translucent frame; after the last char once the record finished. */
+  .ghost {
+    outline: 0.08em solid color-mix(in srgb, var(--cursor) 45%, transparent);
+    outline-offset: -0.04em;
+  }
+  .ghost-end {
+    outline: none;
+  }
+  .ghost-end::after {
+    content: "";
+    border-right: 0.12em solid color-mix(in srgb, var(--cursor) 45%, transparent);
+  }
+  .ghost-delta {
+    margin: 0 0 0 auto;
+    font-family: var(--mono);
+    font-size: 1.25rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+  .ghost-delta.behind {
+    color: var(--danger);
+  }
+  .ghost-delta.ahead {
+    color: var(--accent);
   }
   .kind {
     margin: 0 0 -0.75rem;

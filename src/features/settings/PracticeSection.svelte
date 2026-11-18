@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ErrorMode } from "../practice/engine";
   import SettingField from "./SettingField.svelte";
-  import { ERROR_MODES, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
+  import { ERROR_MODES, GHOST_SETTING, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -73,6 +73,18 @@
       aria-describedby={hintId}
       checked={settings.liveStats}
       onchange={(e: Change<HTMLInputElement>) => settings.setLiveStats(e.currentTarget.checked)}
+    />
+  {/snippet}
+</SettingField>
+
+<SettingField toggle label={GHOST_SETTING.label} hint={GHOST_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={settings.ghost}
+      onchange={(e: Change<HTMLInputElement>) => settings.setGhost(e.currentTarget.checked)}
     />
   {/snippet}
 </SettingField>

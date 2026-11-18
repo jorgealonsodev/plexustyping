@@ -5,6 +5,7 @@
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
   import { type TempoChange, rhythmSummary, tempoNotice } from "../metronome/beat";
   import { GOAL_MET_NOTICE } from "../goals/goals";
+  import { NEW_RECORD, recordLines } from "./ghost";
 
   let {
     scored,
@@ -12,6 +13,7 @@
     language = null,
     tempo = null,
     goalMet = false,
+    record = null,
     onNext,
     onRepeat,
   }: {
@@ -23,10 +25,13 @@
     tempo?: TempoChange | null;
     /** This session met the daily goal: "¡Meta diaria cumplida!" is shown (S5). */
     goalMet?: boolean;
+    /** Net PPM of the ghost this text raced (ghost S5); `null` when it raced none. */
+    record?: number | null;
     onNext: () => void;
     onRepeat: () => void;
   } = $props();
   const stats = $derived(scored.result.stats);
+  const records = $derived(record === null ? [] : recordLines(record, scored.result.stats.netWpm, scored.saved));
   const rhythm = $derived(rhythmSummary(scored.offsetsMs ?? []));
 
   const focusAnd = (action: () => void) => () => {
@@ -45,6 +50,7 @@
     <div><dt>Tiempo</dt><dd>{formatTime(stats.durationMs)}</dd></div>
     <div><dt>Errores</dt><dd>{stats.errors}</dd></div>
   </dl>
+  {#each records as line (line)}<p class="record" class:new-record={line === NEW_RECORD} role="status">{line}</p>{/each}
   {#if rhythm}
     <p class="rhythm">
       Ritmo: desvío medio ±{Math.round(rhythm.meanAbsMs)} ms
@@ -120,8 +126,13 @@
   .failed,
   .rhythm,
   .note,
-  .goal-met {
+  .goal-met,
+  .record {
     margin: 0;
+  }
+  .new-record {
+    font-weight: 700;
+    color: var(--accent);
   }
   .goal-met {
     font-weight: 700;

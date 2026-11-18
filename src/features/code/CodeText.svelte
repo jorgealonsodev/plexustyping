@@ -8,7 +8,17 @@
     states,
     cursor,
     classes,
-  }: { chars: string[]; states: CharState[]; cursor: number; classes: TokenClass[] } = $props();
+    ghost = -1,
+    ghostEnd = false,
+  }: {
+    chars: string[];
+    states: CharState[];
+    cursor: number;
+    classes: TokenClass[];
+    /** Index of the ghost cursor's char (ghost S4), -1 for none; `ghostEnd`: it is past that last char. */
+    ghost?: number;
+    ghostEnd?: boolean;
+  } = $props();
 
   let block = $state<HTMLPreElement>();
 
@@ -24,7 +34,9 @@
       class="ch {states[i]} syn-{classes[i]}"
       class:space={c === " "}
       class:nl={c === "\n"}
-      class:cursor={i === cursor}>{newlineMark(c, states[i], i === cursor)}{c}</span
+      class:cursor={i === cursor}
+      class:ghost={i === ghost}
+      class:ghost-end={ghostEnd && i === ghost}>{newlineMark(c, states[i], i === cursor)}{c}</span
     >{/each}</pre>
 
 <style>
@@ -84,6 +96,18 @@
     background: color-mix(in srgb, var(--cursor) 18%, transparent);
     box-shadow: inset 0 -0.12em var(--cursor);
     border-radius: 0.1em;
+  }
+  /* The ghost cursor (S4): a translucent frame; after the last char once the record finished. */
+  .ghost {
+    outline: 0.08em solid color-mix(in srgb, var(--cursor) 45%, transparent);
+    outline-offset: -0.04em;
+  }
+  .ghost-end {
+    outline: none;
+  }
+  .ghost-end::after {
+    content: "";
+    border-right: 0.12em solid color-mix(in srgb, var(--cursor) 45%, transparent);
   }
   .nl.cursor {
     color: var(--muted);

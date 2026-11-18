@@ -23,6 +23,19 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   generated with the AI; off, new texts are saved AI texts of the same language and
   mode, rotating so they do not repeat, or the local corpus when none is saved, and
   no AI request is made.
+- Ghost session: when you type a text again ("Repetir", the diagnostic text, or any
+  text that comes back), a translucent second cursor races you at the pace of your
+  best earlier session with exactly that text: same profile, same mode and, for code,
+  the same language, with the highest net WPM (ties: the earliest). It waits at
+  the start until your first key and stays at the end once it gets there. Next to
+  the live metrics, a delta shows how far behind ("+1,2 s") or ahead ("−0,8 s")
+  you are at the last position you reached. The results then show "Récord anterior:
+  52 PPM" and, when you beat it, "¡Nuevo récord para este texto!". A record set in
+  this attempt races the next one. The timeline comes from the stored keystrokes
+  (`ghost_for_text`), so it works in every error mode and, in temporary mode, with
+  the sessions of this run. The time spent deleting with Backspace is not stored per key,
+  so it is shared among the keys typed after each deletion. Turn it off in
+  Ajustes → Práctica → "Sesión fantasma".
 - Accents and dead keys work: typing goes through a hidden text field, so the
   system input method composes `´` + `a` into one `á`.
 - On-screen keyboard at the bottom (ISO, or ANSI for US), labelled from the chosen layout (normal,
@@ -32,7 +45,8 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
   window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
-  targets per text (2 or 3), text length (100–600 characters) and live stats.
+  targets per text (2 or 3), text length (100–600 characters), live stats and
+  the ghost session (on by default).
   "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
   colour themes, dark and light, switched live, plus themes imported from
   VS Code (see below). Everything is remembered

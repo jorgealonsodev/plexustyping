@@ -191,6 +191,7 @@
     bind:loadingText
     mode={settings.mode}
     liveStats={settings.liveStats}
+    ghost={settings.ghost}
     showKeyboard={settings.showKeyboard}
     flashes={settings.flashes}
     heatmap={settings.heatmap}

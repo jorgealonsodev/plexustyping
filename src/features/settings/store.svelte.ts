@@ -41,6 +41,7 @@ import {
   savePracticeKind,
   loadErrorMode,
   loadFlashes,
+  loadGhost,
   loadLanguage,
   loadLayout,
   saveLanguage,
@@ -53,6 +54,7 @@ import {
   loadTextLength,
   saveErrorMode,
   saveFlashes,
+  saveGhost,
   saveHeatmap,
   saveLiveStats,
   saveMetronome,
@@ -88,6 +90,8 @@ export class SettingsStore {
 
   mode = $state(loadErrorMode());
   liveStats = $state(loadLiveStats());
+  /** Race the ghost of the best earlier session with the same text (ghost S3). */
+  ghost = $state(loadGhost());
   showKeyboard = $state(loadShowKeyboard());
   flashes = $state(loadFlashes());
   /** Themes imported from VS Code; loaded before the theme id so a saved import is known. */
@@ -159,6 +163,11 @@ export class SettingsStore {
   setLiveStats(on: boolean) {
     this.liveStats = on;
     saveLiveStats(on);
+  }
+
+  setGhost(on: boolean) {
+    this.ghost = on;
+    saveGhost(on);
   }
 
   setShowKeyboard(on: boolean) {

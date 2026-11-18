@@ -23,8 +23,10 @@ import {
   savePracticeKind,
   TARGET_COUNTS,
   TEXT_LENGTHS,
+  GHOST_SETTING,
   loadErrorMode,
   loadFlashes,
+  loadGhost,
   loadHeatmap,
   loadLiveStats,
   loadMetronome,
@@ -33,6 +35,7 @@ import {
   loadTextLength,
   saveErrorMode,
   saveFlashes,
+  saveGhost,
   saveHeatmap,
   saveLiveStats,
   saveMetronome,
@@ -85,6 +88,25 @@ describe("settings", () => {
     expect(loadLiveStats(storage)).toBe(false);
     saveLiveStats(true, storage);
     expect(loadLiveStats(storage)).toBe(true);
+  });
+
+  it("races the ghost session by default and persists the toggle (ghost S3)", () => {
+    const storage = memoryStorage();
+    expect(loadGhost(storage)).toBe(true);
+    saveGhost(false, storage);
+    expect(storage.getItem("plexustyping.ghost")).toBe("false");
+    expect(loadGhost(storage)).toBe(false);
+    saveGhost(true, storage);
+    expect(storage.getItem("plexustyping.ghost")).toBe("true");
+    expect(loadGhost(storage)).toBe(true);
+    expect([loadLiveStats(storage), loadFlashes(storage), loadShowKeyboard(storage)]).toEqual([true, true, true]);
+  });
+
+  it("names the ghost setting of Ajustes → Práctica (ghost S3)", () => {
+    expect(GHOST_SETTING).toEqual({
+      label: "Sesión fantasma",
+      hint: "Corre contra tu mejor sesión con el mismo texto",
+    });
   });
 
   it("shows the keyboard by default and persists the toggle", () => {

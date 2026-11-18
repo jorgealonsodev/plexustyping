@@ -11,6 +11,7 @@ const TARGETS_KEY = "plexustyping.targetCount";
 const LENGTH_KEY = "plexustyping.textLength";
 const LAYOUT_KEY = "plexustyping.layout";
 const LANGUAGE_KEY = "plexustyping.language";
+const GHOST_KEY = "plexustyping.ghost";
 
 /** Built-in keyboard layouts (`layouts/*.toml`) in display order; the first is the default. */
 export const LAYOUTS: { id: string; label: string }[] = [
@@ -78,6 +79,17 @@ const saveFlag = (key: string, on: boolean, storage: Storage) => storage.setItem
 export const loadLiveStats = (storage: Storage = localStorage) => loadFlag(LIVE_KEY, storage);
 
 export const saveLiveStats = (on: boolean, storage: Storage = localStorage) => saveFlag(LIVE_KEY, on, storage);
+
+/** Ajustes → Práctica toggle of the ghost session (ghost S3). */
+export const GHOST_SETTING = {
+  label: "Sesión fantasma",
+  hint: "Corre contra tu mejor sesión con el mismo texto",
+};
+
+/** Whether a text with a record races its ghost session (on unless turned off). */
+export const loadGhost = (storage: Storage = localStorage) => loadFlag(GHOST_KEY, storage);
+
+export const saveGhost = (on: boolean, storage: Storage = localStorage) => saveFlag(GHOST_KEY, on, storage);
 
 /** Whether the on-screen keyboard is shown (on unless turned off). */
 export const loadShowKeyboard = (storage: Storage = localStorage) => loadFlag(KEYBOARD_KEY, storage);
