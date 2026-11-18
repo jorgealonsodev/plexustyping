@@ -52,13 +52,14 @@ pub(super) fn save(path: &Path, contents: &str) -> Result<(), AuthError> {
             Err(err) => return Err(storage(err)),
         }
     };
-    let result = write_all(file, contents.as_bytes())
-        .and_then(|()| replace_file(&tmp, path))
-        .and_then(|()| sync_parent(path));
+    let result = write_all(file, contents.as_bytes()).and_then(|()| replace_file(&tmp, path));
     if let Err(err) = result {
         let _ = std::fs::remove_file(&tmp);
         return Err(storage(err));
     }
+    // Best effort: the new contents are already in place, so a failure here must not
+    // report a save that took effect as failed.
+    let _ = sync_parent(path);
     Ok(())
 }
 

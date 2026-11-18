@@ -120,7 +120,8 @@ official "Sign in with ChatGPT" for open-source, locally run apps
   failure, a timeout or a malformed reply moves on to the next provider.
 - **Sign out:** "Cerrar sesión" revokes the session at OpenAI and forgets the
   tokens on this machine; if OpenAI cannot confirm the revocation the app says
-  "No se pudo confirmar la revocación" (the tokens are deleted anyway).
+  "No se pudo confirmar la revocación" (the tokens are deleted anyway). After
+  signing out you can sign in with the same or another ChatGPT account.
 - **Privacy:** the sign-in tokens stay only in a private file on this machine
   (`chatgpt-auth.json` in the app config directory, owner-only, on Linux
   `~/.config/com.plexustyping.app/`), never in the database, the logs or the
