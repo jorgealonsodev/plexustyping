@@ -18,12 +18,13 @@ Branch `feat/phase-3-progressive-unlock`. Backend (T1) and frontend (T2) are wri
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S5, S7 | Backend: order per language/layout, mastery from stats + keystroke medians, unlock after scoring, word/pseudoword generator, text plan integration, commands, tests | writer A (parallel) | pending | |
-| T2 | S1, S6–S8 | Frontend: settings controls, API bindings, dimmed keys, progress line, unlock notice, vitest, README | writer B (parallel) | pending | |
-| T3 | S1–S8 | Integration checks, GUI check in an isolated dev app, review, merge, push, Trello | parent | pending | |
+| T1 | S1–S5, S7 | Backend: order per language/layout, mastery from stats + keystroke medians, unlock after scoring, word/pseudoword generator, text plan integration, commands, tests | writer A (parallel) | done | 0f5959d |
+| T2 | S1, S6–S8 | Frontend: settings controls, API bindings, dimmed keys, progress line, unlock notice, vitest, README | writer B (parallel) | done | 3080508 |
+| T3 | S1–S8 | Integration checks, GUI check in an isolated dev app, review, merge, push, Trello | parent | done | see L4 |
 
 ## Log
 
 - **L1 (user, verbatim, 2026-11-18):** "continua con lo que consideres mas optimo" — after the agent recommended progressive unlock to close phase 3. Everything not quoted from the PRD (per-profile storage, target options, punctuation rule, pseudoword shape, UI strings) is the agent's design.
 - **L2 (PRD §4.3, verbatim):** quoted in S2–S5.
 - **L3 (parent decision, 2026-11-18):** "tras 3 sesiones sin progreso" read as 3 sessions in a row: a session with progress resets the counter (test `a_session_that_masters_an_active_key_is_progress`, RED: counter stayed at 1).
+- **L4 (evidence, 2026-11-18):** T1 (backend, 24 app + 4 corpus + 2 store tests, RED first) and T2 (frontend, 14 vitest, RED first) integrated; cargo 583, vitest 293, clippy 0, check 0, build ok. GUI check by the parent in an isolated dev app: turning on "Desbloqueo progresivo" gives a letter-only text from the home row ("falsa a ha sala falsas salga…" plus pseudowords such as "jaka", "adahal"), dims every other key and shows "Teclas: 10/27 · siguiente: e"; three saved sessions later the result shows "Nueva tecla desbloqueada: e", the e key lights up and the next text uses it ("sed se la de dale llegada jefes…", "Teclas: 11/27 · siguiente: o"). Known limits: from 15 letters the AI prompt does not list the allowed characters, so many AI texts fall back to the restricted corpus; ç and accented letters unlock with digits and punctuation.
