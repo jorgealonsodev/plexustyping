@@ -16,10 +16,11 @@ Branch `feat/phase-3-daily-goal`. Runners: `cargo test --workspace`, `pnpm test`
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S6 | Backend (goal parse/store, progress and streak with tz offset, commands, tests) + frontend (API, Perfiles control, header progress, result notice, vitest) + README | worker | pending | |
-| T2 | S1–S6 | Integration checks + structural review; merge, push, Trello | parent | pending | |
+| T1 | S1–S6 | Backend (goal parse/store, progress and streak with tz offset, commands, tests) + frontend (API, Perfiles control, header progress, result notice, vitest) + README | worker | done | see L3 |
+| T2 | S1–S6 | Integration checks + structural review; merge, push, Trello | parent | done | see L3 |
 
 ## Log
 
 - **L1 (user, verbatim, 2026-11-18):** "continua con lo que consideres mas optimo" — after local profiles, the agent picked the daily goal (smallest remaining RF10 item) and designed S1–S6 (amount lists, streak rule, texts) as its own assumptions.
 - **L2 (PRD, verbatim):** "Meta diaria en minutos o en textos, con racha de días."
+- **L3 (evidence, 2026-11-18):** T1 by one worker, test-first (RED: compile failures and 14 failing stubs, then GREEN): store `DailyGoal`/`GoalKind`/`MINUTE_GOALS`/`TEXT_GOALS`, `daily_goal`/`set_daily_goal` (keeps other keys of `goals`, `{"daily":null}` = off), `src-tauri/src/goals.rs` (`progress` by local day, streak loop), commands `goal_set(kind, amount, tz_offset_min?)` and `goal_status`, `src/features/goals/*`, Perfiles control, header text, `crossedGoal` notice, README. Assumptions: `goal_set` takes an optional `tz_offset_min` (default 0) to return local progress; "off" with an amount is refused; offsets beyond ±18 h give "Zona horaria no válida: N"; default amounts 20 min / 5 texts when switching kind; the notice is skipped when the previous status is unknown. Parent checks: cargo 419, vitest 242, clippy 0, check 0, build ok; structural readback of the local-day and streak code. No component test of the Results notice; not tried in the running app.
