@@ -541,7 +541,8 @@ async fn a_pending_sign_in_can_be_cancelled() {
     let f = Arc::new(Fixture::new().await);
     let waiting = f.clone();
     let task = tokio::spawn(async move { waiting.auth.sign_in(|_| Ok(())).await });
-    for _ in 0..500 {
+    // The host id is saved (and synced) first, which a busy slow disk may take seconds to do.
+    for _ in 0..1500 {
         if f.auth.sign_in_pending() {
             break;
         }
