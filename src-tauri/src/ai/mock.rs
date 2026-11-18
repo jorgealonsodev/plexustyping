@@ -24,8 +24,12 @@ impl Mock {
         self.log.lock().unwrap().clone()
     }
 
+    pub fn endpoints(&self) -> Endpoints {
+        Endpoints::loopback(&self.base)
+    }
+
     pub fn client(&self) -> AiClient {
-        AiClient::new(Endpoints::loopback(&self.base))
+        AiClient::new(self.endpoints())
     }
 }
 

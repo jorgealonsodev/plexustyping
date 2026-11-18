@@ -1,6 +1,8 @@
 //! AI practice texts wired into the app (S2, S3, S5): non-secret settings in
 //! the store, keys in the system keychain, generation through the provider
-//! fallback chain, then the local cache, then the corpus.
+//! fallback chain, then the local cache, then the corpus. ChatGPT (tu
+//! suscripción) uses the signed-in account instead of a key (Sign in with
+//! ChatGPT, S4): its token comes from the client's `ChatgptAuth`.
 //!
 //! Only target units, language, length, allowed chars and topic are sent
 //! (S5). Keys never cross back to the frontend and are never logged. The store
@@ -8,6 +10,7 @@
 
 use std::time::Duration;
 
+use plexustyping_ai::chatgpt_auth::AuthError;
 use plexustyping_ai::{
     AiClient, ApiKey, GenerationRequest, Mode, ProviderConfig, ProviderError, ProviderId,
     ValidationIssue,
@@ -24,8 +27,8 @@ use crate::secrets::{self, SecretError, SharedSecrets};
 
 /// Store `settings` key of the JSON [`AiSettings`].
 pub const SETTINGS_KEY: &str = "ai";
-/// Longest fallback chain.
-pub const MAX_CHAIN: usize = 4;
+/// Longest fallback chain: every provider once.
+pub const MAX_CHAIN: usize = ProviderId::ALL.len();
 /// Longest topic, in chars.
 pub const MAX_TOPIC_CHARS: usize = 60;
 /// Longest model id, in chars.
@@ -48,7 +51,7 @@ pub struct ChainEntry {
 #[serde(rename_all = "camelCase")]
 pub struct AiSettings {
     pub enabled: bool,
-    /// 1–4 distinct providers; order = fallback order.
+    /// 1–[`MAX_CHAIN`] distinct providers; order = fallback order.
     pub chain: Vec<ChainEntry>,
     /// Target density over the normal frequency, `2.0..=5.0`.
     pub density: f32,
@@ -122,6 +125,7 @@ pub fn short_name(id: ProviderId) -> &'static str {
         ProviderId::Openai => "OpenAI",
         ProviderId::Gemini => "Gemini",
         ProviderId::OpencodeGo => "OpenCode Go",
+        ProviderId::Chatgpt => "ChatGPT",
     }
 }
 
@@ -132,6 +136,7 @@ pub fn slug(id: ProviderId) -> &'static str {
         ProviderId::Openai => "openai",
         ProviderId::Gemini => "gemini",
         ProviderId::OpencodeGo => "opencode-go",
+        ProviderId::Chatgpt => "chatgpt",
     }
 }
 
@@ -159,8 +164,17 @@ pub fn providers() -> Vec<ProviderInfo> {
 }
 
 /// The one place that turns a provider error into a short Spanish reason.
+/// ChatGPT's sign-in, plan and request errors already carry a Spanish message
+/// meant for the user (e.g. "Has alcanzado el límite de tu plan de ChatGPT").
 pub fn provider_reason(id: ProviderId, err: &ProviderError) -> String {
     let name = short_name(id);
+    if id == ProviderId::Chatgpt
+        && let ProviderError::Auth { message }
+        | ProviderError::RateLimit { message }
+        | ProviderError::Config { message } = err
+    {
+        return message.clone();
+    }
     match err {
         ProviderError::NoKey => format!("Falta la clave de {name}"),
         ProviderError::Auth { .. } => format!("{name} rechazó la clave"),
@@ -311,16 +325,38 @@ async fn load_key(secrets: &SharedSecrets, id: ProviderId) -> Result<Option<ApiK
 }
 
 /// Whether a key is saved for `id`; the key itself never leaves the backend.
-pub async fn key_status(secrets: &SharedSecrets, id: ProviderId) -> Result<bool, AiFailure> {
+/// For ChatGPT: whether its account is signed in with plan use enabled.
+pub async fn key_status(
+    client: &AiClient,
+    secrets: &SharedSecrets,
+    id: ProviderId,
+) -> Result<bool, AiFailure> {
+    if id == ProviderId::Chatgpt {
+        let Some(auth) = client.chatgpt() else {
+            return Ok(false);
+        };
+        return match auth.status().await {
+            Ok(status) => Ok(status.plan_enabled),
+            Err(AuthError::NoStorage) => Ok(false),
+            Err(err) => Err(provider_failure(id, &err.into())),
+        };
+    }
     Ok(load_key(secrets, id).await?.is_some())
 }
 
-/// Saves `key` (trimmed) for `id` in the system keychain.
+/// Why ChatGPT takes no key.
+const CHATGPT_NO_KEY: &str = "ChatGPT no usa clave: inicia sesión con ChatGPT en Ajustes → IA";
+
+/// Saves `key` (trimmed) for `id` in the system keychain. ChatGPT is refused:
+/// it uses the signed-in account.
 pub async fn key_save(
     secrets: &SharedSecrets,
     id: ProviderId,
     key: String,
 ) -> Result<(), AiFailure> {
+    if id == ProviderId::Chatgpt {
+        return Err(AiFailure::new("config", CHATGPT_NO_KEY));
+    }
     let key = key.trim().to_owned();
     if key.is_empty() {
         return Err(AiFailure::new("noKey", "La clave está vacía"));
@@ -336,8 +372,12 @@ pub async fn key_save(
     .map_err(keychain_failure)
 }
 
-/// Deletes `id`'s key; deleting a missing key succeeds.
+/// Deletes `id`'s key; deleting a missing key succeeds. ChatGPT keeps nothing
+/// in the keychain (signing out is its own action), so it is a no-op.
 pub async fn key_delete(secrets: &SharedSecrets, id: ProviderId) -> Result<(), AiFailure> {
+    if id == ProviderId::Chatgpt {
+        return Ok(());
+    }
     let account = account(id);
     secrets::run(secrets, move |s| {
         if !s.available() {
@@ -349,14 +389,15 @@ pub async fn key_delete(secrets: &SharedSecrets, id: ProviderId) -> Result<(), A
     .map_err(keychain_failure)
 }
 
-/// Models `id` offers, with its stored key; OpenCode Go's list needs none.
+/// Models `id` offers, with its stored key; OpenCode Go's list needs none and
+/// ChatGPT's uses the signed-in account (slugs, in the plan's order).
 pub async fn models(
     client: &AiClient,
     secrets: &SharedSecrets,
     id: ProviderId,
 ) -> Result<Vec<String>, AiFailure> {
     let key = match id {
-        ProviderId::OpencodeGo => None,
+        ProviderId::OpencodeGo | ProviderId::Chatgpt => None,
         _ => Some(
             load_key(secrets, id)
                 .await?
@@ -369,13 +410,28 @@ pub async fn models(
         .map_err(|e| provider_failure(id, &e))
 }
 
-/// Checks `id`'s stored key with `model` (empty = the default model).
+/// The ChatGPT access token of the signed-in account (renewed when it is
+/// about to expire), or why there is none.
+async fn chatgpt_token(client: &AiClient) -> Result<ApiKey, ProviderError> {
+    let auth = client.chatgpt().ok_or(AuthError::NotSignedIn)?;
+    Ok(auth.access_token().await?)
+}
+
+/// Checks `id`'s stored key with `model` (empty = the default model). For
+/// ChatGPT, checks the sign-in (renewing its token if needed) without any
+/// inference request.
 pub async fn test_connection(
     client: &AiClient,
     secrets: &SharedSecrets,
     id: ProviderId,
     model: &str,
 ) -> Result<(), AiFailure> {
+    if id == ProviderId::Chatgpt {
+        return chatgpt_token(client)
+            .await
+            .map(|_| ())
+            .map_err(|e| provider_failure(id, &e));
+    }
     let key = load_key(secrets, id)
         .await?
         .ok_or_else(|| provider_failure(id, &ProviderError::NoKey))?;
@@ -451,9 +507,10 @@ fn now_ms() -> i64 {
         .unwrap_or(0)
 }
 
-/// Configs of the chain entries that have a model and a key, and the reason
-/// for the first unusable entry.
+/// Configs of the chain entries that have a model and a key (for ChatGPT, a
+/// signed-in account with plan use), and the reason for the first unusable entry.
 async fn usable_chain(
+    client: &AiClient,
     secrets: &SharedSecrets,
     settings: &AiSettings,
 ) -> (Vec<ProviderConfig>, Option<String>) {
@@ -463,6 +520,19 @@ async fn usable_chain(
         let id = entry.provider;
         if entry.model.is_empty() {
             reason.get_or_insert_with(|| format!("Falta el modelo de {}", short_name(id)));
+            continue;
+        }
+        if id == ProviderId::Chatgpt {
+            match chatgpt_token(client).await {
+                Ok(token) => {
+                    let mut cfg = ProviderConfig::new(id, token);
+                    cfg.model = entry.model.clone();
+                    configs.push(cfg);
+                }
+                Err(err) => {
+                    reason.get_or_insert_with(|| provider_reason(id, &err));
+                }
+            }
             continue;
         }
         match load_key(secrets, id).await {
@@ -607,7 +677,7 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
         }
         return plan.corpus(p.seed);
     }
-    let (chain, missing) = usable_chain(&state.secrets, &settings).await;
+    let (chain, missing) = usable_chain(&state.ai, &state.secrets, &settings).await;
     let reason = if chain.is_empty() {
         missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned())
     } else {

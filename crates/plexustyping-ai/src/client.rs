@@ -1,9 +1,12 @@
 //! The one place that sends HTTP requests.
 
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use crate::chatgpt_auth::{AuthError, ChatgptAuth};
+
 use crate::opencode::{Catalog, MAX_CATALOGUE_BYTES, ModelInfo, models_from_models_dev};
-use crate::providers::{build, list_request, new_session_id, parse, parse_models};
+use crate::providers::{Shape, build, list_request, new_session_id, parse, parse_models};
 use crate::{
     ApiKey, DEFAULT_DEADLINE, DEFAULT_TIMEOUT, Endpoints, Generated, GenerationRequest,
     ProviderConfig, ProviderError, ProviderId, Usage, build_prompt, parse_text_json, validate,
@@ -36,10 +39,10 @@ const MAX_REPLY_BYTES: usize = 4 * 1024 * 1024;
 /// The cheapest generation, used to check an OpenCode Go key.
 const PING_PROMPT: &str = "Responde solo con JSON: {\"text\": \"ok\"}";
 
-/// HTTP client for the four providers: HTTPS only, redirects off (keys are
+/// HTTP client for the five providers: HTTPS only, redirects off (keys are
 /// never re-sent to another host), 5 s connect timeout, fixed [`Endpoints`],
-/// an overall deadline per fallback chain, and the in-memory OpenCode Go
-/// format catalogue.
+/// an overall deadline per fallback chain, the in-memory OpenCode Go format
+/// catalogue and, when set, the ChatGPT sign-in that renews a rejected token.
 pub struct AiClient {
     http: Result<reqwest::Client, String>,
     endpoints: Endpoints,
@@ -48,6 +51,8 @@ pub struct AiClient {
     session: String,
     /// Total time for one [`AiClient::generate_with_fallback`] call.
     deadline: Duration,
+    /// The ChatGPT sign-in (see [`AiClient::with_chatgpt`]).
+    chatgpt: Option<Arc<ChatgptAuth>>,
 }
 
 impl AiClient {
@@ -66,6 +71,7 @@ impl AiClient {
             catalog: Catalog::default(),
             session: new_session_id(),
             deadline: DEFAULT_DEADLINE,
+            chatgpt: None,
         }
     }
 
@@ -74,6 +80,19 @@ impl AiClient {
     pub fn with_deadline(mut self, deadline: Duration) -> Self {
         self.deadline = deadline;
         self
+    }
+
+    /// The same client with the ChatGPT sign-in: a ChatGPT request whose token
+    /// is rejected (HTTP 401) is retried once with a renewed token, and the
+    /// ChatGPT model list without a token uses the signed-in account.
+    pub fn with_chatgpt(mut self, auth: Arc<ChatgptAuth>) -> Self {
+        self.chatgpt = Some(auth);
+        self
+    }
+
+    /// The ChatGPT sign-in, when set with [`AiClient::with_chatgpt`].
+    pub fn chatgpt(&self) -> Option<&ChatgptAuth> {
+        self.chatgpt.as_deref()
     }
 
     /// Total time of one [`AiClient::generate_with_fallback`] call
@@ -106,24 +125,55 @@ impl AiClient {
 
     /// Model ids the provider offers, filtered to text models. Claude, OpenAI
     /// and Gemini need `key` ([`ProviderError::NoKey`] without it); OpenCode
-    /// Go's list is public and is fetched without the key.
+    /// Go's list is public and is fetched without the key. ChatGPT lists the
+    /// plan's models (slugs, in server order) with `key` or, without it, with
+    /// the signed-in account's token.
     pub async fn list_models(
         &self,
         id: ProviderId,
         key: Option<&ApiKey>,
     ) -> Result<Vec<String>, ProviderError> {
+        if id == ProviderId::Chatgpt {
+            return self.chatgpt_models(key).await;
+        }
         let mask = |err: ProviderError| match key {
             Some(key) => err.masked(key.expose()),
             None => err,
         };
+        let (status, body) = self.get_models(id, key).await.map_err(mask)?;
+        parse_models(id, status, &body).map_err(mask)
+    }
+
+    /// `GET` of `id`'s model list; `(status, body)`, errors not masked yet.
+    async fn get_models(
+        &self,
+        id: ProviderId,
+        key: Option<&ApiKey>,
+    ) -> Result<(u16, String), ProviderError> {
         let (url, headers) = list_request(id, &self.endpoints, key)?;
         let mut request = self.http()?.get(url);
         for (name, value) in headers {
             request = request.header(name, value);
         }
-        let (status, body) = fetch(request, DEFAULT_TIMEOUT, id, MAX_REPLY_BYTES)
-            .await
-            .map_err(mask)?;
+        fetch(request, DEFAULT_TIMEOUT, id, MAX_REPLY_BYTES).await
+    }
+
+    /// The ChatGPT plan's model list; a rejected token is renewed once.
+    async fn chatgpt_models(&self, key: Option<&ApiKey>) -> Result<Vec<String>, ProviderError> {
+        let id = ProviderId::Chatgpt;
+        let token = match (key, self.chatgpt()) {
+            (Some(key), _) => key.clone(),
+            (None, Some(auth)) => auth.access_token().await?,
+            (None, None) => return Err(AuthError::NotSignedIn.into()),
+        };
+        let mask = |err: ProviderError| err.masked(token.expose());
+        let (status, body) = self.get_models(id, Some(&token)).await.map_err(mask)?;
+        let Some(auth) = self.chatgpt().filter(|_| status == 401) else {
+            return parse_models(id, status, &body).map_err(mask);
+        };
+        let renewed = auth.refresh_rejected(&token).await?;
+        let mask = |err: ProviderError| mask(err.masked(renewed.expose()));
+        let (status, body) = self.get_models(id, Some(&renewed)).await.map_err(mask)?;
         parse_models(id, status, &body).map_err(mask)
     }
 
@@ -220,13 +270,17 @@ impl AiClient {
     /// Sends `prompt` and returns the model's raw text with the usage. With
     /// `generation`, an OpenCode Go reasoning model is asked for its lowest
     /// effort (the connection test sends the plain request). Every error is
-    /// masked with the key.
+    /// masked with the key. A ChatGPT token rejected with HTTP 401 is renewed
+    /// once through the sign-in and the request sent once more.
     async fn complete(
         &self,
         cfg: &ProviderConfig,
         prompt: &str,
         generation: bool,
     ) -> Result<(String, Usage), ProviderError> {
+        if cfg.id == ProviderId::Chatgpt {
+            return self.complete_chatgpt(cfg, prompt).await;
+        }
         let key = cfg.api_key.expose();
         let mut format = ModelInfo::default();
         let mut with_session;
@@ -240,16 +294,53 @@ impl AiClient {
             }
         }
         let low_effort = format.low_effort.filter(|_| generation);
-        let call = build(cfg, &self.endpoints, prompt, format.wire, low_effort)
+        let (shape, status, body) = self
+            .post(cfg, prompt, format.wire, low_effort)
+            .await
             .map_err(|e| e.masked(key))?;
+        parse(shape, status, &body).map_err(|e| e.masked(key))
+    }
+
+    /// Builds and sends one generation request; `(shape, status, body)`, errors
+    /// not masked yet.
+    async fn post(
+        &self,
+        cfg: &ProviderConfig,
+        prompt: &str,
+        format: crate::providers::Wire,
+        low_effort: Option<&str>,
+    ) -> Result<(Shape, u16, String), ProviderError> {
+        let call = build(cfg, &self.endpoints, prompt, format, low_effort)?;
         let mut request = self.http()?.post(&call.url).json(&call.body);
         for (name, value) in &call.headers {
             request = request.header(*name, value);
         }
-        let (status, body) = fetch(request, cfg.timeout, cfg.id, MAX_REPLY_BYTES)
-            .await
-            .map_err(|e| e.masked(key))?;
-        parse(call.shape, status, &body).map_err(|e| e.masked(key))
+        let (status, body) = fetch(request, cfg.timeout, cfg.id, MAX_REPLY_BYTES).await?;
+        Ok((call.shape, status, body))
+    }
+
+    /// One ChatGPT generation (the streamed reply is read to its end); after a
+    /// 401, one token renewal and one more request, never more.
+    async fn complete_chatgpt(
+        &self,
+        cfg: &ProviderConfig,
+        prompt: &str,
+    ) -> Result<(String, Usage), ProviderError> {
+        let wire = crate::providers::Wire::Responses;
+        let token = &cfg.api_key;
+        let mask = |err: ProviderError| err.masked(token.expose());
+        let (shape, status, body) = self.post(cfg, prompt, wire, None).await.map_err(mask)?;
+        let Some(auth) = self.chatgpt().filter(|_| status == 401) else {
+            return parse(shape, status, &body).map_err(mask);
+        };
+        let renewed = auth.refresh_rejected(token).await?;
+        let mask = |err: ProviderError| mask(err.masked(renewed.expose()));
+        let retry = ProviderConfig {
+            api_key: renewed.clone(),
+            ..cfg.clone()
+        };
+        let (shape, status, body) = self.post(&retry, prompt, wire, None).await.map_err(mask)?;
+        parse(shape, status, &body).map_err(mask)
     }
 
     /// The OpenCode Go API format and lowest effort of `cfg.model`, fetching
@@ -296,7 +387,7 @@ async fn fetch(
         if body.len() + chunk.len() > max {
             return Err(ProviderError::bad_response(format!(
                 "The answer from {} was too large.",
-                provider.label()
+                provider.error_name()
             )));
         }
         body.extend_from_slice(&chunk);
@@ -317,9 +408,11 @@ fn transport_error(provider: ProviderId, err: reqwest::Error) -> ProviderError {
         detail.push_str(&cause.to_string());
         source = cause.source();
     }
-    ProviderError::Network {
-        message: format!("Could not reach {}: {detail}.", provider.label()),
-    }
+    let message = match provider {
+        ProviderId::Chatgpt => format!("No se pudo conectar con ChatGPT: {detail}."),
+        _ => format!("Could not reach {}: {detail}.", provider.label()),
+    };
+    ProviderError::Network { message }
 }
 
 #[async_trait::async_trait]

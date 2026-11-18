@@ -18,6 +18,7 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
+mod chatgpt;
 pub mod chatgpt_auth;
 mod client;
 mod opencode;
@@ -53,15 +54,19 @@ pub enum ProviderId {
     Gemini,
     /// OpenCode Go subscription (open models over several API formats).
     OpencodeGo,
+    /// The user's ChatGPT plan through Sign in with ChatGPT (no API key):
+    /// streamed Responses API on api.openai.com.
+    Chatgpt,
 }
 
 impl ProviderId {
     /// Every provider, in display order.
-    pub const ALL: [ProviderId; 4] = [
+    pub const ALL: [ProviderId; 5] = [
         ProviderId::Claude,
         ProviderId::Openai,
         ProviderId::Gemini,
         ProviderId::OpencodeGo,
+        ProviderId::Chatgpt,
     ];
 
     /// Human-readable name.
@@ -71,6 +76,15 @@ impl ProviderId {
             ProviderId::Openai => "OpenAI",
             ProviderId::Gemini => "Google Gemini",
             ProviderId::OpencodeGo => "OpenCode Go",
+            ProviderId::Chatgpt => "ChatGPT (tu suscripción)",
+        }
+    }
+
+    /// The name used in error messages: the label, or just "ChatGPT".
+    pub fn error_name(self) -> &'static str {
+        match self {
+            ProviderId::Chatgpt => "ChatGPT",
+            other => other.label(),
         }
     }
 
@@ -82,7 +96,7 @@ impl ProviderId {
             ProviderId::Claude => "claude-haiku-5-5",
             ProviderId::Openai => "gpt-5-mini",
             ProviderId::Gemini => "gemini-3.5-flash-lite",
-            ProviderId::OpencodeGo => "",
+            ProviderId::OpencodeGo | ProviderId::Chatgpt => "",
         }
     }
 }
