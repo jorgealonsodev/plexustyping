@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod code;
 pub mod commands;
+pub mod ghost;
 pub mod goals;
 pub mod history;
 pub mod metronome;
@@ -195,6 +196,17 @@ fn heatmap(state: State<AppState>, mode: Option<PracticeMode>) -> Result<Vec<Hea
     let store = store(&state);
     let model = commands::load_model_for(&store, &state.active_profile(), stats_mode)?;
     Ok(commands::heatmap(&model))
+}
+
+/// The active profile's best earlier session with exactly `text` in `mode` (prose by
+/// default, words or `{ kind: "code", lang }`) and its timeline, or `null` (S1, S2, S6).
+#[tauri::command]
+fn ghost_for_text(
+    state: State<AppState>,
+    text: String,
+    mode: Option<PracticeMode>,
+) -> Result<Option<ghost::Ghost>, String> {
+    ghost::for_text(&state, &text, &mode.unwrap_or_default())
 }
 
 #[tauri::command]
@@ -487,6 +499,7 @@ pub fn run() {
             weaknesses,
             heatmap,
             recent_sessions,
+            ghost_for_text,
             session_history,
             export_sessions_csv,
             history_by_day,

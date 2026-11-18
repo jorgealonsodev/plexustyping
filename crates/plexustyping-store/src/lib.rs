@@ -327,6 +327,22 @@ pub struct SessionSummary {
     pub bpm: Option<u32>,
 }
 
+/// The ghost of a text (S1, S2): the profile's best earlier session with it.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Ghost {
+    /// Row id of the record session.
+    pub session_id: i64,
+    /// Its net words per minute.
+    pub net_wpm: f64,
+    /// Per text position (char), the ms after the record's first keystroke at
+    /// which its cursor first moved past it; `None` where it never did.
+    pub times: Vec<Option<f64>>,
+}
+
+/// Columns between tab stops when a Tab consumes a run of spaces (as in `plexustyping-core`).
+const TAB_WIDTH: usize = 4;
+
 /// Stored statistics for one character or bigram.
 #[derive(Clone, Debug, PartialEq)]
 pub struct UnitStatRow {
@@ -758,6 +774,46 @@ impl Store {
             })
         })
         .collect()
+    }
+
+    /// The ghost for `text` (S1): among the sessions of `profile_id` with exactly
+    /// that text, `mode` (`sessions.mode`) and `code_language`, the one with the
+    /// highest net PPM (ties: the earliest), with its timeline (S2); `None` when
+    /// there is none.
+    pub fn ghost_for_text(
+        &self,
+        profile_id: i64,
+        text: &str,
+        mode: &str,
+        code_language: Option<&str>,
+    ) -> Result<Option<Ghost>> {
+        let best = self
+            .conn
+            .query_row(
+                "SELECT id, net_wpm, error_mode, duration_ms FROM sessions
+                 WHERE profile_id = ?1 AND text = ?2 AND mode = ?3 AND code_language IS ?4
+                 ORDER BY net_wpm DESC, started_at_ms, id LIMIT 1",
+                params![profile_id, text, mode, code_language],
+                |r| {
+                    Ok((
+                        r.get::<_, i64>(0)?,
+                        r.get::<_, f64>(1)?,
+                        r.get::<_, String>(2)?,
+                        r.get::<_, f64>(3)?,
+                    ))
+                },
+            )
+            .optional()?;
+        let Some((session_id, net_wpm, error_mode, duration_ms)) = best else {
+            return Ok(None);
+        };
+        let error_mode = parse_error_mode(&error_mode)?;
+        let records = self.session_keystrokes(session_id)?;
+        Ok(Some(Ghost {
+            session_id,
+            net_wpm,
+            times: ghost_times(text, error_mode, &records, duration_ms),
+        }))
     }
 
     /// Metronome offset of each keystroke of a session in typing order (`None` where
@@ -1192,6 +1248,106 @@ fn replace_stats(tx: &Connection, profile_id: i64, mode: &str, s: &StatsSnapshot
 
 fn user_version(conn: &Connection) -> Result<i64> {
     Ok(conn.query_row("PRAGMA user_version", [], |r| r.get(0))?)
+}
+
+/// The ms (from the first keystroke) at which the cursor of a session first
+/// moved past each position of `text`, rebuilt from its stored records (S2).
+///
+/// Records hold only char and Tab keystrokes, so the cursor after each one is
+/// replayed with the rules of `plexustyping-core`: a correct key advances (a
+/// Tab over spaces up to the tab stop, a newline also over an auto-filled
+/// indent), a wrong one advances unless the mode stops on errors. Auto indent
+/// is not stored: it was on when a newline was followed by a key beyond it.
+/// The time spent on Backspaces has no record either: the part of
+/// `duration_ms` the records do not account for is shared among the
+/// keystrokes typed after deleting, by how many positions were deleted.
+fn ghost_times(
+    text: &str,
+    mode: ErrorMode,
+    records: &[KeystrokeRecord],
+    duration_ms: f64,
+) -> Vec<Option<f64>> {
+    let chars: Vec<char> = text.chars().collect();
+    let len = chars.len();
+    let auto_indent = records
+        .windows(2)
+        .any(|w| w[0].correct && w[0].expected == '\n' && w[1].index > w[0].index + 1);
+    let cursor_after = |r: &KeystrokeRecord| -> usize {
+        let i = r.index.min(len);
+        if !r.correct {
+            return if mode == ErrorMode::StopOnError {
+                i
+            } else {
+                (i + 1).min(len)
+            };
+        }
+        let mut next = if r.typed == '\t' && r.expected == ' ' {
+            i + tab_run(&chars, i).max(1)
+        } else {
+            i + 1
+        };
+        next = next.min(len);
+        if auto_indent && r.expected == '\n' {
+            while next < len && matches!(chars[next], ' ' | '\t') {
+                next += 1;
+            }
+        }
+        next
+    };
+    let after: Vec<usize> = records.iter().map(cursor_after).collect();
+    // Positions deleted before each record (weights of the unrecorded Backspace time).
+    let deleted: Vec<usize> = (0..records.len())
+        .map(|k| match k {
+            0 => 0,
+            _ => after[k - 1].saturating_sub(records[k].index),
+        })
+        .collect();
+    let recorded: f64 = records.iter().filter_map(|r| r.ms_since_previous).sum();
+    let unrecorded = (duration_ms - recorded).max(0.0);
+    let total_deleted: usize = deleted.iter().sum();
+    let mut times = vec![None; len];
+    let mut reached = 0;
+    let mut t = 0.0;
+    for (k, r) in records.iter().enumerate() {
+        t += r.ms_since_previous.unwrap_or(0.0);
+        if total_deleted > 0 {
+            t += unrecorded * deleted[k] as f64 / total_deleted as f64;
+        }
+        if after[k] > reached {
+            for slot in &mut times[reached..after[k]] {
+                *slot = Some(t);
+            }
+            reached = after[k];
+        }
+    }
+    times
+}
+
+/// Spaces a Tab at `cursor` consumes: up to the line's next tab stop, bounded
+/// by the run of spaces (as in `plexustyping-core`).
+fn tab_run(chars: &[char], cursor: usize) -> usize {
+    let line_start = chars[..cursor]
+        .iter()
+        .rposition(|&c| c == '\n')
+        .map_or(0, |i| i + 1);
+    let width = TAB_WIDTH - (cursor - line_start) % TAB_WIDTH;
+    chars[cursor..]
+        .iter()
+        .take(width)
+        .take_while(|&&c| c == ' ')
+        .count()
+}
+
+/// The error mode of a stored `error_mode` value.
+fn parse_error_mode(s: &str) -> Result<ErrorMode> {
+    match s {
+        "stop-on-error" => Ok(ErrorMode::StopOnError),
+        "allow-continue" => Ok(ErrorMode::AllowContinue),
+        "backspace-correct" => Ok(ErrorMode::BackspaceCorrect),
+        other => Err(StoreError::InvalidData(format!(
+            "unknown error mode {other:?}"
+        ))),
+    }
 }
 
 /// Stored form of an error mode (matches its serde kebab-case name).
