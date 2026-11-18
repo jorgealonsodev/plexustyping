@@ -91,6 +91,9 @@ pub struct ScoredSession {
     /// Metronome offset of each record (negative = early); empty without a metronome.
     #[serde(default)]
     pub offsets_ms: Vec<Option<f64>>,
+    /// The key this session unlocked (progressive unlock, prose only).
+    #[serde(default)]
+    pub unlocked: Option<String>,
 }
 
 /// What the metronome measured while a text was typed.
@@ -321,7 +324,7 @@ pub fn load_model_for(
         .map_err(|e| e.to_string())
 }
 
-fn unknown_language(language: &str) -> String {
+pub(crate) fn unknown_language(language: &str) -> String {
     format!("unknown language: {language}")
 }
 
@@ -410,16 +413,43 @@ pub fn words_text(plan: &TextPlan, seed: u64) -> Result<NextText, String> {
     })
 }
 
-/// A corpus text for `plan`.
+/// A corpus text for `plan`. When the plan does not allow `.` (progressive
+/// unlock), the sentence periods are dropped, asking for as many more chars
+/// (a few attempts) so the text keeps its length.
 pub fn corpus_text(plan: &TextPlan, seed: u64) -> Result<NextText, String> {
+    let periods = plan.allowed.contains(&'.');
     generate_with_retry(&plan.targets, |targets| {
-        plan.corpus.generate(&GenerateOptions {
-            targets: targets.to_vec(),
-            length: plan.length.clone(),
-            allowed: Some(plan.allowed.clone()),
-            seed,
-        })
+        let generate = |extra: usize| {
+            plan.corpus.generate(&GenerateOptions {
+                targets: targets.to_vec(),
+                length: plan.length.start + extra..plan.length.end + extra,
+                allowed: Some(plan.allowed.clone()),
+                seed,
+            })
+        };
+        if periods {
+            return generate(0);
+        }
+        let mut extra = 0;
+        let mut text = without_periods(&generate(extra));
+        for _ in 0..PERIOD_ATTEMPTS {
+            let short = plan.length.start.saturating_sub(text.chars().count());
+            if short == 0 || text.is_empty() {
+                break;
+            }
+            extra += short;
+            text = without_periods(&generate(extra));
+        }
+        text
     })
+}
+
+/// Regenerations of a corpus text whose dropped periods made it too short.
+const PERIOD_ATTEMPTS: usize = 3;
+
+/// `text` without its `.`.
+fn without_periods(text: &str) -> String {
+    text.chars().filter(|c| *c != '.').collect()
 }
 
 /// The diagnostic text while `profile` has no saved session, unless `layout`
@@ -547,7 +577,12 @@ pub fn score_practice(store: &mut Store, profile: &Profile, req: &ScoreRequest) 
         bpm: metronome.session_bpm(&offsets_ms),
         offsets_ms: &offsets_ms,
     };
-    let (saved, save_error) = if result.completed && !result.records.is_empty() {
+    let storable = result.completed && !result.records.is_empty();
+    // Progressive unlock: only prose, compared before and after the save (S4).
+    let unlock = (storable && *req.practice == PracticeMode::Prose)
+        .then(|| crate::unlock::before_session(store, profile))
+        .flatten();
+    let (saved, save_error) = if storable {
         match persist(store, profile, &saved_session, &result) {
             Ok(()) => (true, None),
             Err(e) => (false, Some(e.to_string())),
@@ -555,12 +590,16 @@ pub fn score_practice(store: &mut Store, profile: &Profile, req: &ScoreRequest) 
     } else {
         (false, None)
     };
+    let unlocked = unlock
+        .filter(|_| saved)
+        .and_then(|before| crate::unlock::after_session(store, before));
     ScoredSession {
         result,
         failed_chars,
         saved,
         save_error,
         offsets_ms,
+        unlocked,
     }
 }
 

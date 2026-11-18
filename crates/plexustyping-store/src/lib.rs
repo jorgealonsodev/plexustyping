@@ -868,6 +868,44 @@ impl Store {
         )?;
         Ok(())
     }
+
+    /// Deletes setting `key` and every setting whose key starts with
+    /// `key` followed by `:` (e.g. `unlock:3` and `unlock:3:es:es-qwerty`).
+    pub fn delete_settings_under(&self, key: &str) -> Result<()> {
+        // substr, not LIKE: keys may contain `%` or `_`.
+        let prefix = format!("{key}:");
+        self.conn.execute(
+            "DELETE FROM settings
+             WHERE key = ?1 OR substr(key, 1, length(?2)) = ?2",
+            [key, prefix.as_str()],
+        )?;
+        Ok(())
+    }
+
+    /// `ms_since_previous` of the last `limit` correct keystrokes on `ch` in
+    /// the sessions of `profile_id` with `sessions.mode = mode`, newest first
+    /// (by session start, then typing order); keystrokes without an interval
+    /// are skipped.
+    pub fn correct_latencies(
+        &self,
+        profile_id: i64,
+        mode: &str,
+        ch: char,
+        limit: usize,
+    ) -> Result<Vec<f64>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT k.ms_since_previous FROM keystrokes k
+             JOIN sessions s ON s.id = k.session_id
+             WHERE s.profile_id = ?1 AND s.mode = ?2 AND k.expected = ?3
+                 AND k.correct = 1 AND k.ms_since_previous IS NOT NULL
+             ORDER BY s.started_at_ms DESC, s.id DESC, k.idx DESC LIMIT ?4",
+        )?;
+        let rows = stmt.query_map(
+            params![profile_id, mode, ch.to_string(), to_i64(limit)?],
+            |r| r.get::<_, f64>(0),
+        )?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
 }
 
 impl Store {

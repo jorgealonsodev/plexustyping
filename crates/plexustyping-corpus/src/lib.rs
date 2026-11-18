@@ -78,6 +78,19 @@ pub struct GenerateOptions {
     pub seed: u64,
 }
 
+/// Options for [`Corpus::generate_letters`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LetterOptions {
+    /// The only letters the text may contain (lowercase).
+    pub letters: BTreeSet<char>,
+    /// Letters to practise more (the new key, weak keys); others are ignored.
+    pub weighted: Vec<char>,
+    /// Wanted length in chars, end exclusive.
+    pub length: Range<usize>,
+    /// Seed of the deterministic generator.
+    pub seed: u64,
+}
+
 /// One bundled language: its code and its embedded data files.
 struct LanguageData {
     id: &'static str,
@@ -250,6 +263,94 @@ impl Corpus {
         pools.text(min, max, &mut rng)
     }
 
+    /// Builds lowercase words made only of `options.letters` for progressive
+    /// unlock below 15 letters; identical options always give identical text.
+    ///
+    /// Words of [`Corpus::words`] made only of those letters come first
+    /// (frequent ones preferred, each at most once per text); the rest is
+    /// pronounceable pseudowords that alternate single consonants and vowels
+    /// of those letters (only one kind when the other has no active letter).
+    /// When `options.weighted` has an active letter, at least about half the
+    /// words contain one. Words are joined by single spaces; the length lies
+    /// in `options.length`. Empty only when `options.letters` is empty.
+    pub fn generate_letters(&self, options: &LetterOptions) -> String {
+        let letters = &options.letters;
+        if letters.is_empty() {
+            return String::new();
+        }
+        let weighted: Vec<char> = options
+            .weighted
+            .iter()
+            .copied()
+            .filter(|c| letters.contains(c))
+            .collect::<BTreeSet<char>>()
+            .into_iter()
+            .collect();
+        let real: Vec<&str> = self
+            .words
+            .iter()
+            .copied()
+            .filter(|w| !w.is_empty() && w.chars().all(|c| letters.contains(&c)))
+            .collect();
+        let real_set: BTreeSet<&str> = real.iter().copied().collect();
+        let pseudo = Pseudo {
+            vowels: letters.iter().copied().filter(|c| is_vowel(*c)).collect(),
+            consonants: letters.iter().copied().filter(|c| !is_vowel(*c)).collect(),
+        };
+        let has_weighted = |w: &str| w.chars().any(|c| weighted.contains(&c));
+        let (min, max) = bounds(&options.length);
+        let mut rng = SplitMix64(options.seed);
+        let mut used: BTreeSet<&str> = BTreeSet::new();
+        let mut text = String::new();
+        let (mut len, mut count, mut hits) = (0, 0, 0);
+        while len < min {
+            let sep = usize::from(len > 0);
+            let Some(room) = max.checked_sub(len + sep).filter(|r| *r > 0) else {
+                break;
+            };
+            let need = min.saturating_sub(len + sep);
+            let want = !weighted.is_empty() && (hits * 2 <= count || rng.below(2) == 0);
+            // The word closes the text, or leaves room for a space and one letter.
+            let fits = |n: usize| n <= room && (n >= need || n + 2 <= room);
+            let found = pick(&real, &mut rng, |w| {
+                !used.contains(w) && fits(w.chars().count()) && (!want || has_weighted(w))
+            });
+            let word = match found {
+                Some(word) => {
+                    used.insert(word);
+                    word.to_owned()
+                }
+                None => {
+                    let n = if need <= PSEUDO_MAX {
+                        let lo = need.max(2).min(room);
+                        let hi = room.min(PSEUDO_MAX).max(lo);
+                        lo + rng.below(hi - lo + 1)
+                    } else {
+                        (2 + rng.below(PSEUDO_MAX - 1)).min(room - 2)
+                    };
+                    let focus = want.then(|| weighted[rng.below(weighted.len())]);
+                    // A pseudoword that happens to be a real word is drawn again.
+                    let mut word = pseudo.word(n, focus, &mut rng);
+                    for _ in 0..DRAWS {
+                        if !real_set.contains(word.as_str()) {
+                            break;
+                        }
+                        word = pseudo.word(n, focus, &mut rng);
+                    }
+                    word
+                }
+            };
+            if sep == 1 {
+                text.push(' ');
+            }
+            text.push_str(&word);
+            len += sep + word.chars().count();
+            count += 1;
+            hits += usize::from(has_weighted(&word));
+        }
+        text
+    }
+
     /// Builds loose words for words mode; identical options always give identical text.
     ///
     /// Only words of [`Corpus::words`] made of lowercase letters that pass
@@ -336,6 +437,60 @@ fn loose_words(
         hits += usize::from(targets.contains(&word));
     }
     Ok(text)
+}
+
+/// Longest pseudoword, in chars.
+const PSEUDO_MAX: usize = 6;
+
+/// Vowels of the Latin-script corpus languages (others count as consonants).
+fn is_vowel(c: char) -> bool {
+    "aeiouáéíóúàèìòùâêîôûäëïöüãõæœ".contains(c)
+}
+
+/// The active letters split for pseudowords.
+struct Pseudo {
+    vowels: Vec<char>,
+    consonants: Vec<char>,
+}
+
+impl Pseudo {
+    /// A pseudoword of `n` chars alternating consonants and vowels; with
+    /// `focus`, that letter is in it.
+    fn word(&self, n: usize, focus: Option<char>, rng: &mut SplitMix64) -> String {
+        let both = !self.vowels.is_empty() && !self.consonants.is_empty();
+        let mut vowel = if self.vowels.is_empty() {
+            false
+        } else if self.consonants.is_empty() {
+            true
+        } else {
+            rng.below(2) == 0
+        };
+        // A one-letter word starts with the focus letter's kind.
+        if let (Some(f), true, 1) = (focus, both, n) {
+            vowel = is_vowel(f);
+        }
+        let mut chars: Vec<char> = Vec::with_capacity(n);
+        for _ in 0..n {
+            let pool = if vowel {
+                &self.vowels
+            } else {
+                &self.consonants
+            };
+            chars.push(pool[rng.below(pool.len())]);
+            if both {
+                vowel = !vowel;
+            }
+        }
+        if let Some(f) = focus {
+            let slots: Vec<usize> = (0..n)
+                .filter(|&i| !both || is_vowel(chars[i]) == is_vowel(f))
+                .collect();
+            if !slots.is_empty() {
+                chars[slots[rng.below(slots.len())]] = f;
+            }
+        }
+        chars.into_iter().collect()
+    }
 }
 
 /// Inclusive char bounds of a wanted length range, never below one char.

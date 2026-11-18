@@ -24,6 +24,7 @@ use crate::commands::{
     TextSource, lock_store,
 };
 use crate::secrets::{self, SecretError, SharedSecrets};
+use crate::unlock;
 
 /// Store `settings` key of the JSON [`AiSettings`].
 pub const SETTINGS_KEY: &str = "ai";
@@ -709,11 +710,17 @@ impl Plan {
 /// Words texts always come from the corpus with the prose model: no AI
 /// request and no cache, even with the AI enabled.
 pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, String> {
-    let (model, settings) = {
+    let (model, settings, restriction) = {
         let store = lock_store(&state.store);
+        let profile = state.active_profile();
+        let restriction = match p.mode {
+            PracticeMode::Prose => unlock::restriction(&store, &profile, &p.language, &p.layout)?,
+            _ => None,
+        };
         (
-            commands::load_model_for(&store, &state.active_profile(), p.mode.stats_mode())?,
+            commands::load_model_for(&store, &profile, p.mode.stats_mode())?,
             load_settings(&store),
+            restriction,
         )
     };
     let prose_request = || NextTextRequest {
@@ -729,7 +736,18 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
             let plan = commands::plan_text(&model, &prose_request())?;
             return commands::words_text(&plan, p.seed);
         }
-        PracticeMode::Prose => Plan::Prose(commands::plan_text(&model, &prose_request())?),
+        PracticeMode::Prose => {
+            let mut plan = commands::plan_text(&model, &prose_request())?;
+            // Progressive unlock (S5): only the active characters; below 15
+            // letters, words and pseudowords, never the AI or the cache.
+            if let Some(r) = &restriction {
+                unlock::restrict_plan(&mut plan, r);
+                if r.letters.len() < unlock::AI_MIN_LETTERS {
+                    return unlock::letters_text(&plan, r, &model, p.seed);
+                }
+            }
+            Plan::Prose(plan)
+        }
         PracticeMode::Code { lang } => Plan::Code(code::plan_code(
             &model,
             lang,
@@ -740,8 +758,13 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
         )?),
     };
     let cache_mode = p.mode.cache_mode();
+    // Cached texts may use locked characters: none while some letter is locked.
+    let cache_ok = restriction.as_ref().is_none_or(|r| r.all_letters);
     if !settings.enabled {
         // AI off: a saved text, rotating so consecutive texts differ, else the corpus.
+        if !cache_ok {
+            return plan.corpus(p.seed);
+        }
         let cached = {
             let store = lock_store(&state.store);
             store.take_cached_text(&p.language, &cache_mode, plan.targets())
@@ -828,10 +851,12 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
             }
         }
     };
-    let cached = {
+    let cached = if cache_ok {
         let store = lock_store(&state.store);
         // Never a text already shown: the corpus gives a new one instead.
         store.take_unused_cached_text(&p.language, &cache_mode, plan.targets())
+    } else {
+        Ok(None)
     };
     match cached {
         Ok(Some(c)) => {
@@ -866,7 +891,13 @@ pub async fn first_text(
     if *mode == PracticeMode::Prose {
         let diagnostic = {
             let store = lock_store(&state.store);
-            commands::diagnostic_for_new_profile(&store, &state.active_profile(), language, layout)?
+            let profile = state.active_profile();
+            // Progressive unlock starts from the home row: no diagnostic text.
+            if unlock::is_enabled(&store, profile.id) {
+                None
+            } else {
+                commands::diagnostic_for_new_profile(&store, &profile, language, layout)?
+            }
         };
         if let Some(first) = diagnostic {
             return Ok(first);
@@ -890,6 +921,6 @@ pub async fn first_text(
 }
 
 #[cfg(test)]
-mod mock;
+pub(crate) mod mock;
 #[cfg(test)]
 mod tests;

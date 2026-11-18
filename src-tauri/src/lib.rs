@@ -8,6 +8,7 @@ pub mod metronome;
 pub mod oauth;
 pub mod profiles;
 pub mod secrets;
+pub mod unlock;
 
 use std::sync::{Arc, MutexGuard};
 
@@ -30,6 +31,7 @@ use plexustyping_store::{Profile, SessionSummary, Store, UsageRow};
 use profiles::{ProfileDeleted, ProfileList};
 use secrets::KeyringStore;
 use tauri::{Manager, State};
+use unlock::UnlockStatus;
 
 /// The store; never held across an `.await` (async commands must be `Send`).
 fn store<'a>(state: &'a State<AppState>) -> MutexGuard<'a, Store> {
@@ -473,6 +475,29 @@ fn goal_status(state: State<AppState>, tz_offset_min: i32) -> Result<GoalStatus,
     goals::status(&state, tz_offset_min, now_ms())
 }
 
+/// The active profile's progressive unlock for `language` and `layout` (S7).
+#[tauri::command]
+fn unlock_status(
+    state: State<AppState>,
+    language: String,
+    layout: String,
+) -> Result<UnlockStatus, String> {
+    unlock::status(&state, &language, &layout)
+}
+
+/// Turns the active profile's progressive unlock on or off and/or sets its
+/// target speed (20, 30, 40 or 50 PPM); missing values are kept (S7).
+#[tauri::command]
+fn unlock_set(
+    state: State<AppState>,
+    language: String,
+    layout: String,
+    enabled: Option<bool>,
+    target_wpm: Option<u32>,
+) -> Result<UnlockStatus, String> {
+    unlock::set(&state, &language, &layout, enabled, target_wpm)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -531,7 +556,9 @@ pub fn run() {
             profile_delete,
             profile_switch,
             goal_set,
-            goal_status
+            goal_status,
+            unlock_status,
+            unlock_set
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");

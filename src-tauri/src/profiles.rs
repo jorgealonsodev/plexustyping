@@ -99,6 +99,10 @@ pub fn update(
 pub fn delete(state: &AppState, id: i64) -> Result<ProfileDeleted, String> {
     let store = lock_store(&state.store);
     store.delete_profile(id).map_err(|e| e.to_string())?;
+    // Its progressive unlock state lives in `settings`, outside the cascade.
+    if let Err(e) = crate::unlock::forget_profile(&store, id) {
+        eprintln!("PlexusTyping: could not forget the unlock state: {e}");
+    }
     if state.active_profile().id == id {
         let first = store.default_profile().map_err(|e| e.to_string())?;
         // The deletion is done: a failed save only means the next start
