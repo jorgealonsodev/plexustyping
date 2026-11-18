@@ -735,7 +735,8 @@ impl ChatgptAuth {
     }
 
     /// Revokes the renewable session, then forgets the tokens even when revocation failed.
-    /// The host id, client id and account stay for a later sign-in.
+    /// The host id, client id and email (the next `login_hint`) stay; the account subject is
+    /// forgotten, so any ChatGPT account may sign in next.
     pub async fn sign_out(&self) -> Result<SignOut, AuthError> {
         self.cancel();
         let path = self.path()?;
