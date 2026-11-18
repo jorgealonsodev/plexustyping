@@ -294,6 +294,9 @@ pub struct ChatgptAuth {
     pending: Mutex<Option<(u64, tokio::sync::oneshot::Sender<()>)>>,
     /// Numbers sign-in attempts, so one never clears another's pending slot.
     attempts: AtomicU64,
+    /// Bumped by every cancel and sign-out: a sign-in that saw an older value
+    /// stops before it saves anything, wherever it is.
+    cancels: AtomicU64,
     port: u16,
     timeout: Duration,
     revoke_backoff: Duration,
@@ -324,6 +327,15 @@ impl Drop for PendingSlot<'_> {
     }
 }
 
+/// Longest lifetime taken from an `expires_in`: a larger one only means an
+/// earlier renewal, never an overflow.
+const MAX_EXPIRES_IN_SECS: u64 = 24 * 3600;
+
+/// When a token given `expires_in` seconds now stops being used (one hour when absent).
+fn expiry(expires_in: Option<u64>) -> u64 {
+    now_secs().saturating_add(expires_in.unwrap_or(3600).min(MAX_EXPIRES_IN_SECS))
+}
+
 fn now_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -331,18 +343,33 @@ fn now_secs() -> u64 {
 }
 
 /// The saved record; a file that is not a record is reported, never taken as "signed out".
-fn load_from(path: &Path) -> Result<Record, AuthError> {
-    match file::load(path)? {
+async fn load_from(path: &Path) -> Result<Record, AuthError> {
+    let path = path.to_path_buf();
+    let text = blocking(move || file::load(&path)).await?;
+    match text {
         None => Ok(Record::default()),
         Some(text) => serde_json::from_str(&text).map_err(|_| AuthError::DamagedFile),
     }
 }
 
-fn save_to(path: &Path, record: &Record) -> Result<(), AuthError> {
+async fn save_to(path: &Path, record: &Record) -> Result<(), AuthError> {
     let text = serde_json::to_string_pretty(record).map_err(|_| AuthError::Storage {
         message: "no se pudo preparar el registro".into(),
     })?;
-    file::save(path, &text)
+    let path = path.to_path_buf();
+    blocking(move || file::save(&path, &text)).await
+}
+
+/// File work runs on the blocking pool: a save may fsync or, on Windows, wait
+/// for another process to release the file.
+async fn blocking<T: Send + 'static>(
+    op: impl FnOnce() -> Result<T, AuthError> + Send + 'static,
+) -> Result<T, AuthError> {
+    tokio::task::spawn_blocking(op).await.unwrap_or_else(|err| {
+        Err(AuthError::Storage {
+            message: err.to_string(),
+        })
+    })
 }
 
 impl ChatgptAuth {
@@ -366,6 +393,7 @@ impl ChatgptAuth {
             lock: Arc::default(),
             pending: Mutex::new(None),
             attempts: AtomicU64::new(0),
+            cancels: AtomicU64::new(0),
             port: PREFERRED_PORT,
             timeout: SIGN_IN_TIMEOUT,
             revoke_backoff: REVOKE_BACKOFF,
@@ -414,12 +442,16 @@ impl ChatgptAuth {
             .ok_or(AuthError::NoStorage)
     }
 
-    fn load(&self) -> Result<Record, AuthError> {
-        load_from(&self.path()?)
+    async fn load(&self) -> Result<Record, AuthError> {
+        load_from(&self.path()?).await
     }
 
-    fn save(&self, record: &Record) -> Result<(), AuthError> {
-        save_to(&self.path()?, record)
+    async fn save(&self, record: &Record) -> Result<(), AuthError> {
+        save_to(&self.path()?, record).await
+    }
+
+    fn cancelled_since(&self, epoch: u64) -> bool {
+        self.cancels.load(Ordering::SeqCst) != epoch
     }
 
     /// Whether a sign-in is waiting for the browser.
@@ -432,7 +464,7 @@ impl ChatgptAuth {
 
     pub async fn status(&self) -> Result<Status, AuthError> {
         let _guard = self.lock.lock().await;
-        Ok(self.load()?.status())
+        Ok(self.load().await?.status())
     }
 
     /// Signed in with ChatGPT plan use enabled (what the provider chain needs).
@@ -440,8 +472,10 @@ impl ChatgptAuth {
         Ok(self.status().await?.plan_enabled)
     }
 
-    /// Ends a pending sign-in, if any.
+    /// Ends the running sign-in, if any: one waiting for the browser at once,
+    /// one in any other step before it saves its tokens.
     pub fn cancel(&self) {
+        self.cancels.fetch_add(1, Ordering::SeqCst);
         let pending = self
             .pending
             .lock()
@@ -459,20 +493,21 @@ impl ChatgptAuth {
     where
         F: Fn(&str) -> Result<(), String> + Send + Sync,
     {
+        let epoch = self.cancels.load(Ordering::SeqCst);
         // A stable host id is chosen and saved before the first sign-in.
         let saved = {
             let _guard = self.lock.lock().await;
-            let mut record = self.load()?;
+            let mut record = self.load().await?;
             if record.host_id.is_empty() {
                 record.host_id = new_host_id();
-                self.save(&record)?;
+                self.save(&record).await?;
             }
             record
         };
-        match self.authorize(&saved, None, &open).await {
+        match self.authorize(&saved, None, &open, epoch).await {
             Round::Done(result) => result,
             Round::Again { client_id } => {
-                match self.authorize(&saved, Some(client_id), &open).await {
+                match self.authorize(&saved, Some(client_id), &open, epoch).await {
                     Round::Done(result) => result,
                     Round::Again { .. } => Err(AuthError::CodeExchange {
                         detail: "invalid_grant".into(),
@@ -484,11 +519,21 @@ impl ChatgptAuth {
 
     /// One authorization round: browser, callback, code exchange, ID-token check, save.
     /// `retained` is the client id kept from a round whose code was rejected.
-    async fn authorize<F>(&self, saved: &Record, retained: Option<String>, open: &F) -> Round
+    /// `epoch` is the cancel count when the sign-in began.
+    async fn authorize<F>(
+        &self,
+        saved: &Record,
+        retained: Option<String>,
+        open: &F,
+        epoch: u64,
+    ) -> Round
     where
         F: Fn(&str) -> Result<(), String> + Send + Sync,
     {
         let done = |err: AuthError| Round::Done(Err(err));
+        if self.cancelled_since(epoch) {
+            return done(AuthError::Cancelled);
+        }
         let listener = match callback::bind(self.port).await {
             Ok(listener) => listener,
             Err(err) => return done(err),
@@ -521,6 +566,10 @@ impl ChatgptAuth {
         // A new sign-in ends the previous one (its sender is dropped).
         *self.pending.lock().unwrap_or_else(|p| p.into_inner()) = Some((number, tx));
         let slot = PendingSlot { auth: self, number };
+        // A cancel that came before the slot was registered had nothing to send to.
+        if self.cancelled_since(epoch) {
+            return done(AuthError::Cancelled);
+        }
 
         let params = tokio::select! {
             params = callback::wait(&listener, &attempt.state) => match params {
@@ -579,7 +628,10 @@ impl ChatgptAuth {
                 detail: error.unwrap_or_else(|| format!("HTTP {status}")),
             });
         }
-        Round::Done(self.finish(saved, client_id, &attempt.nonce, &body).await)
+        Round::Done(
+            self.finish(saved, client_id, &attempt.nonce, &body, epoch)
+                .await,
+        )
     }
 
     /// Validates the token response of a sign-in and saves the new token set.
@@ -589,6 +641,7 @@ impl ChatgptAuth {
         client_id: String,
         nonce: &str,
         body: &[u8],
+        epoch: u64,
     ) -> Result<Status, AuthError> {
         let tokens: TokenResponse =
             serde_json::from_slice(body).map_err(|_| AuthError::BadResponse)?;
@@ -604,7 +657,12 @@ impl ChatgptAuth {
         let granted = tokens.scope.clone().unwrap_or_default();
 
         let _guard = self.lock.lock().await;
-        let mut record = self.load()?;
+        // Checked under the lock a sign-out clears the tokens with: a sign-out or cancel
+        // during the exchange wins over its answer.
+        if self.cancelled_since(epoch) {
+            return Err(AuthError::Cancelled);
+        }
+        let mut record = self.load().await?;
         record.host_id = saved.host_id.clone();
         record.client_id = Some(client_id);
         record.subject = Some(claims.sub);
@@ -613,8 +671,8 @@ impl ChatgptAuth {
         record.access_token = Some(tokens.access_token);
         record.refresh_token = tokens.refresh_token;
         record.scopes = granted.split_whitespace().map(str::to_string).collect();
-        record.expires_at = now_secs() + tokens.expires_in.unwrap_or(3600);
-        self.save(&record)?;
+        record.expires_at = expiry(tokens.expires_in);
+        self.save(&record).await?;
         Ok(record.status())
     }
 
@@ -635,7 +693,7 @@ impl ChatgptAuth {
     async fn token(&self, rejected: Option<&str>) -> Result<ApiKey, AuthError> {
         let path = self.path()?;
         let guard = self.lock.clone().lock_owned().await;
-        let mut record = load_from(&path)?;
+        let mut record = load_from(&path).await?;
         if !record.signed_in() {
             return Err(AuthError::NotSignedIn);
         }
@@ -652,7 +710,7 @@ impl ChatgptAuth {
             (record.refresh_token.clone(), record.client_id.clone())
         else {
             record.clear_tokens();
-            save_to(&path, &record)?;
+            save_to(&path, &record).await?;
             return Err(AuthError::SessionExpired);
         };
         // The refresh runs on its own task holding the lock: once the rotating refresh token is
@@ -685,16 +743,16 @@ impl ChatgptAuth {
         // so a stalled network never holds up the other requests.
         let (refresh, client_id) = {
             let _guard = self.lock.lock().await;
-            match load_from(&path) {
+            match load_from(&path).await {
                 Ok(mut record) => {
                     let copy = (record.refresh_token.clone(), record.client_id.clone());
                     record.clear_tokens();
-                    save_to(&path, &record)?;
+                    save_to(&path, &record).await?;
                     copy
                 }
                 // A damaged file starts over: there is nothing that could be revoked.
                 Err(AuthError::DamagedFile) => {
-                    save_to(&path, &Record::default())?;
+                    save_to(&path, &Record::default()).await?;
                     return Ok(SignOut { revoked: false });
                 }
                 Err(err) => return Err(err),
@@ -772,7 +830,7 @@ impl Refresh<'_> {
                 .is_some_and(|e| TERMINAL_REFRESH_ERRORS.contains(&e))
             {
                 record.clear_tokens();
-                save_to(self.path, &record)?;
+                save_to(self.path, &record).await?;
                 return Err(AuthError::SessionExpired);
             }
             if error.as_deref() == Some("invalid_client") {
@@ -794,6 +852,10 @@ impl Refresh<'_> {
         if let Some(scope) = tokens.scope {
             record.scopes = scope.split_whitespace().map(str::to_string).collect();
         }
+        record.expires_at = expiry(tokens.expires_in);
+        // Saved before anything else may wait on the network: the old refresh token is
+        // already spent, so losing the new one would end the session.
+        save_to(self.path, &record).await?;
         // A new ID token is kept only when it checks out for the same account (it becomes the
         // next sign-in's `id_token_hint`); a refresh carries no nonce.
         if let Some(id_token) = tokens.id_token
@@ -804,9 +866,8 @@ impl Refresh<'_> {
                 .is_ok_and(|claims| record.subject.as_deref() == Some(claims.sub.as_str()))
         {
             record.id_token = Some(id_token);
+            save_to(self.path, &record).await?;
         }
-        record.expires_at = now_secs() + tokens.expires_in.unwrap_or(3600);
-        save_to(self.path, &record)?;
         if !record.plan_enabled() {
             return Err(AuthError::PlanNotEnabled);
         }
