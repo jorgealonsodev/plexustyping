@@ -91,7 +91,7 @@ fn check_tz(tz_offset_min: i32) -> Result<(), String> {
 }
 
 /// Local day number (days since 1970-01-01 in the local calendar) of `ms`.
-fn local_day(ms: i64, tz_offset_min: i32) -> i64 {
+pub(crate) fn local_day(ms: i64, tz_offset_min: i32) -> i64 {
     (ms + i64::from(tz_offset_min) * 60_000).div_euclid(DAY_MS)
 }
 

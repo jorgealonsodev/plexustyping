@@ -16,7 +16,7 @@ use commands::{
     StorageStatus, Weakness, lock_store,
 };
 use goals::GoalStatus;
-use history::CsvExport;
+use history::{CharRow, CsvExport, DayRow};
 use metronome::{MetronomeStarted, MetronomeState};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
 use plexustyping_audio::MetronomeConfig;
@@ -242,6 +242,39 @@ fn export_sessions_csv(
     )
 }
 
+/// Practice per local day of `mode` (as `session_history`), newest first: the
+/// last `days` days with sessions (default 30, at most 366); `tz_offset_min`
+/// is minutes east of UTC. Empty in temporary mode.
+#[tauri::command]
+fn history_by_day(
+    state: State<AppState>,
+    mode: Option<String>,
+    tz_offset_min: i32,
+    days: Option<u32>,
+) -> Result<Vec<DayRow>, String> {
+    let persistent = state.status.persistent;
+    let store = store(&state);
+    let profile = state.active_profile();
+    history::history_by_day(
+        &store,
+        &profile,
+        persistent,
+        mode.as_deref(),
+        tz_offset_min,
+        days,
+    )
+}
+
+/// Characters with at least 5 samples in the statistics of `mode` (none merges
+/// prose and code), worst first. Empty in temporary mode.
+#[tauri::command]
+fn history_by_char(state: State<AppState>, mode: Option<String>) -> Result<Vec<CharRow>, String> {
+    let persistent = state.status.persistent;
+    let store = store(&state);
+    let profile = state.active_profile();
+    history::history_by_char(&store, &profile, persistent, mode.as_deref())
+}
+
 #[tauri::command]
 fn storage_status(state: State<AppState>) -> StorageStatus {
     state.status.clone()
@@ -408,6 +441,8 @@ pub fn run() {
             recent_sessions,
             session_history,
             export_sessions_csv,
+            history_by_day,
+            history_by_char,
             storage_status,
             get_layout,
             key_sequences,

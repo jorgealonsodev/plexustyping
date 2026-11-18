@@ -1,11 +1,15 @@
 //! Session history and CSV export (phase 3, S6–S7), testable without a Tauri runtime.
 
+use std::collections::BTreeMap;
 use std::fs::{File, OpenOptions};
 use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use plexustyping_store::{Profile, SessionSummary, Store};
 use serde::Serialize;
+
+use crate::code::CODE_STATS_MODE;
+use crate::commands::STATS_MODE;
 
 /// First line of every export (S7).
 pub const CSV_HEADER: &str = "fecha,modo,lenguaje_codigo,idioma,layout,duracion_s,ppm_brutas,ppm_netas,precision,pulsaciones,bpm";
@@ -52,6 +56,167 @@ pub fn session_history(
     store
         .sessions(profile.id, mode, limit)
         .map_err(|e| e.to_string())
+}
+
+/// Days of [`history_by_day`] when not given.
+pub const DEFAULT_DAYS: u32 = 30;
+/// Most days [`history_by_day`] returns.
+pub const MAX_DAYS: u32 = 366;
+/// Fewest error samples for a character to be listed by [`history_by_char`].
+pub const MIN_CHAR_SAMPLES: u32 = 5;
+
+/// One local day of practice (S2, S5).
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DayRow {
+    /// Local date, `YYYY-MM-DD`.
+    pub day: String,
+    /// Sessions started that day.
+    pub sessions: u32,
+    /// Practised minutes (summed durations, not rounded).
+    pub minutes: f64,
+    /// Mean net WPM, weighted by session duration.
+    pub net_wpm: f64,
+    /// Mean accuracy in `0.0..=1.0`, weighted by session duration.
+    pub accuracy: f64,
+}
+
+/// Statistics of one character (S3, S5).
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CharRow {
+    /// The character.
+    pub unit: String,
+    /// Error samples seen.
+    pub samples: u32,
+    /// EMA of errors, `0.0..=1.0`.
+    pub error: f64,
+    /// EMA of relative slowness, `0.0..=1.0`.
+    pub slowness: f64,
+}
+
+/// Refuses an offset outside ±[`MAX_TZ_OFFSET_MIN`] with "Zona horaria no válida: N".
+pub fn check_tz(tz_offset_min: i32) -> Result<(), String> {
+    if (-MAX_TZ_OFFSET_MIN..=MAX_TZ_OFFSET_MIN).contains(&tz_offset_min) {
+        Ok(())
+    } else {
+        Err(format!("Zona horaria no válida: {tz_offset_min}"))
+    }
+}
+
+/// Practice per local day of `profile` for the filter `mode`: the newest `days`
+/// days that have sessions (default [`DEFAULT_DAYS`], at most [`MAX_DAYS`]),
+/// newest first; `tz_offset_min` is minutes east of UTC. Net WPM and accuracy
+/// are means weighted by session duration. Empty in temporary mode.
+pub fn history_by_day(
+    store: &Store,
+    profile: &Profile,
+    persistent: bool,
+    mode: Option<&str>,
+    tz_offset_min: i32,
+    days: Option<u32>,
+) -> Result<Vec<DayRow>, String> {
+    let mode = parse_mode(mode)?;
+    check_tz(tz_offset_min)?;
+    let days = days.unwrap_or(DEFAULT_DAYS).min(MAX_DAYS) as usize;
+    let sessions = session_history(store, profile, persistent, mode, None)?;
+    // Sessions come newest first, so each day's sessions are contiguous.
+    let mut groups: Vec<(i64, Vec<&SessionSummary>)> = Vec::new();
+    for s in &sessions {
+        let day = crate::goals::local_day(s.started_at_ms, tz_offset_min);
+        if let Some((_, group)) = groups.last_mut().filter(|(last, _)| *last == day) {
+            group.push(s);
+        } else if groups.len() == days {
+            break;
+        } else {
+            groups.push((day, vec![s]));
+        }
+    }
+    Ok(groups
+        .into_iter()
+        .map(|(day, group)| day_row(day, &group))
+        .collect())
+}
+
+/// The row of local day number `day` from its sessions.
+fn day_row(day: i64, group: &[&SessionSummary]) -> DayRow {
+    let durations: Vec<f64> = group.iter().map(|s| s.duration_ms.max(0.0)).collect();
+    let total: f64 = durations.iter().sum();
+    // Without any duration every session weighs the same.
+    let weight = |i: usize| if total > 0.0 { durations[i] } else { 1.0 };
+    let weights: f64 = (0..group.len()).map(weight).sum();
+    let mean = |value: fn(&SessionSummary) -> f64| {
+        group
+            .iter()
+            .enumerate()
+            .map(|(i, s)| value(s) * weight(i))
+            .sum::<f64>()
+            / weights
+    };
+    let t = local_time(day * 86_400_000, 0);
+    DayRow {
+        day: format!("{:04}-{:02}-{:02}", t.year, t.month, t.day),
+        sessions: group.len() as u32,
+        minutes: total / 60_000.0,
+        net_wpm: mean(|s| s.net_wpm),
+        accuracy: mean(|s| s.accuracy),
+    }
+}
+
+/// Characters of `profile` with at least [`MIN_CHAR_SAMPLES`] error samples
+/// in the statistics of the filter `mode` (`None` merges prose and code,
+/// words share the prose statistics), worst first: by error, then slowness,
+/// then character. Empty in temporary mode.
+pub fn history_by_char(
+    store: &Store,
+    profile: &Profile,
+    persistent: bool,
+    mode: Option<&str>,
+) -> Result<Vec<CharRow>, String> {
+    let modes: &[&str] = match parse_mode(mode)? {
+        None => &[STATS_MODE, CODE_STATS_MODE],
+        Some("code") => &[CODE_STATS_MODE],
+        Some(_) => &[STATS_MODE],
+    };
+    if !persistent {
+        return Ok(Vec::new());
+    }
+    // Per character: error samples, error × samples, slowness samples, slowness × samples.
+    let mut merged: BTreeMap<String, (u32, f64, u32, f64)> = BTreeMap::new();
+    for stats_mode in modes {
+        let snapshot = store
+            .load_stats(profile.id, stats_mode)
+            .map_err(|e| e.to_string())?;
+        for u in snapshot
+            .units
+            .into_iter()
+            .filter(|u| u.unit.chars().count() == 1)
+        {
+            let entry = merged.entry(u.unit).or_default();
+            entry.0 += u.samples;
+            entry.1 += u.ema_error * f64::from(u.samples);
+            entry.2 += u.slowness_samples;
+            entry.3 += u.ema_slowness * f64::from(u.slowness_samples);
+        }
+    }
+    let ratio = |sum: f64, n: u32| if n > 0 { sum / f64::from(n) } else { 0.0 };
+    let mut rows: Vec<CharRow> = merged
+        .into_iter()
+        .filter(|(_, (samples, ..))| *samples >= MIN_CHAR_SAMPLES)
+        .map(|(unit, (samples, error, slow_n, slowness))| CharRow {
+            unit,
+            samples,
+            error: ratio(error, samples),
+            slowness: ratio(slowness, slow_n),
+        })
+        .collect();
+    // Stable: equal error and slowness keep the character order of the map.
+    rows.sort_by(|a, b| {
+        b.error
+            .total_cmp(&a.error)
+            .then(b.slowness.total_cmp(&a.slowness))
+    });
+    Ok(rows)
 }
 
 /// Civil date and time of a local instant.
@@ -208,9 +373,7 @@ pub fn export_sessions_csv(
     dir: impl FnOnce() -> Result<PathBuf, String>,
 ) -> Result<CsvExport, String> {
     parse_mode(mode)?;
-    if !(-MAX_TZ_OFFSET_MIN..=MAX_TZ_OFFSET_MIN).contains(&tz_offset_min) {
-        return Err(format!("Zona horaria no válida: {tz_offset_min}"));
-    }
+    check_tz(tz_offset_min)?;
     let sessions = session_history(store, profile, persistent, mode, None)?;
     if sessions.is_empty() {
         return Err(NO_SESSIONS.to_owned());
@@ -292,6 +455,17 @@ mod tests {
 
     /// Saves a session of `mode` (`code` uses Rust at 80 BPM) started at `started_at_ms`.
     fn save(store: &mut Store, profile: &Profile, mode: &str, started_at_ms: i64) -> i64 {
+        save_with(store, profile, mode, started_at_ms, (1_500.0, 38.5, 0.95))
+    }
+
+    /// [`save`] with the session's `(duration_ms, net_wpm, accuracy)`.
+    fn save_with(
+        store: &mut Store,
+        profile: &Profile,
+        mode: &str,
+        started_at_ms: i64,
+        (duration_ms, net_wpm, accuracy): (f64, f64, f64),
+    ) -> i64 {
         let records = [KeystrokeRecord {
             index: 0,
             expected: 'a',
@@ -309,10 +483,10 @@ mod tests {
             layout: Some("es-qwerty"),
             error_mode: ErrorMode::AllowContinue,
             text: "a",
-            duration_ms: 1_500.0,
+            duration_ms,
             gross_wpm: 40.0,
-            net_wpm: 38.5,
-            accuracy: 0.95,
+            net_wpm,
+            accuracy,
             keystrokes: 1,
             bpm: code.then_some(80),
             records: &records,
@@ -643,6 +817,366 @@ mod tests {
         assert_eq!(
             result,
             Err("No se pudo exportar el CSV: sin Descargas".to_owned())
+        );
+    }
+
+    // ---- History by day and by character (history charts S2, S3, S5) ----
+
+    /// 2026-11-18T00:00:00Z.
+    const MIDNIGHT_18_UTC: i64 = 1_794_960_000_000;
+    const MINUTE: i64 = 60_000;
+    const DAY: i64 = 24 * 60 * MINUTE;
+
+    fn day_row(day: &str, sessions: u32, minutes: f64, net_wpm: f64, accuracy: f64) -> DayRow {
+        DayRow {
+            day: day.to_owned(),
+            sessions,
+            minutes,
+            net_wpm,
+            accuracy,
+        }
+    }
+
+    fn by_day(
+        store: &Store,
+        profile: &Profile,
+        mode: Option<&str>,
+        tz: i32,
+        days: Option<u32>,
+    ) -> Result<Vec<DayRow>, String> {
+        history_by_day(store, profile, true, mode, tz, days)
+    }
+
+    #[test]
+    fn by_day_splits_at_local_midnight_with_a_positive_offset() {
+        let (mut store, profile) = memory();
+        // Local midnight at +01:00 is 23:00Z of the 17th.
+        let before = MIDNIGHT_18_UTC - 70 * MINUTE; // 23:50 local, the 17th
+        let after = MIDNIGHT_18_UTC - 50 * MINUTE; // 00:10 local, the 18th
+        save_with(
+            &mut store,
+            &profile,
+            "prose",
+            before,
+            (120_000.0, 30.0, 1.0),
+        );
+        save_with(&mut store, &profile, "prose", after, (60_000.0, 40.0, 0.5));
+        assert_eq!(
+            by_day(&store, &profile, None, 60, None),
+            Ok(vec![
+                day_row("2026-11-18", 1, 1.0, 40.0, 0.5),
+                day_row("2026-11-17", 1, 2.0, 30.0, 1.0),
+            ])
+        );
+        // In UTC both are on the 17th.
+        assert_eq!(
+            by_day(&store, &profile, None, 0, None).map(|d| d.len()),
+            Ok(1)
+        );
+    }
+
+    #[test]
+    fn by_day_splits_at_local_midnight_with_a_negative_offset() {
+        let (mut store, profile) = memory();
+        // Local midnight at -05:00 is 05:00Z of the 18th.
+        let before = MIDNIGHT_18_UTC + 4 * 60 * MINUTE + 50 * MINUTE; // 23:50 local, the 17th
+        let after = MIDNIGHT_18_UTC + 5 * 60 * MINUTE + 10 * MINUTE; // 00:10 local, the 18th
+        save_with(
+            &mut store,
+            &profile,
+            "prose",
+            before,
+            (120_000.0, 30.0, 1.0),
+        );
+        save_with(&mut store, &profile, "prose", after, (60_000.0, 40.0, 0.5));
+        assert_eq!(
+            by_day(&store, &profile, None, -300, None),
+            Ok(vec![
+                day_row("2026-11-18", 1, 1.0, 40.0, 0.5),
+                day_row("2026-11-17", 1, 2.0, 30.0, 1.0),
+            ])
+        );
+        // In UTC both are on the 18th.
+        assert_eq!(
+            by_day(&store, &profile, None, 0, None),
+            Ok(vec![day_row("2026-11-18", 2, 3.0, 100.0 / 3.0, 2.5 / 3.0)])
+        );
+    }
+
+    #[test]
+    fn by_day_weights_wpm_and_accuracy_by_duration() {
+        let (mut store, profile) = memory();
+        let noon = MIDNIGHT_18_UTC + 12 * 60 * MINUTE;
+        save_with(&mut store, &profile, "prose", noon, (60_000.0, 40.0, 0.5));
+        save_with(
+            &mut store,
+            &profile,
+            "code",
+            noon + MINUTE,
+            (180_000.0, 60.0, 1.0),
+        );
+        // Unweighted means would be 50 WPM and 75 %.
+        assert_eq!(
+            by_day(&store, &profile, None, 0, None),
+            Ok(vec![day_row("2026-11-18", 2, 4.0, 55.0, 0.875)])
+        );
+        // Minutes are not rounded: 90 s is 1.5.
+        save_with(
+            &mut store,
+            &profile,
+            "prose",
+            noon + 2 * MINUTE,
+            (30_000.0, 40.0, 0.5),
+        );
+        assert_eq!(
+            by_day(&store, &profile, Some("prose"), 0, None),
+            Ok(vec![day_row("2026-11-18", 2, 1.5, 40.0, 0.5)])
+        );
+        assert_eq!(
+            by_day(&store, &profile, Some("code"), 0, None),
+            Ok(vec![day_row("2026-11-18", 1, 3.0, 60.0, 1.0)])
+        );
+        assert_eq!(by_day(&store, &profile, Some("words"), 0, None), Ok(vec![]));
+    }
+
+    #[test]
+    fn by_day_with_zero_durations_uses_the_plain_mean() {
+        let (mut store, profile) = memory();
+        save_with(
+            &mut store,
+            &profile,
+            "prose",
+            MIDNIGHT_18_UTC,
+            (0.0, 40.0, 0.5),
+        );
+        save_with(
+            &mut store,
+            &profile,
+            "prose",
+            MIDNIGHT_18_UTC + 1,
+            (0.0, 60.0, 1.0),
+        );
+        assert_eq!(
+            by_day(&store, &profile, None, 0, None),
+            Ok(vec![day_row("2026-11-18", 2, 0.0, 50.0, 0.75)])
+        );
+    }
+
+    #[test]
+    fn by_day_returns_the_newest_days_with_sessions_30_by_default_and_at_most_366() {
+        let (mut store, profile) = memory();
+        // One session a day for 400 days, plus gaps: only days with sessions count.
+        for i in 0..400 {
+            save(&mut store, &profile, "prose", MIDNIGHT_18_UTC - 2 * i * DAY);
+        }
+        let days = |n| by_day(&store, &profile, None, 0, n).unwrap();
+        let default = days(None);
+        assert_eq!(DEFAULT_DAYS, 30);
+        assert_eq!(default.len(), 30);
+        assert_eq!(default[0].day, "2026-11-18");
+        assert_eq!(default[1].day, "2026-11-16");
+        assert_eq!(
+            default[29].day,
+            local_iso(MIDNIGHT_18_UTC - 58 * DAY, 0)[..10]
+        );
+        assert_eq!(days(Some(5)).len(), 5);
+        assert_eq!(days(Some(366)).len(), 366);
+        assert_eq!(MAX_DAYS, 366);
+        assert_eq!(days(Some(367)).len(), 366);
+        assert_eq!(days(Some(u32::MAX)).len(), 366);
+        assert_eq!(days(Some(0)), vec![]);
+        let all = days(Some(366));
+        assert!(all.windows(2).all(|w| w[0].day > w[1].day));
+    }
+
+    #[test]
+    fn by_day_refuses_an_unknown_mode_or_offset_without_side_effects() {
+        let (mut store, profile) = memory();
+        save(&mut store, &profile, "prose", MIDNIGHT_18_UTC);
+        let before = store.sessions(profile.id, None, None).unwrap();
+        assert_eq!(
+            by_day(&store, &profile, Some("xx"), 0, None),
+            Err("Modo desconocido: xx".to_owned())
+        );
+        for bad in [MAX_TZ_OFFSET_MIN + 1, -MAX_TZ_OFFSET_MIN - 1] {
+            assert_eq!(
+                by_day(&store, &profile, None, bad, None),
+                Err(format!("Zona horaria no válida: {bad}"))
+            );
+            // Refused in temporary mode too.
+            assert_eq!(
+                history_by_day(&store, &profile, false, None, bad, None),
+                Err(format!("Zona horaria no válida: {bad}"))
+            );
+        }
+        for edge in [MAX_TZ_OFFSET_MIN, -MAX_TZ_OFFSET_MIN] {
+            assert_eq!(
+                by_day(&store, &profile, None, edge, None).map(|d| d.len()),
+                Ok(1)
+            );
+        }
+        assert_eq!(store.sessions(profile.id, None, None).unwrap(), before);
+    }
+
+    #[test]
+    fn by_day_is_empty_in_temporary_mode() {
+        let (mut store, profile) = memory();
+        save(&mut store, &profile, "prose", MIDNIGHT_18_UTC);
+        for mode in [None, Some("prose")] {
+            assert_eq!(
+                history_by_day(&store, &profile, false, mode, 60, None),
+                Ok(vec![])
+            );
+        }
+    }
+
+    #[test]
+    fn day_row_serializes_in_camel_case() {
+        assert_eq!(
+            serde_json::to_value(day_row("2026-11-18", 2, 4.0, 55.0, 0.875)).unwrap(),
+            serde_json::json!({
+                "day": "2026-11-18",
+                "sessions": 2,
+                "minutes": 4.0,
+                "netWpm": 55.0,
+                "accuracy": 0.875
+            })
+        );
+    }
+
+    use plexustyping_store::{StatsSnapshot, UnitStatRow};
+
+    /// `(unit, samples, ema_error, ema_slowness, slowness_samples)`.
+    type Unit<'a> = (&'a str, u32, f64, f64, u32);
+
+    fn save_units(store: &mut Store, profile: &Profile, mode: &str, units: &[Unit]) {
+        let mut units: Vec<UnitStatRow> = units
+            .iter()
+            .map(
+                |&(unit, samples, ema_error, ema_slowness, slowness_samples)| UnitStatRow {
+                    unit: unit.to_owned(),
+                    ema_error,
+                    ema_slowness,
+                    samples,
+                    slowness_samples,
+                },
+            )
+            .collect();
+        units.sort_by(|a, b| a.unit.cmp(&b.unit));
+        let snapshot = StatsSnapshot {
+            units,
+            confusions: vec![],
+            mean_interval_ms: None,
+        };
+        store.save_stats(profile.id, mode, &snapshot).unwrap();
+    }
+
+    fn char_row(unit: &str, samples: u32, error: f64, slowness: f64) -> CharRow {
+        CharRow {
+            unit: unit.to_owned(),
+            samples,
+            error,
+            slowness,
+        }
+    }
+
+    #[test]
+    fn by_char_lists_characters_with_5_samples_worst_first() {
+        let (mut store, profile) = memory();
+        save_units(
+            &mut store,
+            &profile,
+            "prose",
+            &[
+                ("a", 5, 0.2, 0.1, 5),
+                ("b", 4, 0.9, 0.9, 4),    // below the threshold
+                ("ab", 10, 0.9, 0.9, 10), // a bigram, not a character
+                (" ", 6, 0.5, 0.0, 6),
+                ("\n", 5, 0.2, 0.3, 5), // same error as "a", slower
+                ("\t", 7, 0.0, 0.25, 7),
+                ("c", 9, 0.0, 0.25, 9), // same error and slowness as Tab
+            ],
+        );
+        assert_eq!(MIN_CHAR_SAMPLES, 5);
+        assert_eq!(
+            history_by_char(&store, &profile, true, Some("prose")),
+            Ok(vec![
+                char_row(" ", 6, 0.5, 0.0),
+                char_row("\n", 5, 0.2, 0.3),
+                char_row("a", 5, 0.2, 0.1),
+                char_row("\t", 7, 0.0, 0.25),
+                char_row("c", 9, 0.0, 0.25),
+            ])
+        );
+        // Words practice shares the prose statistics; code has its own.
+        assert_eq!(
+            history_by_char(&store, &profile, true, Some("words")),
+            history_by_char(&store, &profile, true, Some("prose"))
+        );
+        assert_eq!(
+            history_by_char(&store, &profile, true, Some("code")),
+            Ok(vec![])
+        );
+    }
+
+    #[test]
+    fn by_char_all_merges_prose_and_code_weighted_by_samples() {
+        let (mut store, profile) = memory();
+        save_units(
+            &mut store,
+            &profile,
+            "prose",
+            &[("a", 3, 0.0, 0.25, 1), ("p", 5, 0.1, 0.0, 0)],
+        );
+        save_units(
+            &mut store,
+            &profile,
+            "code",
+            &[("a", 3, 0.5, 0.75, 3), ("{", 8, 0.75, 0.5, 8)],
+        );
+        // "a" has 3 samples in each mode: only listed when merged.
+        assert_eq!(
+            history_by_char(&store, &profile, true, None),
+            Ok(vec![
+                char_row("{", 8, 0.75, 0.5),
+                char_row("a", 6, 0.25, 0.625),
+                char_row("p", 5, 0.1, 0.0),
+            ])
+        );
+        assert_eq!(
+            history_by_char(&store, &profile, true, Some("prose")),
+            Ok(vec![char_row("p", 5, 0.1, 0.0)])
+        );
+        assert_eq!(
+            history_by_char(&store, &profile, true, Some("code")),
+            Ok(vec![char_row("{", 8, 0.75, 0.5)])
+        );
+    }
+
+    #[test]
+    fn by_char_refuses_an_unknown_mode_and_is_empty_in_temporary_mode() {
+        let (mut store, profile) = memory();
+        save_units(&mut store, &profile, "prose", &[("a", 9, 0.5, 0.5, 9)]);
+        let before = store.load_stats(profile.id, "prose").unwrap();
+        assert_eq!(
+            history_by_char(&store, &profile, true, Some("xx")),
+            Err("Modo desconocido: xx".to_owned())
+        );
+        assert_eq!(
+            history_by_char(&store, &profile, false, Some("xx")),
+            Err("Modo desconocido: xx".to_owned())
+        );
+        for mode in [None, Some("prose"), Some("code")] {
+            assert_eq!(history_by_char(&store, &profile, false, mode), Ok(vec![]));
+        }
+        assert_eq!(store.load_stats(profile.id, "prose").unwrap(), before);
+    }
+
+    #[test]
+    fn char_row_serializes_in_camel_case() {
+        assert_eq!(
+            serde_json::to_value(char_row("a", 6, 0.25, 0.625)).unwrap(),
+            serde_json::json!({ "unit": "a", "samples": 6, "error": 0.25, "slowness": 0.625 })
         );
     }
 }
