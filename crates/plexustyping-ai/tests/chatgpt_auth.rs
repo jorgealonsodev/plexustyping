@@ -1421,6 +1421,32 @@ async fn sign_out_revokes_at_the_discovered_endpoint_and_keeps_the_registration(
 }
 
 #[tokio::test]
+async fn after_signing_out_another_chatgpt_account_can_sign_in() {
+    let f = Fixture::new().await;
+    f.sign_in(vec![f.approve(3600, PLAN, true)])
+        .await
+        .result
+        .unwrap();
+    f.mock.route(REVOKE, Reply::status(200, ""));
+    f.auth.sign_out().await.unwrap();
+    assert_eq!(f.record()["subject"], Value::Null);
+
+    let other = f
+        .sign_in(vec![f.approve_with(|signer, mut c| {
+            c["sub"] = json!("user-other");
+            c["email"] = json!("otra@example.com");
+            signer.sign(&c)
+        })])
+        .await;
+
+    let status = other.result.unwrap();
+    assert!(status.signed_in);
+    assert_eq!(status.email.as_deref(), Some("otra@example.com"));
+    assert_eq!(f.record()["subject"], "user-other");
+    assert_eq!(f.record()["clientId"], CLIENT);
+}
+
+#[tokio::test]
 async fn sign_out_retries_server_errors_then_clears_locally() {
     let f = Fixture::new().await;
     f.sign_in(vec![f.approve(3600, PLAN, true)])

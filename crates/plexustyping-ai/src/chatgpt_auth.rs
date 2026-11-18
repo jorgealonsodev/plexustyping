@@ -747,6 +747,10 @@ impl ChatgptAuth {
                 Ok(mut record) => {
                     let copy = (record.refresh_token.clone(), record.client_id.clone());
                     record.clear_tokens();
+                    // The next sign-in may be another ChatGPT account: only a renewal or a
+                    // sign-in while still signed in must stay on the same one. The email is
+                    // kept as the next sign-in's `login_hint`.
+                    record.subject = None;
                     save_to(&path, &record).await?;
                     copy
                 }
