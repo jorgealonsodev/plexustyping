@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adaptTempo, beatAt, tempoChangeFor, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
+import { adaptTempo, beatAt, stepBpm, tempoChangeFor, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
 
 describe("beatOffsetMs", () => {
   it("is the time from the nearest beat, negative when early", () => {
@@ -129,5 +129,13 @@ describe("tempoNotice", () => {
   it("tells the change, or that the tempo stays", () => {
     expect(tempoNotice({ from: 60, to: 63 })).toBe("Tempo: 60 → 63 BPM");
     expect(tempoNotice({ from: 60, to: 60 })).toBe("Tempo: se mantiene en 60 BPM");
+  });
+});
+
+describe("quick tempo buttons", () => {
+  it("move the tempo by 5 BPM inside 30–300 and snap an odd tempo to the 5s grid", () => {
+    expect([stepBpm(60, 1), stepBpm(60, -1)]).toEqual([65, 55]);
+    expect([stepBpm(62, 1), stepBpm(62, -1)]).toEqual([65, 60]);
+    expect([stepBpm(300, 1), stepBpm(30, -1), stepBpm(298, 1), stepBpm(32, -1)]).toEqual([300, 30, 300, 30]);
   });
 });

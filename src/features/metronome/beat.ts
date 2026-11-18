@@ -133,3 +133,12 @@ type ShortcutKey = Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey" 
 /** A bare F4 turns the metronome on or off. */
 export const isMetronomeShortcut = (k: ShortcutKey) =>
   k.key === "F4" && !k.ctrlKey && !k.altKey && !k.metaKey && !k.shiftKey && !k.repeat;
+
+/** Tempo step of the quick − / + buttons. */
+export const BPM_STEP = 5;
+
+/** The tempo one quick step up (`dir` 1) or down (-1): the next multiple of 5, inside 30–300. */
+export function stepBpm(bpm: number, dir: 1 | -1): number {
+  const next = dir > 0 ? Math.floor(bpm / BPM_STEP) * BPM_STEP + BPM_STEP : Math.ceil(bpm / BPM_STEP) * BPM_STEP - BPM_STEP;
+  return Math.min(MAX_BPM, Math.max(MIN_BPM, next));
+}

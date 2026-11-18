@@ -43,7 +43,7 @@
     tempoChangeFor,
     toConfig,
   } from "../metronome/beat";
-  import BeatDot from "../metronome/BeatDot.svelte";
+  import MetronomeQuick from "../metronome/MetronomeQuick.svelte";
   import { MetronomeController } from "../metronome/controller";
   import type { UnlockStatus } from "../unlock/api";
   import { lockedKeys, progressLine, unlockApplies } from "../unlock/unlock";
@@ -59,6 +59,7 @@
     textLength,
     aiRevision,
     metronome,
+    onMetronomeChange,
     onTempo,
     practice,
     indent,
@@ -82,6 +83,8 @@
     /** Changes when AI settings or keys change. */
     aiRevision: number;
     metronome: MetronomeSettings;
+    /** A change made in the metronome's quick panel (next to the beat dot). */
+    onMetronomeChange?: (change: Partial<MetronomeSettings>) => void;
     /** The adaptive metronome chose a new tempo for the next text. */
     onTempo: (bpm: number) => void;
     /** Prose or code of a language (S1); a change loads a new text. */
@@ -418,7 +421,7 @@
 
   // Any click outside a settings control, or focus lost to the page, returns to the typing field.
   function onWindowClick(e: MouseEvent) {
-    if (e.target instanceof Element && e.target.closest("select, input, label")) return;
+    if (e.target instanceof Element && e.target.closest("select, input, label, .metro-quick")) return;
     focusTyping();
   }
 
@@ -583,7 +586,14 @@
   <section class="practice">
     {#if phase === "typing" && ((liveStats && view) || anchor || showDelta)}
       <div class="top">
-        {#if anchor}<BeatDot {anchor} />{/if}
+        {#if anchor}
+          <MetronomeQuick
+            {anchor}
+            {metronome}
+            onChange={(change) => onMetronomeChange?.(change)}
+            onClose={() => focusTyping()}
+          />
+        {/if}
         {#if liveStats && view}
           <dl class="live" aria-label="Estadísticas en vivo">
             <div><dt>PPM</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
