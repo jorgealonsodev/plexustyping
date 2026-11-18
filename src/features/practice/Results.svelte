@@ -6,6 +6,7 @@
   import { type TempoChange, rhythmSummary, tempoNotice } from "../metronome/beat";
   import { GOAL_MET_NOTICE } from "../goals/goals";
   import { NEW_RECORD, recordLines } from "./ghost";
+  import { unlockNotice } from "../unlock/unlock";
 
   let {
     scored,
@@ -33,6 +34,8 @@
   const stats = $derived(scored.result.stats);
   const records = $derived(record === null ? [] : recordLines(record, scored.result.stats.netWpm, scored.saved));
   const rhythm = $derived(rhythmSummary(scored.offsetsMs ?? []));
+  /** "Nueva tecla desbloqueada: e" when this session unlocked a key (S6). */
+  const unlocked = $derived(unlockNotice(scored.unlocked));
 
   const focusAnd = (action: () => void) => () => {
     focusTyping();
@@ -43,6 +46,7 @@
 <section class="results" aria-labelledby="results-title">
   <h2 id="results-title">Resultado{#if language}<span class="lang"> · Código · {language}</span>{/if}</h2>
   {#if goalMet}<p class="goal-met" role="status">{GOAL_MET_NOTICE}</p>{/if}
+  {#if unlocked}<p class="goal-met" role="status">{unlocked}</p>{/if}
   <dl class="figures">
     <div class="main"><dt>PPM netas</dt><dd>{formatWpm(stats.netWpm)}</dd></div>
     <div><dt>PPM brutas</dt><dd>{formatWpm(stats.grossWpm)}</dd></div>

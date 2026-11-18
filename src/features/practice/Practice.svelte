@@ -45,6 +45,8 @@
   } from "../metronome/beat";
   import BeatDot from "../metronome/BeatDot.svelte";
   import { MetronomeController } from "../metronome/controller";
+  import type { UnlockStatus } from "../unlock/api";
+  import { lockedKeys, progressLine, unlockApplies } from "../unlock/unlock";
 
   let {
     mode,
@@ -64,6 +66,7 @@
     layoutId,
     languageId,
     profileRevision = 0,
+    unlock = null,
     onSaved,
     loadingText = $bindable(null),
   }: {
@@ -93,6 +96,8 @@
     languageId: string;
     /** Changes when another profile becomes active: a new text, weaknesses and heatmap are loaded. */
     profileRevision?: number;
+    /** Progressive unlock of the profile in this language and layout (unlock S1, S6); `null` until read. */
+    unlock?: UnlockStatus | null;
     /** A session was saved; resolves `true` when it met the daily goal (its result shows the notice once). */
     onSaved?: () => Promise<boolean>;
     /** Out: the loading label ("Cargando texto…", "Generando texto…") while a text loads, else `null`. */
@@ -136,8 +141,10 @@
   let textLanguage = untrack(() => languageId);
   // The next text, requested in the background while this one is typed (S6).
   const prefetch = new Prefetcher<PracticeText>();
+  // The active keys shape prose texts in the unlock mode (S5): a prefetch made before an unlock is stale.
+  const unlockKey = $derived(unlockApplies(unlock, practice) ? `unlock:${unlock.active.join("")}` : "");
   const genKey = $derived(
-    generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId, isCodeMode(practice) ? "es" : languageId),
+    `${generationKey(targetCount, textLength, aiRevision, practiceId, codeLines, layoutId, isCodeMode(practice) ? "es" : languageId)}|${unlockKey}`,
   );
   let weak = $state.raw<Weakness[]>([]);
   let charScores = $state.raw<CharScore[]>([]);
@@ -192,6 +199,10 @@
   const ghostEnd = $derived(ghostAt !== null && !!session && ghostAt === session.chars.length);
   const showDelta = $derived(racing && ghostDelta !== null);
   const heat = $derived(heatmap && layout ? heatScores(layout, charScores) : null);
+  // Progressive unlock (S6): prose texts only; the keys not reached yet are dimmed.
+  const unlockShown = $derived(unlockApplies(unlock, textMode));
+  const locked = $derived(unlockShown ? lockedKeys(layout, unlock) : null);
+  const unlockLine = $derived(unlockShown ? progressLine(unlock) : null);
   const highlights = $derived(phase === "typing" && view && sequences ? highlightsFor(sequences[view.cursor]) : []);
 
   function restart() {
@@ -606,6 +617,7 @@
           {#each targets as t, i (i)}{#if i > 0}<span class="sep">·</span>{/if}<kbd>{charLabel(t)}</kbd>{/each}
         {/if}
       </p>
+      {#if unlockLine}<p class="kind" aria-label="Desbloqueo progresivo">{unlockLine}</p>{/if}
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
       {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
       {#if isCode}
@@ -629,7 +641,7 @@
 
 {#if showKeyboard}
   <footer>
-    <Keyboard {layout} {highlights} {flash} {heat} />
+    <Keyboard {layout} {highlights} {flash} {heat} {locked} />
   </footer>
 {/if}
 

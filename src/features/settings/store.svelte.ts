@@ -18,6 +18,7 @@ import type { MetronomeSettings } from "../metronome/beat";
 import { type GoalsApi, goalsApi } from "../goals/api";
 import { type GoalChoice, type GoalSnapshot, crossedGoal, localDay, tzOffsetMin } from "../goals/goals";
 import { type Profile, type ProfileFields, type ProfilesApi, profilesApi } from "../profiles/api";
+import { type UnlockApi, type UnlockChange, type UnlockStatus, unlockApi } from "../unlock/api";
 import {
   type Appearance,
   createProfile,
@@ -70,11 +71,18 @@ export class SettingsStore {
   private readonly goalApi: GoalsApi;
   /** Latest goal read: an older reply (e.g. of the previous profile) is stale. */
   private goalRun = 0;
+  private readonly unlockApi: UnlockApi;
+  /** Latest unlock read: an older reply (another profile, language or layout) is stale. */
+  private unlockRun = 0;
 
-  constructor(api: ProfilesApi = profilesApi, goals: GoalsApi = goalsApi) {
+  constructor(api: ProfilesApi = profilesApi, goals: GoalsApi = goalsApi, unlocks: UnlockApi = unlockApi) {
     this.profileApi = api;
     this.goalApi = goals;
+    this.unlockApi = unlocks;
   }
+
+  /** Progressive unlock of the active profile in the current language and layout (S1); `null` until read. */
+  unlock = $state.raw<UnlockStatus | null>(null);
 
   /** The active profile's daily goal, today's progress and streak (S5); `null` until read. */
   goal = $state.raw<GoalSnapshot | null>(null);
@@ -185,6 +193,7 @@ export class SettingsStore {
     this.layout = id;
     saveLayout(id);
     this.saveToProfile({ layout: id });
+    void this.refreshUnlock();
   }
 
   /** Loads a new prose or words text in the language (the practice screen watches it); saved to the active profile. */
@@ -192,6 +201,7 @@ export class SettingsStore {
     this.language = id;
     saveLanguage(id);
     this.saveToProfile({ language: id });
+    void this.refreshUnlock();
   }
 
   private appearance(): Appearance {
@@ -240,6 +250,7 @@ export class SettingsStore {
       this.profilesReady = true;
     }
     void this.refreshGoal();
+    void this.refreshUnlock();
   }
 
   private activate(profile: Profile, appearance: Appearance) {
@@ -247,6 +258,33 @@ export class SettingsStore {
     this.applyAppearance(appearance);
     this.profileRevision++;
     void this.refreshGoal();
+    void this.refreshUnlock();
+  }
+
+  /** Applies an unlock reply unless a newer read started meanwhile. */
+  private async readUnlock(read: (language: string, layout: string) => Promise<UnlockStatus>) {
+    const id = ++this.unlockRun;
+    const status = await read(this.language, this.layout);
+    if (id === this.unlockRun) this.unlock = status;
+  }
+
+  /** Reads the unlock progress again (after a session, a switch of profile, language or layout). */
+  async refreshUnlock() {
+    try {
+      await this.readUnlock((language, layout) => this.unlockApi.status(language, layout));
+    } catch (err) {
+      console.warn("unlock_status failed", err);
+    }
+  }
+
+  /** Turns the mode on or off or sets its target speed; the backend's Spanish error when refused, else `null`. */
+  async setUnlock(change: UnlockChange): Promise<string | null> {
+    try {
+      await this.readUnlock((language, layout) => this.unlockApi.set(language, layout, change));
+      return null;
+    } catch (err) {
+      return String(err);
+    }
   }
 
   /** Applies a goal reply unless a newer read started meanwhile. */
@@ -271,6 +309,7 @@ export class SettingsStore {
 
   /** After a saved session: refreshes the progress; `true` when this session met the goal (S5). */
   async sessionSaved(): Promise<boolean> {
+    void this.refreshUnlock();
     const before = this.goal;
     const after = await this.refreshGoal();
     return after !== null && crossedGoal(before, after);

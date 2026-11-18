@@ -3,8 +3,18 @@
   import SettingField from "./SettingField.svelte";
   import { ERROR_MODES, GHOST_SETTING, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
+  import type { UnlockChange } from "../unlock/api";
+  import { DEFAULT_TARGET_WPM, TARGET_SETTING, TARGET_WPMS, UNLOCK_SETTING } from "../unlock/unlock";
 
   let { settings }: { settings: SettingsStore } = $props();
+
+  /** The last refused unlock change (Spanish, from the backend); cleared by the next one that works. */
+  let unlockError = $state<string | null>(null);
+  const targetWpm = $derived(settings.unlock?.targetWpm ?? DEFAULT_TARGET_WPM);
+
+  async function setUnlock(change: UnlockChange) {
+    unlockError = await settings.setUnlock(change);
+  }
 
   type Change<T extends HTMLElement> = Event & { currentTarget: T };
 </script>
@@ -88,3 +98,41 @@
     />
   {/snippet}
 </SettingField>
+
+<!-- Progressive unlock (S1): per profile, language and layout; prose texts only. -->
+<SettingField toggle label={UNLOCK_SETTING.label} hint={UNLOCK_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={settings.unlock?.enabled ?? false}
+      disabled={settings.unlock === null}
+      onchange={(e: Change<HTMLInputElement>) => void setUnlock({ enabled: e.currentTarget.checked })}
+    />
+  {/snippet}
+</SettingField>
+
+<SettingField label={TARGET_SETTING.label} hint={TARGET_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <select
+      {id}
+      aria-describedby={hintId}
+      disabled={settings.unlock === null}
+      onchange={(e: Change<HTMLSelectElement>) => void setUnlock({ targetWpm: Number(e.currentTarget.value) })}
+    >
+      {#each TARGET_WPMS as n (n)}
+        <option value={n} selected={n === targetWpm}>{n} PPM</option>
+      {/each}
+    </select>
+  {/snippet}
+</SettingField>
+{#if unlockError}<p class="error" role="alert">{unlockError}</p>{/if}
+
+<style>
+  .error {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--danger);
+  }
+</style>

@@ -230,6 +230,7 @@
     languageId={settings.language}
     codeLines={settings.codeLines}
     profileRevision={settings.profileRevision}
+    unlock={settings.unlock}
     onSaved={() => settings.sessionSaved()}
   />
 {/if}

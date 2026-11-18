@@ -353,6 +353,39 @@ without sessions breaks it, and changing the goal applies the new one to past
 days. Other profiles keep their own goal. In temporary mode the goal and the
 progress last only until the app closes.
 
+### Progressive unlock (beginner mode)
+
+An optional beginner mode, off by default, set per profile in
+"Ajustes → Práctica": "Desbloqueo progresivo" ("Empieza por la fila base y
+añade una tecla cada vez que dominas las activas") and "Velocidad objetivo"
+(20, 30, 40 or 50 PPM; 30 by default). It shapes prose texts only: words and
+code modes ignore it. Progress is kept per profile, language and layout, and
+survives turning the mode off and on.
+
+Practice starts with the home row only: the letters the layout puts on the
+A…L keys and the one after L (Spanish: a s d f g h j k l ñ); space is always
+active and so is the uppercase of an active letter. A key counts as mastered
+with at least 30 samples, an error rate (EMA) of 5 % or less and a median time
+per keystroke within the target speed (12 000 / PPM ms: 400 ms at 30 PPM),
+from the profile's prose statistics. After each saved prose session in this
+mode one key is added when every active key is mastered, or after 3 sessions
+in a row without a newly mastered key. The order is the home row (in Spanish
+f j d k s l a ñ) and then the remaining letters by their frequency in the
+language (Spanish: e o n r i t u c m p…); digits and punctuation unlock all
+together once every letter is active.
+
+With fewer than 15 letters there are no meaningful sentences, so texts are
+lowercase words of active letters only, without AI: real words from the
+language corpus first, completed with pronounceable pseudowords (alternating
+consonant and vowel groups), with the new key and weak keys weighted up. From
+15 letters on, texts come from the usual generation (AI when enabled, the
+corpus otherwise) restricted to the active characters.
+
+The on-screen keyboard dims the keys not unlocked yet, the line above the text
+shows the progress ("Teclas: 9/27 · siguiente: e") and the result screen of
+the session that adds a key says "Nueva tecla desbloqueada: e". In temporary
+mode the progress lasts only until the app closes.
+
 ### Where data lives
 
 Sessions, keystrokes and statistics are stored only on this machine, in

@@ -10,12 +10,15 @@
     highlights,
     flash,
     heat = null,
+    locked = null,
   }: {
     layout: Layout | null;
     highlights: Highlight[];
     flash: Flash | null;
     /** Error score per key code (`heatScores`); `null` hides the heatmap. */
     heat?: Map<string, number> | null;
+    /** Codes of the keys progressive unlock has not reached yet (S6): drawn dimmed. */
+    locked?: Set<string> | null;
   } = $props();
 
   const FLASH_MS = 150;
@@ -71,6 +74,7 @@
           class:flash-ok={flashed[key.code] === "ok"}
           class:flash-bad={flashed[key.code] === "bad"}
           class:home={key.code === "KeyF" || key.code === "KeyJ"}
+          class:locked={locked?.has(key.code) ?? false}
         >
           {#if key.labels.shift}<span class="shift" class:dead={key.labels.shift.dead}>{key.labels.shift.text}</span>{/if}
           {#if key.labels.main}
@@ -207,6 +211,10 @@
   .secondary {
     color: var(--finger);
     border: 2px dashed var(--finger);
+  }
+  /* A key progressive unlock has not reached yet (S6). */
+  .locked {
+    opacity: 0.3;
   }
   /* After the highlight rules, so a flash wins on the same key. */
   .flash-ok,

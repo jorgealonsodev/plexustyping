@@ -13,6 +13,8 @@ export interface ScoredSession {
   saveError: string | null;
   /** Metronome offset of each record, ms (negative = early); empty without a metronome. */
   offsetsMs: (number | null)[];
+  /** The key progressive unlock added after this session (unlock S7); `null` when none. */
+  unlocked?: string | null;
 }
 
 /** Where a practice text came from: generated now, the local cache of AI texts, or the corpus. */
