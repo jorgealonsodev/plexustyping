@@ -262,9 +262,9 @@
     font-weight: 600;
     color: var(--warning);
   }
+  /* The name keeps its room (up to 12rem); the goal text gives way first. */
   .profile {
-    flex: 0 1 auto;
-    min-width: 0;
+    flex: none;
     max-width: 12rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -285,7 +285,10 @@
     gap: 0.5rem;
   }
   .goal {
-    flex: none;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.85rem;
     color: var(--muted);
