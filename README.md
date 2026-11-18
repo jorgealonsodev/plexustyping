@@ -248,6 +248,30 @@ layout chosen in the app must match the one set in the operating system. The
 statistics of weak keys are one model per profile, shared by every language.
 Corpus sources and licences: `THIRD_PARTY_NOTICES.md`.
 
+### Profiles
+
+Several people (or several goals) can share the app through local profiles.
+The active profile's name is shown in the header; clicking it opens
+"Ajustes → Perfiles", which lists every profile with the active one marked and
+has "Usar" (switch), "Nuevo perfil", "Renombrar" and "Borrar". Names are 1–40
+characters and unique ignoring case. A new profile starts with the active
+profile's language and layout and does not become active until "Usar".
+
+Per profile: the history, keystrokes and statistics (weak keys, heatmap), the
+keyboard layout, the prose language and the theme. Everything else (error mode,
+live stats, keyboard and heatmap toggles, text length, metronome, code options,
+AI settings and imported VS Code themes) is shared by all profiles. Switching
+profile applies its layout, language and theme, loads a new text and shows its
+own weaknesses, heatmap and history; a profile without a theme keeps the
+current one. On the first start with profiles, the layout, language and theme
+chosen before are copied once to the active profile.
+
+"Borrar" asks "Se borrarán el historial y las estadísticas de «nombre».
+¿Continuar?" and then deletes that profile with all its sessions, keystrokes
+and statistics; other profiles are untouched and it cannot be undone. The only
+remaining profile cannot be deleted. Deleting the active profile switches to
+the first remaining one.
+
 ### Where data lives
 
 Sessions, keystrokes and statistics are stored only on this machine, in
@@ -255,8 +279,9 @@ Sessions, keystrokes and statistics are stored only on this machine, in
 `~/.local/share/com.plexustyping.app/`). If that file cannot be opened the app
 still works with a temporary in-memory store and shows "Sin guardar: modo
 temporal" in the header. The same database keeps the AI settings (without
-keys), the cache of generated texts and the usage counters. Display settings
-stay in the webview's local storage.
+keys), the cache of generated texts and the usage counters, and the profiles
+with the active one. Shared display settings stay in the webview's local
+storage.
 
 ## Layout
 

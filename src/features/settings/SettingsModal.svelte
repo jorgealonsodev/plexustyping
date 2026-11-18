@@ -13,7 +13,9 @@
   const ids = SECTIONS.map((s) => s.id);
   const tabs: Record<string, HTMLButtonElement | undefined> = $state({});
 
-  export function open() {
+  /** Opens the modal, on `section` when given (e.g. the header's profile name opens "Perfiles"). */
+  export function open(section?: string) {
+    if (section && ids.includes(section)) current = section;
     if (!dialog || dialog.open) return;
     dialog.showModal();
     tabs[current]?.focus();

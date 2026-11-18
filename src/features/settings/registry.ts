@@ -5,6 +5,7 @@ import CodeSection from "./CodeSection.svelte";
 import KeyboardSection from "./KeyboardSection.svelte";
 import MetronomeSection from "./MetronomeSection.svelte";
 import PracticeSection from "./PracticeSection.svelte";
+import ProfilesSection from "./ProfilesSection.svelte";
 import type { SettingsStore } from "./store.svelte";
 
 /** One tab of the settings modal: a section component that reads and writes the shared store. */
@@ -22,4 +23,5 @@ export const SECTIONS: SettingsSection[] = [
   { id: "appearance", label: "Apariencia", component: AppearanceSection },
   { id: "metronome", label: "Metrónomo", component: MetronomeSection },
   { id: "ai", label: "IA", component: AiSection },
+  { id: "profiles", label: "Perfiles", component: ProfilesSection },
 ];

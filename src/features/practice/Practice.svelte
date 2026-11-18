@@ -61,6 +61,7 @@
     codeLines,
     layoutId,
     languageId,
+    profileRevision = 0,
     loadingText = $bindable(null),
   }: {
     mode: ErrorMode;
@@ -85,6 +86,8 @@
     layoutId: string;
     /** Prose language id (S1, S4); a change loads a new prose text. */
     languageId: string;
+    /** Changes when another profile becomes active: a new text, weaknesses and heatmap are loaded. */
+    profileRevision?: number;
     /** Out: the loading label ("Cargando texto…", "Generando texto…") while a text loads, else `null`. */
     loadingText?: string | null;
   } = $props();
@@ -115,10 +118,10 @@
   let classes = $state.raw<TokenClass[]>([]);
   const isCode = $derived(isCodeMode(textMode));
   const practiceId = $derived(practiceKey(practice));
-  // Mode, layout and language of the latest requested text: a different one loads a new text.
+  // Profile, mode, layout and language of the latest requested text: a different one loads a new text.
   // Code texts do not depend on the prose language (S1); prose and words texts do.
   const requestKey = (p: PracticeMode, layoutOf: string, languageOf: string) =>
-    `${practiceKey(p)}|${layoutOf}|${isCodeMode(p) ? "" : languageOf}`;
+    `${profileRevision}|${practiceKey(p)}|${layoutOf}|${isCodeMode(p) ? "" : languageOf}`;
   const wantedKey = $derived(requestKey(practice, layoutId, languageId));
   let requestedKey = untrack(() => requestKey(practice, layoutId, languageId));
   // Layout and language the current text was generated for; the scored session records them (S5).
@@ -429,7 +432,7 @@
     untrack(() => indentChangeRestarts(phase, isCode) && restart());
   });
 
-  // Switching prose/code, the language or the layout drops the prefetch and loads a new text.
+  // Switching profile, prose/code, the language or the layout drops the prefetch and loads a new text.
   $effect(() => {
     const key = wantedKey;
     untrack(() => {

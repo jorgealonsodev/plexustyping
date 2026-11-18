@@ -42,6 +42,7 @@
   }
 
   onMount(() => {
+    void settings.loadProfiles();
     aiSettingsGet()
       .then((s) => (settings.aiEnabled ??= s.enabled))
       .catch((err) => console.warn("ai_settings_get failed", err));
@@ -123,6 +124,15 @@
       <strong class="temporary" title={storageError}>Sin guardar: modo temporal</strong>
     {/if}
   </div>
+  {#if settings.activeProfile}
+    <!-- The active profile (S4): opens Ajustes → Perfiles to switch or manage profiles. -->
+    <button
+      type="button"
+      class="profile"
+      title="Perfil activo: {settings.activeProfile.name}. Cambiar en Ajustes → Perfiles"
+      onclick={() => modal?.open("profiles")}>{settings.activeProfile.name}</button
+    >
+  {/if}
   <ModeSwitch {settings} />
   <button
     type="button"
@@ -167,25 +177,29 @@
   </button>
 </header>
 
-<Practice
-  bind:this={practiceScreen}
-  bind:loadingText
-  mode={settings.mode}
-  liveStats={settings.liveStats}
-  showKeyboard={settings.showKeyboard}
-  flashes={settings.flashes}
-  heatmap={settings.heatmap}
-  targetCount={settings.targetCount}
-  textLength={settings.textLength}
-  aiRevision={settings.aiRevision}
-  metronome={settings.metronome}
-  onTempo={(bpm) => settings.setMetronome({ bpm })}
-  {practice}
-  indent={settings.codeIndent}
-  layoutId={settings.layout}
-  languageId={settings.language}
-  codeLines={settings.codeLines}
-/>
+<!-- After the active profile is known, so the first text already uses its layout and language. -->
+{#if settings.profilesReady}
+  <Practice
+    bind:this={practiceScreen}
+    bind:loadingText
+    mode={settings.mode}
+    liveStats={settings.liveStats}
+    showKeyboard={settings.showKeyboard}
+    flashes={settings.flashes}
+    heatmap={settings.heatmap}
+    targetCount={settings.targetCount}
+    textLength={settings.textLength}
+    aiRevision={settings.aiRevision}
+    metronome={settings.metronome}
+    onTempo={(bpm) => settings.setMetronome({ bpm })}
+    {practice}
+    indent={settings.codeIndent}
+    layoutId={settings.layout}
+    languageId={settings.language}
+    codeLines={settings.codeLines}
+    profileRevision={settings.profileRevision}
+  />
+{/if}
 
 <SettingsModal bind:this={modal} {settings} />
 <HistoryModal bind:this={history} />
@@ -239,6 +253,21 @@
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--warning);
+  }
+  .profile {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .profile:hover {
+    color: var(--text);
+    border-color: var(--accent);
   }
   .gear {
     flex: none;

@@ -15,6 +15,16 @@ import {
   type ThemeEntry,
 } from "../themes";
 import type { MetronomeSettings } from "../metronome/beat";
+import { type Profile, type ProfileFields, type ProfilesApi, profilesApi } from "../profiles/api";
+import {
+  type Appearance,
+  createProfile,
+  deleteProfile,
+  renameProfile,
+  saveAppearance,
+  startProfiles,
+  switchProfile,
+} from "../profiles/profiles";
 import {
   MAX_CODE_LINES,
   MIN_CODE_LINES,
@@ -49,8 +59,24 @@ import {
   saveTextLength,
 } from "./settings";
 
-/** The live, persisted settings shared by the app and every settings section. */
+/** The live, persisted settings shared by the app and every settings section. Layout, language and
+ * theme belong to the active profile (S5); localStorage keeps them only as the first-paint cache. */
 export class SettingsStore {
+  private readonly profileApi: ProfilesApi;
+
+  constructor(api: ProfilesApi = profilesApi) {
+    this.profileApi = api;
+  }
+
+  /** Every profile, the active one and whether the start-up load finished (also when it failed). */
+  profiles = $state.raw<Profile[]>([]);
+  activeProfile = $state.raw<Profile | null>(null);
+  profilesReady = $state(false);
+  /** Bumped when another profile becomes active: the practice screen loads a new text and model. */
+  profileRevision = $state(0);
+  /** The last failed profile write (Spanish, from the backend); `null` when none. */
+  profileError = $state<string | null>(null);
+
   mode = $state(loadErrorMode());
   liveStats = $state(loadLiveStats());
   showKeyboard = $state(loadShowKeyboard());
@@ -86,8 +112,13 @@ export class SettingsStore {
     saveErrorMode(next);
   }
 
-  /** Switches the theme live and remembers it. */
+  /** Switches the theme live and saves it to the active profile. */
   setTheme(id: string) {
+    this.showTheme(id);
+    this.saveToProfile({ theme: id });
+  }
+
+  private showTheme(id: string) {
     this.themeId = id;
     applyTheme(themeById(id));
     saveThemeId(id);
@@ -131,16 +162,117 @@ export class SettingsStore {
     saveFlashes(on);
   }
 
-  /** Loads a new text for the layout (the practice screen watches it). */
+  /** Loads a new text for the layout (the practice screen watches it); saved to the active profile. */
   setLayout(id: string) {
     this.layout = id;
     saveLayout(id);
+    this.saveToProfile({ layout: id });
   }
 
-  /** Loads a new prose or words text in the language (the practice screen watches it). */
+  /** Loads a new prose or words text in the language (the practice screen watches it); saved to the active profile. */
   setLanguage(id: string) {
     this.language = id;
     saveLanguage(id);
+    this.saveToProfile({ language: id });
+  }
+
+  private appearance(): Appearance {
+    return { layout: this.layout, language: this.language, theme: this.themeId };
+  }
+
+  /** Shows a profile's layout, language and theme without writing them back to it. */
+  private applyAppearance(a: Appearance) {
+    if (a.layout !== this.layout) {
+      this.layout = a.layout;
+      saveLayout(a.layout);
+    }
+    if (a.language !== this.language) {
+      this.language = a.language;
+      saveLanguage(a.language);
+    }
+    if (a.theme !== this.themeId) this.showTheme(a.theme);
+  }
+
+  private setActive(profile: Profile) {
+    this.activeProfile = profile;
+    this.profiles = this.profiles.map((p) => (p.id === profile.id ? profile : p));
+  }
+
+  private saveToProfile(fields: ProfileFields) {
+    const active = this.activeProfile;
+    if (!active) return;
+    saveAppearance(this.profileApi, active.id, fields)
+      .then((saved) => {
+        if (this.activeProfile?.id === saved.id) this.setActive(saved);
+      })
+      .catch((err) => (this.profileError = String(err)));
+  }
+
+  /** Start-up: the active profile (after the one-time carry-over, S6) and its layout, language and theme. */
+  async loadProfiles(storage: Storage = localStorage) {
+    try {
+      const started = await startProfiles(this.profileApi, storage, this.appearance());
+      this.profiles = started.profiles;
+      this.activeProfile = started.active;
+      this.applyAppearance(started.appearance);
+    } catch (err) {
+      console.warn("profiles failed", err);
+      this.profileError = String(err);
+    } finally {
+      this.profilesReady = true;
+    }
+  }
+
+  private activate(profile: Profile, appearance: Appearance) {
+    this.setActive(profile);
+    this.applyAppearance(appearance);
+    this.profileRevision++;
+  }
+
+  /** Runs a profile command; the backend's Spanish error when it fails, else `null`. */
+  private async attempt(run: () => Promise<void>): Promise<string | null> {
+    try {
+      await run();
+      this.profileError = null;
+      return null;
+    } catch (err) {
+      return String(err);
+    }
+  }
+
+  /** Makes `id` the active profile and applies its layout, language and theme (S5). */
+  useProfile(id: number) {
+    return this.attempt(async () => {
+      const { active, appearance } = await switchProfile(this.profileApi, id, this.appearance());
+      this.activate(active, appearance);
+    });
+  }
+
+  /** A new profile with the active one's language and layout (S4); the active profile stays. */
+  createProfile(name: string) {
+    return this.attempt(async () => {
+      const listed = await createProfile(this.profileApi, name, { language: this.language, layout: this.layout });
+      this.profiles = listed.profiles;
+    });
+  }
+
+  renameProfile(id: number, name: string) {
+    return this.attempt(async () => {
+      this.profiles = await renameProfile(this.profileApi, id, name, this.profiles);
+      const active = this.profiles.find((p) => p.id === this.activeProfile?.id);
+      if (active) this.activeProfile = active;
+    });
+  }
+
+  /** Deletes a profile and its data; deleting the active one applies the profile the backend switched to. */
+  deleteProfile(id: number) {
+    return this.attempt(async () => {
+      const activeId = this.activeProfile?.id ?? id;
+      const result = await deleteProfile(this.profileApi, id, activeId, this.appearance());
+      this.profiles = result.profiles;
+      if (result.appearance) this.activate(result.active, result.appearance);
+      else this.activeProfile = result.active;
+    });
   }
 
   setHeatmap(on: boolean) {
