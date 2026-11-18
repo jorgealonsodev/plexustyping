@@ -62,6 +62,7 @@
     layoutId,
     languageId,
     profileRevision = 0,
+    onSaved,
     loadingText = $bindable(null),
   }: {
     mode: ErrorMode;
@@ -88,6 +89,8 @@
     languageId: string;
     /** Changes when another profile becomes active: a new text, weaknesses and heatmap are loaded. */
     profileRevision?: number;
+    /** A session was saved; resolves `true` when it met the daily goal (its result shows the notice once). */
+    onSaved?: () => Promise<boolean>;
     /** Out: the loading label ("Cargando texto…", "Generando texto…") while a text loads, else `null`. */
     loadingText?: string | null;
   } = $props();
@@ -141,6 +144,8 @@
   let scored = $state.raw<ScoredSession | null>(null);
   /** What the adaptive metronome decided after the scored text; `null` when it did not apply. */
   let tempo = $state.raw<TempoChange | null>(null);
+  /** The scored session met the daily goal (S5). */
+  let goalMet = $state(false);
   let message = $state("");
   let retry: () => void = loadFirst;
   // Invalidates in-flight IPC results when the user restarts or moves on.
@@ -173,6 +178,7 @@
     session = new TypingSession(text, mode, isCodeMode(textMode) ? indent : "manual");
     track = { offsets: [], bpms: new Set(), switched: false };
     scored = null;
+    goalMet = false;
     phase = "typing";
     tick++;
   }
@@ -265,8 +271,13 @@
       tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
       if (tempo && tempo.to !== tempo.from) onTempo(tempo.to);
       weak = [];
+      goalMet = false;
       phase = "results";
       refreshModel(id);
+      if (result.saved && onSaved)
+        onSaved()
+          .then((met) => id === run && (goalMet = met))
+          .catch((err) => console.warn("goal refresh failed", err));
     } catch (err) {
       if (id !== run) return;
       retry = () => void finish(done, measured);
@@ -529,7 +540,7 @@
         <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
       </div>
     {:else if phase === "results" && scored}
-      <Results {scored} {weak} {tempo} language={isCodeMode(textMode) ? LANGUAGES.name(textMode.lang) : null} onNext={loadNext} onRepeat={restart} />
+      <Results {scored} {weak} {tempo} {goalMet} language={isCodeMode(textMode) ? LANGUAGES.name(textMode.lang) : null} onNext={loadNext} onRepeat={restart} />
     {:else if session && view}
       <p class="kind">
         {#if isCodeMode(textMode)}{LANGUAGES.name(textMode.lang)} ·{/if}

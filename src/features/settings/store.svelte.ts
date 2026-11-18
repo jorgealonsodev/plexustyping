@@ -15,6 +15,8 @@ import {
   type ThemeEntry,
 } from "../themes";
 import type { MetronomeSettings } from "../metronome/beat";
+import { type GoalsApi, goalsApi } from "../goals/api";
+import { type GoalChoice, type GoalSnapshot, crossedGoal, localDay, tzOffsetMin } from "../goals/goals";
 import { type Profile, type ProfileFields, type ProfilesApi, profilesApi } from "../profiles/api";
 import {
   type Appearance,
@@ -63,10 +65,17 @@ import {
  * theme belong to the active profile (S5); localStorage keeps them only as the first-paint cache. */
 export class SettingsStore {
   private readonly profileApi: ProfilesApi;
+  private readonly goalApi: GoalsApi;
+  /** Latest goal read: an older reply (e.g. of the previous profile) is stale. */
+  private goalRun = 0;
 
-  constructor(api: ProfilesApi = profilesApi) {
+  constructor(api: ProfilesApi = profilesApi, goals: GoalsApi = goalsApi) {
     this.profileApi = api;
+    this.goalApi = goals;
   }
+
+  /** The active profile's daily goal, today's progress and streak (S5); `null` until read. */
+  goal = $state.raw<GoalSnapshot | null>(null);
 
   /** Every profile, the active one and whether the start-up load finished (also when it failed). */
   profiles = $state.raw<Profile[]>([]);
@@ -221,12 +230,48 @@ export class SettingsStore {
     } finally {
       this.profilesReady = true;
     }
+    void this.refreshGoal();
   }
 
   private activate(profile: Profile, appearance: Appearance) {
     this.setActive(profile);
     this.applyAppearance(appearance);
     this.profileRevision++;
+    void this.refreshGoal();
+  }
+
+  /** Applies a goal reply unless a newer read started meanwhile. */
+  private async readGoal(read: (tz: number) => Promise<GoalSnapshot["status"]>): Promise<GoalSnapshot | null> {
+    const id = ++this.goalRun;
+    const now = new Date();
+    const status = await read(tzOffsetMin(now));
+    const snapshot = { status, day: localDay(now) };
+    if (id === this.goalRun) this.goal = snapshot;
+    return snapshot;
+  }
+
+  /** Reads the active profile's goal progress again (after a session, a switch or a goal change). */
+  async refreshGoal(): Promise<GoalSnapshot | null> {
+    try {
+      return await this.readGoal((tz) => this.goalApi.status(tz));
+    } catch (err) {
+      console.warn("goal_status failed", err);
+      return null;
+    }
+  }
+
+  /** After a saved session: refreshes the progress; `true` when this session met the goal (S5). */
+  async sessionSaved(): Promise<boolean> {
+    const before = this.goal;
+    const after = await this.refreshGoal();
+    return after !== null && crossedGoal(before, after);
+  }
+
+  /** Sets the active profile's daily goal; the backend's Spanish error when refused, else `null`. */
+  setGoal(kind: GoalChoice, amount: number | null) {
+    return this.attempt(async () => {
+      await this.readGoal((tz) => this.goalApi.set(kind, amount, tz));
+    });
   }
 
   /** Runs a profile command; the backend's Spanish error when it fails, else `null`. */

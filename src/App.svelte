@@ -14,9 +14,12 @@
   import { focusTyping } from "./features/practice/focus";
   import { aiSettingsGet, aiSettingsSet } from "./features/settings/aiApi";
   import { aiToggleTitle, toggleEnabled } from "./features/settings/ai";
+  import { goalHeaderText } from "./features/goals/goals";
 
   const settings = new SettingsStore();
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
+  /** Today's daily goal progress next to the profile name (S5); `null` without a goal. */
+  const goalText = $derived(goalHeaderText(settings.goal?.status ?? null));
   let modal: SettingsModal | undefined = $state();
   let history: HistoryModal | undefined = $state();
   let practiceScreen: Practice | undefined = $state();
@@ -125,13 +128,17 @@
     {/if}
   </div>
   {#if settings.activeProfile}
-    <!-- The active profile (S4): opens Ajustes → Perfiles to switch or manage profiles. -->
-    <button
-      type="button"
-      class="profile"
-      title="Perfil activo: {settings.activeProfile.name}. Cambiar en Ajustes → Perfiles"
-      onclick={() => modal?.open("profiles")}>{settings.activeProfile.name}</button
-    >
+    <div class="who">
+      <!-- The active profile (S4): opens Ajustes → Perfiles to switch or manage profiles. -->
+      <button
+        type="button"
+        class="profile"
+        title="Perfil activo: {settings.activeProfile.name}. Cambiar en Ajustes → Perfiles"
+        onclick={() => modal?.open("profiles")}>{settings.activeProfile.name}</button
+      >
+      <!-- Today's daily goal progress and streak (S5). -->
+      {#if goalText}<span class="goal" title="Meta diaria del perfil activo">{goalText}</span>{/if}
+    </div>
   {/if}
   <ModeSwitch {settings} />
   <button
@@ -198,6 +205,7 @@
     languageId={settings.language}
     codeLines={settings.codeLines}
     profileRevision={settings.profileRevision}
+    onSaved={() => settings.sessionSaved()}
   />
 {/if}
 
@@ -268,6 +276,19 @@
   .profile:hover {
     color: var(--text);
     border-color: var(--accent);
+  }
+  .who {
+    flex: 0 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .goal {
+    flex: none;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    color: var(--muted);
   }
   .gear {
     flex: none;

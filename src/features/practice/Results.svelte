@@ -4,12 +4,14 @@
   import { focusTyping } from "./focus";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
   import { type TempoChange, rhythmSummary, tempoNotice } from "../metronome/beat";
+  import { GOAL_MET_NOTICE } from "../goals/goals";
 
   let {
     scored,
     weak,
     language = null,
     tempo = null,
+    goalMet = false,
     onNext,
     onRepeat,
   }: {
@@ -19,6 +21,8 @@
     language?: string | null;
     /** What the adaptive metronome decided after this text; `null` when it did not apply. */
     tempo?: TempoChange | null;
+    /** This session met the daily goal: "¡Meta diaria cumplida!" is shown (S5). */
+    goalMet?: boolean;
     onNext: () => void;
     onRepeat: () => void;
   } = $props();
@@ -33,6 +37,7 @@
 
 <section class="results" aria-labelledby="results-title">
   <h2 id="results-title">Resultado{#if language}<span class="lang"> · Código · {language}</span>{/if}</h2>
+  {#if goalMet}<p class="goal-met" role="status">{GOAL_MET_NOTICE}</p>{/if}
   <dl class="figures">
     <div class="main"><dt>PPM netas</dt><dd>{formatWpm(stats.netWpm)}</dd></div>
     <div><dt>PPM brutas</dt><dd>{formatWpm(stats.grossWpm)}</dd></div>
@@ -114,8 +119,13 @@
   }
   .failed,
   .rhythm,
-  .note {
+  .note,
+  .goal-met {
     margin: 0;
+  }
+  .goal-met {
+    font-weight: 700;
+    color: var(--accent);
   }
   .note {
     color: var(--muted);

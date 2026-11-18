@@ -272,6 +272,23 @@ and statistics; other profiles are untouched and it cannot be undone. The only
 remaining profile cannot be deleted. Deleting the active profile switches to
 the first remaining one.
 
+### Daily goal and streak
+
+Each profile can have its own daily goal, set in "Ajustes → Perfiles" under
+"Meta diaria": "Desactivada" (the default), "Minutos al día" (5, 10, 15, 20,
+30, 45, 60, 90 or 120) or "Textos al día" (1, 3, 5, 10, 15, 20 or 30). It
+counts the active profile's saved sessions (prose, words and code) started on
+the local day: minutes are the sum of their durations (shown rounded down;
+met when the exact sum reaches the goal), texts are the number of sessions.
+With a goal set, the header shows the progress next to the profile name, e.g.
+"Hoy 12/20 min · racha 3" or "Hoy 2/5 textos", and "Meta cumplida · racha 4"
+once met; the result screen of the session that meets it says "¡Meta diaria
+cumplida!". The streak counts consecutive days on which the current goal was
+met, ending today when today's goal is met and yesterday otherwise; a day
+without sessions breaks it, and changing the goal applies the new one to past
+days. Other profiles keep their own goal. In temporary mode the goal and the
+progress last only until the app closes.
+
 ### Where data lives
 
 Sessions, keystrokes and statistics are stored only on this machine, in
@@ -280,7 +297,7 @@ Sessions, keystrokes and statistics are stored only on this machine, in
 still works with a temporary in-memory store and shows "Sin guardar: modo
 temporal" in the header. The same database keeps the AI settings (without
 keys), the cache of generated texts and the usage counters, and the profiles
-with the active one. Shared display settings stay in the webview's local
+(with their daily goals) and the active one. Shared display settings stay in the webview's local
 storage.
 
 ## Layout

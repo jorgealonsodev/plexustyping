@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { GOAL_KINDS, type GoalChoice, amountsFor, chooseGoal } from "../goals/goals";
   import { deleteConfirmation } from "../profiles/profiles";
   import SettingField from "./SettingField.svelte";
   import type { SettingsStore } from "./store.svelte";
@@ -45,6 +46,17 @@
       () => settings.renameProfile(id, renameValue),
       () => (renaming = null),
     );
+  }
+
+  type Change<T extends HTMLElement> = Event & { currentTarget: T };
+
+  // "Meta diaria" (S5) of the active profile.
+  const goal = $derived(settings.goal?.status.goal ?? null);
+  const goalKind = $derived<GoalChoice>(goal?.kind ?? "off");
+
+  function setGoal(kind: GoalChoice, amount?: number) {
+    const next = chooseGoal(kind, goal, amount);
+    void run(() => settings.setGoal(next.kind, next.amount));
   }
 
   function remove(id: number) {
@@ -111,6 +123,33 @@
     {/snippet}
   </SettingField>
 </form>
+
+<SettingField label="Meta diaria" hint="Del perfil activo: minutos o textos al día, con racha de días.">
+  {#snippet children({ id, hintId })}
+    <select
+      {id}
+      aria-describedby={hintId}
+      disabled={busy}
+      onchange={(e: Change<HTMLSelectElement>) => setGoal(e.currentTarget.value as GoalChoice)}
+    >
+      {#each GOAL_KINDS as k (k.id)}
+        <option value={k.id} selected={k.id === goalKind}>{k.label}</option>
+      {/each}
+    </select>
+    {#if goal}
+      <select
+        style="min-width: 4.5rem; margin-left: 0.4rem"
+        aria-label={goal.kind === "minutes" ? "Minutos al día" : "Textos al día"}
+        disabled={busy}
+        onchange={(e: Change<HTMLSelectElement>) => setGoal(goal.kind, Number(e.currentTarget.value))}
+      >
+        {#each amountsFor(goal.kind) as n (n)}
+          <option value={n} selected={n === goal.amount}>{n}</option>
+        {/each}
+      </select>
+    {/if}
+  {/snippet}
+</SettingField>
 
 {#if shown}<p class="notice error" role="alert">{shown}</p>{/if}
 
