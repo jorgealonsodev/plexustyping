@@ -38,12 +38,15 @@ pub(super) async fn wait(
     let (found_tx, mut found) = tokio::sync::mpsc::channel(1);
     loop {
         tokio::select! {
-            accepted = listener.accept() => {
-                let (socket, _) = accepted.map_err(|err| AuthError::Listener {
-                    message: err.to_string(),
-                })?;
-                tokio::spawn(answer(socket, state.to_string(), found_tx.clone()));
-            }
+            accepted = listener.accept() => match accepted {
+                Ok((socket, _)) => {
+                    tokio::spawn(answer(socket, state.to_string(), found_tx.clone()));
+                }
+                // One failed connection (aborted, out of descriptors) is not the end of the
+                // sign-in: the next one may be the callback. The pause keeps a lasting failure
+                // from spinning; the caller's timeout and cancel still bound the wait.
+                Err(_) => tokio::time::sleep(std::time::Duration::from_millis(50)).await,
+            },
             Some(params) = found.recv() => return Ok(params),
         }
     }

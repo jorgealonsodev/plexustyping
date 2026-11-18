@@ -541,7 +541,7 @@ async fn a_pending_sign_in_can_be_cancelled() {
     let f = Arc::new(Fixture::new().await);
     let waiting = f.clone();
     let task = tokio::spawn(async move { waiting.auth.sign_in(|_| Ok(())).await });
-    for _ in 0..100 {
+    for _ in 0..500 {
         if f.auth.sign_in_pending() {
             break;
         }
@@ -551,6 +551,62 @@ async fn a_pending_sign_in_can_be_cancelled() {
     f.auth.cancel();
     assert_eq!(task.await.unwrap().unwrap_err(), AuthError::Cancelled);
     assert!(!f.auth.sign_in_pending());
+}
+
+#[tokio::test]
+async fn a_cancel_before_the_sign_in_waits_for_the_browser_still_ends_it() {
+    let f = Fixture::new().await;
+    let auth = &f.auth;
+    // Cancelled while the browser opens: no pending sign-in exists yet.
+    let result = tokio::time::timeout(
+        Duration::from_secs(2),
+        auth.sign_in(|_| {
+            auth.cancel();
+            Ok(())
+        }),
+    )
+    .await;
+    assert_eq!(
+        result.expect("ended at once").unwrap_err(),
+        AuthError::Cancelled
+    );
+    assert!(!f.auth.sign_in_pending());
+    assert!(f.calls(TOKEN).is_empty());
+}
+
+#[tokio::test]
+async fn a_sign_out_during_the_code_exchange_wins_over_its_answer() {
+    let f = Arc::new(Fixture::new().await);
+    let (mock, signer) = (f.mock.clone(), f.signer.clone());
+    let slow: Step = Box::new(move |p| {
+        let id = signer.sign(&claims(&mock.base, &p["nonce"]));
+        mock.route(
+            TOKEN,
+            tokens(&id, ACCESS, REFRESH, 3600, PLAN).delayed(Duration::from_millis(500)),
+        );
+        Some(format!(
+            "code={CODE}&state={}&client_id={CLIENT}&scope={}",
+            p["state"],
+            PLAN.replace(' ', "+")
+        ))
+    });
+    let signing = f.clone();
+    let task = tokio::spawn(async move { signing.sign_in(vec![slow]).await.result });
+    for _ in 0..500 {
+        if !f.calls(TOKEN).is_empty() {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert_eq!(f.calls(TOKEN).len(), 1, "the exchange is under way");
+
+    f.auth.sign_out().await.unwrap();
+
+    assert_eq!(task.await.unwrap().unwrap_err(), AuthError::Cancelled);
+    let record = f.record();
+    assert!(record["accessToken"].is_null(), "{record}");
+    assert!(record["refreshToken"].is_null(), "{record}");
+    assert!(!f.auth.status().await.unwrap().signed_in);
 }
 
 #[tokio::test]
@@ -577,15 +633,22 @@ async fn the_preferred_port_falls_back_to_a_free_one() {
     let auth = manager(&f.mock, &f.path).with_callback_port(port);
     let urls: Arc<Mutex<Vec<String>>> = Arc::default();
     let log = urls.clone();
-    let result = tokio::time::timeout(
-        Duration::from_millis(300),
-        auth.sign_in(move |u| {
-            log.lock().unwrap().push(u.to_string());
-            Ok(())
-        }),
-    )
-    .await;
-    assert!(result.is_err(), "still waiting for the browser");
+    let sign_in = auth.sign_in(move |u| {
+        log.lock().unwrap().push(u.to_string());
+        Ok(())
+    });
+    let opened = async {
+        while urls.lock().unwrap().is_empty() {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    };
+    // Saving the host id may take a while on a slow disk: wait for the browser, not a fixed time.
+    tokio::select! {
+        result = sign_in => panic!("the sign-in ended without a callback: {result:?}"),
+        waited = tokio::time::timeout(Duration::from_secs(5), opened) => {
+            assert!(waited.is_ok(), "the browser was never opened");
+        }
+    }
     let redirect = query(&urls.lock().unwrap()[0])["redirect_uri"].clone();
     assert!(redirect.starts_with("http://127.0.0.1:"));
     assert!(!redirect.contains(&format!(":{port}/")), "{redirect}");
@@ -1100,7 +1163,13 @@ async fn a_dropped_request_still_saves_the_rotated_tokens() {
     );
     let dropped = tokio::time::timeout(Duration::from_millis(50), f.auth.access_token()).await;
     assert!(dropped.is_err());
-    tokio::time::sleep(Duration::from_millis(400)).await;
+    // The renewal goes on in the background; a slow disk may take a while to save it.
+    for _ in 0..500 {
+        if f.record()["refreshToken"] == REFRESH_2 {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
     assert_eq!(f.record()["refreshToken"], REFRESH_2);
 }
 
@@ -1223,6 +1292,61 @@ async fn a_refreshed_id_token_is_kept_only_when_it_verifies() {
     );
     f.auth.access_token().await.unwrap();
     assert_eq!(f.record()["idToken"], good.as_str());
+}
+
+#[tokio::test]
+async fn the_rotated_refresh_token_is_saved_before_the_id_token_is_checked() {
+    let signer = Arc::new(Signer::new("kid-1"));
+    let keys = json!({"keys": [signer.jwk()]});
+    // The sign-in reads the keys at once; the refetch for an unknown kid is slow.
+    let f = Fixture::with(
+        signer,
+        Some(Reply::ok(discovery("")).repeated()),
+        vec![
+            Reply::ok(keys.clone()),
+            Reply::ok(keys).delayed(Duration::from_secs(3)).repeated(),
+        ],
+    )
+    .await;
+    f.sign_in(vec![f.approve(0, PLAN, true)])
+        .await
+        .result
+        .unwrap();
+    let mut c = claims(&f.mock.base, "");
+    c.as_object_mut().unwrap().remove("nonce");
+    f.mock.route(
+        TOKEN,
+        Reply::ok(json!({"access_token": ACCESS_2, "refresh_token": REFRESH_2,
+                         "id_token": Signer::new("kid-new").sign(&c),
+                         "expires_in": 3600, "scope": PLAN})),
+    );
+
+    let gave_up = tokio::time::timeout(Duration::from_secs(1), f.auth.access_token()).await;
+
+    assert!(gave_up.is_err(), "still checking the ID token");
+    assert_eq!(f.record()["refreshToken"], REFRESH_2);
+    assert_eq!(f.record()["accessToken"], ACCESS_2);
+}
+
+#[tokio::test]
+async fn a_huge_expires_in_is_capped_instead_of_overflowing() {
+    let f = Fixture::new().await;
+    f.sign_in(vec![f.approve(u64::MAX, PLAN, true)])
+        .await
+        .result
+        .unwrap();
+    let day = 24 * 3600;
+    let expires = f.record()["expiresAt"].as_u64().unwrap();
+    assert!(expires > now() && expires <= now() + day, "{expires}");
+
+    f.mock
+        .route(TOKEN, refreshed(ACCESS_2, REFRESH_2, u64::MAX));
+    let rejected = f.auth.access_token().await.unwrap();
+    f.auth.refresh_rejected(&rejected).await.unwrap();
+    assert_eq!(f.record()["accessToken"], ACCESS_2);
+    let expires = f.record()["expiresAt"].as_u64().unwrap();
+    assert!(expires > now() && expires <= now() + day, "{expires}");
+    assert_eq!(f.record()["refreshToken"], REFRESH_2);
 }
 
 #[tokio::test]

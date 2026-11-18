@@ -81,8 +81,15 @@ fn terminal_event(body: &str) -> Result<(Value, String), ProviderError> {
             Some("response.output_text.delta") => {
                 deltas.push_str(event["delta"].as_str().unwrap_or_default());
             }
-            Some("response.completed" | "response.incomplete") => {
-                return Ok((event["response"].clone(), deltas));
+            Some("response.completed") => return Ok((event["response"].clone(), deltas)),
+            // The event type is what says the answer was cut, even when the
+            // `response` it carries has no status.
+            Some("response.incomplete") => {
+                let mut response = event["response"].clone();
+                if let Some(object) = response.as_object_mut() {
+                    object.insert("status".into(), "incomplete".into());
+                }
+                return Ok((response, deltas));
             }
             Some("response.failed") => {
                 let error = &event["response"]["error"];
@@ -113,6 +120,12 @@ fn terminal_event(body: &str) -> Result<(Value, String), ProviderError> {
 /// output when the event carried none.
 pub(crate) fn stream_response(body: &str) -> Result<Value, ProviderError> {
     let (mut response, deltas) = terminal_event(body)?;
+    // Checked first: indexing a non-object `Value` mutably panics.
+    if !response.is_object() {
+        return Err(ProviderError::bad_response(
+            "ChatGPT sent an answer PlexusTyping could not read.",
+        ));
+    }
     let has_text = response["output"].as_array().is_some_and(|items| {
         items.iter().any(|item| {
             item["content"]
@@ -125,11 +138,6 @@ pub(crate) fn stream_response(body: &str) -> Result<Value, ProviderError> {
             "type": "message",
             "content": [{"type": "output_text", "text": deltas}]
         }]);
-    }
-    if !response.is_object() {
-        return Err(ProviderError::bad_response(
-            "ChatGPT sent an answer PlexusTyping could not read.",
-        ));
     }
     Ok(response)
 }
@@ -312,6 +320,38 @@ mod tests {
             stream_response(""),
             Err(ProviderError::Network { .. })
         ));
+    }
+
+    #[test]
+    fn an_incomplete_event_without_status_is_still_incomplete() {
+        let body = format!(
+            "data: {}\n\ndata: {}\n\n",
+            json!({"type": "response.output_text.delta", "delta": "partial"}),
+            json!({"type": "response.incomplete", "response": {"output": []}})
+        );
+        let response = stream_response(&body).unwrap();
+        assert_eq!(response["status"], "incomplete");
+        assert_eq!(response["output"], json!([]));
+    }
+
+    #[test]
+    fn a_terminal_event_without_a_response_object_is_unreadable() {
+        for response in [json!("x"), json!([1]), json!(null), json!(3)] {
+            for kind in ["response.completed", "response.incomplete"] {
+                let body = format!(
+                    "data: {}\n\ndata: {}\n\n",
+                    json!({"type": "response.output_text.delta", "delta": "partial"}),
+                    json!({"type": kind, "response": response})
+                );
+                assert!(
+                    matches!(
+                        stream_response(&body),
+                        Err(ProviderError::BadResponse { .. })
+                    ),
+                    "{kind} {response}"
+                );
+            }
+        }
     }
 
     #[test]
