@@ -54,9 +54,11 @@ the on-screen keyboard by its score.
 ### AI texts (optional)
 
 In "Ajustes → IA", turn on "Usar IA para generar textos" and build the fallback
-chain: up to four providers (Claude, OpenAI, Google Gemini, OpenCode Go), tried
-in order, each with its model (picked from the provider's list, or typed by
-hand), its API key ("Guardar clave" / "Borrar clave") and "Probar conexión".
+chain: up to five providers (Claude, OpenAI, Google Gemini, OpenCode Go and
+ChatGPT (tu suscripción)), tried in order, each with its model (picked from the
+provider's list, or typed by hand), its API key ("Guardar clave" / "Borrar
+clave") and "Probar conexión". ChatGPT takes no key: it uses your signed-in
+ChatGPT account (see below).
 "Densidad" (2×–5×, default 3×) sets how much more often the targets appear in
 code mode and
 "Tema" an optional topic. Prose prompts only ask for a text in the language,
@@ -95,6 +97,35 @@ today and in total, so you can watch your spending.
   "Corpus local").
 - **Latency:** the next text is requested in the background as soon as you
   start typing the current one, so it is usually ready when you finish.
+
+#### ChatGPT (tu suscripción)
+
+This provider uses your ChatGPT plan instead of an API key, through OpenAI's
+official "Sign in with ChatGPT" for open-source, locally run apps
+(developers.openai.com/siwc), a preview programme of OpenAI's.
+
+- **Sign in:** add "ChatGPT (tu suscripción)" to the chain in Ajustes → IA and
+  press "Iniciar sesión con ChatGPT". Your browser opens OpenAI's sign-in page;
+  the app shows "Esperando al navegador…" (with "Cancelar") until you finish
+  there, then the account's email and whether plan use is enabled. Pick the
+  model from the plan's list (shown by name). If you decline, cancel or take
+  more than 5 minutes, nothing is saved and the reason is shown.
+- **Usage counts against your ChatGPT plan**, under its own limits; "Gestionar
+  uso" opens chatgpt.com/settings/usage. When the plan's limit is reached the
+  notice reads "Has alcanzado el límite de tu plan de ChatGPT".
+- **No silent switch to your keys:** a ChatGPT plan error (limit reached, plan
+  use unavailable or not enabled, account not eligible, session rejected) stops
+  the chain: the text comes from the cache or the local corpus with that
+  notice, and your other providers' keys are never used instead. Only a network
+  failure, a timeout or a malformed reply moves on to the next provider.
+- **Sign out:** "Cerrar sesión" revokes the session at OpenAI and forgets the
+  tokens on this machine; if OpenAI cannot confirm the revocation the app says
+  "No se pudo confirmar la revocación" (the tokens are deleted anyway).
+- **Privacy:** the sign-in tokens stay only in a private file on this machine
+  (`chatgpt-auth.json` in the app config directory, owner-only, on Linux
+  `~/.config/com.plexustyping.app/`), never in the database, the logs or the
+  interface. The prompts (language, length, topic, and in code mode the
+  targets and allowed characters) go to OpenAI, as with the other providers.
 
 ### Words mode
 
@@ -253,7 +284,9 @@ Sessions, keystrokes and statistics are stored only on this machine, in
 `~/.local/share/com.plexustyping.app/`). If that file cannot be opened the app
 still works with a temporary in-memory store and shows "Sin guardar: modo
 temporal" in the header. The same database keeps the AI settings (without
-keys), the cache of generated texts and the usage counters. Display settings
+keys), the cache of generated texts and the usage counters. The ChatGPT
+sign-in lives apart, in the private `chatgpt-auth.json` of the app config
+directory. Display settings
 stay in the webview's local storage.
 
 ## Layout

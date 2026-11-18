@@ -8,6 +8,7 @@ export const PROVIDER_NAMES: Record<string, string> = {
   openai: "OpenAI",
   gemini: "Gemini",
   "opencode-go": "OpenCode Go",
+  chatgpt: "ChatGPT",
 };
 
 /** Where a text came from, shown discreetly above it. */

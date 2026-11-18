@@ -24,6 +24,11 @@ impl Mock {
         self.log.lock().unwrap().clone()
     }
 
+    /// `http://127.0.0.1:<port>`.
+    pub fn base(&self) -> &str {
+        &self.base
+    }
+
     pub fn endpoints(&self) -> Endpoints {
         Endpoints::loopback(&self.base)
     }
@@ -36,13 +41,19 @@ impl Mock {
 /// Serves on 127.0.0.1:0. Each request takes the first unused `(path, status,
 /// body)` route whose path (query ignored) matches; others get 404.
 pub async fn mock(routes: Vec<(&str, u16, String)>) -> Mock {
-    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-    let base = format!("http://{}", listener.local_addr().unwrap());
-    let log: Arc<Mutex<Vec<Captured>>> = Arc::default();
     let routes: Vec<(String, u16, String)> = routes
         .into_iter()
         .map(|(p, s, b)| (p.to_owned(), s, b))
         .collect();
+    mock_with(|_| routes).await
+}
+
+/// Like [`mock`], with routes that may name the mock's own base URL.
+pub async fn mock_with(make: impl FnOnce(&str) -> Vec<(String, u16, String)>) -> Mock {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let base = format!("http://{}", listener.local_addr().unwrap());
+    let log: Arc<Mutex<Vec<Captured>>> = Arc::default();
+    let routes = make(&base);
     let routes = Arc::new(Mutex::new(routes));
     let task_log = log.clone();
     tokio::spawn(async move {

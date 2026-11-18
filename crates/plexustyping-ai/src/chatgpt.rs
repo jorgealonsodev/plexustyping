@@ -8,10 +8,13 @@
 //! app shows them as notices) and never contain a token: the caller masks the
 //! token in every error as for the other providers.
 
+use std::collections::HashMap;
+use std::sync::{LazyLock, Mutex};
+
 use serde_json::Value;
 
-use crate::ProviderError;
 use crate::chatgpt_auth::AuthError;
+use crate::{AiClient, ProviderError, ProviderId};
 
 /// Longest model id accepted from the model list.
 const MAX_ID: usize = 200;
@@ -208,31 +211,75 @@ fn api_error(status: u16, code: Option<&str>, param: Option<&str>) -> ProviderEr
     }
 }
 
+/// Display names (slug → name) of the plan's models, from the last catalogue
+/// read. Names are only shown in the settings; the slug is what is stored and sent.
+static NAMES: LazyLock<Mutex<HashMap<String, String>>> = LazyLock::new(Mutex::default);
+
+/// The display name of `slug` from the last catalogue read, else the slug.
+pub(crate) fn display_name(slug: &str) -> String {
+    let names = NAMES.lock().unwrap_or_else(|p| p.into_inner());
+    names.get(slug).cloned().unwrap_or_else(|| slug.to_string())
+}
+
+/// Remembers the display names of a catalogue's listed models (a model listed
+/// without a usable name forgets the old one).
+fn remember_names(listed: &[(String, Option<String>)]) {
+    let mut names = NAMES.lock().unwrap_or_else(|p| p.into_inner());
+    for (slug, name) in listed {
+        let name = name
+            .as_deref()
+            .map(str::trim)
+            .filter(|n| !n.is_empty() && !n.chars().any(char::is_control))
+            .map(|n| n.chars().take(MAX_ID).collect::<String>());
+        match name {
+            Some(name) => names.insert(slug.clone(), name),
+            None => names.remove(slug),
+        };
+    }
+}
+
+impl AiClient {
+    /// The ChatGPT plan's models as `(slug, display name)` in server order, read
+    /// like [`AiClient::list_models`] with the signed-in account; the name is the
+    /// slug when the catalogue gives none.
+    pub async fn chatgpt_model_names(&self) -> Result<Vec<(String, String)>, ProviderError> {
+        let slugs = self.list_models(ProviderId::Chatgpt, None).await?;
+        Ok(slugs
+            .into_iter()
+            .map(|slug| {
+                let name = display_name(&slug);
+                (slug, name)
+            })
+            .collect())
+    }
+}
+
 /// The plan's models from `GET /models`: `models[]` with `visibility == "list"`,
 /// in server order, as `(slug, display_name)`; slugs are deduplicated and must
-/// be short, without whitespace or control characters.
+/// be short, without whitespace or control characters. Their display names are
+/// remembered for [`AiClient::chatgpt_model_names`].
 pub(crate) fn models(value: &Value) -> Option<Vec<(String, Option<String>)>> {
     let mut seen = std::collections::HashSet::new();
-    Some(
-        value
-            .get("models")?
-            .as_array()?
-            .iter()
-            .filter(|m| m["visibility"] == "list")
-            .filter_map(|m| {
-                let slug = m["slug"].as_str()?;
-                let valid = !slug.is_empty()
-                    && slug.chars().count() <= MAX_ID
-                    && !slug.chars().any(|c| c.is_control() || c.is_whitespace());
-                (valid && seen.insert(slug.to_string())).then(|| {
-                    (
-                        slug.to_string(),
-                        m["display_name"].as_str().map(str::to_string),
-                    )
-                })
+    let listed: Vec<(String, Option<String>)> = value
+        .get("models")?
+        .as_array()?
+        .iter()
+        .filter(|m| m["visibility"] == "list")
+        .filter_map(|m| {
+            let slug = m["slug"].as_str()?;
+            let valid = !slug.is_empty()
+                && slug.chars().count() <= MAX_ID
+                && !slug.chars().any(|c| c.is_control() || c.is_whitespace());
+            (valid && seen.insert(slug.to_string())).then(|| {
+                (
+                    slug.to_string(),
+                    m["display_name"].as_str().map(str::to_string),
+                )
             })
-            .collect(),
-    )
+        })
+        .collect();
+    remember_names(&listed);
+    Some(listed)
 }
 
 #[cfg(test)]
@@ -352,5 +399,29 @@ mod tests {
             ]
         );
         assert_eq!(models(&json!({"data": []})), None);
+    }
+
+    #[test]
+    fn display_names_follow_the_last_catalogue_read() {
+        let first = json!({"models": [
+            {"slug": "names-x", "display_name": "X One", "visibility": "list"},
+            {"slug": "names-y", "display_name": "Y", "visibility": "hide"}
+        ]});
+        models(&first).unwrap();
+        assert_eq!(display_name("names-x"), "X One");
+        assert_eq!(
+            display_name("names-y"),
+            "names-y",
+            "hidden models are not named"
+        );
+        assert_eq!(display_name("names-unknown"), "names-unknown");
+        // A later catalogue without a name drops the old one; a blank name is the slug.
+        let second = json!({"models": [
+            {"slug": "names-x", "visibility": "list"},
+            {"slug": "names-z", "display_name": "  ", "visibility": "list"}
+        ]});
+        models(&second).unwrap();
+        assert_eq!(display_name("names-x"), "names-x");
+        assert_eq!(display_name("names-z"), "names-z");
     }
 }

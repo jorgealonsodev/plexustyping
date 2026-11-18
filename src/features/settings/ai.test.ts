@@ -7,8 +7,14 @@ import {
   aiToggleTitle,
   densityLabel,
   failureMessage,
+  CHATGPT_USAGE_URL,
+  chatgptAccount,
+  chatgptReady,
   modelChoices,
+  modelOptions,
   moveEntry,
+  needsKey,
+  signOutNotice,
   providerChoices,
   removeEntry,
   setModel,
@@ -22,20 +28,24 @@ const PROVIDERS: ProviderInfo[] = [
   { id: "openai", label: "OpenAI", name: "OpenAI", defaultModel: "gpt-5-mini" },
   { id: "gemini", label: "Google Gemini", name: "Gemini", defaultModel: "gemini-3.5-flash-lite" },
   { id: "opencode-go", label: "OpenCode Go", name: "OpenCode Go", defaultModel: "" },
+  { id: "chatgpt", label: "ChatGPT (tu suscripción)", name: "ChatGPT", defaultModel: "" },
 ];
 
 const claude: ChainEntry = { provider: "claude", model: "claude-haiku-5-5" };
 const gemini: ChainEntry = { provider: "gemini", model: "g" };
 
 describe("fallback chain editing", () => {
-  it("adds the first unused provider with its default model, up to four", () => {
+  it("adds the first unused provider with its default model, up to five (the backend's limit)", () => {
     let chain = [claude];
     chain = addEntry(chain, PROVIDERS)!;
     expect(chain).toEqual([claude, { provider: "openai", model: "gpt-5-mini" }]);
     chain = addEntry(chain, PROVIDERS)!;
     chain = addEntry(chain, PROVIDERS)!;
-    expect(chain.map((e) => e.provider)).toEqual(["claude", "openai", "gemini", "opencode-go"]);
+    chain = addEntry(chain, PROVIDERS)!;
+    expect(chain.map((e) => e.provider)).toEqual(["claude", "openai", "gemini", "opencode-go", "chatgpt"]);
     expect(chain[3].model).toBe("");
+    expect(chain[4]).toEqual({ provider: "chatgpt", model: "" });
+    expect(MAX_CHAIN).toBe(5);
     expect(chain).toHaveLength(MAX_CHAIN);
     expect(addEntry(chain, PROVIDERS)).toBeNull();
   });
@@ -66,7 +76,7 @@ describe("fallback chain editing", () => {
 
   it("offers each row its own provider plus the unused ones", () => {
     const ids = (list: ProviderInfo[]) => list.map((p) => p.id);
-    expect(ids(providerChoices([claude, gemini], 1, PROVIDERS))).toEqual(["openai", "gemini", "opencode-go"]);
+    expect(ids(providerChoices([claude, gemini], 1, PROVIDERS))).toEqual(["openai", "gemini", "opencode-go", "chatgpt"]);
   });
 
   it("sets a trimmed model", () => {
@@ -80,6 +90,62 @@ describe("modelChoices", () => {
     expect(modelChoices(["a"], "custom")).toEqual(["custom", "a"]);
     expect(modelChoices(["a"], "")).toEqual(["a"]);
     expect(modelChoices([], "x")).toEqual(["x"]);
+  });
+});
+
+describe("modelOptions", () => {
+  it("shows display names, stores slugs and keeps an unlisted current model", () => {
+    const listed = [
+      { id: "gpt-6.2-sol", name: "GPT-6.2 Sol" },
+      { id: "gpt-6.1-sol", name: "GPT-6.1 Sol" },
+    ];
+    expect(modelOptions(listed, "gpt-6.1-sol")).toEqual(listed);
+    expect(modelOptions(listed, "old-slug")).toEqual([{ id: "old-slug", name: "old-slug" }, ...listed]);
+    expect(modelOptions(listed, "")).toEqual(listed);
+    expect(modelOptions([], "x")).toEqual([{ id: "x", name: "x" }]);
+  });
+});
+
+describe("ChatGPT account", () => {
+  const signedIn = { signedIn: true, email: "ana@example.com", planEnabled: true };
+
+  it("takes no API key; every other provider does", () => {
+    expect(needsKey("chatgpt")).toBe(false);
+    for (const id of ["claude", "openai", "gemini", "opencode-go"] as const) expect(needsKey(id)).toBe(true);
+  });
+
+  it("is ready only when signed in with plan use enabled", () => {
+    expect(chatgptReady(signedIn)).toBe(true);
+    expect(chatgptReady({ ...signedIn, planEnabled: false })).toBe(false);
+    expect(chatgptReady({ signedIn: false, email: null, planEnabled: false })).toBe(false);
+    expect(chatgptReady(null)).toBe(false);
+  });
+
+  it("describes the account and whether plan use is enabled", () => {
+    expect(chatgptAccount(signedIn)).toEqual({
+      account: "Sesión iniciada como ana@example.com",
+      plan: "El uso del plan está activado",
+      ok: true,
+    });
+    expect(chatgptAccount({ signedIn: true, email: null, planEnabled: false })).toEqual({
+      account: "Sesión iniciada",
+      plan: "El uso del plan no está activado: inicia sesión de nuevo y permítelo",
+      ok: false,
+    });
+    expect(chatgptAccount({ signedIn: false, email: null, planEnabled: false })).toEqual({
+      account: "Sin sesión iniciada",
+      plan: "",
+      ok: false,
+    });
+  });
+
+  it("warns when the sign-out could not be confirmed", () => {
+    expect(signOutNotice({ revoked: false })).toBe("No se pudo confirmar la revocación");
+    expect(signOutNotice({ revoked: true })).toBe("");
+  });
+
+  it("links the plan usage page", () => {
+    expect(CHATGPT_USAGE_URL).toBe("https://chatgpt.com/settings/usage");
   });
 });
 

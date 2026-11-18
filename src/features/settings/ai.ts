@@ -1,6 +1,6 @@
 // AI settings types and pure helpers for the "IA" section (S2, S3).
 
-export type ProviderId = "claude" | "openai" | "gemini" | "opencode-go";
+export type ProviderId = "claude" | "openai" | "gemini" | "opencode-go" | "chatgpt";
 
 export interface ChainEntry {
   provider: ProviderId;
@@ -39,7 +39,26 @@ export interface AiFailure {
   message: string;
 }
 
-export const MAX_CHAIN = 4;
+/** One listed model: `id` is stored and sent, `name` is shown (ChatGPT's display name). */
+export interface ModelOption {
+  id: string;
+  name: string;
+}
+
+/** The Sign in with ChatGPT account (`ai_chatgpt_status`); never a token. */
+export interface ChatgptStatus {
+  signedIn: boolean;
+  email: string | null;
+  planEnabled: boolean;
+}
+
+/** `ai_chatgpt_sign_out`: `revoked` is false when OpenAI could not confirm it. */
+export interface ChatgptSignOut {
+  revoked: boolean;
+}
+
+/** Every provider once (backend `MAX_CHAIN`). */
+export const MAX_CHAIN = 5;
 export const DENSITY_MIN = 2;
 export const DENSITY_MAX = 5;
 export const MAX_TOPIC = 60;
@@ -91,6 +110,11 @@ export function providerChoices(chain: readonly ChainEntry[], i: number, provide
   return providers.filter((p) => !taken.has(p.id));
 }
 
+/** Listed models (shown by name, stored by id), with the current one first when the list lacks it. */
+export function modelOptions(listed: readonly ModelOption[], current: string): ModelOption[] {
+  return current && !listed.some((m) => m.id === current) ? [{ id: current, name: current }, ...listed] : [...listed];
+}
+
 /** Listed models, with the current one first when the list lacks it. */
 export function modelChoices(listed: readonly string[], current: string): string[] {
   return current && !listed.includes(current) ? [current, ...listed] : [...listed];
@@ -122,3 +146,27 @@ export const aiToggleTitle = (enabled: boolean) =>
 
 /** `s` with the AI turned on or off, everything else kept. */
 export const toggleEnabled = (s: AiSettings): AiSettings => ({ ...s, enabled: !s.enabled });
+
+/** ChatGPT uses the signed-in account instead of an API key. */
+export const needsKey = (id: ProviderId) => id !== "chatgpt";
+
+/** The ChatGPT row is usable: signed in with plan use enabled (as a saved key for the others). */
+export const chatgptReady = (s: ChatgptStatus | null | undefined) => !!s && s.signedIn && s.planEnabled;
+
+/** The account lines of the ChatGPT block; `ok` when the row is usable. */
+export function chatgptAccount(s: ChatgptStatus): { account: string; plan: string; ok: boolean } {
+  if (!s.signedIn) return { account: "Sin sesión iniciada", plan: "", ok: false };
+  return {
+    account: s.email ? `Sesión iniciada como ${s.email}` : "Sesión iniciada",
+    plan: s.planEnabled
+      ? "El uso del plan está activado"
+      : "El uso del plan no está activado: inicia sesión de nuevo y permítelo",
+    ok: s.planEnabled,
+  };
+}
+
+/** What to tell after signing out; empty when the revocation was confirmed. */
+export const signOutNotice = (r: ChatgptSignOut) => (r.revoked ? "" : "No se pudo confirmar la revocación");
+
+/** OpenAI's page with the ChatGPT plan usage ("Gestionar uso"). */
+export const CHATGPT_USAGE_URL = "https://chatgpt.com/settings/usage";
