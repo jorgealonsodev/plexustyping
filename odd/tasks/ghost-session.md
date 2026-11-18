@@ -16,10 +16,11 @@ Branch `feat/ghost-session`. Runners: `cargo test --workspace`, `pnpm test`, `pn
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S6 | Backend query + timeline + command + tests; frontend setting, ghost cursor, live delta, result lines, vitest for the pure timeline/delta functions; README | worker | pending | |
-| T2 | S1–S6 | Integration checks, GUI check in an isolated dev app, review, merge, push, Trello | parent | pending | |
+| T1 | S1–S6 | Backend query + timeline + command + tests; frontend setting, ghost cursor, live delta, result lines, vitest for the pure timeline/delta functions; README | worker | done | 2bff087, 5e5659f |
+| T2 | S1–S6 | Integration checks, GUI check in an isolated dev app, review, merge, push, Trello | parent | done | see L3 |
 
 ## Log
 
 - **L1 (user, verbatim, 2026-11-18):** "Estaba pensando añadir una sesion fantasma para el mismo texto de la sesion mas rapida registrada. Como en los juegos de coches cuando puedes ver el coche fantasma del que hizo el record"
 - **L2 (user decisions, 2026-11-18):** asked which session, how it looks and when it is on; chose "Tu mejor sesión con ese texto (Recomendado)", "Cursor fantasma + diferencia en vivo (Recomendado)" and "Siempre que haya récord, con interruptor (Recomendado)".
+- **L3 (evidence, 2026-11-18):** T1 by one worker, test-first (RED as compile failures and missing modules): `Store::ghost_for_text` + timeline rebuilt with the core replay rules (Backspace time shared among the keys after a deletion: the end time is exact, times in between are estimates), command `ghost_for_text`, `practice/ghost.ts`, ghost cursor in prose and code, live delta, record lines, "Sesión fantasma" setting. cargo 553, vitest 278, clippy 0, check 0, build ok. GUI check by the parent in an isolated dev app: the diagnostic text typed once, "Repetir" shows the translucent ghost cursor and "−21,2 s" (ahead); finishing gives "Récord anterior: 0 PPM" and "¡Nuevo récord para este texto!"; repeating again, the ghost of the new record runs ahead and the delta reads "+0,7 s" in red.
