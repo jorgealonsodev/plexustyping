@@ -28,6 +28,11 @@ const BUILTINS: &[(&str, &str)] = &[
     ("pt-abnt2", include_str!("../../../layouts/pt-abnt2.toml")),
     ("fr-azerty", include_str!("../../../layouts/fr-azerty.toml")),
     ("de-qwertz", include_str!("../../../layouts/de-qwertz.toml")),
+    ("us-dvorak", include_str!("../../../layouts/us-dvorak.toml")),
+    (
+        "us-colemak",
+        include_str!("../../../layouts/us-colemak.toml"),
+    ),
 ];
 
 /// Built-in layout ids, in the same order as [`BUILTINS`].
@@ -38,6 +43,8 @@ const BUILTIN_IDS: &[&str] = &[
     "pt-abnt2",
     "fr-azerty",
     "de-qwertz",
+    "us-dvorak",
+    "us-colemak",
 ];
 
 /// The key that types `'\n'` when a layout does not map it explicitly.

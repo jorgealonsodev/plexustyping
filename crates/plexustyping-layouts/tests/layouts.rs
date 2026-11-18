@@ -193,7 +193,9 @@ fn builtin_es_qwerty_is_listed_and_valid() {
             "us-qwerty",
             "pt-abnt2",
             "fr-azerty",
-            "de-qwertz"
+            "de-qwertz",
+            "us-dvorak",
+            "us-colemak"
         ]
     );
     for id in builtin_ids() {
@@ -666,4 +668,117 @@ fn builtin_de_qwertz_has_umlauts_and_dead_accents() {
     assert_eq!(layout.locate('@'), Some(vec![press("KeyQ", Layer::Altgr)]));
     assert_eq!(layout.locate('ã'), None);
     assert_allowed(&layout, "äöüßÄÖÜâéèêô?!,.;:/\\|[]{}()'\"@#$%&*-_=+<>~€");
+}
+
+/// The characters `layout` types on each key of the three letter rows, as `normal` strings.
+fn letter_rows(layout: &Layout) -> [String; 3] {
+    const ROWS: [&[&str]; 3] = [
+        &[
+            "KeyQ",
+            "KeyW",
+            "KeyE",
+            "KeyR",
+            "KeyT",
+            "KeyY",
+            "KeyU",
+            "KeyI",
+            "KeyO",
+            "KeyP",
+            "BracketLeft",
+            "BracketRight",
+        ],
+        &[
+            "KeyA",
+            "KeyS",
+            "KeyD",
+            "KeyF",
+            "KeyG",
+            "KeyH",
+            "KeyJ",
+            "KeyK",
+            "KeyL",
+            "Semicolon",
+            "Quote",
+        ],
+        &[
+            "KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period", "Slash",
+        ],
+    ];
+    ROWS.map(|row| {
+        row.iter()
+            .map(|code| layout.keys[*code].normal.expect("a normal layer"))
+            .collect()
+    })
+}
+
+/// Same shape and character set as US QWERTY: ANSI, no dead keys, no AltGr, all of ASCII.
+fn assert_us_variant(layout: &Layout) {
+    assert!(layout.dead_keys.is_empty(), "{}", layout.id);
+    assert_eq!(layout.keys.len(), 48, "{}", layout.id);
+    assert!(!layout.keys.contains_key("IntlBackslash"));
+    assert!(layout.keys.values().all(|key| key.altgr.is_none()));
+    let us = builtin("us-qwerty").unwrap();
+    assert_eq!(layout.allowed_chars(), us.allowed_chars(), "{}", layout.id);
+    for code in [
+        "Backquote",
+        "Digit1",
+        "Digit0",
+        "Backslash",
+        "Space",
+        "Enter",
+    ] {
+        assert_eq!(
+            layout.keys.get(code),
+            us.keys.get(code),
+            "{} {code}",
+            layout.id
+        );
+    }
+}
+
+#[test]
+fn builtin_us_dvorak_has_the_dvorak_letters_on_an_ansi_board() {
+    let layout = builtin("us-dvorak").expect("us-dvorak is built in");
+    assert_eq!(layout.name, "English (Dvorak)");
+    assert_us_variant(&layout);
+    assert_eq!(
+        letter_rows(&layout),
+        [
+            "',.pyfgcrl/=".to_owned(),
+            "aoeuidhtns-".to_owned(),
+            ";qjkxbmwvz".to_owned()
+        ]
+    );
+    assert_eq!(layout.keys["Minus"], layers(Some('['), Some('{'), None));
+    assert_eq!(layout.keys["Equal"], layers(Some(']'), Some('}'), None));
+    assert_eq!(layout.keys["KeyQ"], layers(Some('\''), Some('"'), None));
+    assert_eq!(
+        layout.locate('S'),
+        Some(vec![press("Semicolon", Layer::Shift)])
+    );
+    assert_eq!(layout.locate('_'), Some(vec![press("Quote", Layer::Shift)]));
+}
+
+#[test]
+fn builtin_us_colemak_has_the_colemak_letters_on_an_ansi_board() {
+    let layout = builtin("us-colemak").expect("us-colemak is built in");
+    assert_eq!(layout.name, "English (Colemak)");
+    assert_us_variant(&layout);
+    assert_eq!(
+        letter_rows(&layout),
+        [
+            "qwfpgjluy;[]".to_owned(),
+            "arstdhneio'".to_owned(),
+            "zxcvbkm,./".to_owned()
+        ]
+    );
+    assert_eq!(layout.keys["KeyP"], layers(Some(';'), Some(':'), None));
+    assert_eq!(
+        layout.locate('O'),
+        Some(vec![press("Semicolon", Layer::Shift)])
+    );
+    assert_eq!(
+        layout.locate('-'),
+        Some(vec![press("Minus", Layer::Normal)])
+    );
 }

@@ -20,6 +20,8 @@ export const LAYOUTS: { id: string; label: string }[] = [
   { id: "pt-abnt2", label: "Português (Brasil)" },
   { id: "fr-azerty", label: "Français (France)" },
   { id: "de-qwertz", label: "Deutsch (Deutschland)" },
+  { id: "us-dvorak", label: "English (Dvorak)" },
+  { id: "us-colemak", label: "English (Colemak)" },
 ];
 
 export const DEFAULT_LAYOUT = LAYOUTS[0].id;

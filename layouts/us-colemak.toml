@@ -1,0 +1,200 @@
+# English Colemak (US ANSI): the Colemak letters, no dead keys and no AltGr layer.
+# The operating system must use the same layout: keys are the physical `KeyboardEvent.code` values.
+# Keys are `KeyboardEvent.code` values; layers are `normal`, `shift` and `altgr`.
+name = "English (Colemak)"
+
+# Number row
+[keys.Backquote]
+normal = "`"
+shift = "~"
+
+[keys.Digit1]
+normal = "1"
+shift = "!"
+
+[keys.Digit2]
+normal = "2"
+shift = "@"
+
+[keys.Digit3]
+normal = "3"
+shift = "#"
+
+[keys.Digit4]
+normal = "4"
+shift = "$"
+
+[keys.Digit5]
+normal = "5"
+shift = "%"
+
+[keys.Digit6]
+normal = "6"
+shift = "^"
+
+[keys.Digit7]
+normal = "7"
+shift = "&"
+
+[keys.Digit8]
+normal = "8"
+shift = "*"
+
+[keys.Digit9]
+normal = "9"
+shift = "("
+
+[keys.Digit0]
+normal = "0"
+shift = ")"
+
+[keys.Minus]
+normal = "-"
+shift = "_"
+
+[keys.Equal]
+normal = "="
+shift = "+"
+
+# Top row
+[keys.KeyQ]
+normal = "q"
+shift = "Q"
+
+[keys.KeyW]
+normal = "w"
+shift = "W"
+
+[keys.KeyE]
+normal = "f"
+shift = "F"
+
+[keys.KeyR]
+normal = "p"
+shift = "P"
+
+[keys.KeyT]
+normal = "g"
+shift = "G"
+
+[keys.KeyY]
+normal = "j"
+shift = "J"
+
+[keys.KeyU]
+normal = "l"
+shift = "L"
+
+[keys.KeyI]
+normal = "u"
+shift = "U"
+
+[keys.KeyO]
+normal = "y"
+shift = "Y"
+
+[keys.KeyP]
+normal = ";"
+shift = ":"
+
+[keys.BracketLeft]
+normal = "["
+shift = "{"
+
+[keys.BracketRight]
+normal = "]"
+shift = "}"
+
+[keys.Backslash]
+normal = "\\"
+shift = "|"
+
+# Home row
+[keys.KeyA]
+normal = "a"
+shift = "A"
+
+[keys.KeyS]
+normal = "r"
+shift = "R"
+
+[keys.KeyD]
+normal = "s"
+shift = "S"
+
+[keys.KeyF]
+normal = "t"
+shift = "T"
+
+[keys.KeyG]
+normal = "d"
+shift = "D"
+
+[keys.KeyH]
+normal = "h"
+shift = "H"
+
+[keys.KeyJ]
+normal = "n"
+shift = "N"
+
+[keys.KeyK]
+normal = "e"
+shift = "E"
+
+[keys.KeyL]
+normal = "i"
+shift = "I"
+
+[keys.Semicolon]
+normal = "o"
+shift = "O"
+
+[keys.Quote]
+normal = "'"
+shift = "\""
+
+# Bottom row
+[keys.KeyZ]
+normal = "z"
+shift = "Z"
+
+[keys.KeyX]
+normal = "x"
+shift = "X"
+
+[keys.KeyC]
+normal = "c"
+shift = "C"
+
+[keys.KeyV]
+normal = "v"
+shift = "V"
+
+[keys.KeyB]
+normal = "b"
+shift = "B"
+
+[keys.KeyN]
+normal = "k"
+shift = "K"
+
+[keys.KeyM]
+normal = "m"
+shift = "M"
+
+[keys.Comma]
+normal = ","
+shift = "<"
+
+[keys.Period]
+normal = "."
+shift = ">"
+
+[keys.Slash]
+normal = "/"
+shift = "?"
+
+# Space
+[keys.Space]
+normal = " "

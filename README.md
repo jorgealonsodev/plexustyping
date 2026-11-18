@@ -223,7 +223,7 @@ filtered to plain text typeable on the language's layout. Changing
 it loads a new text; each saved session records its language (history and the
 CSV `idioma` column). Code practice is not affected.
 
-"Ajustes → Teclado → Distribución" chooses one of six built-in layouts:
+"Ajustes → Teclado → Distribución" chooses one of eight built-in layouts:
 
 | Layout | Id | Shape | Dead keys | Notes |
 |---|---|---|---|---|
@@ -233,6 +233,8 @@ CSV `idioma` column). Code practice is not affected.
 | Português (Brasil) | `pt-abnt2` | ABNT2 | `` ´ ` ^ ~ ¨ `` | `ç` key; extra `/ ?` key beside the right Shift |
 | Français (France) | `fr-azerty` | ISO | `^ ¨` | digits on Shift; no `æ œ` or accented capitals |
 | Deutsch (Deutschland) | `de-qwertz` | ISO | `` ^ ´ ` `` | `ß ä ö ü` keys |
+| English (Dvorak) | `us-dvorak` | ANSI | none | US Dvorak; same characters as US |
+| English (Colemak) | `us-colemak` | ANSI | none | US Colemak; same characters as US |
 
 The layout drives the drawn keyboard (labels, next-key highlight, heatmap) and
 the characters generated texts may contain: on the US layout Spanish texts

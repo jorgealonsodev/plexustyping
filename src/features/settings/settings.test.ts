@@ -264,6 +264,8 @@ describe("keyboard layout setting", () => {
       { id: "pt-abnt2", label: "Português (Brasil)" },
       { id: "fr-azerty", label: "Français (France)" },
       { id: "de-qwertz", label: "Deutsch (Deutschland)" },
+      { id: "us-dvorak", label: "English (Dvorak)" },
+      { id: "us-colemak", label: "English (Colemak)" },
     ]);
     expect([...LAYOUTS].sort((a, b) => a.id.localeCompare(b.id))).toEqual(bundled.sort((a, b) => a.id.localeCompare(b.id)));
     expect(DEFAULT_LAYOUT).toBe("es-qwerty");

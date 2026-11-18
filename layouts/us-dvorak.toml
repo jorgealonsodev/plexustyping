@@ -1,0 +1,200 @@
+# English Dvorak (US ANSI): the Dvorak letters and punctuation, no dead keys and no AltGr layer.
+# The operating system must use the same layout: keys are the physical `KeyboardEvent.code` values.
+# Keys are `KeyboardEvent.code` values; layers are `normal`, `shift` and `altgr`.
+name = "English (Dvorak)"
+
+# Number row
+[keys.Backquote]
+normal = "`"
+shift = "~"
+
+[keys.Digit1]
+normal = "1"
+shift = "!"
+
+[keys.Digit2]
+normal = "2"
+shift = "@"
+
+[keys.Digit3]
+normal = "3"
+shift = "#"
+
+[keys.Digit4]
+normal = "4"
+shift = "$"
+
+[keys.Digit5]
+normal = "5"
+shift = "%"
+
+[keys.Digit6]
+normal = "6"
+shift = "^"
+
+[keys.Digit7]
+normal = "7"
+shift = "&"
+
+[keys.Digit8]
+normal = "8"
+shift = "*"
+
+[keys.Digit9]
+normal = "9"
+shift = "("
+
+[keys.Digit0]
+normal = "0"
+shift = ")"
+
+[keys.Minus]
+normal = "["
+shift = "{"
+
+[keys.Equal]
+normal = "]"
+shift = "}"
+
+# Top row
+[keys.KeyQ]
+normal = "'"
+shift = "\""
+
+[keys.KeyW]
+normal = ","
+shift = "<"
+
+[keys.KeyE]
+normal = "."
+shift = ">"
+
+[keys.KeyR]
+normal = "p"
+shift = "P"
+
+[keys.KeyT]
+normal = "y"
+shift = "Y"
+
+[keys.KeyY]
+normal = "f"
+shift = "F"
+
+[keys.KeyU]
+normal = "g"
+shift = "G"
+
+[keys.KeyI]
+normal = "c"
+shift = "C"
+
+[keys.KeyO]
+normal = "r"
+shift = "R"
+
+[keys.KeyP]
+normal = "l"
+shift = "L"
+
+[keys.BracketLeft]
+normal = "/"
+shift = "?"
+
+[keys.BracketRight]
+normal = "="
+shift = "+"
+
+[keys.Backslash]
+normal = "\\"
+shift = "|"
+
+# Home row
+[keys.KeyA]
+normal = "a"
+shift = "A"
+
+[keys.KeyS]
+normal = "o"
+shift = "O"
+
+[keys.KeyD]
+normal = "e"
+shift = "E"
+
+[keys.KeyF]
+normal = "u"
+shift = "U"
+
+[keys.KeyG]
+normal = "i"
+shift = "I"
+
+[keys.KeyH]
+normal = "d"
+shift = "D"
+
+[keys.KeyJ]
+normal = "h"
+shift = "H"
+
+[keys.KeyK]
+normal = "t"
+shift = "T"
+
+[keys.KeyL]
+normal = "n"
+shift = "N"
+
+[keys.Semicolon]
+normal = "s"
+shift = "S"
+
+[keys.Quote]
+normal = "-"
+shift = "_"
+
+# Bottom row
+[keys.KeyZ]
+normal = ";"
+shift = ":"
+
+[keys.KeyX]
+normal = "q"
+shift = "Q"
+
+[keys.KeyC]
+normal = "j"
+shift = "J"
+
+[keys.KeyV]
+normal = "k"
+shift = "K"
+
+[keys.KeyB]
+normal = "x"
+shift = "X"
+
+[keys.KeyN]
+normal = "b"
+shift = "B"
+
+[keys.KeyM]
+normal = "m"
+shift = "M"
+
+[keys.Comma]
+normal = "w"
+shift = "W"
+
+[keys.Period]
+normal = "v"
+shift = "V"
+
+[keys.Slash]
+normal = "z"
+shift = "Z"
+
+# Space
+[keys.Space]
+normal = " "
