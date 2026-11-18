@@ -16,10 +16,11 @@ Branch `feat/phase-3-history-charts`. Runners: `cargo test --workspace`, `pnpm t
 
 | ID | Specs | Task | Route | Status | Commit |
 |----|-------|------|-------|--------|--------|
-| T1 | S1–S6 | Backend queries + commands + tests; frontend view switch, day and character charts and tables, vitest for the pure formatting/scaling, README | worker | pending | |
-| T2 | S1–S6 | Integration checks, merge, push, Trello | parent | pending | |
+| T1 | S1–S6 | Backend queries + commands + tests; frontend view switch, day and character charts and tables, vitest for the pure formatting/scaling, README | worker | done | see L3 |
+| T2 | S1–S6 | Integration checks, merge, push, Trello | parent | done | see L3 |
 
 ## Log
 
 - **L1 (user, verbatim, 2026-11-18):** "continua con lo que consideres mas optimo" — after the daily goal, the agent picked the history charts (smallest remaining phase 3 item, read-only) and designed S1–S6.
 - **L2 (PRD, verbatim):** "gráficas por día y por carácter en la fase 3;"
+- **L3 (evidence, 2026-11-18):** T1 by one worker, test-first (9 of 12 Rust tests and the new vitest file failed before the code): `history_by_day`/`history_by_char` in `src-tauri/src/history.rs` (day grouping reuses `goals::local_day`; one shared `check_tz` now also used by the CSV export, same message), `src/features/history/charts.ts`, view switch in `HistoryModal.svelte`, README. Assumptions: the existing "Palabras" filter also applies (words use the prose character stats); "Todo" weights error by samples and slowness by slowness samples; only single characters (no bigrams); `days` above 366 is capped, 0 gives an empty list; the summary and CSV export stay in "Sesiones". cargo 431, vitest 257, clippy 0, check 0, build ok. Layout at 720×480 not seen in the running app.
