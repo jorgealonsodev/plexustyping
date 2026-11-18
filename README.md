@@ -186,8 +186,9 @@ flashes on each beat (accented beats in another colour).
 ### History and CSV export
 
 The clock button in the header (next to the gear), or `Ctrl+H`, opens the
-"Historial" window. A filter "Todo / Prosa / Palabras / Código" picks the sessions shown;
-everything below follows it:
+"Historial" window. A filter "Todo / Prosa / Palabras / Código" picks the sessions shown,
+and a switch "Sesiones / Por día / Por carácter" picks the view; every view
+follows the filter. "Sesiones" (the default) shows:
 
 - **Summary:** number of sessions, mean and best net WPM, and mean accuracy.
 - **Chart:** net WPM and accuracy of the last 50 sessions, oldest on the left,
@@ -208,7 +209,23 @@ everything below follows it:
   With no sessions nothing is written and "No hay sesiones que exportar." is
   shown.
 
-Without saved sessions (or in temporary mode) the window shows "Aún no hay
+"Por día" groups the sessions by local day (the same local day as the daily
+goal) and shows the last 30 days that have sessions: a chart of the day's mean
+net WPM (line) and practised minutes (bars), oldest on the left, and a table
+"Día · Sesiones · Minutos · PPM netas · Precisión", newest first. A day's WPM
+and accuracy are means weighted by session duration; minutes are rounded down.
+
+"Por carácter" uses the per-character statistics that drive the weak keys and
+the heatmap ("Todo" merges prose and code by samples; "Palabras" shares the
+prose statistics): a table "Carácter · Muestras · Error · Lentitud" of the
+characters with at least 5 samples, worst first (by error, then slowness), and
+a bar chart of the error of the 20 worst. Space shows as "espacio", Enter as
+"Intro" and Tab as "Tab"; error is a percentage (`4,2 %`) and slowness the
+stored relative value (0–1) with one decimal. Without enough keystrokes it
+shows "Aún no hay bastantes pulsaciones por carácter.". The charts are plain
+SVG with accessible titles; CSV export stays in "Sesiones".
+
+Without saved sessions (or in temporary mode) every view shows "Aún no hay
 sesiones guardadas.". `Escape`, `×` or a click outside closes it and returns
 to the text.
 
