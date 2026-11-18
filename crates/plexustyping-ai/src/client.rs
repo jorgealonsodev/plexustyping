@@ -250,7 +250,20 @@ impl AiClient {
                                 err,
                                 ProviderError::Invalid { .. } | ProviderError::BadResponse { .. }
                             );
+                        // A ChatGPT plan error (limit, availability, eligibility, account)
+                        // stops the chain: OpenAI never moves plan usage silently to another
+                        // billing path, and the user chose not to bill their other keys.
+                        let plan_error = cfg.id == ProviderId::Chatgpt
+                            && matches!(
+                                err,
+                                ProviderError::RateLimit { .. }
+                                    | ProviderError::Auth { .. }
+                                    | ProviderError::Config { .. }
+                            );
                         errors.push((cfg.id, err));
+                        if plan_error {
+                            return Err(errors);
+                        }
                         if !retry {
                             break;
                         }
