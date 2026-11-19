@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyTheme, contrastRatio, mix, readableOn, themeById, typingColors } from "./index";
+import { SYNTAX_CLASSES } from "./colors";
+import { applyTheme, contrastRatio, ensureContrast, mix, readableOn, themeById, typingColors } from "./index";
 
 const KEYS = [
   "--bg",
@@ -21,6 +22,7 @@ const KEYS = [
   "--cursor-text",
   "--key-bg",
   "--key-fg",
+  "--heat-base",
   "--key-border",
   "--key-active",
   "--finger-l-pinky",
@@ -46,6 +48,7 @@ const KEYS = [
   "--syntax-tag",
   "--syntax-attribute",
   "--syntax-property",
+  ...SYNTAX_CLASSES.map((cls) => `--syntax-pending-${cls}`),
   "color-scheme",
 ];
 
@@ -88,13 +91,13 @@ describe("typingColors", () => {
       "--surface-2": "#2c2d3e",
       "--border": "#3a3b4e",
       "--text": "#cdd6f4",
-      "--muted": "#878ca5",
+      "--muted": "#8f94ae",
       "--accent": "#89b4fa",
       "--on-accent": "#000000",
       "--success": "#a6e3a1",
       "--warning": "#f9e2af",
       "--danger": "#f38ba8",
-      "--text-pending": "#6d7187",
+      "--text-pending": "#8f94ad",
       "--text-correct": "#cdd6f4",
       "--text-error": "#f38ba8",
       "--error-bg": "#4d3649",
@@ -102,6 +105,7 @@ describe("typingColors", () => {
       "--cursor-text": "#1e1e2e",
       "--key-bg": "#2c2d3e",
       "--key-fg": "#cdd6f4",
+      "--heat-base": "#ad6a83",
       "--key-border": "#414356",
       "--key-active": "#89b4fa",
       "--finger-l-pinky": "#f5c2e7",
@@ -127,6 +131,20 @@ describe("typingColors", () => {
       "--syntax-tag": "#f38ba8",
       "--syntax-attribute": "#f9e2af",
       "--syntax-property": "#aeccfc",
+      "--syntax-pending-plain": "#878ca5",
+      "--syntax-pending-keyword": "#9688a3",
+      "--syntax-pending-string": "#7b928a",
+      "--syntax-pending-number": "#938c87",
+      "--syntax-pending-comment": "#888da6",
+      "--syntax-pending-function": "#7d8db2",
+      "--syntax-pending-type": "#75919c",
+      "--syntax-pending-variable": "#7a909b",
+      "--syntax-pending-constant": "#978c7d",
+      "--syntax-pending-operator": "#9c85a9",
+      "--syntax-pending-punctuation": "#868ca4",
+      "--syntax-pending-tag": "#9f859e",
+      "--syntax-pending-attribute": "#938c87",
+      "--syntax-pending-property": "#818dab",
       "color-scheme": "dark",
     });
   });
@@ -135,21 +153,23 @@ describe("typingColors", () => {
     for (const entry of [themeById("plexusterm"), themeById("catppuccin-latte"), themeById("laser")]) {
       const colors = typingColors(entry);
       const { background: bg, foreground: fg, red } = entry.palette;
+      const text = colors["--text"];
+      const layers = [bg, colors["--surface"], colors["--surface-2"]];
       expect(Object.keys(colors).sort()).toEqual([...KEYS].sort());
-      expect(colors["--text-pending"]).toBe(mix(bg, fg, 0.45));
+      // Derived colours keep their mix, corrected only where it falls short of AA (S1).
+      expect(text).toBe(ensureContrast(fg, layers, 4.5, fg));
+      expect(colors["--text-pending"]).toBe(ensureContrast(mix(bg, fg, 0.45), layers, 4.5, text));
       expect(colors["--error-bg"]).toBe(mix(bg, red, 0.22));
-      expect(colors["--key-active"]).toBe(entry.palette.blue);
-      expect(colors["--finger-l-index"]).toBe(entry.palette.green);
-      expect(colors["--finger-r-index"]).toBe(entry.palette.yellow);
-      expect(colors["--finger-thumb"]).toBe(entry.dark ? entry.palette.white : entry.palette.black);
+      expect(colors["--accent"]).toBe(ensureContrast(entry.palette.blue, layers, 3, text));
+      expect(colors["--key-active"]).toBe(colors["--accent"]);
       expect(colors["color-scheme"]).toBe(entry.dark ? "dark" : "light");
       // Code mode (S3): syntax colours from the ANSI palette, as PlexusTerm colours code.
-      expect(colors["--syntax-plain"]).toBe(fg);
+      expect(colors["--syntax-plain"]).toBe(text);
       expect(colors["--syntax-keyword"]).toBe(entry.palette.magenta);
       expect(colors["--syntax-string"]).toBe(entry.palette.green);
       expect(colors["--syntax-function"]).toBe(entry.palette.blue);
       expect(colors["--syntax-tag"]).toBe(red);
-      expect(colors["--syntax-comment"]).toBe(mix(bg, fg, 0.6));
+      expect(colors["--syntax-comment"]).toBe(ensureContrast(mix(bg, fg, 0.6), [colors["--surface"]], 4.5, text));
       expect(colors["--syntax-punctuation"]).toBe(mix(bg, fg, 0.75));
     }
   });

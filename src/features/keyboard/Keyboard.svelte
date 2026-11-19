@@ -160,8 +160,8 @@
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  /* Heatmap tint: the key background mixed toward --danger by score, under any highlight. */
-  .heat { background: color-mix(in srgb, var(--danger) var(--heat), var(--key-bg)); }
+  /* Heatmap tint: the key background mixed toward --heat-base by score, under any highlight. */
+  .heat { background: color-mix(in srgb, var(--heat-base) var(--heat), var(--key-bg)); }
   .heat-1 { --heat: 6%; }
   .heat-2 { --heat: 12%; }
   .heat-3 { --heat: 18%; }
@@ -185,7 +185,7 @@
   .scale {
     width: 8rem;
     height: 0.5rem;
-    background: linear-gradient(to right, var(--key-bg), color-mix(in srgb, var(--danger) 60%, var(--key-bg)));
+    background: linear-gradient(to right, var(--key-bg), color-mix(in srgb, var(--heat-base) 60%, var(--key-bg)));
     border: 1px solid var(--key-border);
     border-radius: 0.25rem;
   }

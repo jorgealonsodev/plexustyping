@@ -57,23 +57,23 @@
   .ch {
     border-radius: 0.15em;
   }
-  .syn-plain { --syn: var(--syntax-plain); }
-  .syn-keyword { --syn: var(--syntax-keyword); }
-  .syn-string { --syn: var(--syntax-string); }
-  .syn-number { --syn: var(--syntax-number); }
-  .syn-comment { --syn: var(--syntax-comment); }
-  .syn-function { --syn: var(--syntax-function); }
-  .syn-type { --syn: var(--syntax-type); }
-  .syn-variable { --syn: var(--syntax-variable); }
-  .syn-constant { --syn: var(--syntax-constant); }
-  .syn-operator { --syn: var(--syntax-operator); }
-  .syn-punctuation { --syn: var(--syntax-punctuation); }
-  .syn-tag { --syn: var(--syntax-tag); }
-  .syn-attribute { --syn: var(--syntax-attribute); }
-  .syn-property { --syn: var(--syntax-property); }
-  /* Still to type: the syntax colour, dimmed towards the background. */
+  .syn-plain { --syn: var(--syntax-plain); --syn-pending: var(--syntax-pending-plain); }
+  .syn-keyword { --syn: var(--syntax-keyword); --syn-pending: var(--syntax-pending-keyword); }
+  .syn-string { --syn: var(--syntax-string); --syn-pending: var(--syntax-pending-string); }
+  .syn-number { --syn: var(--syntax-number); --syn-pending: var(--syntax-pending-number); }
+  .syn-comment { --syn: var(--syntax-comment); --syn-pending: var(--syntax-pending-comment); }
+  .syn-function { --syn: var(--syntax-function); --syn-pending: var(--syntax-pending-function); }
+  .syn-type { --syn: var(--syntax-type); --syn-pending: var(--syntax-pending-type); }
+  .syn-variable { --syn: var(--syntax-variable); --syn-pending: var(--syntax-pending-variable); }
+  .syn-constant { --syn: var(--syntax-constant); --syn-pending: var(--syntax-pending-constant); }
+  .syn-operator { --syn: var(--syntax-operator); --syn-pending: var(--syntax-pending-operator); }
+  .syn-punctuation { --syn: var(--syntax-punctuation); --syn-pending: var(--syntax-pending-punctuation); }
+  .syn-tag { --syn: var(--syntax-tag); --syn-pending: var(--syntax-pending-tag); }
+  .syn-attribute { --syn: var(--syntax-attribute); --syn-pending: var(--syntax-pending-attribute); }
+  .syn-property { --syn: var(--syntax-property); --syn-pending: var(--syntax-pending-property); }
+  /* Still to type: the syntax colour dimmed towards the code background, kept readable (colors.ts, S1). */
   .pending {
-    color: color-mix(in srgb, var(--syn) 45%, var(--surface));
+    color: var(--syn-pending);
   }
   .correct {
     color: var(--syn);

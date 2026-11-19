@@ -55,7 +55,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
-| T1 | S1 | Contrast guard for derived theme colours, all-themes AA vitest, CodeText comment/plain colours | writer A (parallel with T2) | pending | |
+| T1 | S1 | Contrast guard for derived theme colours, all-themes AA vitest, CodeText comment/plain colours | writer A (parallel with T2) | done | see L5 |
 | T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
 | T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | pending | |
 | T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | pending | |
@@ -88,3 +88,10 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
     - A focused button that disappears or becomes disabled drops focus to the page, and the typing field then takes it.
     - Shift+Tab in code mode still types indentation.
     - The Svelte focus wiring has no component test; it needs a GUI check.
+- **L5 (evidence, 2026-11-19):** T1 done by writer A.
+  - `ensureContrast`/`correctColor` in `colors.ts`: a passing colour stays byte-identical; a failing one moves toward the foreground, then toward black or white.
+  - Applied to text, pending and muted text on all three layers, error on its tint, every pending code class (new `--syntax-pending-*`, used by CodeText.svelte), key labels on highlighted, modifier and flashed keys, the accent and `--on-accent`.
+  - A new `--heat-base` (the theme's `--danger`, weakened toward `--key-bg` only as far as needed) is used by the heatmap and its legend in Keyboard.svelte. Flashes keep `--danger`.
+  - RED: 57/57 themes failing (2047 pairs). GREEN: `contrast.test.ts` sweeps all 57 themes and the imported VS Code path. The tightest heat tint is catppuccin-frappe at 4.50.
+  - Checks: vitest 376/376, check 0.
+  - Note: Mocha `--text-pending` and `--muted` now nearly match (both stop at 4.5 on `--surface-2`).
