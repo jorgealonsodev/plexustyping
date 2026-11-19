@@ -3,7 +3,7 @@
   import { nextFocusIndex } from "../practice/focus";
   import type { Sound } from "./api";
   import BeatDot from "./BeatDot.svelte";
-  import { type BeatAnchor, MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS, stepBpm } from "./beat";
+  import { type BeatAnchor, MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS, parseBpm, stepBpm } from "./beat";
 
   // The beat dot is also the metronome's quick settings: a click opens a small panel to tune it
   // without leaving the text. Classes only (CSP). Keyboard (accessibility S2): opening moves the
@@ -81,15 +81,23 @@
       <div class="row">
         <label class="name" for="mq-bpm">Tempo</label>
         <button type="button" aria-label="Más lento" onclick={() => onChange({ bpm: stepBpm(metronome.bpm, -1) })}>−</button>
+        <!-- Typed tempo applies on Enter or when leaving the field, not per key (typing 120 passes "1"). -->
         <input
           id="mq-bpm"
-          type="range"
+          class="bpm-input"
+          type="number"
+          inputmode="numeric"
           min={MIN_BPM}
           max={MAX_BPM}
           value={metronome.bpm}
-          aria-label="Tempo"
-          oninput={(e: Change<HTMLInputElement>) => onChange({ bpm: number(e) })}
+          aria-label="Tempo en BPM"
+          onchange={(e: Change<HTMLInputElement>) => {
+            const bpm = parseBpm(e.currentTarget.value, metronome.bpm);
+            e.currentTarget.value = String(bpm);
+            onChange({ bpm });
+          }}
         />
+        <span class="unit">BPM</span>
         <button type="button" aria-label="Más rápido" onclick={() => onChange({ bpm: stepBpm(metronome.bpm, 1) })}>+</button>
       </div>
       <div class="row">
@@ -202,6 +210,21 @@
     width: 3rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+  .bpm-input {
+    width: 4.5rem;
+    padding: 0.2rem 0.35rem;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0.3rem;
+  }
+  .unit {
+    color: var(--muted);
+    font-size: 0.85em;
   }
   input[type="range"] {
     flex: 1;

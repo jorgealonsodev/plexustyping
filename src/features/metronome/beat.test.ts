@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adaptTempo, beatAt, stepBpm, tempoChangeFor, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
+import { adaptTempo, beatAt, parseBpm, stepBpm, tempoChangeFor, beatOffsetMs, isAccent, isMetronomeShortcut, rhythmSummary, tempoNotice, toConfig } from "./beat";
 
 describe("beatOffsetMs", () => {
   it("is the time from the nearest beat, negative when early", () => {
@@ -137,5 +137,20 @@ describe("quick tempo buttons", () => {
     expect([stepBpm(60, 1), stepBpm(60, -1)]).toEqual([65, 55]);
     expect([stepBpm(62, 1), stepBpm(62, -1)]).toEqual([65, 60]);
     expect([stepBpm(300, 1), stepBpm(30, -1), stepBpm(298, 1), stepBpm(32, -1)]).toEqual([300, 30, 300, 30]);
+  });
+});
+
+describe("parseBpm", () => {
+  // "que muestre el tempo y se pueda subir con + - o escribir directamente"
+  it("takes a typed tempo, rounded and clamped to the metronome range", () => {
+    expect(parseBpm("120", 90)).toBe(120);
+    expect(parseBpm(" 97.6 ", 90)).toBe(98);
+    expect(parseBpm("5", 90)).toBe(30);
+    expect(parseBpm("9999", 90)).toBe(300);
+  });
+
+  it("keeps the current tempo for empty or non-numeric input", () => {
+    expect(parseBpm("", 90)).toBe(90);
+    expect(parseBpm("abc", 90)).toBe(90);
   });
 });

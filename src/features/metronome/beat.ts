@@ -138,6 +138,13 @@ export const isMetronomeShortcut = (k: ShortcutKey) =>
 export const BPM_STEP = 5;
 
 /** The tempo one quick step up (`dir` 1) or down (-1): the next multiple of 5, inside 30–300. */
+/** A tempo typed by hand: rounded and clamped to MIN_BPM..MAX_BPM; `current` when it is not a number. */
+export function parseBpm(text: string, current: number): number {
+  const value = Number(text.trim());
+  if (text.trim() === "" || !Number.isFinite(value)) return current;
+  return Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(value)));
+}
+
 export function stepBpm(bpm: number, dir: 1 | -1): number {
   const next = dir > 0 ? Math.floor(bpm / BPM_STEP) * BPM_STEP + BPM_STEP : Math.ceil(bpm / BPM_STEP) * BPM_STEP - BPM_STEP;
   return Math.min(MAX_BPM, Math.max(MIN_BPM, next));
