@@ -149,9 +149,11 @@
   .cursor.error {
     --cur: var(--text-error);
   }
+  /* Square corners: the highlight's rounding would bend a thin bar into a bracket. */
   :global([data-cursor="bar"]) .cursor {
     background: transparent;
-    box-shadow: inset 0.12em 0 var(--cur);
+    border-radius: 0;
+    box-shadow: inset 0.1em 0 var(--cur);
   }
   :global([data-cursor="block"]) .cursor {
     color: var(--bg);
@@ -160,6 +162,7 @@
   }
   :global([data-cursor="underline"]) .cursor {
     background: transparent;
+    border-radius: 0;
     box-shadow: inset 0 -0.15em var(--cur);
   }
   :global([data-cursor="outline"]) .cursor {
