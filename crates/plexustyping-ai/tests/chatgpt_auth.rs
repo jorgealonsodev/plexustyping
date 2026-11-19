@@ -623,7 +623,7 @@ async fn a_cancel_during_the_code_exchange_revokes_the_tokens_it_got() {
         let id = signer.sign(&claims(&mock.base, &p["nonce"]));
         mock.route(
             TOKEN,
-            tokens(&id, ACCESS, REFRESH, 3600, PLAN).delayed(Duration::from_millis(500)),
+            tokens(&id, ACCESS, REFRESH, 3600, PLAN).delayed(Duration::from_secs(2)),
         );
         Some(format!(
             "code={CODE}&state={}&client_id={CLIENT}&scope={}",

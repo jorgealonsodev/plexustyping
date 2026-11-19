@@ -677,22 +677,27 @@ impl ChatgptAuth {
         self.save(&record).await?;
         // A plain cancel takes no lock: one that landed during the save still wins.
         if self.cancelled_since(epoch) {
-            self.save(&previous).await?;
+            // The new grant is revoked even when the restore fails (then its error is returned).
+            let restored = self.save(&previous).await;
             drop(guard);
-            return self.discard(record.refresh_token, client_id).await;
+            let cancelled = self.discard(record.refresh_token, client_id).await;
+            restored?;
+            return cancelled;
         }
         Ok(record.status())
     }
 
     /// Ends a cancelled sign-in: the refresh token its answer carried is revoked
-    /// (best effort), so no unused grant stays alive.
+    /// (best effort, at most [`DISCARD_REVOKE_LIMIT`] so a cancel stays prompt),
+    /// so no unused grant stays alive.
     async fn discard(
         &self,
         refresh: Option<String>,
         client_id: String,
     ) -> Result<Status, AuthError> {
         if let Some(refresh) = refresh {
-            self.revoke(&refresh, &client_id).await;
+            let _ =
+                tokio::time::timeout(DISCARD_REVOKE_LIMIT, self.revoke(&refresh, &client_id)).await;
         }
         Err(AuthError::Cancelled)
     }
@@ -821,6 +826,9 @@ impl ChatgptAuth {
         false
     }
 }
+
+/// Longest wait for revoking the grant of a cancelled sign-in.
+const DISCARD_REVOKE_LIMIT: Duration = Duration::from_secs(5);
 
 /// One refresh, run on its own task while it holds the record lock.
 struct Refresh<'a> {
