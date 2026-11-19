@@ -560,9 +560,11 @@ async fn a_pending_sign_in_can_be_cancelled() {
 async fn a_cancel_before_the_sign_in_waits_for_the_browser_still_ends_it() {
     let f = Fixture::new().await;
     let auth = &f.auth;
-    // Cancelled while the browser opens: no pending sign-in exists yet.
+    // Cancelled while the browser opens: no pending sign-in exists yet. The
+    // guard only stops a hang: an ignored cancel ends in Timeout (5 s), not
+    // Cancelled, and saving the host id first may take seconds under load.
     let result = tokio::time::timeout(
-        Duration::from_secs(2),
+        Duration::from_secs(30),
         auth.sign_in(|_| {
             auth.cancel();
             Ok(())
@@ -648,7 +650,7 @@ async fn the_preferred_port_falls_back_to_a_free_one() {
     // Saving the host id may take a while on a slow disk: wait for the browser, not a fixed time.
     tokio::select! {
         result = sign_in => panic!("the sign-in ended without a callback: {result:?}"),
-        waited = tokio::time::timeout(Duration::from_secs(5), opened) => {
+        waited = tokio::time::timeout(Duration::from_secs(30), opened) => {
             assert!(waited.is_ok(), "the browser was never opened");
         }
     }
@@ -1164,10 +1166,19 @@ async fn a_dropped_request_still_saves_the_rotated_tokens() {
         TOKEN,
         refreshed(ACCESS_2, REFRESH_2, 3600).delayed(Duration::from_millis(200)),
     );
-    let dropped = tokio::time::timeout(Duration::from_millis(50), f.auth.access_token()).await;
-    assert!(dropped.is_err());
+    // Dropped once the refresh request reached the server (not after a fixed
+    // time, which under load may come before the request is sent).
+    let sent = async {
+        while f.calls(TOKEN).len() < 2 {
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        }
+    };
+    tokio::select! {
+        result = f.auth.access_token() => panic!("the delayed refresh ended first: {result:?}"),
+        () = sent => {}
+    }
     // The renewal goes on in the background; a slow disk may take a while to save it.
-    for _ in 0..500 {
+    for _ in 0..3000 {
         if f.record()["refreshToken"] == REFRESH_2 {
             break;
         }
