@@ -171,3 +171,55 @@ describe("visual identity", () => {
     expect(failures(parsed.theme)).toEqual([]);
   });
 });
+
+describe("dimmed pending text (a11y S7)", () => {
+  // About 2.5:1 on the background each is drawn on, and below the AA pending colour; an explicit exception to S1.
+  const DIM_MIN = 2.2;
+  const DIM_MAX = 3.0;
+
+  /** Every dimmed pending colour of a theme with its AA pending colour and the background it is drawn on. */
+  function dimPairs(entry: ThemeEntry) {
+    const c = typingColors(entry);
+    const out = [{ label: "--text-pending-dim on --bg", dim: c["--text-pending-dim"], aa: c["--text-pending"], bg: c["--bg"] }];
+    for (const cls of SYNTAX)
+      out.push({
+        label: `--syntax-pending-dim-${cls} on --surface`,
+        dim: c[`--syntax-pending-dim-${cls}`],
+        aa: c[`--syntax-pending-${cls}`],
+        bg: c["--surface"],
+      });
+    return out;
+  }
+
+  const dimmed = THEMES.filter((entry) => !entry.highContrast);
+
+  it.each(dimmed.map((entry) => [entry.id, entry] as const))(
+    "%s dims every pending colour to about 2.5:1, below its AA pending colour",
+    (_id, entry) => {
+      const bad = dimPairs(entry)
+        .map((p) => ({ ...p, ratio: contrastRatio(p.dim, p.bg), aaRatio: contrastRatio(p.aa, p.bg) }))
+        .filter((p) => !(p.ratio >= DIM_MIN && p.ratio <= DIM_MAX && p.ratio < p.aaRatio))
+        .map((p) => `${p.label}: ${p.dim} / ${p.bg} = ${p.ratio.toFixed(2)} (AA ${p.aa} = ${p.aaRatio.toFixed(2)})`);
+      expect(bad).toEqual([]);
+    },
+  );
+
+  it.each(["alto-contraste-oscuro", "alto-contraste-claro"])("%s never dims: the dim colours are its 7:1 ones", (id) => {
+    const entry = themeById(id);
+    expect(entry.highContrast).toBe(true);
+    for (const p of dimPairs(entry)) expect(p.dim, p.label).toBe(p.aa);
+  });
+
+  it("dims an imported VS Code theme the same way", () => {
+    const parsed = parseVsCodeTheme(
+      JSON.stringify({ name: "Dark", type: "dark", colors: { "editor.background": "#101010", "editor.foreground": "#e0e0e0" } }),
+      "dark.json",
+    );
+    if (!parsed.ok) throw new Error(parsed.error);
+    for (const p of dimPairs(parsed.theme)) {
+      const ratio = contrastRatio(p.dim, p.bg);
+      expect(ratio, p.label).toBeGreaterThanOrEqual(DIM_MIN);
+      expect(ratio, p.label).toBeLessThanOrEqual(DIM_MAX);
+    }
+  });
+});

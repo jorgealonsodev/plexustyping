@@ -232,6 +232,7 @@
     showKeyboard={settings.showKeyboard}
     flashes={settings.flashes}
     colorBlind={settings.colorBlind}
+    dimPending={settings.dimPending}
     heatmap={settings.heatmap}
     targetCount={settings.targetCount}
     textLength={settings.textLength}

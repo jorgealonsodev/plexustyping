@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MAX_THEME_FILE_CHARS, THEMES, TOO_LARGE } from "../themes";
   import SettingField from "./SettingField.svelte";
-  import { TYPOGRAPHY_FIELDS, type Typography } from "./settings";
+  import { DIM_PENDING_SETTING, TYPOGRAPHY_FIELDS, type Typography } from "./settings";
   import { FONT_GROUPS, FONT_SETTING, PRACTICE_FONTS, fontById } from "./fonts";
   import type { SettingsStore } from "./store.svelte";
 
@@ -91,6 +91,19 @@
   {/snippet}
 </SettingField>
 {#if notice}<p class="notice" class:error={notice.error} role={notice.error ? "alert" : "status"}>{notice.text}</p>{/if}
+
+<!-- Pending practice text dimmed below AA (a11y S7): on by default, off restores the AA colours. -->
+<SettingField toggle label={DIM_PENDING_SETTING.label} hint={DIM_PENDING_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={settings.dimPending}
+      onchange={(e: Event & { currentTarget: HTMLInputElement }) => settings.setDimPending(e.currentTarget.checked)}
+    />
+  {/snippet}
+</SettingField>
 
 <!-- Typeface of the practice text, prose and code (practice-font S1): each option and the preview in its own font. -->
 <SettingField label={FONT_SETTING.label} hint="{FONT_SETTING.hint} {font.hint}">

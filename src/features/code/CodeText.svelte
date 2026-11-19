@@ -10,6 +10,7 @@
     classes,
     ghost = -1,
     ghostEnd = false,
+    dim = false,
   }: {
     chars: string[];
     states: CharState[];
@@ -18,6 +19,8 @@
     /** Index of the ghost cursor's char (ghost S4), -1 for none; `ghostEnd`: it is past that last char. */
     ghost?: number;
     ghostEnd?: boolean;
+    /** Pending chars in the dimmed colours of about 2.5:1 (a11y S7). */
+    dim?: boolean;
   } = $props();
 
   let block = $state<HTMLPreElement>();
@@ -30,7 +33,7 @@
 </script>
 
 <!-- No whitespace inside: the block keeps every space and newline. -->
-<pre bind:this={block} class="code">{#each chars as c, i (i)}<span
+<pre bind:this={block} class="code" class:dim>{#each chars as c, i (i)}<span
       class="ch {states[i]} syn-{classes[i]}"
       class:space={c === " "}
       class:nl={c === "\n"}
@@ -59,6 +62,23 @@
   }
   .ch {
     border-radius: 0.15em;
+  }
+  /* "Atenuar texto pendiente" (a11y S7): every class's pending shade reads its dimmed one. */
+  .code.dim {
+    --syntax-pending-plain: var(--syntax-pending-dim-plain);
+    --syntax-pending-keyword: var(--syntax-pending-dim-keyword);
+    --syntax-pending-string: var(--syntax-pending-dim-string);
+    --syntax-pending-number: var(--syntax-pending-dim-number);
+    --syntax-pending-comment: var(--syntax-pending-dim-comment);
+    --syntax-pending-function: var(--syntax-pending-dim-function);
+    --syntax-pending-type: var(--syntax-pending-dim-type);
+    --syntax-pending-variable: var(--syntax-pending-dim-variable);
+    --syntax-pending-constant: var(--syntax-pending-dim-constant);
+    --syntax-pending-operator: var(--syntax-pending-dim-operator);
+    --syntax-pending-punctuation: var(--syntax-pending-dim-punctuation);
+    --syntax-pending-tag: var(--syntax-pending-dim-tag);
+    --syntax-pending-attribute: var(--syntax-pending-dim-attribute);
+    --syntax-pending-property: var(--syntax-pending-dim-property);
   }
   .syn-plain { --syn: var(--syntax-plain); --syn-pending: var(--syntax-pending-plain); }
   .syn-keyword { --syn: var(--syntax-keyword); --syn-pending: var(--syntax-pending-keyword); }

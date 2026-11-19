@@ -42,6 +42,7 @@ import {
   savePracticeKind,
   loadErrorMode,
   loadColorBlind,
+  loadDimPending,
   loadFlashes,
   loadGhost,
   loadLanguage,
@@ -56,6 +57,7 @@ import {
   loadTextLength,
   saveErrorMode,
   saveColorBlind,
+  saveDimPending,
   saveFlashes,
   saveGhost,
   saveHeatmap,
@@ -113,6 +115,8 @@ export class SettingsStore {
   flashes = $state(loadFlashes());
   /** Okabe–Ito blue/orange flashes and an underlined wrong key (a11y S5); off by default. */
   colorBlind = $state(loadColorBlind());
+  /** Pending practice text dimmed to about 2.5:1 (a11y S7); on by default. */
+  dimPending = $state(loadDimPending());
   /** Themes imported from VS Code; loaded before the theme id so a saved import is known. */
   customThemes = $state.raw(initCustomThemes());
   themeId = $state(loadThemeId());
@@ -208,6 +212,11 @@ export class SettingsStore {
   setColorBlind(on: boolean) {
     this.colorBlind = on;
     saveColorBlind(on);
+  }
+
+  setDimPending(on: boolean) {
+    this.dimPending = on;
+    saveDimPending(on);
   }
 
   /** Loads a new text for the layout (the practice screen watches it); saved to the active profile. */

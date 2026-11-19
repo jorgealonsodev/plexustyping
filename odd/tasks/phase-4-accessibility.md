@@ -67,7 +67,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 | T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
 | T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | done | see L6 |
 | T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | done | see L7 |
-| T6 | S7 | Dimmed pending text setting | worker | pending | |
+| T6 | S7 | Dimmed pending text setting | worker | done | see L10 |
 | T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | done | see L8 |
 
 ## Log
@@ -129,3 +129,9 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
     - No GUI check of the reduced motion, the badges or the legend.
 - **L8 (integration, 2026-11-19):** vitest 412/412, svelte-check 0, vite build ok (no Rust change in this feature). Native assess over origin/main..HEAD: risk medium, review not due (under_budget). Fast-forwarded into main and pushed. Pending: a GUI check of S2, S3 with Orca and S6, and the user's try-out.
 - **L9 (user, 2026-11-19):** the user showed a Monkeytype screenshot and chose "Más contraste entre escrito y pendiente". Told that AA allows only a small change in Mocha (#8f94ad to about #878ba1 on `--bg`), they chose "Ajuste «Atenuar texto pendiente» (recomendado)": on by default, about 2.5:1, AA when off, never on the high-contrast themes. S7 added.
+- **L10 (evidence, 2026-11-19):** T6 done.
+  - `dimColor` in `colors.ts` derives `--text-pending-dim` (on `--bg`) and `--syntax-pending-dim-*` (on `--surface`) at about 2.5:1. On the high-contrast themes they equal the normal pending colours. No existing value changed.
+  - The setting "Atenuar texto pendiente" (on by default, `plexustyping.dimPending`) sits in Apariencia, and Practice and CodeText switch variables when it is on.
+  - Mocha pending: #8f94ad (5.47:1) becomes #5a5c71 (2.50:1).
+  - RED: 63 failing tests. GREEN: vitest 486/486, check 0, build ok.
+  - Not covered by any test: the off path and the GUI look.

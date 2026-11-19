@@ -58,6 +58,7 @@
     showKeyboard,
     flashes,
     colorBlind = false,
+    dimPending = true,
     heatmap,
     targetCount,
     textLength,
@@ -88,6 +89,8 @@
     flashes: boolean;
     /** Colour-blind keyboard flashes (a11y S5): Okabe–Ito blue/orange and an underlined wrong key. */
     colorBlind?: boolean;
+    /** Pending chars, prose and code, in the dimmed colours of about 2.5:1 (a11y S7). */
+    dimPending?: boolean;
     heatmap: boolean;
     targetCount: number;
     textLength: number;
@@ -691,10 +694,10 @@
       <!-- A named region (a11y S3) carrying the typography variables (a11y S4) for prose and code. -->
       <div id={textId} role="region" aria-label={isCode ? "Código de práctica" : "Texto de práctica"} style={textStyle}>
       {#if isCode}
-        <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} />
+        <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} dim={dimPending} />
       {:else}
         <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
-        <p class="text" bind:this={proseText}>{#each session.chars as c, i (i)}<span
+        <p class="text" class:dim={dimPending} bind:this={proseText}>{#each session.chars as c, i (i)}<span
               class="ch {view.states[i]}"
               class:space={c === " "}
               class:cursor={i === view.cursor}
@@ -806,6 +809,10 @@
   }
   .pending {
     color: var(--text-pending);
+  }
+  /* "Atenuar texto pendiente" (a11y S7): the same rule reads the dimmed colour; the cursor char keeps its own. */
+  .text.dim {
+    --text-pending: var(--text-pending-dim);
   }
   .correct {
     color: var(--text-correct);

@@ -28,6 +28,9 @@ import {
   COLOR_BLIND_SETTING,
   loadColorBlind,
   saveColorBlind,
+  DIM_PENDING_SETTING,
+  loadDimPending,
+  saveDimPending,
   TYPOGRAPHY_FIELDS,
   checkTypography,
   loadScreenReader,
@@ -371,6 +374,27 @@ describe("colour-blind keyboard setting (a11y S5)", () => {
     saveColorBlind(false, storage);
     expect(storage.getItem("plexustyping.colorBlind")).toBe("false");
     expect(loadColorBlind(storage)).toBe(false);
+  });
+});
+
+describe("dimmed pending text setting (a11y S7)", () => {
+  it("names the setting in Spanish and says it lowers the pending text below AA", () => {
+    expect(DIM_PENDING_SETTING.label).toBe("Atenuar texto pendiente");
+    expect(DIM_PENDING_SETTING.hint).toMatch(/AA/);
+  });
+
+  it("is on by default and persists the toggle across a reload, apart from the other toggles", () => {
+    const storage = memoryStorage();
+    expect(loadDimPending(storage)).toBe(true);
+    saveDimPending(false, storage);
+    expect(storage.getItem("plexustyping.dimPending")).toBe("false");
+    // A reload reads the same storage again.
+    expect(loadDimPending(storage)).toBe(false);
+    expect([loadColorBlind(storage), loadScreenReader(storage), loadFlashes(storage)]).toEqual([false, false, true]);
+    saveDimPending(true, storage);
+    expect(storage.getItem("plexustyping.dimPending")).toBe("true");
+    expect(loadDimPending(storage)).toBe(true);
+    expect(loadDimPending(memoryStorage({ "plexustyping.dimPending": "false" }))).toBe(false);
   });
 });
 

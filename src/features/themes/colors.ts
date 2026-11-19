@@ -77,6 +77,32 @@ export function ensureContrast(color: string, backgrounds: string[], min: number
   return correctColor(color, (candidate) => minContrast(candidate, backgrounds) >= min, toward, backgrounds);
 }
 
+/** Contrast of the dimmed pending text (a11y S7): about 2.5:1, an explicit, user-controlled exception to S1. */
+export const DIM_PENDING = 2.5;
+/** Steps of the dimming path; fine enough that the closest step lands well inside 2.2–3.0. */
+const DIM_STEPS = 1000;
+
+/**
+ * `pending` dimmed toward `background` (a11y S7): the step on the way from `background` to `pending`
+ * whose contrast on `background` is closest to `target`, never above that of `pending` itself.
+ * The first such step wins a tie, so the result is deterministic.
+ */
+export function dimColor(pending: string, background: string, target = DIM_PENDING): string {
+  const limit = contrastRatio(pending, background);
+  let best = pending;
+  let bestGap = Math.abs(limit - target);
+  for (let step = 0; step < DIM_STEPS; step++) {
+    const candidate = mix(background, pending, step / DIM_STEPS);
+    const ratio = contrastRatio(candidate, background);
+    const gap = Math.abs(ratio - target);
+    if (ratio <= limit && gap < bestGap) {
+      best = candidate;
+      bestGap = gap;
+    }
+  }
+  return best;
+}
+
 /** Black or white for text on `background`: `readableOn` unless it falls short of AA, then the better one. */
 const textOn = (background: string, min = AA_TEXT) => {
   const pick = readableOn(background);
@@ -84,7 +110,7 @@ const textOn = (background: string, min = AA_TEXT) => {
   return contrastRatio(BLACK, background) >= contrastRatio(WHITE, background) ? BLACK : WHITE;
 };
 
-/** Highlight classes of code mode; each gets `--syntax-<class>` and its pending shade `--syntax-pending-<class>`. */
+/** Highlight classes of code mode; each gets `--syntax-<class>`, its pending shade `--syntax-pending-<class>` and its dimmed one `--syntax-pending-dim-<class>`. */
 export const SYNTAX_CLASSES = [
   "plain",
   "keyword",
@@ -168,6 +194,7 @@ export function typingColors({ dark, palette, highContrast = false }: ThemeEntry
     attribute: palette.yellow,
     property: palette.brightBlue,
   };
+  const pending = onLayers(mix(bg, fg, 0.45));
   const colors: Record<string, string> = {
     "--bg": bg,
     "--surface": surface,
@@ -181,7 +208,9 @@ export function typingColors({ dark, palette, highContrast = false }: ThemeEntry
     "--warning": palette.yellow,
     "--danger": danger,
     // Practice text: still to type, typed right, typed wrong.
-    "--text-pending": onLayers(mix(bg, fg, 0.45)),
+    "--text-pending": pending,
+    // The same, dimmed on --bg when "Atenuar texto pendiente" is on (a11y S7); never on high-contrast themes.
+    "--text-pending-dim": highContrast ? pending : dimColor(pending, bg),
     "--text-correct": text,
     "--text-error": ensureContrast(palette.red, [errorBg], minText, text),
     "--error-bg": errorBg,
@@ -209,6 +238,11 @@ export function typingColors({ dark, palette, highContrast = false }: ThemeEntry
   for (const cls of SYNTAX_CLASSES) colors[`--syntax-${cls}`] = syntax[cls];
   for (const cls of SYNTAX_CLASSES)
     colors[`--syntax-pending-${cls}`] = ensureContrast(mix(surface, syntax[cls], 0.45), [surface], minText, text);
+  // Dimmed on the code block when "Atenuar texto pendiente" is on (a11y S7); never on high-contrast themes.
+  for (const cls of SYNTAX_CLASSES) {
+    const codePending = colors[`--syntax-pending-${cls}`];
+    colors[`--syntax-pending-dim-${cls}`] = highContrast ? codePending : dimColor(codePending, surface);
+  }
   colors["color-scheme"] = dark ? "dark" : "light";
   return colors;
 }

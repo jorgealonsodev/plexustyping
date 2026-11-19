@@ -119,6 +119,19 @@ export const loadColorBlind = (storage: Storage = localStorage) => storage.getIt
 
 export const saveColorBlind = (on: boolean, storage: Storage = localStorage) => saveFlag(COLOR_BLIND_KEY, on, storage);
 
+const DIM_PENDING_KEY = "plexustyping.dimPending";
+
+/** Ajustes → Apariencia toggle of the dimmed pending text (a11y S7). */
+export const DIM_PENDING_SETTING = {
+  label: "Atenuar texto pendiente",
+  hint: "Baja el contraste del texto por escribir por debajo del nivel AA para que destaque lo escrito; desactívalo para recuperarlo.",
+};
+
+/** Whether the practice text's pending chars use the dimmed colours (on unless turned off). */
+export const loadDimPending = (storage: Storage = localStorage) => loadFlag(DIM_PENDING_KEY, storage);
+
+export const saveDimPending = (on: boolean, storage: Storage = localStorage) => saveFlag(DIM_PENDING_KEY, on, storage);
+
 /** Choices of weak units practised per text (2 or 3); the first is the default. */
 export const TARGET_COUNTS = [2, 3];
 
