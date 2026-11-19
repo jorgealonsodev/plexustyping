@@ -23,3 +23,25 @@ type ShortcutKey = Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey" 
 /** Ctrl+, opens (or closes) the settings modal; only plain Ctrl counts, and never a held key. */
 export const isSettingsShortcut = (e: ShortcutKey) =>
   e.key === "," && e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey && !e.repeat;
+
+/** Ctrl+F in the settings modal: back to the search box; only plain Ctrl counts. */
+export const isSearchShortcut = (ev: ShortcutKey) =>
+  ev.key.toLowerCase() === "f" && ev.ctrlKey && !ev.altKey && !ev.metaKey && !ev.shiftKey;
+
+/** Lowercase, without accents and with single spaces, for the settings search. */
+const fold = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** Whether a setting's `text` (label and hint) holds every word of `query`; a blank query matches all. */
+export function matchesSettingQuery(text: string, query: string): boolean {
+  const haystack = fold(text);
+  return fold(query)
+    .split(" ")
+    .filter(Boolean)
+    .every((word) => haystack.includes(word));
+}

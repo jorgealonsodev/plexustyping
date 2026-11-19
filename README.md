@@ -49,24 +49,33 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   in the flash colour instead of flashing, and the metronome dot still lights
   on every beat, without transition.
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
-  window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
+  window, with one section per topic, in this order: Práctica, Texto, Teclado,
+  Metrónomo, Código, Apariencia, Accesibilidad, IA and Perfiles. The search box
+  at the top (focused on open, `Ctrl+F` from anywhere in the window) shows only
+  the settings whose name, description or options hold every typed word,
+  ignoring case and accents, grouped by section with a match count; `Enter`
+  goes to the first one and `Escape` clears the search (a second `Escape`
+  closes the window). "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
   targets per text (2 or 3), text length (100–600 characters), live stats,
-  the ghost session (on by default) and "Anunciar con lector de pantalla"
+  the ghost session (on by default) and progressive unlock.
+  "Accesibilidad": "Anunciar con lector de pantalla"
   (off by default): a polite `aria-live` region then announces the next
   character after each keystroke («siguiente: a», with spoken names such as
   "espacio", "salto de línea", "tabulador" or "coma"), each wrong key
   («error: esperaba e, pulsaste r»), the start of a new text and the result
   line; while off it is not rendered and announces nothing. The typing field
-  is described by the practice text region.
-  "Teclado": layout (see below), on-screen keyboard (`F2`), flashes, "Modo
-  daltónico" (off by default: the flashes use the Okabe–Ito blue `#0072B2` and
+  is described by the practice text region; and "Modo
+  daltónico" (off by default: the keyboard flashes use the Okabe–Ito blue `#0072B2` and
   orange `#E69F00`, the same in every theme, and a wrong key's label also gets
-  a bold underline) and heatmap. "Apariencia": 59
+  a bold underline).
+  "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and
+  heatmap. "Apariencia": 59
   colour themes, dark and light, switched live (PlexusTerm's 57 plus "Alto
   contraste oscuro" and "Alto contraste claro", whose colours reach 7:1 for
   text and 4.5:1 for UI; every other theme meets WCAG AA), plus themes imported from
-  VS Code (see below); "Cursor" (how the next char is marked: "Resaltado",
+  VS Code (see below). "Texto", everything about how the practice text looks:
+  "Cursor" (how the next char is marked: "Resaltado",
   the default tint with an underline, "Barra", "Bloque", "Subrayado" or
   "Contorno", in the error colour on a wrong char) and "Cursor parpadeante"
   (off by default; never with the system's reduced motion); "Atenuar texto pendiente" (on by default: the text

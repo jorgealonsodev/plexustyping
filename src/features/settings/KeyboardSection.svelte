@@ -1,6 +1,6 @@
 <script lang="ts">
   import SettingField from "./SettingField.svelte";
-  import { COLOR_BLIND_SETTING, LAYOUTS } from "./settings";
+  import { LAYOUTS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -42,18 +42,6 @@
       aria-describedby={hintId}
       checked={settings.flashes}
       onchange={(e: Change) => settings.setFlashes(e.currentTarget.checked)}
-    />
-  {/snippet}
-</SettingField>
-
-<SettingField toggle label={COLOR_BLIND_SETTING.label} hint={COLOR_BLIND_SETTING.hint}>
-  {#snippet children({ id, hintId })}
-    <input
-      {id}
-      type="checkbox"
-      aria-describedby={hintId}
-      checked={settings.colorBlind}
-      onchange={(e: Change) => settings.setColorBlind(e.currentTarget.checked)}
     />
   {/snippet}
 </SettingField>

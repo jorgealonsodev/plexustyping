@@ -1,7 +1,8 @@
 <script lang="ts">
   import { type FocusTarget, returnFocus } from "../practice/focus";
   import { SECTIONS } from "./registry";
-  import { isSettingsShortcut, moveSection } from "./sections";
+  import { tick } from "svelte";
+  import { isSearchShortcut, isSettingsShortcut, matchesSettingQuery, moveSection } from "./sections";
   import type { SettingsStore } from "./store.svelte";
 
   // Settings modal (S8). A native modal <dialog> traps focus, makes the page inert (typing never
@@ -15,6 +16,77 @@
   // The control that opened the modal; `null` when a shortcut did (focus goes back to the typing field).
   let opener: FocusTarget | null = null;
 
+  // Quick search ("añade un buscador rapido"): every section shows only the rows whose label, hint or
+  // options hold every word of the query, accents and case aside.
+  let query = $state("");
+  let search: HTMLInputElement | undefined = $state();
+  let panels: HTMLDivElement | undefined = $state();
+  let matches = $state(0);
+  const searching = $derived(query.trim() !== "");
+  /** Sections with at least one matching row while searching. */
+  let found: Record<string, boolean> = $state({});
+
+  // Marks what the search hid, so clearing it restores exactly that.
+  const HIDDEN = "data-search-hidden";
+  $effect(() => {
+    const q = query;
+    const root = panels;
+    if (!root) return;
+    void tick().then(() => {
+      let count = 0;
+      const next: Record<string, boolean> = {};
+      const setShown = (el: HTMLElement, show: boolean) => {
+        if (show && el.hasAttribute(HIDDEN)) {
+          el.removeAttribute(HIDDEN);
+          el.hidden = false;
+        } else if (!show && !el.hidden) {
+          el.hidden = true;
+          el.setAttribute(HIDDEN, "");
+        }
+      };
+      for (const panel of root.querySelectorAll<HTMLElement>("[data-section]")) {
+        let inPanel = 0;
+        // Every setting row, at any depth (some sections wrap their rows in one container).
+        for (const field of panel.querySelectorAll<HTMLElement>(".field")) {
+          const show = q.trim() === "" || matchesSettingQuery(field.textContent ?? "", q);
+          setShown(field, show);
+          if (show) inPanel++;
+        }
+        // Other top-level content (notes, headings) stays only beside a matching row.
+        for (const child of panel.querySelectorAll<HTMLElement>(":scope > .section-body > *")) {
+          if (child.classList.contains("field")) continue;
+          const keep = q.trim() === "" || child.querySelector(`.field:not([${HIDDEN}])`) !== null;
+          setShown(child, keep);
+        }
+        next[panel.dataset.section ?? ""] = inPanel > 0;
+        count += inPanel;
+      }
+      found = next;
+      matches = count;
+    });
+  });
+
+  /** Enter in the search box: the first matching setting's control. Escape clears a search first. */
+  function onSearchKeydown(ev: KeyboardEvent) {
+    const pressed = ev.key;
+    if (pressed === "Escape" && query !== "") {
+      ev.preventDefault();
+      query = "";
+      return;
+    }
+    if (pressed !== "Enter") return;
+    ev.preventDefault();
+    const first = panels?.querySelector<HTMLElement>(
+      "[data-section]:not([hidden]) .field:not([hidden]) :is(input, select, button, textarea)",
+    );
+    first?.focus();
+  }
+
+  function pick(id: string) {
+    query = "";
+    current = id;
+  }
+
   /**
    * Opens the modal, on `section` when given (e.g. the header's profile name opens "Perfiles");
    * closing it gives the focus back to `from`, or to the typing field without one (a shortcut).
@@ -24,7 +96,8 @@
     if (!dialog || dialog.open) return;
     opener = from;
     dialog.showModal();
-    tabs[current]?.focus();
+    query = "";
+    search?.focus();
   }
 
   export function close() {
@@ -45,6 +118,12 @@
     if (isSettingsShortcut(e)) {
       e.preventDefault();
       close();
+    }
+    // Ctrl+F: back to the search box from anywhere in the modal.
+    if (isSearchShortcut(e)) {
+      e.preventDefault();
+      search?.focus();
+      search?.select();
     }
     if (e.key !== "F2") e.stopPropagation();
   }
@@ -76,6 +155,21 @@
   <div class="frame">
     <header>
       <h2 id="settings-title">Ajustes</h2>
+      <input
+        bind:this={search}
+        bind:value={query}
+        type="search"
+        class="search"
+        placeholder="Buscar ajuste…  (Ctrl+F)"
+        aria-label="Buscar ajuste"
+        aria-describedby="settings-search-count"
+        spellcheck="false"
+        autocomplete="off"
+        onkeydown={onSearchKeydown}
+      />
+      <p id="settings-search-count" class="count" aria-live="polite">
+        {#if searching}{matches === 0 ? "Ningún ajuste coincide" : matches === 1 ? "1 ajuste" : `${matches} ajustes`}{/if}
+      </p>
       <button type="button" class="close" aria-label="Cerrar" title="Cerrar" onclick={close}>×</button>
     </header>
     <div class="body">
@@ -89,24 +183,28 @@
             aria-controls="settings-panel-{s.id}"
             tabindex={s.id === current ? 0 : -1}
             bind:this={tabs[s.id]}
-            onclick={() => (current = s.id)}
+            onclick={() => pick(s.id)}
             onkeydown={onTabKeydown}
           >
             {s.label}
           </button>
         {/each}
       </div>
-      {#each SECTIONS as s (s.id)}
-        <div
-          class="panel"
-          role="tabpanel"
-          id="settings-panel-{s.id}"
-          aria-labelledby="settings-tab-{s.id}"
-          hidden={s.id !== current}
-        >
-          <s.component {settings} />
-        </div>
-      {/each}
+      <div class="panels" bind:this={panels}>
+        {#each SECTIONS as s (s.id)}
+          <div
+            class="panel"
+            role="tabpanel"
+            id="settings-panel-{s.id}"
+            data-section={s.id}
+            aria-labelledby="settings-tab-{s.id}"
+            hidden={searching ? !found[s.id] : s.id !== current}
+          >
+            {#if searching}<h3 class="result-section">{s.label}</h3>{/if}
+            <div class="section-body"><s.component {settings} /></div>
+          </div>
+        {/each}
+      </div>
     </div>
   </div>
 </dialog>
@@ -146,6 +244,34 @@
   h2 {
     margin: 0;
     font-size: 1.1rem;
+  }
+  .search {
+    flex: 1;
+    min-width: 0;
+    margin: 0 0.75rem 0 1rem;
+    padding: 0.35rem 0.6rem;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+  }
+  .search::placeholder {
+    color: var(--muted);
+  }
+  .count {
+    flex: none;
+    margin: 0 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .result-section {
+    margin: 0.75rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
   .close {
     padding: 0.1rem 0.55rem;
@@ -190,9 +316,12 @@
     border-color: var(--border);
     border-left: 3px solid var(--accent);
   }
-  .panel {
+  /* The panels share one scroll: while searching, every section with a match is listed. */
+  .panels {
     min-height: 0;
     overflow-y: auto;
+  }
+  .panel {
     padding: 0.5rem 1.25rem 1rem;
   }
   /* Narrow windows: the section list becomes a row above the panel. */

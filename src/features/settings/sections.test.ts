@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SECTIONS } from "./registry";
-import { isSettingsShortcut, moveSection } from "./sections";
+import { isSearchShortcut, isSettingsShortcut, matchesSettingQuery, moveSection } from "./sections";
 
 const key = (k: string, mods: Partial<Record<"ctrlKey" | "altKey" | "metaKey" | "shiftKey" | "repeat", boolean>> = {}) => ({
   key: k,
@@ -13,8 +13,20 @@ const key = (k: string, mods: Partial<Record<"ctrlKey" | "altKey" | "metaKey" | 
 });
 
 describe("settings sections", () => {
-  it("lists Práctica, Código, Teclado, Apariencia, Metrónomo, IA and Perfiles in order, each with a unique id and a component", () => {
-    expect(SECTIONS.map((s) => s.label)).toEqual(["Práctica", "Código", "Teclado", "Apariencia", "Metrónomo", "IA", "Perfiles"]);
+  it("lists the reorganised sections in order, each with a unique id and a component", () => {
+    // "Organiza bien el menu de ajustes": what changes the practice text has its own section, and
+    // the accessibility aids sit together.
+    expect(SECTIONS.map((s) => s.label)).toEqual([
+      "Práctica",
+      "Texto",
+      "Teclado",
+      "Metrónomo",
+      "Código",
+      "Apariencia",
+      "Accesibilidad",
+      "IA",
+      "Perfiles",
+    ]);
     expect(new Set(SECTIONS.map((s) => s.id)).size).toBe(SECTIONS.length);
     for (const s of SECTIONS) expect(s.component).toBeTypeOf("function");
   });
@@ -49,5 +61,31 @@ describe("settings shortcut", () => {
     expect(isSettingsShortcut(key(",", { ctrlKey: true, shiftKey: true }))).toBe(false);
     expect(isSettingsShortcut(key(".", { ctrlKey: true }))).toBe(false);
     expect(isSettingsShortcut(key(",", { ctrlKey: true, repeat: true }))).toBe(false);
+  });
+});
+
+describe("settings search", () => {
+  // "añade un buscador rapido"
+  it("matches every word of the query, ignoring case and accents", () => {
+    const row = "Interlineado Texto de práctica: 1,75 (de 1,2 a 2,4).";
+    expect(matchesSettingQuery(row, "interlineado")).toBe(true);
+    expect(matchesSettingQuery(row, "PRACTICA")).toBe(true);
+    expect(matchesSettingQuery(row, "texto  inter")).toBe(true);
+    expect(matchesSettingQuery(row, "texto tema")).toBe(false);
+    expect(matchesSettingQuery("Modo daltónico", "daltonico")).toBe(true);
+    expect(matchesSettingQuery("Tamaño de letra", "tamano")).toBe(true);
+  });
+
+  it("focuses the search with plain Ctrl+F only", () => {
+    expect(isSearchShortcut(key("f", { ctrlKey: true }))).toBe(true);
+    expect(isSearchShortcut(key("F", { ctrlKey: true }))).toBe(true);
+    expect(isSearchShortcut(key("f"))).toBe(false);
+    expect(isSearchShortcut(key("f", { ctrlKey: true, shiftKey: true }))).toBe(false);
+    expect(isSearchShortcut(key("f", { ctrlKey: true, altKey: true }))).toBe(false);
+  });
+
+  it("matches everything for an empty or blank query", () => {
+    expect(matchesSettingQuery("Cursor", "")).toBe(true);
+    expect(matchesSettingQuery("Cursor", "   ")).toBe(true);
   });
 });
