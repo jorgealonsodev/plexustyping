@@ -1,6 +1,7 @@
 <script lang="ts">
   import { MAX_THEME_FILE_CHARS, THEMES, TOO_LARGE } from "../themes";
   import SettingField from "./SettingField.svelte";
+  import { TYPOGRAPHY_FIELDS, type Typography } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -33,6 +34,14 @@
       notice = { text: `No se pudo leer el archivo: ${String(err)}`, error: true };
     }
   }
+
+  const UNITS: Record<keyof Typography, string> = { fontScale: " %", letterSpacing: " em", lineHeight: "" };
+  /** A value as the hint shows it: Spanish decimal comma and its unit, e.g. `0,12 em`. */
+  const shown = (key: keyof Typography, value: number) => `${String(value).replace(".", ",")}${UNITS[key]}`;
+  const setTypography = (key: keyof Typography) => (e: Event & { currentTarget: HTMLInputElement }) => {
+    const value = e.currentTarget.valueAsNumber;
+    if (Number.isFinite(value)) settings.setTypography({ [key]: value });
+  };
 
   function remove(id: string) {
     settings.removeTheme(id);
@@ -80,9 +89,53 @@
 </SettingField>
 {#if notice}<p class="notice" class:error={notice.error} role={notice.error ? "alert" : "status"}>{notice.text}</p>{/if}
 
+<!-- Typography of the practice text, prose and code (a11y S4): applies live, out-of-range values are clamped. -->
+{#each TYPOGRAPHY_FIELDS as f (f.key)}
+  <SettingField
+    label={f.label}
+    hint="Texto de práctica: {shown(f.key, settings.typography[f.key])} (de {shown(f.key, f.min)} a {shown(f.key, f.max)})."
+  >
+    {#snippet children({ id, hintId })}
+      <input
+        type="range"
+        min={f.min}
+        max={f.max}
+        step={f.step}
+        value={settings.typography[f.key]}
+        aria-label="{f.label} (deslizador)"
+        oninput={setTypography(f.key)}
+      />
+      <input
+        {id}
+        type="number"
+        min={f.min}
+        max={f.max}
+        step={f.step}
+        value={settings.typography[f.key]}
+        aria-describedby={hintId}
+        onchange={setTypography(f.key)}
+      />
+    {/snippet}
+  </SettingField>
+{/each}
+
 <style>
   .picker {
     display: none;
+  }
+  input[type="number"] {
+    width: 4.5rem;
+    margin-left: 0.5rem;
+    padding: 0.3rem 0.4rem;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+  }
+  input[type="range"] {
+    width: 9rem;
+    accent-color: var(--accent);
   }
   button {
     padding: 0.25rem 0.6rem;

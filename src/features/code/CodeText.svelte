@@ -30,7 +30,7 @@
 </script>
 
 <!-- No whitespace inside: the block keeps every space and newline. -->
-<pre bind:this={block} class="code" aria-label="Código de práctica">{#each chars as c, i (i)}<span
+<pre bind:this={block} class="code">{#each chars as c, i (i)}<span
       class="ch {states[i]} syn-{classes[i]}"
       class:space={c === " "}
       class:nl={c === "\n"}
@@ -46,8 +46,10 @@
     max-height: max(8rem, 42vh);
     overflow: auto;
     font-family: var(--mono);
-    font-size: clamp(0.9rem, min(1.8vw, 3vh), 1.5rem);
-    line-height: 1.6;
+    /* Typography settings (a11y S4), set by the practice text region. */
+    font-size: calc(clamp(0.9rem, min(1.8vw, 3vh), 1.5rem) * var(--text-scale, 1));
+    letter-spacing: var(--text-spacing, 0);
+    line-height: var(--text-leading, 1.6);
     white-space: pre;
     tab-size: 4;
     background: var(--surface);

@@ -23,6 +23,15 @@ import {
   savePracticeKind,
   TARGET_COUNTS,
   TEXT_LENGTHS,
+  DEFAULT_TYPOGRAPHY,
+  SCREEN_READER_SETTING,
+  TYPOGRAPHY_FIELDS,
+  checkTypography,
+  loadScreenReader,
+  loadTypography,
+  saveScreenReader,
+  saveTypography,
+  typographyStyle,
   GHOST_SETTING,
   loadErrorMode,
   loadFlashes,
@@ -322,5 +331,70 @@ describe("language setting", () => {
     saveLanguage("fr", storage);
     expect(storage.getItem("plexustyping.language")).toBe("fr");
     expect(loadLanguage(storage)).toBe("fr");
+  });
+});
+
+describe("screen reader setting (a11y S3)", () => {
+  it("names the setting in Spanish", () => {
+    expect(SCREEN_READER_SETTING.label).toBe("Anunciar con lector de pantalla");
+  });
+
+  it("is off by default and persists the toggle, apart from the other toggles", () => {
+    const storage = memoryStorage();
+    expect(loadScreenReader(storage)).toBe(false);
+    expect(loadScreenReader(memoryStorage({ "plexustyping.screenReader": "yes" }))).toBe(false);
+    saveScreenReader(true, storage);
+    expect(storage.getItem("plexustyping.screenReader")).toBe("true");
+    expect(loadScreenReader(storage)).toBe(true);
+    expect([loadLiveStats(storage), loadFlashes(storage), loadHeatmap(storage)]).toEqual([true, true, false]);
+    saveScreenReader(false, storage);
+    expect(loadScreenReader(storage)).toBe(false);
+  });
+});
+
+describe("typography settings (a11y S4)", () => {
+  it("names the three settings with their ranges, steps and defaults", () => {
+    expect(TYPOGRAPHY_FIELDS).toEqual([
+      { key: "fontScale", label: "Tamaño de letra", min: 80, max: 200, step: 10 },
+      { key: "letterSpacing", label: "Espaciado entre letras", min: 0, max: 0.3, step: 0.02 },
+      { key: "lineHeight", label: "Interlineado", min: 1.2, max: 2.4, step: 0.1 },
+    ]);
+    expect(DEFAULT_TYPOGRAPHY).toEqual({ fontScale: 100, letterSpacing: 0, lineHeight: 1.75 });
+  });
+
+  it("defaults to 100 %, 0 em and the current 1.75 line height", () => {
+    expect(loadTypography(memoryStorage())).toEqual({ fontScale: 100, letterSpacing: 0, lineHeight: 1.75 });
+    expect(loadTypography(memoryStorage({ "plexustyping.typography": "{nope" }))).toEqual(DEFAULT_TYPOGRAPHY);
+  });
+
+  it("survives a reload through the storage helpers", () => {
+    const storage = memoryStorage();
+    const next = { fontScale: 150, letterSpacing: 0.12, lineHeight: 2.1 };
+    saveTypography(next, storage);
+    expect(loadTypography(storage)).toEqual(next);
+    saveTypography({ fontScale: 80, letterSpacing: 0.3, lineHeight: 1.2 }, storage);
+    expect(loadTypography(storage)).toEqual({ fontScale: 80, letterSpacing: 0.3, lineHeight: 1.2 });
+  });
+
+  it("clamps a stored value outside its range, and replaces a missing or non-numeric one by its default", () => {
+    const load = (value: unknown) => loadTypography(memoryStorage({ "plexustyping.typography": JSON.stringify(value) }));
+    expect(load({ fontScale: 300, letterSpacing: -1, lineHeight: 9 })).toEqual({ fontScale: 200, letterSpacing: 0, lineHeight: 2.4 });
+    expect(load({ fontScale: 10, letterSpacing: 0.5, lineHeight: 0.5 })).toEqual({ fontScale: 80, letterSpacing: 0.3, lineHeight: 1.2 });
+    expect(load({ fontScale: "big", lineHeight: null })).toEqual(DEFAULT_TYPOGRAPHY);
+    expect(load({ letterSpacing: 0.1 })).toEqual({ ...DEFAULT_TYPOGRAPHY, letterSpacing: 0.1 });
+  });
+
+  it("clamps a changed value and keeps the current one for an invalid one", () => {
+    const current = { fontScale: 120, letterSpacing: 0.04, lineHeight: 2 };
+    expect(checkTypography({ ...current, fontScale: 250 }, current)).toEqual({ ...current, fontScale: 200 });
+    expect(checkTypography({ ...current, lineHeight: Number.NaN }, current)).toEqual(current);
+    expect(checkTypography({ ...current, letterSpacing: 0.1 + 0.2 }, current)).toEqual({ ...current, letterSpacing: 0.3 });
+  });
+
+  it("turns the values into the practice text's CSS variables", () => {
+    expect(typographyStyle(DEFAULT_TYPOGRAPHY)).toBe("--text-scale: 1; --text-spacing: 0em; --text-leading: 1.75");
+    expect(typographyStyle({ fontScale: 150, letterSpacing: 0.12, lineHeight: 2.1 })).toBe(
+      "--text-scale: 1.5; --text-spacing: 0.12em; --text-leading: 2.1",
+    );
   });
 });

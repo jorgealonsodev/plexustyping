@@ -224,3 +224,66 @@ export function loadCodeLines(storage: Storage = localStorage): number {
 
 export const saveCodeLines = (lines: number, storage: Storage = localStorage) =>
   storage.setItem(CODE_LINES_KEY, String(lines));
+
+const SCREEN_READER_KEY = "plexustyping.screenReader";
+
+/** Ajustes → Práctica toggle of the screen reader mode (a11y S3). */
+export const SCREEN_READER_SETTING = {
+  label: "Anunciar con lector de pantalla",
+  hint: "Anuncia el siguiente carácter, los errores, cada texto nuevo y el resultado (aria-live).",
+};
+
+/** Whether the practice announces to screen readers (off unless turned on). */
+export const loadScreenReader = (storage: Storage = localStorage) => storage.getItem(SCREEN_READER_KEY) === "true";
+
+export const saveScreenReader = (on: boolean, storage: Storage = localStorage) => saveFlag(SCREEN_READER_KEY, on, storage);
+
+const TYPOGRAPHY_KEY = "plexustyping.typography";
+
+/** Size (% of the default), letter spacing (em) and line height of the practice text, prose and code (a11y S4). */
+export interface Typography {
+  fontScale: number;
+  letterSpacing: number;
+  lineHeight: number;
+}
+
+/** 100 %, no extra spacing and the line height the practice text always had (L3). */
+export const DEFAULT_TYPOGRAPHY: Typography = { fontScale: 100, letterSpacing: 0, lineHeight: 1.75 };
+
+/** The Ajustes → Apariencia rows in display order, with each range and step (a11y S4). */
+export const TYPOGRAPHY_FIELDS: { key: keyof Typography; label: string; min: number; max: number; step: number }[] = [
+  { key: "fontScale", label: "Tamaño de letra", min: 80, max: 200, step: 10 },
+  { key: "letterSpacing", label: "Espaciado entre letras", min: 0, max: 0.3, step: 0.02 },
+  { key: "lineHeight", label: "Interlineado", min: 1.2, max: 2.4, step: 0.1 },
+];
+
+/** `stored` with each value clamped to its range (to 2 decimals) and each non-number taken from `d`. */
+export function checkTypography(
+  stored: Partial<Record<keyof Typography, unknown>>,
+  d: Typography = DEFAULT_TYPOGRAPHY,
+): Typography {
+  const next = { ...d };
+  for (const { key, min, max } of TYPOGRAPHY_FIELDS) {
+    const value = stored[key];
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    next[key] = Math.round(Math.min(Math.max(value, min), max) * 100) / 100;
+  }
+  return next;
+}
+
+export function loadTypography(storage: Storage = localStorage): Typography {
+  let stored: Partial<Record<keyof Typography, unknown>> = {};
+  try {
+    stored = JSON.parse(storage.getItem(TYPOGRAPHY_KEY) ?? "{}") ?? {};
+  } catch {
+    // Corrupt value: defaults.
+  }
+  return checkTypography(typeof stored === "object" ? stored : {});
+}
+
+export const saveTypography = (typography: Typography, storage: Storage = localStorage) =>
+  storage.setItem(TYPOGRAPHY_KEY, JSON.stringify(typography));
+
+/** The CSS variables the prose and code practice text read. */
+export const typographyStyle = (t: Typography) =>
+  `--text-scale: ${t.fontScale / 100}; --text-spacing: ${t.letterSpacing}em; --text-leading: ${t.lineHeight}`;

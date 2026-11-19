@@ -62,6 +62,12 @@ import {
   saveShowKeyboard,
   saveTargetCount,
   saveTextLength,
+  type Typography,
+  checkTypography,
+  loadScreenReader,
+  loadTypography,
+  saveScreenReader,
+  saveTypography,
 } from "./settings";
 
 /** The live, persisted settings shared by the app and every settings section. Layout, language and
@@ -118,6 +124,10 @@ export class SettingsStore {
   codeLanguage = $state(loadCodeLanguage());
   codeIndent = $state<IndentMode>(loadCodeIndent());
   codeLines = $state(loadCodeLines());
+  /** Screen reader announcements in the practice (a11y S3); off by default. */
+  screenReader = $state(loadScreenReader());
+  /** Size, letter spacing and line height of the practice text, prose and code (a11y S4). */
+  typography = $state.raw<Typography>(loadTypography());
   /** Bumped whenever AI settings or keys change: a prefetched next text is then stale. */
   aiRevision = $state(0);
   /** The stored `AiSettings.enabled`, shared by the header "IA" toggle and Ajustes → IA; `null` until loaded. */
@@ -366,6 +376,17 @@ export class SettingsStore {
       if (result.appearance) this.activate(result.active, result.appearance);
       else this.activeProfile = result.active;
     });
+  }
+
+  setScreenReader(on: boolean) {
+    this.screenReader = on;
+    saveScreenReader(on);
+  }
+
+  /** Applies live; a value outside its range is clamped, an invalid one keeps the current value. */
+  setTypography(patch: Partial<Typography>) {
+    this.typography = checkTypography({ ...this.typography, ...patch }, this.typography);
+    saveTypography(this.typography);
   }
 
   setHeatmap(on: boolean) {

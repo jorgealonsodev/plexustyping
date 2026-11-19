@@ -46,11 +46,20 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
   window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
-  targets per text (2 or 3), text length (100–600 characters), live stats and
-  the ghost session (on by default).
+  targets per text (2 or 3), text length (100–600 characters), live stats,
+  the ghost session (on by default) and "Anunciar con lector de pantalla"
+  (off by default): a polite `aria-live` region then announces the next
+  character after each keystroke («siguiente: a», with spoken names such as
+  "espacio", "salto de línea", "tabulador" or "coma"), each wrong key
+  («error: esperaba e, pulsaste r»), the start of a new text and the result
+  line; while off it is not rendered and announces nothing. The typing field
+  is described by the practice text region.
   "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
   colour themes, dark and light, switched live, plus themes imported from
-  VS Code (see below). Everything is remembered
+  VS Code (see below), and the typography of the practice text, prose and
+  code, applied live: "Tamaño de letra" (80–200 %, default 100),
+  "Espaciado entre letras" (0–0.30 em, default 0) and "Interlineado"
+  (1.2–2.4, default 1.75); a value outside its range is clamped. Everything is remembered
   locally; targets and length apply from the next text. `Escape`, `×` or a
   click outside closes the window and returns to the text. "IA" and
   "Metrónomo": see below.

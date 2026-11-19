@@ -56,6 +56,16 @@ const bs = (tMs = 0): InputEvent => ({ kind: "backspace", tMs });
 const states = (s: TypingSession) => s.chars.map((_, i) => s.state(i));
 
 describe("TypingSession display state", () => {
+  it("exposes the latest keystroke record for the screen reader mode (a11y S3)", () => {
+    const s = new TypingSession("el", "stop-on-error");
+    expect(s.lastRecord).toBeUndefined();
+    s.apply(ch("r", 3));
+    expect(s.lastRecord).toMatchObject({ index: 0, expected: "e", typed: "r", correct: false });
+    s.apply(ch("e", 7));
+    expect(s.lastRecord).toMatchObject({ index: 0, expected: "e", typed: "e", correct: true });
+    expect(s.result().records).toHaveLength(2);
+  });
+
   it("marks typed positions correct or wrong and the rest pending (allow-continue)", () => {
     const s = new TypingSession("hola", "allow-continue");
     expect([s.apply(ch("h", 5)), s.apply(ch("x", 9))]).toEqual([true, true]);

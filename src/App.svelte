@@ -246,6 +246,10 @@
     profileRevision={settings.profileRevision}
     unlock={settings.unlock}
     onSaved={() => settings.sessionSaved()}
+    screenReader={settings.screenReader}
+    fontScale={settings.typography.fontScale}
+    letterSpacing={settings.typography.letterSpacing}
+    lineHeight={settings.typography.lineHeight}
   />
 {/if}
 

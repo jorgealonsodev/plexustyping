@@ -6,6 +6,8 @@
   import { type Flash, highlightsFor, keyForChar } from "../keyboard/keys";
   import type { KeyPress, Layout } from "../keyboard/types";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
+  import { freshen, keystrokeMessage, liveText, newTextMessage, resultMessage } from "./announce";
+  import { DEFAULT_TYPOGRAPHY, typographyStyle } from "../settings/settings";
   import {
     type PracticeText,
     type ScoredSession,
@@ -70,6 +72,10 @@
     unlock = null,
     onSaved,
     loadingText = $bindable(null),
+    screenReader = false,
+    fontScale = DEFAULT_TYPOGRAPHY.fontScale,
+    letterSpacing = DEFAULT_TYPOGRAPHY.letterSpacing,
+    lineHeight = DEFAULT_TYPOGRAPHY.lineHeight,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -105,7 +111,24 @@
     onSaved?: () => Promise<boolean>;
     /** Out: the loading label ("Cargando texto…", "Generando texto…") while a text loads, else `null`. */
     loadingText?: string | null;
+    /** Screen reader mode (a11y S3): a polite live region announces the next char, errors, new texts and results. */
+    screenReader?: boolean;
+    /** Practice text size in % (80–200), letter spacing in em and line height, prose and code (a11y S4). */
+    fontScale?: number;
+    letterSpacing?: number;
+    lineHeight?: number;
   } = $props();
+
+  // The practice text region; the typing field is described by it (a11y S3).
+  const uid = $props.id();
+  const textId = `${uid}-text`;
+  const textStyle = $derived(typographyStyle({ fontScale, letterSpacing, lineHeight }));
+  // What the live region says; nothing is announced while the setting is off.
+  let announcement = $state("");
+  function announce(message: string) {
+    if (!screenReader || !message) return;
+    announcement = freshen(message, announcement);
+  }
 
   // The metronome plays only while a text is ready or being typed and the window is visible (S7).
   let visible = $state(!document.hidden);
@@ -217,6 +240,7 @@
     goalMet = false;
     phase = "typing";
     tick++;
+    announce(newTextMessage(session.chars));
     fetchGhost(text, textMode);
   }
 
@@ -328,6 +352,7 @@
       weak = [];
       goalMet = false;
       phase = "results";
+      announce(resultMessage(result.result.stats));
       refreshModel(id);
       if (result.saved && onSaved)
         onSaved()
@@ -347,6 +372,7 @@
   function applyEvent(event: TypingEvent) {
     if (phase !== "typing" || !session) return;
     const expected = session.chars[session.cursor];
+    const before = session.cursor;
     const first = session.firstT === null;
     // Chars and Tabs are measured keystrokes (records); backspaces are not.
     const beat = event.kind === "backspace" ? null : anchor;
@@ -356,6 +382,9 @@
     if (!session.apply(event)) return;
     now = event.tMs;
     tick++;
+    const record = event.kind === "backspace" ? undefined : session.lastRecord;
+    const wrong = record && !record.correct ? record : null;
+    announce(keystrokeMessage(wrong, session.chars[session.cursor], session.cursor !== before));
     if (race && session.firstT !== null) {
       race.passed(session.cursor, event.tMs - session.firstT);
       ghostDelta = race.delta;
@@ -462,6 +491,11 @@
 
   $effect(() => {
     loadingText = phase === "loading" ? loadingLabel : null;
+  });
+
+  // Turning the screen reader mode off drops what it would still say.
+  $effect(() => {
+    if (!screenReader) announcement = "";
   });
 
   /** Drops the current text (unscored) and loads a new one; ignored while a text loads or is scored. */
@@ -584,6 +618,7 @@
   bind:this={field}
   class="capture"
   aria-label="Entrada de mecanografía"
+  aria-describedby={textId}
   autocomplete="off"
   {...noAutocorrect}
   autocapitalize="off"
@@ -591,6 +626,11 @@
   oninput={onInput}
   oncompositionend={takeText}
 ></textarea>
+
+{#if screenReader}
+  <!-- Screen reader mode (a11y S3): not rendered while the setting is off, so nothing is announced. -->
+  <div class="sr-only" aria-live="polite" aria-atomic="true">{liveText(screenReader, announcement)}</div>
+{/if}
 
 <main>
   <section class="practice">
@@ -639,11 +679,13 @@
       {#if unlockLine}<p class="kind" aria-label="Desbloqueo progresivo">{unlockLine}</p>{/if}
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
       {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
+      <!-- A named region (a11y S3) carrying the typography variables (a11y S4) for prose and code. -->
+      <div id={textId} role="region" aria-label={isCode ? "Código de práctica" : "Texto de práctica"} style={textStyle}>
       {#if isCode}
         <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} />
       {:else}
         <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
-        <p class="text" aria-label="Texto de práctica" bind:this={proseText}>{#each session.chars as c, i (i)}<span
+        <p class="text" bind:this={proseText}>{#each session.chars as c, i (i)}<span
               class="ch {view.states[i]}"
               class:space={c === " "}
               class:cursor={i === view.cursor}
@@ -651,6 +693,7 @@
               class:ghost-end={ghostEnd && i === ghostIndex}>{c}</span
             >{/each}</p>
       {/if}
+      </div>
       <p class="hint">
         {#if phase === "scoring"}Calculando resultado…{:else}{typingHint(view.cursor !== 0, isCode)}{/if}
       </p>
@@ -665,6 +708,18 @@
 {/if}
 
 <style>
+  /* Read by screen readers, never shown. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
   /* Focusable but invisible: it only collects typed and composed text. */
   .capture {
     position: fixed;
@@ -729,8 +784,9 @@
     margin: 0;
     font-family: var(--mono);
     /* Also scales with the height, so the text and the keyboard fit at 720×480. */
-    font-size: clamp(1rem, min(2.4vw, 4vh), 2rem);
-    line-height: 1.75;
+    font-size: calc(clamp(1rem, min(2.4vw, 4vh), 2rem) * var(--text-scale, 1));
+    letter-spacing: var(--text-spacing, 0);
+    line-height: var(--text-leading, 1.75);
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
@@ -753,7 +809,7 @@
   /* A soft tint with an underline bar: marks the next char without pulling the eye. */
   .cursor {
     /* Scrolling into view also shows the following line. */
-    scroll-margin-block: 1.75em;
+    scroll-margin-block: calc(var(--text-leading, 1.75) * 1em);
     color: var(--text);
     background: color-mix(in srgb, var(--cursor) 18%, transparent);
     box-shadow: inset 0 -0.12em var(--cursor);

@@ -72,6 +72,11 @@ export class TypingSession {
     this.autoFilled = this.chars.map(() => false);
   }
 
+  /** The record of the latest char or Tab keystroke, for the screen reader mode (a11y S3). */
+  get lastRecord(): Readonly<KeystrokeRecord> | undefined {
+    return this.records.at(-1);
+  }
+
   get completed(): boolean {
     return this.cursor === this.chars.length;
   }

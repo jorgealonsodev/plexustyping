@@ -57,7 +57,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 |---|---|---|---|---|---|
 | T1 | S1 | Contrast guard for derived theme colours, all-themes AA vitest, CodeText comment/plain colours | writer A (parallel with T2) | done | see L5 |
 | T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
-| T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | pending | |
+| T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | done | see L6 |
 | T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | pending | |
 | T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | pending | |
 
@@ -95,3 +95,16 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
   - RED: 57/57 themes failing (2047 pairs). GREEN: `contrast.test.ts` sweeps all 57 themes and the imported VS Code path. The tightest heat tint is catppuccin-frappe at 4.50.
   - Checks: vitest 376/376, check 0.
   - Note: Mocha `--text-pending` and `--muted` now nearly match (both stop at 4.5 on `--surface-2`).
+- **L6 (evidence, 2026-11-19):** T3 done.
+  - Announcement wording lives in the pure module `src/features/practice/announce.ts` (12 vitest): spoken names, «siguiente: a», «error: esperaba e, pulsaste r», new text and the result line.
+  - The live region is polite, atomic and rendered only while the setting is on.
+  - The practice text is a `role="region"` wrapper named «Texto de práctica» or «Código de práctica», and the typing field points to it with `aria-describedby`.
+  - Typography: `settings.ts` `loadTypography`/`checkTypography` clamp the values and keep the defaults {100, 0, 1.75}.
+  - Settings UI: "Anunciar con lector de pantalla" in Práctica; the three typography rows in Apariencia.
+  - App.svelte only passes the four new props.
+  - RED: 8 settings tests plus the missing announce module. Checks: vitest 397/397, check 0.
+  - Parent decisions (q1, q2): the props are passed from App.svelte (no global state). One line height for prose and code, default 1.75, so code moves from 1.6 to 1.75 at the default.
+  - Known limits:
+    - No screen-reader or GUI check yet (Orca).
+    - Restarting the same text also announces "Texto nuevo…".
+    - `aria-describedby` makes the screen reader read the whole text as the field description.

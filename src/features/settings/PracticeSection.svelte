@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ErrorMode } from "../practice/engine";
   import SettingField from "./SettingField.svelte";
-  import { ERROR_MODES, GHOST_SETTING, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
+  import { ERROR_MODES, GHOST_SETTING, LANGUAGES, SCREEN_READER_SETTING, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
   import type { UnlockChange } from "../unlock/api";
   import { DEFAULT_TARGET_WPM, TARGET_SETTING, TARGET_WPMS, UNLOCK_SETTING } from "../unlock/unlock";
@@ -95,6 +95,19 @@
       aria-describedby={hintId}
       checked={settings.ghost}
       onchange={(e: Change<HTMLInputElement>) => settings.setGhost(e.currentTarget.checked)}
+    />
+  {/snippet}
+</SettingField>
+
+<!-- Screen reader mode (a11y S3): a polite aria-live region in the practice; silent while off. -->
+<SettingField toggle label={SCREEN_READER_SETTING.label} hint={SCREEN_READER_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={settings.screenReader}
+      onchange={(e: Change<HTMLInputElement>) => settings.setScreenReader(e.currentTarget.checked)}
     />
   {/snippet}
 </SettingField>
