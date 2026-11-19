@@ -80,6 +80,8 @@
     letterSpacing = DEFAULT_TYPOGRAPHY.letterSpacing,
     lineHeight = DEFAULT_TYPOGRAPHY.lineHeight,
     fontId = DEFAULT_FONT_ID,
+    cursorStyle = "highlight",
+    cursorBlink = false,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -127,6 +129,9 @@
     lineHeight?: number;
     /** Practice font id (practice-font S1); an unknown id is the default. */
     fontId?: string;
+    /** Cursor look id and blink (cursor-style S1, S2), read by the `data-cursor` rules below and in CodeText. */
+    cursorStyle?: string;
+    cursorBlink?: boolean;
   } = $props();
 
   // The practice text region; the typing field is described by it (a11y S3).
@@ -692,7 +697,14 @@
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
       {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
       <!-- A named region (a11y S3) carrying the typography variables (a11y S4) for prose and code. -->
-      <div id={textId} role="region" aria-label={isCode ? "Código de práctica" : "Texto de práctica"} style={textStyle}>
+      <div
+        id={textId}
+        role="region"
+        aria-label={isCode ? "Código de práctica" : "Texto de práctica"}
+        style={textStyle}
+        data-cursor={cursorStyle}
+        data-cursor-blink={cursorBlink || undefined}
+      >
       {#if isCode}
         <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} dim={dimPending} />
       {:else}
@@ -836,6 +848,42 @@
   .cursor.error {
     background: color-mix(in srgb, var(--text-error) 22%, transparent);
     box-shadow: inset 0 -0.12em var(--text-error);
+  }
+  /* Cursor styles (cursor-style S1, S2): --cur is the cursor colour, or the error colour on a wrong char.
+     Shadows and backgrounds only, so no style changes the char's width. */
+  .cursor {
+    --cur: var(--cursor);
+  }
+  .cursor.error {
+    --cur: var(--text-error);
+  }
+  :global([data-cursor="bar"]) .cursor {
+    background: transparent;
+    box-shadow: inset 0.12em 0 var(--cur);
+  }
+  :global([data-cursor="block"]) .cursor {
+    color: var(--bg);
+    background: var(--cur);
+    box-shadow: none;
+  }
+  :global([data-cursor="underline"]) .cursor {
+    background: transparent;
+    box-shadow: inset 0 -0.15em var(--cur);
+  }
+  :global([data-cursor="outline"]) .cursor {
+    background: transparent;
+    box-shadow: inset 0 0 0 0.08em var(--cur);
+  }
+  /* About once a second; the global prefers-reduced-motion rule stops it (a11y S6). */
+  :global([data-cursor-blink]) .cursor {
+    animation: cursor-blink 1.06s steps(1) infinite;
+  }
+  @keyframes cursor-blink {
+    50% {
+      color: var(--text);
+      background: transparent;
+      box-shadow: none;
+    }
   }
   /* The ghost cursor (S4): a translucent frame; after the last char once the record finished. */
   .ghost {

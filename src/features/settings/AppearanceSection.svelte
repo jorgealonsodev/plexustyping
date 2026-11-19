@@ -3,6 +3,7 @@
   import SettingField from "./SettingField.svelte";
   import { DIM_PENDING_SETTING, TYPOGRAPHY_FIELDS, type Typography } from "./settings";
   import { FONT_GROUPS, FONT_SETTING, PRACTICE_FONTS, fontById } from "./fonts";
+  import { CURSOR_BLINK_SETTING, CURSOR_SETTING, CURSOR_STYLES } from "./cursor";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -93,6 +94,33 @@
 {#if notice}<p class="notice" class:error={notice.error} role={notice.error ? "alert" : "status"}>{notice.text}</p>{/if}
 
 <!-- Pending practice text dimmed below AA (a11y S7): on by default, off restores the AA colours. -->
+<!-- Look of the typing cursor, prose and code (cursor-style S1, S2). -->
+<SettingField label={CURSOR_SETTING.label} hint={CURSOR_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <select
+      {id}
+      aria-describedby={hintId}
+      onchange={(e: Event & { currentTarget: HTMLSelectElement }) => settings.setCursorStyle(e.currentTarget.value)}
+    >
+      {#each CURSOR_STYLES as c (c.id)}
+        <option value={c.id} selected={c.id === settings.cursorStyle}>{c.name}</option>
+      {/each}
+    </select>
+  {/snippet}
+</SettingField>
+
+<SettingField toggle label={CURSOR_BLINK_SETTING.label} hint={CURSOR_BLINK_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={settings.cursorBlink}
+      onchange={(e: Event & { currentTarget: HTMLInputElement }) => settings.setCursorBlink(e.currentTarget.checked)}
+    />
+  {/snippet}
+</SettingField>
+
 <SettingField toggle label={DIM_PENDING_SETTING.label} hint={DIM_PENDING_SETTING.hint}>
   {#snippet children({ id, hintId })}
     <input

@@ -253,6 +253,8 @@
     letterSpacing={settings.typography.letterSpacing}
     lineHeight={settings.typography.lineHeight}
     fontId={settings.practiceFont}
+    cursorStyle={settings.cursorStyle}
+    cursorBlink={settings.cursorBlink}
   />
 {/if}
 

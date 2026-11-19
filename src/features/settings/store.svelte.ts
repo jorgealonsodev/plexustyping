@@ -75,6 +75,7 @@ import {
   saveTypography,
 } from "./settings";
 import { loadPracticeFont, savePracticeFont } from "./fonts";
+import { loadCursorBlink, loadCursorStyle, saveCursorBlink, saveCursorStyle } from "./cursor";
 
 /** The live, persisted settings shared by the app and every settings section. Layout, language and
  * theme belong to the active profile (S5); the settings storage keeps them only as the first-paint cache. */
@@ -140,6 +141,9 @@ export class SettingsStore {
   typography = $state.raw<Typography>(loadTypography());
   /** Typeface id of the practice text, prose and code (practice-font S1). */
   practiceFont = $state(loadPracticeFont());
+  /** Look of the typing cursor and whether it blinks (cursor-style S1, S2). */
+  cursorStyle = $state(loadCursorStyle());
+  cursorBlink = $state(loadCursorBlink());
   /** Bumped whenever AI settings or keys change: a prefetched next text is then stale. */
   aiRevision = $state(0);
   /** The stored `AiSettings.enabled`, shared by the header "IA" toggle and Ajustes → IA; `null` until loaded. */
@@ -415,6 +419,16 @@ export class SettingsStore {
   setPracticeFont(id: string) {
     this.practiceFont = id;
     savePracticeFont(id);
+  }
+
+  setCursorStyle(id: string) {
+    this.cursorStyle = id;
+    saveCursorStyle(id);
+  }
+
+  setCursorBlink(on: boolean) {
+    this.cursorBlink = on;
+    saveCursorBlink(on);
   }
 
   setHeatmap(on: boolean) {

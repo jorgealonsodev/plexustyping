@@ -120,6 +120,7 @@
     box-shadow: inset 0 -0.12em var(--cursor);
     border-radius: 0.1em;
   }
+
   /* The ghost cursor (S4): a translucent frame; after the last char once the record finished. */
   .ghost {
     outline: 0.08em solid color-mix(in srgb, var(--cursor) 45%, transparent);
@@ -139,5 +140,41 @@
     color: var(--text-error);
     background: color-mix(in srgb, var(--text-error) 22%, transparent);
     box-shadow: inset 0 -0.12em var(--text-error);
+  }
+  /* Cursor styles (cursor-style S1, S2): --cur is the cursor colour, or the error colour on a wrong char.
+     Shadows and backgrounds only, so no style changes the char's width. */
+  .cursor {
+    --cur: var(--cursor);
+  }
+  .cursor.error {
+    --cur: var(--text-error);
+  }
+  :global([data-cursor="bar"]) .cursor {
+    background: transparent;
+    box-shadow: inset 0.12em 0 var(--cur);
+  }
+  :global([data-cursor="block"]) .cursor {
+    color: var(--bg);
+    background: var(--cur);
+    box-shadow: none;
+  }
+  :global([data-cursor="underline"]) .cursor {
+    background: transparent;
+    box-shadow: inset 0 -0.15em var(--cur);
+  }
+  :global([data-cursor="outline"]) .cursor {
+    background: transparent;
+    box-shadow: inset 0 0 0 0.08em var(--cur);
+  }
+  /* About once a second; the global prefers-reduced-motion rule stops it (a11y S6). */
+  :global([data-cursor-blink]) .cursor {
+    animation: cursor-blink 1.06s steps(1) infinite;
+  }
+  @keyframes cursor-blink {
+    50% {
+      color: var(--syn);
+      background: transparent;
+      box-shadow: none;
+    }
   }
 </style>
