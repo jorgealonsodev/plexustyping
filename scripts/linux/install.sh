@@ -29,7 +29,8 @@ fi
 src=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 dest="$HOME/.local"
 manifest="$dest/share/plexustyping/install-manifest"
-icon_sizes=(16x16 24x24 32x32 48x48 64x64 128x128 256x256 512x512)
+# The sizes package-linux-tarball.sh ships (fallback uninstall without a manifest).
+icon_sizes=(32x32 64x64 128x128 256x256 512x512)
 
 created_dirs=()
 installed_files=()
@@ -54,6 +55,8 @@ desktop_quote() {
   s=${s//\`/\\\`}
   s=${s//\$/\\\$}
   s=${s//\\/\\\\}
+  # A literal % is %% in Exec; a single one would start a field code.
+  s=${s//%/%%}
   printf '"%s"' "$s"
 }
 
@@ -97,7 +100,9 @@ do_install() {
   {
     printf 'd %s\n' "${created_dirs[@]+"${created_dirs[@]}"}" | LC_ALL=C sort -u
     printf 'f %s\n' "${installed_files[@]}"
-  } | grep -v '^d $' >"$manifest" || true
+  } | grep -v '^d $' >"$manifest.tmp" ||
+    { echo "Error: no se pudo escribir $manifest; PlexusTyping está instalado, pero --uninstall no sabrá qué carpetas quitar." >&2; exit 1; }
+  mv "$manifest.tmp" "$manifest"
 
   echo "PlexusTyping instalado en $dest/bin/plexustyping"
   case ":${PATH:-}:" in

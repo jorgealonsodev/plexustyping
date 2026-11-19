@@ -30,7 +30,12 @@ in_ldconfig() {
   fi
   local listing
   listing=$("$cmd" -p 2>/dev/null) || return 1
-  [[ "$listing" == *"$lib"* ]]
+  # Only the 64-bit library counts: the binary is x86_64 and cannot load an i386 one.
+  local line
+  while IFS= read -r line; do
+    [[ "$line" == *"$lib"* && "$line" == *x86-64* ]] && return 0
+  done <<<"$listing"
+  return 1
 }
 
 in_lib_dirs() {

@@ -91,3 +91,10 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
   - The AI autofill wiring has no component test.
 
   The .deb was rebuilt with the fonts: 12.5 MB, `Depends: libwebkit2gtk-4.1-0, libgtk-3-0`. Waiting for the user's try-out before the merge and the tag.
+- **L8 (review follow-up, 2026-11-19):** advisories fixed:
+  - install.sh doubles `%` in Exec.
+  - A failed manifest write now stops with a Spanish error; the manifest is written to a temporary file and moved into place.
+  - The fallback icon sizes match the packager (32–512).
+  - The launcher accepts only an x86-64 ldconfig entry, so a 32-bit-only WebKitGTK gives the missing-library message.
+
+  RED: 3 of 62 checks failed. GREEN: 62/62, shellcheck clean. Still open: a reinstall drops the file records of an older layout, and the `gh release view` error is hidden.

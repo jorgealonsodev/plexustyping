@@ -55,7 +55,13 @@ cat >"$work/tools/ldconfig-webkit" <<'EOF'
 echo "1 libs found in cache"
 echo "	libwebkit2gtk-4.1.so.0 (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0"
 EOF
-chmod +x "$work/tools/ldconfig-empty" "$work/tools/ldconfig-webkit"
+# Only the 32-bit library: the x86_64 binary could not load it.
+cat >"$work/tools/ldconfig-webkit32" <<'EOF'
+#!/bin/sh
+echo "1 libs found in cache"
+echo "	libwebkit2gtk-4.1.so.0 (libc6) => /usr/lib/i386-linux-gnu/libwebkit2gtk-4.1.so.0"
+EOF
+chmod +x "$work/tools/ldconfig-empty" "$work/tools/ldconfig-webkit" "$work/tools/ldconfig-webkit32"
 : >"$work/libs/libwebkit2gtk-4.1.so.0"
 
 # --- packager: usage errors -------------------------------------------------
@@ -154,6 +160,14 @@ expect_eq "launcher without a terminal still exits 1" 1 "$code"
 check "launcher without a terminal shows the message with zenity" grep -q "WebKitGTK 4.1" "$work/gui/zenity.args"
 
 set +e
+PLEXUSTYPING_LDCONFIG="$work/tools/ldconfig-webkit32" PLEXUSTYPING_LIB_DIRS="$work/nolibs" \
+  "$pkg/plexustyping" >/dev/null 2>"$work/stderr32"
+code=$?
+set -e
+expect_eq "launcher treats a 32-bit-only WebKitGTK as missing" 1 "$code"
+expect_eq "launcher 32-bit-only message" "$missing_msg" "$(cat "$work/stderr32")"
+
+set +e
 stdout=$(PLEXUSTYPING_LDCONFIG="$work/tools/no-such-ldconfig" \
   PLEXUSTYPING_LIB_DIRS="$work/nolibs" "$pkg/plexustyping" 2>"$work/stderr")
 code=$?
@@ -183,6 +197,14 @@ expect_eq "launcher through a symlink" "fake-bin" "$stdout"
 
 # --- install.sh -----------------------------------------------------------------
 snapshot() { (cd "$1" && find . -mindepth 1 | LC_ALL=C sort); }
+
+# A "%" in HOME is doubled in Exec, so launchers do not read it as a field code.
+pct="$work/home 100%"
+mkdir -p "$pct"
+HOME="$pct" "$pkg/install.sh" >/dev/null
+check "install.sh doubles % in the Exec path" grep -qF 'Exec="'"$work"'/home 100%%/.local/bin/plexustyping"' \
+  "$pct/.local/share/applications/plexustyping.desktop"
+HOME="$pct" "$pkg/install.sh" --uninstall >/dev/null
 
 home="$work/home with space"
 mkdir -p "$home/.local/bin" "$home/Documents"
