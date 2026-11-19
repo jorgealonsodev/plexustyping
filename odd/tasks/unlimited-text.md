@@ -26,6 +26,11 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
     - `tail` is the last ≤ 400 characters of the current text; the backend refuses more than 2000 with a Spanish error.
   - Validation is the same as `next_text`: unknown language or layout gives the existing errors. Usage is counted as for `next_text`.
   - Privacy: the tail is generated text, never typed input.
+- **S5 — Hardening (review-fc4bf6e9e18ff737 advisories).**
+  - In unlimited mode, reaching the end of the text never finishes the session. The typing waits at the end with a quiet "Generando más texto…" line, keeps accepting Esc and "Terminar", and goes on as soon as the continuation arrives.
+  - The first continuation is requested when at most 400 characters remain ahead, not only at half of the text, so a slow AI chain has more room.
+  - A continuation that arrives without a notice clears the previous continuation notice.
+  - Ending a session scores only the events up to the cursor's last position, so a wrong keystroke right before Esc, or erased characters past the cursor, never make the replay of the prefix fail. The backend replay of the prefix must succeed for every error mode (backspace-correct, stop-on-error, allow-continue) and is tested with each.
 
 ## Tasks
 
@@ -33,6 +38,7 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
 |---|---|---|---|---|---|
 | T1 | S1 (backend), S2 (continuation), S4 | Length clamp to 2000, `continue_text` command, continuation prompt (AI crate), corpus and words fallback, tests | worker A (parallel) | done | see L4 |
 | T2 | S1 (frontend), S2 (session growth), S3 | Length choices with "Ilimitado", engine `extend`, Practice wiring (trigger at half, append, end with Esc or Terminar, score the prefix, ghost and adaptive off), api `continueText`, hint, README, tests | worker B (parallel) | done | see L4 |
+| T4 | S5 | Hardening of the unlimited session | worker | pending | |
 | T3 | S1–S4 | Integration: cargo, clippy, vitest, check, build; .deb for the user's try-out | parent | done | see L4 |
 
 ## Log
