@@ -22,8 +22,17 @@ describe("continue_text binding (unlimited S4)", () => {
     backend.reply = () => Promise.resolve(reply);
     await expect(continueText("es", "es-qwerty", "words", "cola", 3, 42)).resolves.toEqual(reply);
     expect(backend.calls).toEqual([
-      ["continue_text", { language: "es", layout: "es-qwerty", mode: "words", tail: "cola", targetCount: 3, seed: 42, day: localDay() }],
+      [
+        "continue_text",
+        { language: "es", layout: "es-qwerty", mode: "words", tail: "cola", targetCount: 3, seed: 42, day: localDay(), offline: false },
+      ],
     ]);
+  });
+
+  it("asks offline to chain corpus texts after the AI failed (\"si no esta por ia, vamos encadenando textos no ia\")", async () => {
+    backend.reply = () => Promise.resolve({ text: "más", targets: [], source: "corpus" });
+    await continueText("es", "es-qwerty", "prose", "cola", 2, 7, true);
+    expect(backend.calls.at(-1)?.[1]).toMatchObject({ offline: true });
   });
 
   it("passes a backend error through", async () => {

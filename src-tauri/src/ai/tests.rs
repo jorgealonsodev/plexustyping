@@ -1071,6 +1071,7 @@ fn continue_params(seed: u64, mode: ContinueMode) -> ContinueParams {
         target_count: 3,
         seed,
         day: DAY.into(),
+        offline: false,
     }
 }
 
@@ -1204,6 +1205,26 @@ async fn an_unusable_or_disabled_ai_continues_from_the_corpus_without_any_reques
             .unwrap()
             .is_some()
     );
+}
+
+#[tokio::test]
+async fn an_offline_continuation_chains_a_corpus_text_without_asking_the_ai() {
+    // "si no esta por ia, vamos encadenando textos no ia": after a failed or slow AI reply the
+    // frontend asks offline, and the AI is never called even though it is on and usable.
+    let srv = server(vec![(OPENAI, 200, chat_reply(&long_ai_text()))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let params = ContinueParams {
+        offline: true,
+        ..continue_params(4, ContinueMode::Prose)
+    };
+    let got = continue_text(&state, &params).await.unwrap();
+    assert_eq!(got, continuation_expected(&state, 4, false));
+    assert!(srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
 }
 
 #[tokio::test]

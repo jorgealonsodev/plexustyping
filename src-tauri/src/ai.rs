@@ -848,6 +848,8 @@ pub struct ContinueParams {
     pub seed: u64,
     /// The user's local day, `YYYY-MM-DD`, for the usage counters.
     pub day: String,
+    /// Skip the AI: the frontend asks so after a failed or slow continuation, chaining corpus texts.
+    pub offline: bool,
 }
 
 /// An AI text for `request` through the usable chain of `settings`, with its
@@ -976,7 +978,7 @@ pub async fn continue_text(state: &AppState, p: &ContinueParams) -> Result<NextT
         }
     }
     let plan = Plan::Prose(plan);
-    if !settings.enabled {
+    if !settings.enabled || p.offline {
         return plan.corpus(p.seed);
     }
     let restricted = restriction.as_ref().is_some_and(|r| !r.all_letters);

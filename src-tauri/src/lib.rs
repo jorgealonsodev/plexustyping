@@ -126,6 +126,7 @@ async fn continue_text(
     target_count: usize,
     seed: u64,
     day: String,
+    offline: Option<bool>,
 ) -> Result<NextText, String> {
     let params = ContinueParams {
         language,
@@ -135,6 +136,7 @@ async fn continue_text(
         target_count,
         seed,
         day,
+        offline: offline.unwrap_or(false),
     };
     ai::continue_text(&state, &params).await
 }

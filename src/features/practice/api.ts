@@ -87,7 +87,9 @@ export const continueText = (
   tail: string,
   targetCount: number,
   seed: number,
-) => invoke<PracticeText>("continue_text", { language, layout, mode, tail, targetCount, seed, day: localDay() });
+  /** Skip the AI and chain a corpus text (after a failed or slow continuation). */
+  offline = false,
+) => invoke<PracticeText>("continue_text", { language, layout, mode, tail, targetCount, seed, day: localDay(), offline });
 
 /** How a text was typed: prose, words or code of a language, and the code indentation. */
 export interface Practice {

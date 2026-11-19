@@ -587,6 +587,7 @@ async fn a_continuation_keeps_the_unlock_restriction() {
         target_count: 3,
         seed: 1,
         day: DAY.into(),
+        offline: false,
     };
     // Below fifteen letters: active words, never the AI.
     let text = ai::continue_text(&state, &p).await.unwrap();

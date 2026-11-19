@@ -84,3 +84,4 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
   - Parent: `withDeadline` (25 s) turns a silent provider into a failure and so into a retry.
   - Checks: vitest 546/546, check 0; cargo 606 and clippy 0 from the worker.
   - Not covered by any test: the Svelte wiring, which needs a GUI check.
+- **L6 (user, verbatim, 2026-11-19):** "si no esta por ia, vamos encadenando textos no ia". `continue_text` accepts an optional `offline` flag that goes straight to the corpus (Rust test: no AI request, no usage). After one failed, empty or timed-out continuation, the frontend sets it for the rest of the text, so later pieces chain local texts with no AI wait. RED first in Rust and in the api test. Checks: vitest 547, check 0, cargo 607, clippy 0.

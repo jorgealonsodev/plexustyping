@@ -197,6 +197,9 @@
   let unlimited = $state(false);
   let continuing = false;
   let retryFrom = 0;
+  // After one failed or slow AI continuation the rest of the text chains corpus texts
+  // ("si no esta por ia, vamos encadenando textos no ia").
+  let continueOffline = false;
   const practiceId = $derived(practiceKey(practice));
   // Profile, mode, layout and language of the latest requested text: a different one loads a new text.
   // Code texts do not depend on the prose language (S1); prose and words texts do.
@@ -278,6 +281,7 @@
     run++;
     continuing = false;
     retryFrom = 0;
+    continueOffline = false;
     session = new TypingSession(text, mode, isCodeMode(textMode) ? indent : "manual");
     track = { offsets: [], bpms: new Set(), switched: false };
     scored = null;
@@ -394,13 +398,14 @@
         }, plan.delayMs);
     };
     withDeadline(
-      continueText(textLanguage, textLayout, textMode, continuationTail(s.chars), targetCount, randomSeed()),
+      continueText(textLanguage, textLayout, textMode, continuationTail(s.chars), targetCount, randomSeed(), continueOffline),
       CONTINUE_DEADLINE_MS,
     )
       .then((next) => {
         if (stale()) return;
         const piece = continuationPiece(s.chars, next.text);
         if (!piece) {
+          continueOffline = true;
           retryLater("la continuación llegó vacía");
           return;
         }
@@ -418,7 +423,8 @@
       })
       .catch((err) => {
         if (stale()) return;
-        console.warn("continue_text failed; asking again later", err);
+        console.warn("continue_text failed; chaining corpus texts from now on", err);
+        continueOffline = true;
         retryLater(failureMessage(err));
       });
   }
