@@ -14,7 +14,9 @@ pub mod unlock;
 use std::collections::HashMap;
 use std::sync::{Arc, MutexGuard};
 
-use ai::{AiFailure, AiSettings, ModelName, ProviderInfo, TextParams};
+use ai::{
+    AiFailure, AiSettings, ContinueMode, ContinueParams, ModelName, ProviderInfo, TextParams,
+};
 use code::PracticeMode;
 use commands::{
     AppState, FirstText, HeatScore, MetronomeTrack, NextText, ScoreRequest, ScoredSession,
@@ -108,6 +110,33 @@ async fn next_text(
         max_lines: max_lines.unwrap_or(code::DEFAULT_MAX_LINES),
     };
     ai::next_text(&state, &params).await
+}
+
+/// The next part of an unlimited text: `mode` is `"prose"` (the AI continues
+/// `tail`, the end of the current generated text, at most 2000 chars) or
+/// `"words"` (more corpus words).
+#[allow(clippy::too_many_arguments)]
+#[tauri::command]
+async fn continue_text(
+    state: State<'_, AppState>,
+    language: String,
+    layout: String,
+    mode: ContinueMode,
+    tail: String,
+    target_count: usize,
+    seed: u64,
+    day: String,
+) -> Result<NextText, String> {
+    let params = ContinueParams {
+        language,
+        layout,
+        mode,
+        tail,
+        target_count,
+        seed,
+        day,
+    };
+    ai::continue_text(&state, &params).await
 }
 
 /// `mode` is the error mode; `practice` is prose (default), words or the code language;
@@ -541,6 +570,7 @@ pub fn run() {
             code_languages,
             first_text,
             next_text,
+            continue_text,
             score_session,
             weaknesses,
             heatmap,

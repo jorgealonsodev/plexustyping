@@ -574,6 +574,47 @@ async fn from_fifteen_letters_a_locked_ai_text_falls_back_to_a_restricted_corpus
     only(&text.text, &allowed);
 }
 
+#[tokio::test]
+async fn a_continuation_keeps_the_unlock_restriction() {
+    // Unlimited (S2): continuations only use the allowed characters.
+    let (state, srv) = ai_state("Un texto con letras bloqueadas y puntos.").await;
+    enable(&state);
+    let p = ai::ContinueParams {
+        language: "es".into(),
+        layout: "es-qwerty".into(),
+        mode: ai::ContinueMode::Prose,
+        tail: "la niña lee".into(),
+        target_count: 3,
+        seed: 1,
+        day: DAY.into(),
+    };
+    // Below fifteen letters: active words, never the AI.
+    let text = ai::continue_text(&state, &p).await.unwrap();
+    assert_eq!(
+        (text.source, text.notice.clone()),
+        (TextSource::Corpus, None)
+    );
+    only(&text.text, &ES_HOME.chars().collect());
+    assert!(srv.requests().is_empty(), "the AI was called");
+    // From fifteen: the prompt names the active characters; a locked reply
+    // falls back to a restricted corpus text.
+    stall_unlock(&state, 5);
+    let text = ai::continue_text(&state, &p).await.unwrap();
+    let sent: serde_json::Value = serde_json::from_str(&srv.requests()[0].body).unwrap();
+    let prompt = sent["messages"][0]["content"].as_str().unwrap();
+    assert!(
+        prompt.starts_with("Continúa de forma natural")
+            && prompt.contains("«la niña lee»")
+            && prompt.contains("Usa solo estos caracteres:"),
+        "{prompt}"
+    );
+    assert_eq!(text.source, TextSource::Corpus, "{}", text.text);
+    assert!(text.notice.is_some());
+    let mut allowed: BTreeSet<char> = "fjdkslañgheonri".chars().collect();
+    allowed.extend("FJDKSLAÑGHEONRI".chars());
+    only(&text.text, &allowed);
+}
+
 #[test]
 fn words_mode_ignores_the_unlock_mode() {
     let state = memory();

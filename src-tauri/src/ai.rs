@@ -5,7 +5,8 @@
 //! ChatGPT, S4): its token comes from the client's `ChatgptAuth`.
 //!
 //! Only target units, language, length, allowed chars and topic are sent
-//! (S5). Keys never cross back to the frontend and are never logged. The store
+//! (S5), plus, for an unlimited text's continuation, the end of the current
+//! generated text (never what the user typed). Keys never cross back to the frontend and are never logged. The store
 //! `Mutex` is never held across an `.await`: lock, copy, drop, await, lock again.
 
 use std::time::Duration;
@@ -697,6 +698,7 @@ impl Plan {
             allowed_chars,
             restrict_chars: restrict_chars && matches!(self, Plan::Prose(_)),
             topic: settings.topic.clone(),
+            continue_from: None,
         })
     }
 
@@ -789,75 +791,12 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
         }
         return plan.corpus(p.seed);
     }
-    let (chain, missing) = usable_chain(&state.ai, &state.secrets, &settings).await;
-    let reason = if chain.is_empty() {
-        missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned())
-    } else {
-        // Unlock from 15 letters: the prompt names the active characters (S5).
-        let restricted = restriction.as_ref().is_some_and(|r| !r.all_letters);
-        let request = plan.request(&p.language, &settings, restricted)?;
-        match state.ai.generate_with_fallback(&chain, &request).await {
-            Ok(generated) => {
-                let provider = slug(generated.provider);
-                // A text from the retry without targets practises none of them; a prose
-                // text (whose prompt names no targets, S9) only those it really contains.
-                let lower = generated.text.to_lowercase();
-                let present: Vec<String>;
-                let targets: &[String] = if generated.free_text {
-                    &[]
-                } else if matches!(plan, Plan::Prose(_)) {
-                    present = plan
-                        .targets()
-                        .iter()
-                        .filter(|t| lower.contains(&t.to_lowercase()))
-                        .cloned()
-                        .collect();
-                    &present
-                } else {
-                    plan.targets()
-                };
-                let store = lock_store(&state.store);
-                let cached = store.cache_text(&NewCachedText {
-                    provider,
-                    model: &generated.model,
-                    language: &p.language,
-                    mode: &cache_mode,
-                    targets,
-                    text: &generated.text,
-                    created_at_ms: now_ms(),
-                    used: true,
-                });
-                let usage = &generated.usage;
-                let counted = store.record_usage(
-                    provider,
-                    &usage_day(&p.day),
-                    usage.input_tokens,
-                    usage.output_tokens,
-                );
-                if let Err(e) = cached.and(counted) {
-                    eprintln!("PlexusTyping: could not store the AI text or its usage: {e}");
-                }
-                // Earlier rejected attempts were billed too: log why, as when all fail.
-                for line in rejection_lines(&generated.failed_attempts) {
-                    eprintln!("{line}");
-                }
-                return Ok(plan.finish(NextText {
-                    source: TextSource::Ai,
-                    provider: Some(provider.to_owned()),
-                    model: Some(generated.model),
-                    ..NextText::corpus(generated.text, targets.to_vec())
-                }));
-            }
-            Err(errors) => {
-                for line in rejection_lines(&errors) {
-                    eprintln!("{line}");
-                }
-                errors
-                    .first()
-                    .map(|(id, err)| provider_reason(*id, err))
-                    .unwrap_or_else(|| "La IA no respondió".to_owned())
-            }
-        }
+    // Unlock from 15 letters: the prompt names the active characters (S5).
+    let restricted = restriction.as_ref().is_some_and(|r| !r.all_letters);
+    let request = plan.request(&p.language, &settings, restricted)?;
+    let reason = match ai_text(state, &plan, &settings, &request, &p.day, Some(&cache_mode)).await {
+        Ok(text) => return Ok(text),
+        Err(reason) => reason,
     };
     let cached = if cache_ok {
         let store = lock_store(&state.store);
@@ -882,6 +821,177 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     let mut text = plan.corpus(p.seed)?;
     text.notice = Some(format!("{reason}: texto del corpus local"));
     Ok(text)
+}
+
+/// Length in chars of each continuation of an unlimited text (S2).
+pub const CONTINUE_LENGTH: usize = 600;
+/// Longest `tail` a continuation accepts, in chars (S4).
+pub const MAX_TAIL_CHARS: usize = 2000;
+
+/// What an unlimited text continues with: AI prose or corpus words (S4).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ContinueMode {
+    Prose,
+    Words,
+}
+
+/// What the frontend sends to continue an unlimited text (owned, like [`TextParams`]).
+#[derive(Clone, Debug)]
+pub struct ContinueParams {
+    pub language: String,
+    pub layout: String,
+    pub mode: ContinueMode,
+    /// The end of the current text (generated, never typed), at most [`MAX_TAIL_CHARS`].
+    pub tail: String,
+    pub target_count: usize,
+    pub seed: u64,
+    /// The user's local day, `YYYY-MM-DD`, for the usage counters.
+    pub day: String,
+}
+
+/// An AI text for `request` through the usable chain of `settings`, with its
+/// usage counted and, when `cache_mode` is given, cached as already used; or
+/// the Spanish reason the AI could not give one.
+async fn ai_text(
+    state: &AppState,
+    plan: &Plan,
+    settings: &AiSettings,
+    request: &GenerationRequest,
+    day: &str,
+    cache_mode: Option<&str>,
+) -> Result<NextText, String> {
+    let (chain, missing) = usable_chain(&state.ai, &state.secrets, settings).await;
+    if chain.is_empty() {
+        return Err(missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned()));
+    }
+    let generated = match state.ai.generate_with_fallback(&chain, request).await {
+        Ok(generated) => generated,
+        Err(errors) => {
+            for line in rejection_lines(&errors) {
+                eprintln!("{line}");
+            }
+            return Err(errors
+                .first()
+                .map(|(id, err)| provider_reason(*id, err))
+                .unwrap_or_else(|| "La IA no respondió".to_owned()));
+        }
+    };
+    let provider = slug(generated.provider);
+    // A text from the retry without targets practises none of them; a prose
+    // text (whose prompt names no targets, S9) only those it really contains.
+    let lower = generated.text.to_lowercase();
+    let present: Vec<String>;
+    let targets: &[String] = if generated.free_text {
+        &[]
+    } else if matches!(plan, Plan::Prose(_)) {
+        present = plan
+            .targets()
+            .iter()
+            .filter(|t| lower.contains(&t.to_lowercase()))
+            .cloned()
+            .collect();
+        &present
+    } else {
+        plan.targets()
+    };
+    let store = lock_store(&state.store);
+    let cached = cache_mode
+        .map(|mode| {
+            store.cache_text(&NewCachedText {
+                provider,
+                model: &generated.model,
+                language: &request.language,
+                mode,
+                targets,
+                text: &generated.text,
+                created_at_ms: now_ms(),
+                used: true,
+            })
+        })
+        .transpose();
+    let usage = &generated.usage;
+    let counted = store.record_usage(
+        provider,
+        &usage_day(day),
+        usage.input_tokens,
+        usage.output_tokens,
+    );
+    if let Err(e) = cached.and(counted) {
+        eprintln!("PlexusTyping: could not store the AI text or its usage: {e}");
+    }
+    // Earlier rejected attempts were billed too: log why, as when all fail.
+    for line in rejection_lines(&generated.failed_attempts) {
+        eprintln!("{line}");
+    }
+    Ok(plan.finish(NextText {
+        source: TextSource::Ai,
+        provider: Some(provider.to_owned()),
+        model: Some(generated.model),
+        ..NextText::corpus(generated.text, targets.to_vec())
+    }))
+}
+
+/// The next part of an unlimited text (S2, S4), about [`CONTINUE_LENGTH`]
+/// chars. Prose: the AI continues `tail` with the targets, allowed chars and
+/// progressive unlock of [`next_text`]; without the AI, a corpus text (with
+/// the reason as a notice when the AI is enabled but not usable). Words: more
+/// corpus words, never the AI. Continuations are never cached nor taken from
+/// the cache; usage is counted as for [`next_text`].
+pub async fn continue_text(state: &AppState, p: &ContinueParams) -> Result<NextText, String> {
+    if p.tail.chars().count() > MAX_TAIL_CHARS {
+        return Err(format!(
+            "El texto a continuar admite como máximo {MAX_TAIL_CHARS} caracteres"
+        ));
+    }
+    let (model, settings, restriction) = {
+        let store = lock_store(&state.store);
+        let profile = state.active_profile();
+        let restriction = match p.mode {
+            ContinueMode::Prose => unlock::restriction(&store, &profile, &p.language, &p.layout)?,
+            ContinueMode::Words => None,
+        };
+        (
+            commands::load_model(&store, &profile)?,
+            load_settings(&store),
+            restriction,
+        )
+    };
+    let request = NextTextRequest {
+        language: &p.language,
+        layout: &p.layout,
+        seed: p.seed,
+        target_count: p.target_count,
+        length: CONTINUE_LENGTH,
+        fallback: &[],
+    };
+    let mut plan = commands::plan_text(&model, &request)?;
+    if p.mode == ContinueMode::Words {
+        return commands::words_text(&plan, p.seed);
+    }
+    if let Some(r) = &restriction {
+        unlock::restrict_plan(&mut plan, r);
+        if r.letters.len() < unlock::AI_MIN_LETTERS {
+            return unlock::letters_text(&plan, r, &model, p.seed);
+        }
+    }
+    let plan = Plan::Prose(plan);
+    if !settings.enabled {
+        return plan.corpus(p.seed);
+    }
+    let restricted = restriction.as_ref().is_some_and(|r| !r.all_letters);
+    let request = GenerationRequest {
+        continue_from: Some(p.tail.clone()),
+        ..plan.request(&p.language, &settings, restricted)?
+    };
+    match ai_text(state, &plan, &settings, &request, &p.day, None).await {
+        Ok(text) => Ok(text),
+        Err(reason) => {
+            let mut text = plan.corpus(p.seed)?;
+            text.notice = Some(format!("{reason}: texto del corpus local"));
+            Ok(text)
+        }
+    }
 }
 
 /// The diagnostic text for a new profile practising prose on a `layout` that

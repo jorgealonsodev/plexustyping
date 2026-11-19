@@ -8,7 +8,8 @@
 //! provider fallback chain ([`AiClient::generate_with_fallback`]).
 //!
 //! Privacy: a [`GenerationRequest`] only carries target characters (with
-//! their corpus frequencies), language, mode, length, allowed characters and topic — never what the user typed. API
+//! their corpus frequencies), language, mode, length, allowed characters, topic
+//! and, for a continuation, the end of an earlier generated text — never what the user typed. API
 //! keys never appear in `Debug` output or error messages, redirects are never
 //! followed, and [`Endpoints::production`] is the only set of hosts used.
 
@@ -140,6 +141,11 @@ pub struct GenerationRequest {
     pub restrict_chars: bool,
     /// Optional topic; `None` means free topic.
     pub topic: Option<String>,
+    /// Prose only: the end of the current practice text (generated, never
+    /// typed) to continue instead of writing a new text. `None` asks for a
+    /// new text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub continue_from: Option<String>,
 }
 
 /// Token usage reported by the provider (zero when it reports none).

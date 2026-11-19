@@ -1058,6 +1058,235 @@ async fn first_text_in_words_mode_skips_the_diagnostic_and_the_ai() {
     assert!(srv.requests().is_empty());
 }
 
+// ---- continue_text (unlimited, S2 and S4) ----
+
+const TAIL: &str = "y al final del camino encontraron una fuente de agua fresca";
+
+fn continue_params(seed: u64, mode: ContinueMode) -> ContinueParams {
+    ContinueParams {
+        language: "es".into(),
+        layout: "es-qwerty".into(),
+        mode,
+        tail: TAIL.into(),
+        target_count: 3,
+        seed,
+        day: DAY.into(),
+    }
+}
+
+/// About 600 chars (within 480..751), 10 × [`AI_TEXT`].
+fn long_ai_text() -> String {
+    [AI_TEXT; 10].join(" ")
+}
+
+/// What the corpus gives for a continuation at 600 chars with the prose model.
+fn continuation_expected(state: &AppState, seed: u64, words: bool) -> NextText {
+    let store = lock_store(&state.store);
+    let model = commands::load_model(&store, &state.active_profile()).unwrap();
+    let req = NextTextRequest {
+        language: "es",
+        layout: "es-qwerty",
+        seed,
+        target_count: 3,
+        length: CONTINUE_LENGTH,
+        fallback: &[],
+    };
+    let plan = commands::plan_text(&model, &req).unwrap();
+    if words {
+        commands::words_text(&plan, seed).unwrap()
+    } else {
+        commands::corpus_text(&plan, seed).unwrap()
+    }
+}
+
+/// The prompt of the `i`-th request to the OpenAI mock.
+fn sent_prompt(srv: &Mock, i: usize) -> String {
+    let sent: serde_json::Value = serde_json::from_str(&srv.requests()[i].body).unwrap();
+    sent["messages"][0]["content"].as_str().unwrap().to_owned()
+}
+
+#[tokio::test]
+async fn a_prose_continuation_asks_the_ai_with_the_tail_counts_it_and_never_caches_it() {
+    let long = long_ai_text();
+    let srv = server(vec![(OPENAI, 200, chat_reply(&long))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let got = continue_text(&state, &continue_params(4, ContinueMode::Prose))
+        .await
+        .unwrap();
+    assert_eq!(
+        serde_json::to_value(&got).unwrap(),
+        json!({"text": long, "targets": ["ñ"], "source": "ai", "provider": "openai", "model": "gpt-5-mini"})
+    );
+    assert_eq!(srv.requests().len(), 1);
+    assert_eq!(
+        sent_prompt(&srv, 0),
+        format!(
+            "Continúa de forma natural este texto en español, con el mismo tono y registro:\n\
+             «{TAIL}»\n\
+             Escribe solo la continuación, de 480–750 caracteres, sin repetir el texto dado, sin título y sin listas.\n\
+             Responde solo con JSON: {{\"text\": \"...\"}}"
+        )
+    );
+    // Usage is counted as for next_text.
+    let usage = usage_of(&state);
+    assert_eq!(usage.len(), 1);
+    assert_eq!(
+        (
+            usage[0].provider.as_str(),
+            usage[0].calls_today,
+            usage[0].input_tokens_today,
+            usage[0].output_tokens_today
+        ),
+        ("openai", 1, 80, 30)
+    );
+    // Not cached: no text to take, used or not.
+    let store = lock_store(&state.store);
+    assert_eq!(store.take_cached_text("es", "prose", &[]).unwrap(), None);
+}
+
+#[tokio::test]
+async fn a_failed_continuation_is_a_corpus_text_with_a_notice_and_no_cached_text() {
+    let srv = server(vec![(OPENAI, 500, "{}".into()), (OPENAI, 500, "{}".into())]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    cache_unused(&state, "prose", "texto guardado sin usar", 1);
+    let got = continue_text(&state, &continue_params(4, ContinueMode::Prose))
+        .await
+        .unwrap();
+    let mut expected = continuation_expected(&state, 4, false);
+    expected.notice = Some("Sin conexión con la IA: texto del corpus local".into());
+    assert_eq!(got, expected);
+    let len = got.text.chars().count();
+    assert!((600..721).contains(&len), "{len}");
+    assert!(!srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
+    // The cached text was not taken.
+    let store = lock_store(&state.store);
+    let kept = store.take_unused_cached_text("es", "prose", &[]).unwrap();
+    assert_eq!(
+        kept.map(|c| c.text).as_deref(),
+        Some("texto guardado sin usar")
+    );
+}
+
+#[tokio::test]
+async fn an_unusable_or_disabled_ai_continues_from_the_corpus_without_any_request() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(&long_ai_text()))]).await;
+    let state = state(MemoryStore::shared(), srv.client());
+    weak_in_n(&state);
+    cache_unused(&state, "prose", "texto guardado sin usar", 1);
+    // AI off: the corpus, without a notice (as next_text), and no cached text.
+    let got = continue_text(&state, &continue_params(4, ContinueMode::Prose))
+        .await
+        .unwrap();
+    assert_eq!(got, continuation_expected(&state, 4, false));
+    // AI on without a key: the reason as a notice.
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let got = continue_text(&state, &continue_params(4, ContinueMode::Prose))
+        .await
+        .unwrap();
+    let mut expected = continuation_expected(&state, 4, false);
+    expected.notice = Some("Falta la clave de OpenAI: texto del corpus local".into());
+    assert_eq!(got, expected);
+    assert!(srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
+    let store = lock_store(&state.store);
+    assert!(
+        store
+            .take_unused_cached_text("es", "prose", &[])
+            .unwrap()
+            .is_some()
+    );
+}
+
+#[tokio::test]
+async fn a_words_continuation_is_more_corpus_words_and_never_the_ai() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(&long_ai_text()))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    cache_unused(&state, "words", "palabras guardadas", 1);
+    let got = continue_text(&state, &continue_params(4, ContinueMode::Words))
+        .await
+        .unwrap();
+    assert_eq!(got, continuation_expected(&state, 4, true));
+    assert_eq!((got.source, got.notice.clone()), (TextSource::Corpus, None));
+    assert!(srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
+    let store = lock_store(&state.store);
+    assert!(
+        store
+            .take_unused_cached_text("es", "words", &[])
+            .unwrap()
+            .is_some()
+    );
+}
+
+#[tokio::test]
+async fn a_continuation_refuses_a_long_tail_and_unknown_language_or_layout() {
+    let srv = server(vec![(OPENAI, 200, chat_reply(&long_ai_text()))]).await;
+    let memory = MemoryStore::shared();
+    with_key(&memory, ProviderId::Openai).await;
+    let state = state(memory, srv.client());
+    enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
+    let too_long = ContinueParams {
+        tail: "ñ".repeat(2001),
+        ..continue_params(1, ContinueMode::Prose)
+    };
+    for mode in [ContinueMode::Prose, ContinueMode::Words] {
+        let p = ContinueParams {
+            mode,
+            ..too_long.clone()
+        };
+        assert_eq!(
+            continue_text(&state, &p).await,
+            Err("El texto a continuar admite como máximo 2000 caracteres".to_owned())
+        );
+    }
+    for (language, layout, error) in [
+        ("xx", "es-qwerty", "unknown language: xx"),
+        ("es", "nope", "unknown layout: nope"),
+    ] {
+        for mode in [ContinueMode::Prose, ContinueMode::Words] {
+            let p = ContinueParams {
+                language: language.into(),
+                layout: layout.into(),
+                ..continue_params(1, mode)
+            };
+            assert_eq!(continue_text(&state, &p).await, Err(error.to_owned()));
+        }
+    }
+    // Nothing was asked or counted.
+    assert!(srv.requests().is_empty());
+    assert!(usage_of(&state).is_empty());
+    // 2000 chars are accepted.
+    let edge = ContinueParams {
+        tail: "ñ".repeat(2000),
+        ..continue_params(1, ContinueMode::Prose)
+    };
+    let got = continue_text(&state, &edge).await.unwrap();
+    assert_eq!(got.source, TextSource::Ai);
+    assert!(sent_prompt(&srv, 0).contains(&"ñ".repeat(2000)));
+}
+
+#[test]
+fn continue_mode_is_prose_or_words_in_json() {
+    let parsed: Vec<ContinueMode> = serde_json::from_value(json!(["prose", "words"])).unwrap();
+    assert_eq!(parsed, [ContinueMode::Prose, ContinueMode::Words]);
+    for bad in [json!("code"), json!({"kind": "code", "lang": "rust"})] {
+        assert!(serde_json::from_value::<ContinueMode>(bad).is_err());
+    }
+}
+
 // ---- AI length margin (S5) ----
 
 #[test]

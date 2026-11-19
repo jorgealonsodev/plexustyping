@@ -29,6 +29,9 @@ pub const STATS_MODE: &str = "prose";
 pub const DEFAULT_TARGETS: usize = 2;
 /// Wanted text length in chars when the user has not chosen.
 pub const DEFAULT_LENGTH: usize = 300;
+/// Shortest and longest text length in chars (S1: up to 2000).
+pub const MIN_LENGTH: usize = 50;
+pub const MAX_LENGTH: usize = 2000;
 
 /// Shared state of the running app.
 pub struct AppState {
@@ -210,7 +213,7 @@ pub struct NextTextRequest<'a> {
     pub seed: u64,
     /// Clamped to 2..=3.
     pub target_count: usize,
-    /// Clamped to 50..=600.
+    /// Clamped to [`MIN_LENGTH`]..=[`MAX_LENGTH`].
     pub length: usize,
     /// Used as targets while the model has no candidates (the last failed chars).
     pub fallback: &'a [String],
@@ -377,7 +380,7 @@ pub fn plan_text(model: &WeaknessModel, req: &NextTextRequest) -> Result<TextPla
     let corpus = corpus(req.language).ok_or_else(|| unknown_language(req.language))?;
     let layout = get_layout(req.layout)?;
     let count = req.target_count.clamp(2, 3);
-    let length = req.length.clamp(50, 600);
+    let length = req.length.clamp(MIN_LENGTH, MAX_LENGTH);
     let mut targets = model.select_targets(count, req.seed);
     if targets.is_empty() {
         targets = req.fallback.to_vec();
@@ -1239,6 +1242,29 @@ mod tests {
         assert_eq!(ai_length(300), 240..376);
         assert_eq!(ai_length(50), 40..63);
         assert_eq!(ai_length(600), 480..751);
+        // The longest choice (S1).
+        assert_eq!(ai_length(2000), 1600..2501);
+    }
+
+    #[test]
+    fn the_longer_lengths_give_corpus_and_words_texts_in_range() {
+        // S1: "mas opciones de tamaño" up to 2000 chars.
+        let m = model(&[("ñ", 0.9), ("qu", 0.8)]);
+        let allowed = get_layout("es-qwerty").unwrap().allowed_chars();
+        for length in [800, 1000, 1500, 2000] {
+            let plan = plan_text(&m, &request(5, 2, length)).unwrap();
+            assert_eq!(plan.length, length..length + length / 5 + 1);
+            for text in [corpus_text(&plan, 5), words_text(&plan, 5)] {
+                let text = text.unwrap();
+                let len = text.text.chars().count();
+                assert!(plan.length.contains(&len), "{length}: {len}");
+                assert!(
+                    text.text.chars().all(|c| allowed.contains(&c)),
+                    "{}",
+                    text.text
+                );
+            }
+        }
     }
 
     #[test]
@@ -1349,7 +1375,7 @@ mod tests {
         ];
         let model = model(&units);
         // 2 or 3 targets per text: "con que coja las 2 o 3 letras que mas se fallan llega".
-        for (count, length, targets, range) in [(1, 10, 2, 50..61), (9, 5000, 3, 600..721)] {
+        for (count, length, targets, range) in [(1, 10, 2, 50..61), (9, 5000, 3, 2000..2401)] {
             let next = next_text(&model, &request(3, count, length)).unwrap();
             assert_eq!(next.targets.len(), targets, "count {count}");
             let len = next.text.chars().count();

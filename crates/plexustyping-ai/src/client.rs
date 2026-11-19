@@ -476,6 +476,7 @@ mod tests {
             allowed_chars: "abcz".into(),
             restrict_chars: false,
             topic: None,
+            continue_from: None,
         };
 
         let err = AiClient::new(endpoints)

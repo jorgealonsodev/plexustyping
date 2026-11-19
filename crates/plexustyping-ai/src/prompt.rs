@@ -63,7 +63,9 @@ fn distinct_chars(chars: &str) -> Vec<String> {
 /// counts and the allowed characters; each count is
 /// [`GenerationRequest::min_counts`] at the longest accepted length, so a
 /// snippet that meets it always meets [`crate::validate`]. Prose also asks
-/// for a varied start (not «El» or «La»).
+/// for a varied start (not «El» or «La»). A prose request with a non-blank
+/// [`GenerationRequest::continue_from`] asks instead to continue that text
+/// naturally, without repeating it or starting a title or a list.
 pub fn build_prompt(req: &GenerationRequest) -> String {
     const ANSWER: &str = "Responde solo con JSON: {\"text\": \"...\"}";
     let language = language_name(&req.language);
@@ -75,14 +77,31 @@ pub fn build_prompt(req: &GenerationRequest) -> String {
         .filter(|t| !t.is_empty())
         .unwrap_or_else(|| "libre".into());
     let Mode::Code { lang } = &req.mode else {
-        let mut lines = vec![
-            format!(
-                "Escribe un texto en {language} de {}–{longest} caracteres.",
-                req.length.start
-            ),
-            format!("Tema: {topic}."),
-            "No empieces con «El» ni con «La».".to_string(),
-        ];
+        let tail = req
+            .continue_from
+            .as_deref()
+            .filter(|t| !t.trim().is_empty());
+        let mut lines = if let Some(tail) = tail {
+            vec![
+                format!(
+                    "Continúa de forma natural este texto en {language}, con el mismo tono y registro:"
+                ),
+                format!("«{}»", tail.trim()),
+                format!(
+                    "Escribe solo la continuación, de {}–{longest} caracteres, sin repetir el texto dado, sin título y sin listas.",
+                    req.length.start
+                ),
+            ]
+        } else {
+            vec![
+                format!(
+                    "Escribe un texto en {language} de {}–{longest} caracteres.",
+                    req.length.start
+                ),
+                format!("Tema: {topic}."),
+                "No empieces con «El» ni con «La».".to_string(),
+            ]
+        };
         if req.restrict_chars {
             lines.push(format!(
                 "Usa solo estos caracteres: {} (y el espacio). Puedes usar palabras sueltas si no salen frases.",
@@ -172,7 +191,53 @@ mod tests {
             allowed_chars: "abcñ.,".into(),
             restrict_chars: false,
             topic: Some("viajes".into()),
+            continue_from: None,
         }
+    }
+
+    #[test]
+    fn a_continuation_prompt_gives_the_tail_and_asks_to_continue_it() {
+        // S2: "cuando vaya por la mitad que continúe el texto".
+        let req = GenerationRequest {
+            continue_from: Some("Seguimos por el camino del río".into()),
+            ..prd()
+        };
+        assert_eq!(
+            build_prompt(&req),
+            "Continúa de forma natural este texto en español, con el mismo tono y registro:\n\
+             «Seguimos por el camino del río»\n\
+             Escribe solo la continuación, de 250–300 caracteres, sin repetir el texto dado, sin título y sin listas.\n\
+             Responde solo con JSON: {\"text\": \"...\"}"
+        );
+        // Progressive unlock still names the allowed characters.
+        let req = GenerationRequest {
+            restrict_chars: true,
+            ..req
+        };
+        assert_eq!(
+            build_prompt(&req),
+            "Continúa de forma natural este texto en español, con el mismo tono y registro:\n\
+             «Seguimos por el camino del río»\n\
+             Escribe solo la continuación, de 250–300 caracteres, sin repetir el texto dado, sin título y sin listas.\n\
+             Usa solo estos caracteres: a b c ñ . , (y el espacio). Puedes usar palabras sueltas si no salen frases.\n\
+             Responde solo con JSON: {\"text\": \"...\"}"
+        );
+    }
+
+    #[test]
+    fn a_blank_continuation_or_code_mode_keeps_the_usual_prompt() {
+        for blank in [None, Some(String::new()), Some(" \n ".into())] {
+            let req = GenerationRequest {
+                continue_from: blank,
+                ..prd()
+            };
+            assert_eq!(build_prompt(&req), build_prompt(&prd()));
+        }
+        let req = GenerationRequest {
+            continue_from: Some("fn main() {".into()),
+            ..code(prd())
+        };
+        assert_eq!(build_prompt(&req), build_prompt(&code(prd())));
     }
 
     #[test]

@@ -206,6 +206,7 @@ mod tests {
             allowed_chars: "abcdefghijklmnopqrstuvwxyzñZ.,'\"-".into(),
             restrict_chars: false,
             topic: None,
+            continue_from: None,
         }
     }
 
