@@ -390,6 +390,68 @@ fn settings_upsert() {
     );
 }
 
+#[test]
+fn settings_with_prefix_lists_only_matching_keys_sorted() {
+    let store = Store::open_in_memory().unwrap();
+    assert!(store.settings_with_prefix("ui:").unwrap().is_empty());
+    store.set_setting("ui:plexustyping.theme", "dark").unwrap();
+    store
+        .set_setting("ui:plexustyping.layout", "es-qwerty")
+        .unwrap();
+    store.set_setting("ai", "{}").unwrap();
+    store.set_setting("uix", "other").unwrap();
+    // `%` and `_` are literal, not LIKE wildcards.
+    store.set_setting("u_:x", "wild").unwrap();
+    assert_eq!(
+        store.settings_with_prefix("ui:").unwrap(),
+        vec![
+            ("ui:plexustyping.layout".to_owned(), "es-qwerty".to_owned()),
+            ("ui:plexustyping.theme".to_owned(), "dark".to_owned()),
+        ]
+    );
+    assert_eq!(store.settings_with_prefix("u_:").unwrap().len(), 1);
+    assert_eq!(store.settings_with_prefix("%").unwrap(), vec![]);
+}
+
+#[test]
+fn delete_setting_removes_only_that_key() {
+    let store = Store::open_in_memory().unwrap();
+    store.set_setting("ui:plexustyping.theme", "dark").unwrap();
+    store
+        .set_setting("ui:plexustyping.theme:x", "keep")
+        .unwrap();
+    store.delete_setting("ui:plexustyping.theme").unwrap();
+    assert_eq!(store.get_setting("ui:plexustyping.theme").unwrap(), None);
+    assert_eq!(
+        store
+            .get_setting("ui:plexustyping.theme:x")
+            .unwrap()
+            .as_deref(),
+        Some("keep")
+    );
+    // Deleting an absent key is not an error.
+    store.delete_setting("ui:plexustyping.none").unwrap();
+}
+
+#[test]
+fn settings_survive_reopening_the_file() {
+    let tmp = TempDir::new();
+    let path = tmp.db();
+    {
+        let store = Store::open(&path).unwrap();
+        store
+            .set_setting("ui:plexustyping.layout", "us-qwerty")
+            .unwrap();
+        store.set_setting("ui:plexustyping.gone", "x").unwrap();
+        store.delete_setting("ui:plexustyping.gone").unwrap();
+    }
+    let store = Store::open(&path).unwrap();
+    assert_eq!(
+        store.settings_with_prefix("ui:").unwrap(),
+        vec![("ui:plexustyping.layout".to_owned(), "us-qwerty".to_owned())]
+    );
+}
+
 /// Bytes 18–19 of the SQLite header: 1/1 rollback journal, 2/2 WAL.
 fn header_versions(path: &Path) -> [u8; 2] {
     let bytes = std::fs::read(path).unwrap();

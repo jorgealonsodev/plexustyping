@@ -14,7 +14,7 @@ UI settings and header toggles survive closing the app, in the dev app and the i
 
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
-| T1 | S1–S5 | Backend commands over the `settings` table (UI keys only), a synchronous `Storage` adapter preloaded before the app mounts, serialized writes, one-time migration, every `localStorage` use routed through it, tests (Rust and vitest) | worker | pending | |
+| T1 | S1–S5 | Backend commands over the `settings` table (UI keys only), a synchronous `Storage` adapter preloaded before the app mounts, serialized writes, one-time migration, every `localStorage` use routed through it, tests (Rust and vitest) | worker | done | see L3 |
 
 ## Log
 
@@ -24,3 +24,10 @@ UI settings and header toggles survive closing the app, in the dev app and the i
   - `tauri_localhost_0` (the installed .deb) has only keyboard, profilesMigrated and theme.
 
   So settings made in one build never reach the other. WebKit also flushes localStorage to disk lazily, which can lose a change made right before quitting. The SQLite store already has a `settings` table (`get_setting`/`set_setting` in crates/plexustyping-store/src/lib.rs), and both builds share it.
+- **L3 (evidence, 2026-11-19):** T1 done.
+  - Backend: commands `ui_settings_get`, `ui_settings_set` and `ui_settings_remove` in `src-tauri/src/ui_settings.rs` store values under `ui:plexustyping.*` in the `settings` table. Keys are limited to 128 bytes and values to 256 KiB. In temporary mode `get` refuses, so the app keeps using localStorage. New store methods: `settings_with_prefix` and `delete_setting`.
+  - Frontend: `src/features/settings/persist.ts` holds an in-memory snapshot with serialized writes. `initSettingsStorage()` is awaited in `main.ts` before the mount. On the first start it migrates `plexustyping.*` keys once, behind the marker `plexustyping.settingsInStore`. Every former default storage now goes through `settingsStorage()`.
+  - RED: E0599/E0425, a missing module, and 2 routing failures. GREEN: cargo, clippy, vitest 494/494, check 0, build ok.
+  - Known limits:
+    - Only the origin of the build that starts first is migrated.
+    - A write still queued in the page when the window is killed can be lost; each write is durable once handled.

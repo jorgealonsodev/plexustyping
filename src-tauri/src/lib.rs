@@ -8,8 +8,10 @@ pub mod metronome;
 pub mod oauth;
 pub mod profiles;
 pub mod secrets;
+pub mod ui_settings;
 pub mod unlock;
 
+use std::collections::HashMap;
 use std::sync::{Arc, MutexGuard};
 
 use ai::{AiFailure, AiSettings, ModelName, ProviderInfo, TextParams};
@@ -498,6 +500,25 @@ fn unlock_set(
     unlock::set(&state, &language, &layout, enabled, target_wpm)
 }
 
+/// Every stored UI setting (`plexustyping.*` keys), read once before the app mounts (S1, S4);
+/// an error when the database could not be opened, so the app keeps localStorage (S5).
+#[tauri::command]
+fn ui_settings_get(state: State<AppState>) -> Result<HashMap<String, String>, String> {
+    ui_settings::get(&state)
+}
+
+/// Stores one UI setting; on disk when it returns (S1).
+#[tauri::command]
+fn ui_settings_set(state: State<AppState>, key: String, value: String) -> Result<(), String> {
+    ui_settings::set(&state, &key, &value)
+}
+
+/// Forgets one UI setting (S1).
+#[tauri::command]
+fn ui_settings_remove(state: State<AppState>, key: String) -> Result<(), String> {
+    ui_settings::remove(&state, &key)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -558,7 +579,10 @@ pub fn run() {
             goal_set,
             goal_status,
             unlock_status,
-            unlock_set
+            unlock_set,
+            ui_settings_get,
+            ui_settings_set,
+            ui_settings_remove
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");

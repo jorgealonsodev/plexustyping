@@ -1,5 +1,6 @@
-// Themes imported by the user from VS Code colour theme files, kept in local storage.
+// Themes imported by the user from VS Code colour theme files, kept with the UI settings (settingsStorage).
 
+import { settingsStorage } from "../settings/persist";
 import { readableOn } from "./colors";
 import { type Palette, type ThemeEntry, THEMES, setCustomThemes } from "./themes";
 
@@ -168,7 +169,7 @@ function isCustomTheme(value: unknown): value is ThemeEntry {
 }
 
 /** The stored imported themes; invalid entries (and a corrupt value) are ignored. */
-export function loadCustomThemes(storage: Storage = localStorage): ThemeEntry[] {
+export function loadCustomThemes(storage: Storage = settingsStorage()): ThemeEntry[] {
   try {
     const stored: unknown = JSON.parse(storage.getItem(KEY) ?? "[]");
     return Array.isArray(stored) ? stored.filter(isCustomTheme).slice(0, MAX_CUSTOM_THEMES) : [];
@@ -177,7 +178,7 @@ export function loadCustomThemes(storage: Storage = localStorage): ThemeEntry[] 
   }
 }
 
-export const saveCustomThemes = (themes: ThemeEntry[], storage: Storage = localStorage) =>
+export const saveCustomThemes = (themes: ThemeEntry[], storage: Storage = settingsStorage()) =>
   storage.setItem(KEY, JSON.stringify(themes));
 
 /**
@@ -203,7 +204,7 @@ export function addCustomTheme(
 }
 
 /** Loads the stored imports and makes them known to `themeById`; call before reading the saved theme id. */
-export function initCustomThemes(storage: Storage = localStorage): ThemeEntry[] {
+export function initCustomThemes(storage: Storage = settingsStorage()): ThemeEntry[] {
   const themes = loadCustomThemes(storage);
   setCustomThemes(themes);
   return themes;

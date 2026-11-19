@@ -1,3 +1,5 @@
+import { settingsStorage } from "./persist";
+
 /** Ajustes → Apariencia select of the practice text's typeface, prose and code (practice-font S1). */
 export const FONT_SETTING = {
   label: "Fuente",
@@ -110,9 +112,9 @@ export const fontById = (id: string): PracticeFont =>
 const FONT_KEY = "plexustyping.practiceFont";
 
 /** The stored font id; the default when missing or unknown (S1). */
-export const loadPracticeFont = (storage: Storage = localStorage) => fontById(storage.getItem(FONT_KEY) ?? "").id;
+export const loadPracticeFont = (storage: Storage = settingsStorage()) => fontById(storage.getItem(FONT_KEY) ?? "").id;
 
-export const savePracticeFont = (id: string, storage: Storage = localStorage) => storage.setItem(FONT_KEY, id);
+export const savePracticeFont = (id: string, storage: Storage = settingsStorage()) => storage.setItem(FONT_KEY, id);
 
 /** The CSS variables the prose and code practice text read. */
 export const fontStyle = (f: PracticeFont) =>

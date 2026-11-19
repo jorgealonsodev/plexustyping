@@ -1,3 +1,4 @@
+import { settingsStorage } from "../settings/persist";
 import { LANGUAGES, LAYOUTS } from "../settings/settings";
 import { isThemeId } from "../themes";
 import type { Profile, ProfileFields, ProfilesApi, ProfilesList } from "./api";
@@ -7,7 +8,7 @@ import type { Profile, ProfileFields, ProfilesApi, ProfilesList } from "./api";
 /** Set once the pre-profile settings were carried over to the active profile (S6). */
 export const MIGRATED_KEY = "plexustyping.profilesMigrated";
 
-/** The pre-profile localStorage keys carried over (S6); the values stay in place. */
+/** The pre-profile settings keys carried over (S6); the values stay in place. */
 const LAYOUT_KEY = "plexustyping.layout";
 const LANGUAGE_KEY = "plexustyping.language";
 const THEME_KEY = "plexustyping.theme";
@@ -24,7 +25,7 @@ export const deleteConfirmation = (name: string) =>
   `Se borrarán el historial y las estadísticas de «${name}». ¿Continuar?`;
 
 /** The stored valid layout, language and theme to write to the active profile; `null` once carried over. */
-export function carryOver(storage: Storage = localStorage): ProfileFields | null {
+export function carryOver(storage: Storage = settingsStorage()): ProfileFields | null {
   if (storage.getItem(MIGRATED_KEY) !== null) return null;
   const fields: ProfileFields = {};
   const layout = storage.getItem(LAYOUT_KEY);

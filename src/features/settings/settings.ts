@@ -1,4 +1,5 @@
 import { MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS } from "../metronome/beat";
+import { settingsStorage } from "./persist";
 import type { PracticeKind } from "../code/api";
 import type { ErrorMode, IndentMode } from "../practice/engine";
 
@@ -28,12 +29,12 @@ export const LAYOUTS: { id: string; label: string }[] = [
 export const DEFAULT_LAYOUT = LAYOUTS[0].id;
 
 /** The stored layout id if it is a built-in one, else Spain's. */
-export function loadLayout(storage: Storage = localStorage): string {
+export function loadLayout(storage: Storage = settingsStorage()): string {
   const id = storage.getItem(LAYOUT_KEY);
   return LAYOUTS.find((l) => l.id === id)?.id ?? DEFAULT_LAYOUT;
 }
 
-export const saveLayout = (id: string, storage: Storage = localStorage) => storage.setItem(LAYOUT_KEY, id);
+export const saveLayout = (id: string, storage: Storage = settingsStorage()) => storage.setItem(LAYOUT_KEY, id);
 
 /** Prose languages (corpus ids) in display order; the first is the default. */
 export const LANGUAGES: { id: string; label: string }[] = [
@@ -47,12 +48,12 @@ export const LANGUAGES: { id: string; label: string }[] = [
 export const DEFAULT_LANGUAGE = LANGUAGES[0].id;
 
 /** The stored prose language if it is a listed one, else Spanish. */
-export function loadLanguage(storage: Storage = localStorage): string {
+export function loadLanguage(storage: Storage = settingsStorage()): string {
   const id = storage.getItem(LANGUAGE_KEY);
   return LANGUAGES.find((l) => l.id === id)?.id ?? DEFAULT_LANGUAGE;
 }
 
-export const saveLanguage = (id: string, storage: Storage = localStorage) => storage.setItem(LANGUAGE_KEY, id);
+export const saveLanguage = (id: string, storage: Storage = settingsStorage()) => storage.setItem(LANGUAGE_KEY, id);
 
 /** Error modes in display order; the first is the default (S3). */
 export const ERROR_MODES: { id: ErrorMode; label: string }[] = [
@@ -61,12 +62,12 @@ export const ERROR_MODES: { id: ErrorMode; label: string }[] = [
   { id: "backspace-correct", label: "Borrar con Retroceso" },
 ];
 
-export function loadErrorMode(storage: Storage = localStorage): ErrorMode {
+export function loadErrorMode(storage: Storage = settingsStorage()): ErrorMode {
   const id = storage.getItem(MODE_KEY);
   return ERROR_MODES.find((m) => m.id === id)?.id ?? ERROR_MODES[0].id;
 }
 
-export function saveErrorMode(mode: ErrorMode, storage: Storage = localStorage): void {
+export function saveErrorMode(mode: ErrorMode, storage: Storage = settingsStorage()): void {
   storage.setItem(MODE_KEY, mode);
 }
 
@@ -76,9 +77,9 @@ const loadFlag = (key: string, storage: Storage) => storage.getItem(key) !== "fa
 const saveFlag = (key: string, on: boolean, storage: Storage) => storage.setItem(key, String(on));
 
 /** Whether the live stats bar is shown (on unless turned off). */
-export const loadLiveStats = (storage: Storage = localStorage) => loadFlag(LIVE_KEY, storage);
+export const loadLiveStats = (storage: Storage = settingsStorage()) => loadFlag(LIVE_KEY, storage);
 
-export const saveLiveStats = (on: boolean, storage: Storage = localStorage) => saveFlag(LIVE_KEY, on, storage);
+export const saveLiveStats = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(LIVE_KEY, on, storage);
 
 /** Ajustes → Práctica toggle of the ghost session (ghost S3). */
 export const GHOST_SETTING = {
@@ -87,24 +88,24 @@ export const GHOST_SETTING = {
 };
 
 /** Whether a text with a record races its ghost session (on unless turned off). */
-export const loadGhost = (storage: Storage = localStorage) => loadFlag(GHOST_KEY, storage);
+export const loadGhost = (storage: Storage = settingsStorage()) => loadFlag(GHOST_KEY, storage);
 
-export const saveGhost = (on: boolean, storage: Storage = localStorage) => saveFlag(GHOST_KEY, on, storage);
+export const saveGhost = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(GHOST_KEY, on, storage);
 
 /** Whether the on-screen keyboard is shown (on unless turned off). */
-export const loadShowKeyboard = (storage: Storage = localStorage) => loadFlag(KEYBOARD_KEY, storage);
+export const loadShowKeyboard = (storage: Storage = settingsStorage()) => loadFlag(KEYBOARD_KEY, storage);
 
-export const saveShowKeyboard = (on: boolean, storage: Storage = localStorage) => saveFlag(KEYBOARD_KEY, on, storage);
+export const saveShowKeyboard = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(KEYBOARD_KEY, on, storage);
 
 /** Whether typed keys flash green or red on the keyboard (on unless turned off). */
-export const loadFlashes = (storage: Storage = localStorage) => loadFlag(FLASHES_KEY, storage);
+export const loadFlashes = (storage: Storage = settingsStorage()) => loadFlag(FLASHES_KEY, storage);
 
-export const saveFlashes = (on: boolean, storage: Storage = localStorage) => saveFlag(FLASHES_KEY, on, storage);
+export const saveFlashes = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(FLASHES_KEY, on, storage);
 
 /** Whether the keyboard is tinted by error score (off unless turned on). */
-export const loadHeatmap = (storage: Storage = localStorage) => storage.getItem(HEATMAP_KEY) === "true";
+export const loadHeatmap = (storage: Storage = settingsStorage()) => storage.getItem(HEATMAP_KEY) === "true";
 
-export const saveHeatmap = (on: boolean, storage: Storage = localStorage) => saveFlag(HEATMAP_KEY, on, storage);
+export const saveHeatmap = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(HEATMAP_KEY, on, storage);
 
 const COLOR_BLIND_KEY = "plexustyping.colorBlind";
 
@@ -115,9 +116,9 @@ export const COLOR_BLIND_SETTING = {
 };
 
 /** Whether the keyboard flashes use the colour-blind pair (off unless turned on). */
-export const loadColorBlind = (storage: Storage = localStorage) => storage.getItem(COLOR_BLIND_KEY) === "true";
+export const loadColorBlind = (storage: Storage = settingsStorage()) => storage.getItem(COLOR_BLIND_KEY) === "true";
 
-export const saveColorBlind = (on: boolean, storage: Storage = localStorage) => saveFlag(COLOR_BLIND_KEY, on, storage);
+export const saveColorBlind = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(COLOR_BLIND_KEY, on, storage);
 
 const DIM_PENDING_KEY = "plexustyping.dimPending";
 
@@ -128,9 +129,9 @@ export const DIM_PENDING_SETTING = {
 };
 
 /** Whether the practice text's pending chars use the dimmed colours (on unless turned off). */
-export const loadDimPending = (storage: Storage = localStorage) => loadFlag(DIM_PENDING_KEY, storage);
+export const loadDimPending = (storage: Storage = settingsStorage()) => loadFlag(DIM_PENDING_KEY, storage);
 
-export const saveDimPending = (on: boolean, storage: Storage = localStorage) => saveFlag(DIM_PENDING_KEY, on, storage);
+export const saveDimPending = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(DIM_PENDING_KEY, on, storage);
 
 /** Choices of weak units practised per text (2 or 3); the first is the default. */
 export const TARGET_COUNTS = [2, 3];
@@ -144,15 +145,15 @@ function loadChoice(key: string, choices: number[], fallback: number, storage: S
   return choices.includes(value) ? value : fallback;
 }
 
-export const loadTargetCount = (storage: Storage = localStorage) =>
+export const loadTargetCount = (storage: Storage = settingsStorage()) =>
   loadChoice(TARGETS_KEY, TARGET_COUNTS, TARGET_COUNTS[0], storage);
 
-export const saveTargetCount = (count: number, storage: Storage = localStorage) =>
+export const saveTargetCount = (count: number, storage: Storage = settingsStorage()) =>
   storage.setItem(TARGETS_KEY, String(count));
 
-export const loadTextLength = (storage: Storage = localStorage) => loadChoice(LENGTH_KEY, TEXT_LENGTHS, 300, storage);
+export const loadTextLength = (storage: Storage = settingsStorage()) => loadChoice(LENGTH_KEY, TEXT_LENGTHS, 300, storage);
 
-export const saveTextLength = (length: number, storage: Storage = localStorage) =>
+export const saveTextLength = (length: number, storage: Storage = settingsStorage()) =>
   storage.setItem(LENGTH_KEY, String(length));
 
 const METRONOME_KEY = "plexustyping.metronome";
@@ -171,7 +172,7 @@ const intIn = (value: unknown, min: number, max: number) =>
   Number.isInteger(value) && (value as number) >= min && (value as number) <= max;
 
 /** The stored metronome settings; each missing or invalid field takes its default. */
-export function loadMetronome(storage: Storage = localStorage): MetronomeSettings {
+export function loadMetronome(storage: Storage = settingsStorage()): MetronomeSettings {
   let stored: Partial<Record<keyof MetronomeSettings, unknown>> = {};
   try {
     stored = JSON.parse(storage.getItem(METRONOME_KEY) ?? "{}") ?? {};
@@ -196,7 +197,7 @@ export function checkMetronome(
   };
 }
 
-export const saveMetronome = (settings: MetronomeSettings, storage: Storage = localStorage) =>
+export const saveMetronome = (settings: MetronomeSettings, storage: Storage = settingsStorage()) =>
   storage.setItem(METRONOME_KEY, JSON.stringify(settings));
 
 const KIND_KEY = "plexustyping.practiceKind";
@@ -205,23 +206,23 @@ const CODE_INDENT_KEY = "plexustyping.codeIndent";
 const CODE_LINES_KEY = "plexustyping.codeLines";
 
 /** Words or code when chosen; prose for a missing or unknown value (S1). */
-export function loadPracticeKind(storage: Storage = localStorage): PracticeKind {
+export function loadPracticeKind(storage: Storage = settingsStorage()): PracticeKind {
   const kind = storage.getItem(KIND_KEY);
   return kind === "code" || kind === "words" ? kind : "prose";
 }
 
-export const savePracticeKind = (kind: PracticeKind, storage: Storage = localStorage) => storage.setItem(KIND_KEY, kind);
+export const savePracticeKind = (kind: PracticeKind, storage: Storage = settingsStorage()) => storage.setItem(KIND_KEY, kind);
 
 /** Default code language; the backend list decides which ids exist. */
 export const DEFAULT_CODE_LANGUAGE = "python";
 
 /** The stored language id if it looks like one (`rust`, `html-css`), else Python. */
-export function loadCodeLanguage(storage: Storage = localStorage): string {
+export function loadCodeLanguage(storage: Storage = settingsStorage()): string {
   const id = storage.getItem(CODE_LANGUAGE_KEY) ?? "";
   return /^[a-z][a-z-]*$/.test(id) ? id : DEFAULT_CODE_LANGUAGE;
 }
 
-export const saveCodeLanguage = (id: string, storage: Storage = localStorage) => storage.setItem(CODE_LANGUAGE_KEY, id);
+export const saveCodeLanguage = (id: string, storage: Storage = settingsStorage()) => storage.setItem(CODE_LANGUAGE_KEY, id);
 
 /** Indentation modes in display order; the first is the default (S4). */
 export const CODE_INDENTS: { id: IndentMode; label: string }[] = [
@@ -229,12 +230,12 @@ export const CODE_INDENTS: { id: IndentMode; label: string }[] = [
   { id: "manual", label: "Manual" },
 ];
 
-export function loadCodeIndent(storage: Storage = localStorage): IndentMode {
+export function loadCodeIndent(storage: Storage = settingsStorage()): IndentMode {
   const id = storage.getItem(CODE_INDENT_KEY);
   return CODE_INDENTS.find((m) => m.id === id)?.id ?? CODE_INDENTS[0].id;
 }
 
-export const saveCodeIndent = (indent: IndentMode, storage: Storage = localStorage) =>
+export const saveCodeIndent = (indent: IndentMode, storage: Storage = settingsStorage()) =>
   storage.setItem(CODE_INDENT_KEY, indent);
 
 /** Snippet size in lines (S2: 5–20); 12 is the default. */
@@ -242,13 +243,13 @@ export const MIN_CODE_LINES = 5;
 export const MAX_CODE_LINES = 20;
 export const DEFAULT_CODE_LINES = 12;
 
-export function loadCodeLines(storage: Storage = localStorage): number {
+export function loadCodeLines(storage: Storage = settingsStorage()): number {
   const raw = storage.getItem(CODE_LINES_KEY);
   const value = raw === null || raw === "" ? NaN : Number(raw);
   return intIn(value, MIN_CODE_LINES, MAX_CODE_LINES) ? value : DEFAULT_CODE_LINES;
 }
 
-export const saveCodeLines = (lines: number, storage: Storage = localStorage) =>
+export const saveCodeLines = (lines: number, storage: Storage = settingsStorage()) =>
   storage.setItem(CODE_LINES_KEY, String(lines));
 
 const SCREEN_READER_KEY = "plexustyping.screenReader";
@@ -260,9 +261,9 @@ export const SCREEN_READER_SETTING = {
 };
 
 /** Whether the practice announces to screen readers (off unless turned on). */
-export const loadScreenReader = (storage: Storage = localStorage) => storage.getItem(SCREEN_READER_KEY) === "true";
+export const loadScreenReader = (storage: Storage = settingsStorage()) => storage.getItem(SCREEN_READER_KEY) === "true";
 
-export const saveScreenReader = (on: boolean, storage: Storage = localStorage) => saveFlag(SCREEN_READER_KEY, on, storage);
+export const saveScreenReader = (on: boolean, storage: Storage = settingsStorage()) => saveFlag(SCREEN_READER_KEY, on, storage);
 
 const TYPOGRAPHY_KEY = "plexustyping.typography";
 
@@ -297,7 +298,7 @@ export function checkTypography(
   return next;
 }
 
-export function loadTypography(storage: Storage = localStorage): Typography {
+export function loadTypography(storage: Storage = settingsStorage()): Typography {
   let stored: Partial<Record<keyof Typography, unknown>> = {};
   try {
     stored = JSON.parse(storage.getItem(TYPOGRAPHY_KEY) ?? "{}") ?? {};
@@ -307,7 +308,7 @@ export function loadTypography(storage: Storage = localStorage): Typography {
   return checkTypography(typeof stored === "object" ? stored : {});
 }
 
-export const saveTypography = (typography: Typography, storage: Storage = localStorage) =>
+export const saveTypography = (typography: Typography, storage: Storage = settingsStorage()) =>
   storage.setItem(TYPOGRAPHY_KEY, JSON.stringify(typography));
 
 /** The CSS variables the prose and code practice text read. */

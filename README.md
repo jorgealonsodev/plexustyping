@@ -424,8 +424,12 @@ still works with a temporary in-memory store and shows "Sin guardar: modo
 temporal" in the header. The same database keeps the AI settings (without
 keys), the cache of generated texts and the usage counters, and the profiles
 (with their daily goals) and the active one. The ChatGPT sign-in lives apart,
-in the private `chatgpt-auth.json` of the app config directory. Shared display
-settings stay in the webview's local storage.
+in the private `chatgpt-auth.json` of the app config directory. The display and
+practice settings (theme, keyboard, toggles, metronome, typography…) are kept
+there too and written as soon as they change, so the development build and the
+installed app share them and closing the app never loses the last change. On
+the first start with this version they are copied once from the webview's local
+storage, which is left untouched; in temporary mode they stay in local storage.
 
 ## Install
 

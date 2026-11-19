@@ -1,3 +1,4 @@
+import { settingsStorage } from "./persist";
 import type { PracticeKind } from "../code/api";
 import type { ErrorMode, IndentMode } from "../practice/engine";
 import {
@@ -76,7 +77,7 @@ import {
 import { loadPracticeFont, savePracticeFont } from "./fonts";
 
 /** The live, persisted settings shared by the app and every settings section. Layout, language and
- * theme belong to the active profile (S5); localStorage keeps them only as the first-paint cache. */
+ * theme belong to the active profile (S5); the settings storage keeps them only as the first-paint cache. */
 export class SettingsStore {
   private readonly profileApi: ProfilesApi;
   private readonly goalApi: GoalsApi;
@@ -268,7 +269,7 @@ export class SettingsStore {
   }
 
   /** Start-up: the active profile (after the one-time carry-over, S6) and its layout, language and theme. */
-  async loadProfiles(storage: Storage = localStorage) {
+  async loadProfiles(storage: Storage = settingsStorage()) {
     try {
       const started = await startProfiles(this.profileApi, storage, this.appearance());
       this.profiles = started.profiles;

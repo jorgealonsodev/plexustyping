@@ -869,6 +869,24 @@ impl Store {
         Ok(())
     }
 
+    /// Every setting whose key starts with `prefix`, as `(key, value)` sorted by key.
+    pub fn settings_with_prefix(&self, prefix: &str) -> Result<Vec<(String, String)>> {
+        // substr, not LIKE: keys may contain `%` or `_`.
+        let mut stmt = self.conn.prepare(
+            "SELECT key, value FROM settings
+             WHERE substr(key, 1, length(?1)) = ?1 ORDER BY key",
+        )?;
+        let rows = stmt.query_map([prefix], |r| Ok((r.get(0)?, r.get(1)?)))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// Deletes setting `key` only; nothing happens when it is not set.
+    pub fn delete_setting(&self, key: &str) -> Result<()> {
+        self.conn
+            .execute("DELETE FROM settings WHERE key = ?1", [key])?;
+        Ok(())
+    }
+
     /// Deletes setting `key` and every setting whose key starts with
     /// `key` followed by `:` (e.g. `unlock:3` and `unlock:3:es:es-qwerty`).
     pub fn delete_settings_under(&self, key: &str) -> Result<()> {
