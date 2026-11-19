@@ -1,6 +1,6 @@
 import { settingsStorage } from "./persist";
 
-/** Ajustes → Apariencia select of the typing cursor's look, prose and code (cursor-style S1). */
+/** Ajustes → Texto select of the typing cursor's look, prose and code (cursor-style S1). */
 export const CURSOR_SETTING = {
   label: "Cursor",
   hint: "Cómo se marca el siguiente carácter que hay que escribir.",

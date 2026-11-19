@@ -9,6 +9,7 @@
   import { freshen, keystrokeMessage, liveText, newTextMessage, resultMessage } from "./announce";
   import { DEFAULT_TYPOGRAPHY, typographyStyle } from "../settings/settings";
   import { DEFAULT_FONT_ID, fontById, fontStyle } from "../settings/fonts";
+  import { DEFAULT_CURSOR_STYLE } from "../settings/cursor";
   import {
     type PracticeText,
     type ScoredSession,
@@ -80,7 +81,7 @@
     letterSpacing = DEFAULT_TYPOGRAPHY.letterSpacing,
     lineHeight = DEFAULT_TYPOGRAPHY.lineHeight,
     fontId = DEFAULT_FONT_ID,
-    cursorStyle = "highlight",
+    cursorStyle = DEFAULT_CURSOR_STYLE,
     cursorBlink = false,
   }: {
     mode: ErrorMode;

@@ -138,8 +138,17 @@
     const next = moveSection(ids, current, e.key);
     if (next === null) return;
     e.preventDefault();
-    current = next;
+    // Like a click: choosing a section ends the search.
+    pick(next);
     tabs[next]?.focus();
+  }
+
+  // Escape anywhere in the window (native cancel) clears an active search first; the next one closes.
+  function onCancel(ev: Event) {
+    if (query === "") return;
+    ev.preventDefault();
+    query = "";
+    search?.focus();
   }
 </script>
 
@@ -149,6 +158,7 @@
   class="settings"
   aria-labelledby="settings-title"
   onclose={onClose}
+  oncancel={onCancel}
   onkeydown={onKeydown}
   onclick={onClick}
 >
