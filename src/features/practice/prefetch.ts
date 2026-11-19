@@ -83,3 +83,6 @@ export function localDay(d: Date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+
+/** Whether two `profile|mode|layout|language` request keys belong to different profiles. */
+export const isProfileSwitch = (from: string, to: string): boolean => from.split("|")[0] !== to.split("|")[0];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Prefetcher, generationKey, localDay, provisionalFailedChars, sourceLabel } from "./prefetch";
+import { Prefetcher, generationKey, isProfileSwitch, localDay, provisionalFailedChars, sourceLabel } from "./prefetch";
 
 const deferred = <T>() => {
   let resolve!: (v: T) => void;
@@ -109,5 +109,15 @@ describe("localDay", () => {
   it("formats the local calendar day as YYYY-MM-DD", () => {
     expect(localDay(new Date(2026, 10, 16, 23, 59))).toBe("2026-11-16");
     expect(localDay(new Date(2027, 0, 5, 0, 1))).toBe("2027-01-05");
+  });
+});
+
+describe("isProfileSwitch", () => {
+  it("is true only when the profile part of the request key changes", () => {
+    // A new profile gets its diagnostic text, as at start-up.
+    expect(isProfileSwitch("0|prose|es-qwerty|es", "1|prose|es-qwerty|es")).toBe(true);
+    expect(isProfileSwitch("1|prose|es-qwerty|es", "1|prose|us-qwerty|en")).toBe(false);
+    expect(isProfileSwitch("1|prose|es-qwerty|es", "1|code:rust|es-qwerty|")).toBe(false);
+    expect(isProfileSwitch("2|prose|es-qwerty|es", "2|prose|es-qwerty|es")).toBe(false);
   });
 });

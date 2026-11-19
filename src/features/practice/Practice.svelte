@@ -30,7 +30,7 @@
   import { LANGUAGES } from "../code/languages.svelte";
   import { type TokenClass, codeKeyEvent, tokenClasses } from "../code/syntax";
   import { focusTyping, setTypingField } from "./focus";
-  import { Prefetcher, generationKey, provisionalFailedChars, sourceLabel } from "./prefetch";
+  import { Prefetcher, generationKey, isProfileSwitch, provisionalFailedChars, sourceLabel } from "./prefetch";
   import { type Phase, indentChangeRestarts, shouldApply } from "./replies";
   import Results from "./Results.svelte";
   import { type Ghost, GhostRace, formatDelta, ghostForText, ghostPosition } from "./ghost";
@@ -503,11 +503,17 @@
   });
 
   // Switching profile, prose/code, the language or the layout drops the prefetch and loads a new text.
+  // Another profile starts as at start-up: a new one gets its diagnostic text.
   $effect(() => {
     const key = wantedKey;
     untrack(() => {
       if (key === requestedKey) return;
       prefetch.clear();
+      if (isProfileSwitch(requestedKey, key)) {
+        loadFirst();
+        refreshModel(run, practice);
+        return;
+      }
       const [count, length, chosen, lines, lay, lang] = [targetCount, textLength, practice, codeLines, layoutId, languageId];
       const fresh = () => nextText(lang, lay, randomSeed(), count, length, [], chosen, lines);
       const again = () => void load(fresh, again, "Generando texto…", chosen);
