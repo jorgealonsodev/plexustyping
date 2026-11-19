@@ -7,6 +7,7 @@
 An adaptive typing tutor built with Rust and Tauri 2.
 
 Status: phase 2 in progress (code mode). See `PRD-PlexusTyping.v0.1.md` for the product plan.
+To install a release, see [Install](#install).
 
 Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
 
@@ -418,6 +419,59 @@ keys), the cache of generated texts and the usage counters, and the profiles
 in the private `chatgpt-auth.json` of the app config directory. Shared display
 settings stay in the webview's local storage.
 
+## Install
+
+Each [GitHub release](https://github.com/jorgealonsodev/plexustyping/releases)
+ships three 64-bit artefacts and a `SHA256SUMS` file. Check your download with
+`sha256sum -c SHA256SUMS --ignore-missing` in the download folder.
+
+### Linux: `.deb` (Debian, Ubuntu 22.04+ and derivatives)
+
+```sh
+sudo apt install ./plexustyping_<versión>_amd64.deb
+```
+
+`apt` also installs the system dependencies it declares (`libwebkit2gtk-4.1-0`,
+`libgtk-3-0`), the menu entry and the icons. Update by installing the newer
+`.deb` the same way; remove with `sudo apt remove plexus-typing` (the Debian package name Tauri derives from the product name).
+
+### Linux: portable `.tar.gz` (any x86_64 distribution)
+
+`plexustyping-<versión>-linux-x86_64.tar.gz` does not include WebKitGTK 4.1
+or GTK 3; install them first:
+
+| Distribution | Command |
+| --- | --- |
+| Debian / Ubuntu | `sudo apt install libwebkit2gtk-4.1-0 libgtk-3-0` |
+| Fedora | `sudo dnf install webkit2gtk4.1 gtk3` |
+| Arch Linux | `sudo pacman -S webkit2gtk-4.1 gtk3` |
+
+```sh
+tar -xzf plexustyping-<versión>-linux-x86_64.tar.gz
+cd plexustyping-<versión>
+./plexustyping           # run it from here, or:
+./install.sh             # install into ~/.local (no root)
+./install.sh --uninstall # remove exactly what install.sh installed
+```
+
+`plexustyping` is a launcher: if WebKitGTK 4.1 is missing it prints the
+package to install for Debian/Ubuntu, Fedora and Arch and exits with status 1;
+otherwise it starts the real binary, `plexustyping-bin`. `install.sh` copies
+both to `~/.local/bin`, the menu entry to `~/.local/share/applications` and the
+icons to `~/.local/share/icons/hicolor`, and writes nothing outside
+`~/.local`. Uninstalling keeps your data in
+`~/.local/share/com.plexustyping.app/`. The `.tar.gz` does not update itself:
+download the new one and run `./install.sh` again. The archive's `README`
+(in Spanish) has the same instructions.
+
+### Windows: `PlexusTyping_<versión>_x64-setup.exe`
+
+Run the installer. It installs for the current user only, without
+administrator rights, and downloads the WebView2 runtime if Windows does not
+have it. The installer is not signed yet, so SmartScreen warns about an
+unknown publisher: click "Más información" ("More info") → "Ejecutar de todas
+formas" ("Run anyway"). Uninstall it from Settings → Apps.
+
 ## Layout
 
 | Path | Contents |
@@ -442,8 +496,15 @@ pnpm install
 pnpm tauri dev      # run the app
 cargo test --workspace
 pnpm check && pnpm test
-pnpm tauri build    # installers
+pnpm tauri build    # installers: .deb on Linux, NSIS .exe on Windows
+scripts/package-linux-tarball.sh target/release/plexustyping 0.1.0 out  # .tar.gz
+scripts/test-package-linux-tarball.sh  # test of the .tar.gz script
 ```
+
+Pushing a `v*` tag (or running the Release workflow by hand) builds the
+`.deb`, the `.tar.gz`, the `.exe` and `SHA256SUMS` in GitHub Actions
+(`.github/workflows/release.yml`); on a tag they are attached to a draft
+release, which a maintainer publishes.
 
 ## License
 

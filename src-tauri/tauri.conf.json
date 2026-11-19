@@ -27,13 +27,31 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "appimage", "msi", "nsis", "dmg", "app"],
+    "targets": [
+      "deb",
+      "nsis"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    },
+    "publisher": "J. Alonso",
+    "homepage": "https://github.com/jorgealonsodev/plexustyping",
+    "license": "MIT OR Apache-2.0",
+    "category": "Education",
+    "shortDescription": "Adaptive typing tutor",
+    "longDescription": "PlexusTyping is an adaptive typing tutor: it measures your weak keys and generates practice texts that target them, with a local corpus and optional AI providers."
   }
 }

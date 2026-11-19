@@ -1,0 +1,65 @@
+PlexusTyping para Linux (x86_64) — versión portable .tar.gz
+============================================================
+
+Tutor de mecanografía adaptativo. Este archivo no necesita instalarse: se
+puede ejecutar directamente desde la carpeta descomprimida.
+
+Dependencias del sistema
+------------------------
+
+PlexusTyping usa WebKitGTK 4.1 y GTK 3, que este paquete no incluye.
+Instálalos con el gestor de paquetes de tu distribución:
+
+  Debian / Ubuntu (22.04 o posterior):
+    sudo apt install libwebkit2gtk-4.1-0 libgtk-3-0
+
+  Fedora:
+    sudo dnf install webkit2gtk4.1 gtk3
+
+  Arch Linux:
+    sudo pacman -S webkit2gtk-4.1 gtk3
+
+Si falta WebKitGTK 4.1, el lanzador `plexustyping` lo avisa con un mensaje
+que indica el paquete que hay que instalar y no abre la aplicación.
+
+Ejecutar sin instalar
+---------------------
+
+  ./plexustyping
+
+`plexustyping` es el lanzador: comprueba las dependencias y arranca el
+binario real, `plexustyping-bin`. Abre siempre la aplicación con el lanzador.
+
+Instalar en ~/.local (opcional, sin permisos de administrador)
+---------------------------------------------------------------
+
+  ./install.sh
+
+Copia el lanzador y el binario en ~/.local/bin, el acceso directo
+plexustyping.desktop en ~/.local/share/applications y los iconos en
+~/.local/share/icons/hicolor. No escribe nada fuera de ~/.local. Después
+aparece «PlexusTyping» en el menú de aplicaciones; para lanzarlo desde la
+terminal, ~/.local/bin debe estar en el PATH.
+
+Desinstalar
+-----------
+
+  ./install.sh --uninstall
+
+Borra exactamente los archivos que instaló install.sh (y las carpetas que
+tuvo que crear, si quedan vacías). Tus datos (sesiones, estadísticas y
+ajustes) se conservan en ~/.local/share/com.plexustyping.app/; bórralos a
+mano si ya no los quieres.
+
+Actualizar
+----------
+
+Esta versión no se actualiza sola. Descarga el nuevo .tar.gz, descomprímelo
+y vuelve a ejecutar ./install.sh.
+
+Licencia
+--------
+
+Código: MIT o Apache-2.0, a tu elección (LICENSE-MIT, LICENSE-APACHE).
+Los datos incluidos (corpus, distribuciones, temas) conservan su propia
+licencia: consulta THIRD_PARTY_NOTICES.md.

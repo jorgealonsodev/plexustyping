@@ -44,7 +44,7 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
 
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
-| T1 | S1–S6 | Bundle targets, tarball script with launcher, install.sh (+ --uninstall), tarball README, a shell test of the script, release workflow, README | worker | pending | |
+| T1 | S1–S6 | Bundle targets, tarball script with launcher, install.sh (+ --uninstall), tarball README, a shell test of the script, release workflow, README | worker | done | see L5 |
 | T3 | S5, S7 | Merge, tag v0.1.0, watch the workflow, publish the release | parent | pending | |
 | T2 | S1–S4 | Local proof: real `tauri build --bundles deb`, `dpkg-deb -I` dependencies, the script on the real binary, launcher message with the library hidden, install/uninstall into a temporary HOME | parent | pending | |
 
@@ -63,3 +63,17 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
   - The workflow only drafts releases; publishing is the human's call.
   - Windows signing and the updater wait for the certificate decision.
 - **L4 (user, verbatim, 2026-11-19):** "habra que hacer release, crea los instaladores en github" → S7 added. The unsigned Windows NSIS installer is included, and the release v0.1.0 is created and published by the parent once CI passes.
+- **L5 (evidence, 2026-11-19):** T1 done by the worker plus parent fixes.
+  - Scripts: `scripts/package-linux-tarball.sh`, `scripts/linux/{plexustyping,install.sh,plexustyping.desktop,README}` and `scripts/test-package-linux-tarball.sh`. RED: exit 127. GREEN: 57 checks, shellcheck clean.
+  - Workflow: `.github/workflows/release.yml` (linux, windows and release jobs; draft release; actions pinned to commit SHAs). README has an install section.
+  - Parent fixes:
+    - Tauri names the .deb `PlexusTyping_<v>_amd64.deb` with Debian package `plexus-typing` (there is no packageName option). The workflow reads that file and publishes it as `plexustyping_<v>_amd64.deb`. README says `apt remove plexus-typing`.
+    - Bundle metadata added (publisher, homepage, license, category, short and long description).
+    - WebView2 set to `embedBootstrapper` (PRD: "Incluye el bootstrapper de WebView2").
+    - The explicit deb depends were removed: Tauri already adds `libwebkit2gtk-4.1-0, libgtk-3-0`, and listing them again duplicated them. The workflow still checks both with `dpkg-deb -f`.
+  - T2 local proof:
+    - A real `tauri build --bundles deb` gives `Depends: libwebkit2gtk-4.1-0, libgtk-3-0`, with the .desktop file and the icons.
+    - The tarball built from the real binary has the expected file list.
+    - With the library hidden, the launcher prints the Spanish message and exits 1.
+  - Checks: cargo 586, vitest 412, check 0.
+  - Not yet run: the workflow itself (the Windows build and the ubuntu-22.04 package list).

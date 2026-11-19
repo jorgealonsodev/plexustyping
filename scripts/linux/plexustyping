@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# PlexusTyping launcher for the .tar.gz release.
+#
+# The real binary (plexustyping-bin, next to this script) is linked against
+# WebKitGTK 4.1; when the library is missing the dynamic loader fails before
+# the app can say anything. This launcher checks for the library first and,
+# if it is missing, prints which package to install and exits with status 1.
+#
+# Test hooks (not needed in normal use):
+#   PLEXUSTYPING_LDCONFIG  ldconfig command to query instead of the system one
+#   PLEXUSTYPING_LIB_DIRS  colon-separated library dirs to search as a fallback
+set -euo pipefail
+
+here=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+bin="$here/plexustyping-bin"
+lib="libwebkit2gtk-4.1.so"
+
+in_ldconfig() {
+  local cmd
+  if [[ -n "${PLEXUSTYPING_LDCONFIG:-}" ]]; then
+    cmd=$PLEXUSTYPING_LDCONFIG
+  elif command -v ldconfig >/dev/null 2>&1; then
+    cmd=ldconfig
+  elif [[ -x /sbin/ldconfig ]]; then
+    cmd=/sbin/ldconfig
+  elif [[ -x /usr/sbin/ldconfig ]]; then
+    cmd=/usr/sbin/ldconfig
+  else
+    return 1
+  fi
+  local listing
+  listing=$("$cmd" -p 2>/dev/null) || return 1
+  [[ "$listing" == *"$lib"* ]]
+}
+
+in_lib_dirs() {
+  local dirs d f
+  dirs=${PLEXUSTYPING_LIB_DIRS:-/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib64:/lib64:/usr/lib:/lib:/usr/local/lib}
+  local IFS=:
+  for d in $dirs; do
+    for f in "$d/$lib"*; do
+      [[ -e "$f" ]] && return 0
+    done
+  done
+  return 1
+}
+
+if ! in_ldconfig && ! in_lib_dirs; then
+  cat >&2 <<'EOF'
+PlexusTyping necesita WebKitGTK 4.1 (libwebkit2gtk-4.1), que no está instalada.
+Instálala con el gestor de paquetes de tu distribución:
+  Debian/Ubuntu:  sudo apt install libwebkit2gtk-4.1-0
+  Fedora:         sudo dnf install webkit2gtk4.1
+  Arch Linux:     sudo pacman -S webkit2gtk-4.1
+Después vuelve a abrir PlexusTyping.
+EOF
+  exit 1
+fi
+
+exec "$bin" "$@"

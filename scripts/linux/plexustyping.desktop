@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=PlexusTyping
+GenericName=Typing tutor
+GenericName[es]=Tutor de mecanografía
+Comment=Adaptive typing tutor
+Comment[es]=Tutor de mecanografía adaptativo
+Exec=plexustyping
+Icon=plexustyping
+Terminal=false
+Categories=Education;
+Keywords=typing;keyboard;mecanografía;teclado;
