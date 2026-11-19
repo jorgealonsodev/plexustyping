@@ -38,7 +38,7 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
 |---|---|---|---|---|---|
 | T1 | S1 (backend), S2 (continuation), S4 | Length clamp to 2000, `continue_text` command, continuation prompt (AI crate), corpus and words fallback, tests | worker A (parallel) | done | see L4 |
 | T2 | S1 (frontend), S2 (session growth), S3 | Length choices with "Ilimitado", engine `extend`, Practice wiring (trigger at half, append, end with Esc or Terminar, score the prefix, ghost and adaptive off), api `continueText`, hint, README, tests | worker B (parallel) | done | see L4 |
-| T4 | S5 | Hardening of the unlimited session | worker | pending | |
+| T4 | S5 | Hardening of the unlimited session | worker | done | see L5 |
 | T3 | S1–S4 | Integration: cargo, clippy, vitest, check, build; .deb for the user's try-out | parent | done | see L4 |
 
 ## Log
@@ -74,3 +74,13 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
     - With the AI off, a continuation is a corpus text without a notice, as next_text does.
     - Scoring the prefix ignores keystrokes made after the prefix point that were then backspaced.
     - The Svelte wiring is untested; it needs a GUI check.
+- **L5 (user report and fix, 2026-11-19):** the user wrote "he llegado al final y noo ha generado texto nuevo", with a screenshot of ChatGPT and the end of the text reached. Root cause: a failed continuation was retried only after the cursor advanced 50 chars, which is impossible at the end of the text, and the failure was only logged with console.warn: a silent, permanent stall.
+  - T4 (worker):
+    - The trigger also fires at ≤400 chars ahead.
+    - The end of the text waits with «Generando más texto…» instead of finishing.
+    - `retryPlan` retries on a 2.5 s timer near the end, with the notice «No se pudo continuar el texto: …; reintentando…».
+    - `noticeAfterContinuation` clears a stale notice.
+    - `prefixEvents` scores only the events up to the cursor's first arrival at its final position, consistent with the replay. A Rust test saves an ended prefix in every error mode.
+  - Parent: `withDeadline` (25 s) turns a silent provider into a failure and so into a retry.
+  - Checks: vitest 546/546, check 0; cargo 606 and clippy 0 from the worker.
+  - Not covered by any test: the Svelte wiring, which needs a GUI check.

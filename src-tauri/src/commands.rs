@@ -855,6 +855,56 @@ mod tests {
         assert_eq!(load_model(&store, &profile), Ok(WeaknessModel::new()));
     }
 
+    /// Unlimited S5: an ended session is scored against chars 0..cursor with the
+    /// events up to the one that first brought the cursor there (the frontend's
+    /// `prefixEvents`); the replay completes and the session is saved in every mode.
+    #[test]
+    fn score_session_saves_an_ended_prefix_in_every_error_mode() {
+        let backspace = |t_ms: f64| -> InputEvent {
+            serde_json::from_value(serde_json::json!({ "kind": "backspace", "tMs": t_ms })).unwrap()
+        };
+        let corrected = {
+            let mut events = typing("hx");
+            events.push(backspace(150.0));
+            events.extend(typing("ola").into_iter().map(|e| match e {
+                InputEvent::Char { ch, t_ms } => InputEvent::Char {
+                    ch,
+                    t_ms: t_ms + 200.0,
+                },
+                other => other,
+            }));
+            events
+        };
+        // (mode, prefix, kept events, records, uncorrected errors)
+        let cases = [
+            (ErrorMode::BackspaceCorrect, "hola ", typing("hola "), 5, 0),
+            (ErrorMode::BackspaceCorrect, "hola", corrected, 5, 0),
+            (ErrorMode::StopOnError, "hola m", typing("hola m"), 6, 0),
+            (ErrorMode::StopOnError, "hola", typing("hxola"), 5, 0),
+            (ErrorMode::AllowContinue, "hola mu", typing("hola mx"), 7, 1),
+        ];
+        let (mut store, profile) = memory();
+        for (i, (mode, prefix, events, records, uncorrected)) in cases.into_iter().enumerate() {
+            let scored = score_session(&mut store, &profile, prefix, mode, &events, i as i64);
+            assert!(
+                scored.result.completed && scored.result.cursor == prefix.chars().count(),
+                "{mode:?} {prefix:?}: {:?}",
+                scored.result
+            );
+            assert_eq!(scored.result.records.len(), records, "{mode:?} {prefix:?}");
+            assert_eq!(
+                scored.result.stats.uncorrected_errors, uncorrected,
+                "{mode:?} {prefix:?}"
+            );
+            assert_eq!(
+                (scored.saved, scored.save_error),
+                (true, None),
+                "{mode:?} {prefix:?}"
+            );
+        }
+        assert_eq!(store.recent_sessions(profile.id, 10).unwrap().len(), 5);
+    }
+
     #[test]
     fn score_session_keeps_the_result_when_saving_fails() {
         let (mut store, profile) = memory();

@@ -53,15 +53,21 @@
   import type { UnlockStatus } from "../unlock/api";
   import { lockedKeys, progressLine, unlockApplies } from "../unlock/unlock";
   import {
-    RETRY_AFTER_CHARS,
+    continuationFailureNotice,
     continuationPiece,
     continuationTail,
     endAction,
     isUnlimited,
+    noticeAfterContinuation,
+    prefixEvents,
     requestLength,
+    retryPlan,
     shouldContinue,
+    withDeadline,
+    CONTINUE_DEADLINE_MS,
     typedPrefix,
   } from "./unlimited";
+  import { failureMessage } from "../settings/ai";
 
   let {
     mode,
@@ -179,6 +185,8 @@
   // Origin of the current text, and why the AI was not used (when enabled).
   let source = $state("");
   let notice = $state<string | null>(null);
+  // The notice was set by a continuation (unlimited S5): the next continuation replaces or clears it.
+  let continuationNotice = false;
   let loadingLabel = $state("Cargando texto…");
   // Practice mode of the current text, and the syntax class of each of its chars (code only).
   let textMode = $state.raw<PracticeMode>("prose");
@@ -322,6 +330,7 @@
       unlimited = isUnlimited(forLength, textPractice, diagnostic);
       source = sourceLabel(next);
       notice = next.notice ?? null;
+      continuationNotice = false;
       restart();
     } catch (err) {
       if (id !== run) return;
@@ -360,8 +369,9 @@
     prefetch.start(genKey, () => nextText(lang, lay, randomSeed(), count, length, fallback, chosen, lines));
   }
 
-  // Unlimited S2: at half of the current text, one continuation at a time is asked in the background
-  // and appended after a single space; a reply after a restart, a new text or the end is stale.
+  // Unlimited S2, S5: at half of the current text, or with at most 400 chars ahead, one continuation
+  // at a time is asked in the background and appended after a single space; a reply after a
+  // restart, a new text or the end is stale.
   function maybeContinue() {
     if (!unlimited || !session || phase !== "typing" || isCodeMode(textMode)) return;
     const s = session;
@@ -369,16 +379,36 @@
     continuing = true;
     const id = run;
     const stale = () => id !== run || session !== s;
-    continueText(textLanguage, textLayout, textMode, continuationTail(s.chars), targetCount, randomSeed())
+    // A failed or empty continuation is asked again: near the end after a delay, else 50 chars later.
+    const retryLater = (reason: string) => {
+      continuing = false;
+      notice = continuationFailureNotice(reason);
+      continuationNotice = true;
+      const plan = retryPlan(s.cursor, s.chars.length);
+      retryFrom = plan.retryFrom;
+      if (plan.delayMs !== null)
+        setTimeout(() => {
+          if (stale()) return;
+          retryFrom = 0;
+          maybeContinue();
+        }, plan.delayMs);
+    };
+    withDeadline(
+      continueText(textLanguage, textLayout, textMode, continuationTail(s.chars), targetCount, randomSeed()),
+      CONTINUE_DEADLINE_MS,
+    )
       .then((next) => {
         if (stale()) return;
-        continuing = false;
-        if (next.notice) notice = next.notice;
         const piece = continuationPiece(s.chars, next.text);
         if (!piece) {
-          retryFrom = s.cursor + RETRY_AFTER_CHARS;
+          retryLater("la continuación llegó vacía");
           return;
         }
+        continuing = false;
+        ({ text: notice, continuation: continuationNotice } = noticeAfterContinuation(
+          { text: notice, continuation: continuationNotice },
+          next.notice,
+        ));
         retryFrom = 0;
         s.extend(piece);
         text = s.chars.join("");
@@ -388,9 +418,8 @@
       })
       .catch((err) => {
         if (stale()) return;
-        continuing = false;
-        retryFrom = s.cursor + RETRY_AFTER_CHARS;
         console.warn("continue_text failed; asking again later", err);
+        retryLater(failureMessage(err));
       });
   }
 
@@ -398,8 +427,15 @@
   // typed the text is dropped unscored and a new one loads.
   function endUnlimited() {
     if (!unlimited || phase !== "typing" || !session) return;
-    if (endAction(session.cursor) === "discard") loadNext();
-    else void finish(session, track, typedPrefix(session.chars, session.cursor));
+    if (endAction(session.cursor) === "discard") {
+      loadNext();
+      return;
+    }
+    // Only the events up to where the cursor first reached its final position are scored, with
+    // their offsets: the backend replay of the prefix stops there (S5).
+    const prefix = typedPrefix(session.chars, session.cursor);
+    const kept = prefixEvents(prefix, session.mode, session.events, track.offsets, session.indent);
+    void finish(session, { ...track, offsets: kept.offsets }, prefix, kept.events);
   }
 
   // Weaknesses and heatmap scores from the stored model; missing ones only hide those views.
@@ -415,8 +451,9 @@
       .catch((err) => console.warn("heatmap failed", err));
   }
 
-  // `scoredText` is the text replayed: the whole text, or the typed prefix of an ended unlimited one.
-  async function finish(done: TypingSession, measured: Track, scoredText: string = text) {
+  // `scoredText` is the text replayed: the whole text, or the typed prefix of an ended unlimited one
+  // with `events`, the events up to the end of that prefix.
+  async function finish(done: TypingSession, measured: Track, scoredText: string = text, events: TypingEvent[] = done.events) {
     const id = ++run;
     phase = "scoring";
     const against = ghostEnabled && !unlimited ? ghost : null;
@@ -425,7 +462,7 @@
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
       const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
       const typed = { mode: textMode, indent: done.indent };
-      const result = await scoreSession(isCodeMode(textMode) ? null : textLanguage, textLayout, scoredText, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
+      const result = await scoreSession(isCodeMode(textMode) ? null : textLanguage, textLayout, scoredText, done.mode, events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
       raced = against;
@@ -443,7 +480,7 @@
           .catch((err) => console.warn("goal refresh failed", err));
     } catch (err) {
       if (id !== run) return;
-      retry = () => void finish(done, measured, scoredText);
+      retry = () => void finish(done, measured, scoredText, events);
       message = `No se pudo calcular el resultado: ${String(err)}`;
       phase = "error";
     }
@@ -454,6 +491,12 @@
 
   function applyEvent(event: TypingEvent) {
     if (phase !== "typing" || !session) return;
+    // Unlimited S5: the end of the text waits for its continuation; keys are neither applied nor
+    // recorded there (Esc and "Terminar" do not come through here).
+    if (unlimited && session.completed) {
+      maybeContinue();
+      return;
+    }
     const expected = session.chars[session.cursor];
     const before = session.cursor;
     const first = session.firstT === null;
@@ -477,7 +520,7 @@
       const code = keyForChar(layout, event.ch);
       if (code) flash = { code, ok: event.ch === expected };
     }
-    if (session.completed) void finish(session, track);
+    if (session.completed && !unlimited) void finish(session, track);
     else maybeContinue();
   }
 
@@ -794,6 +837,9 @@
             >{/each}</p>
       {/if}
       </div>
+      {#if unlimited && phase === "typing" && view.cursor === session.chars.length}
+        <p class="hint" role="status">Generando más texto…</p>
+      {/if}
       <p class="hint">
         {#if phase === "scoring"}Calculando resultado…{:else}{typingHint(view.cursor !== 0, isCode, unlimited)}{/if}
       </p>

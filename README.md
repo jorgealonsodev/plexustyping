@@ -114,18 +114,26 @@ does not rely on colour alone; the legend under the keyboard names the levels
 "Longitud" → "Ilimitado" (prose and words; code ignores it and keeps its line
 limit) gives a text that keeps growing while you type. It starts with a
 600-character text from the usual source (AI, cache or corpus). When the cursor
-reaches half of the text, a continuation of about 600 characters is requested
-in the background, one at a time, and appended after a single space without
-interrupting you; the next one is asked at half of the new total, so there is
-always text ahead. Prose continues with the AI from the last ~400 characters
+reaches half of the text, or at most 400 characters remain ahead of it, a
+continuation of about 600 characters is requested in the background, one at a
+time, and appended after a single space without interrupting you; the next one
+is asked at half of the new total (or 400 characters before its end), so there
+is always text ahead. Prose continues with the AI from the last ~400 characters
 (same language, only characters the layout and progressive unlock allow);
 without the AI, or when it fails, a corpus text follows, with the reason as a
-note above the text. Words mode always continues with more corpus words.
-Continuations are never cached, and only generated text is sent, never what
-you type. `Esc` (from the text) or the "Terminar" button under it ends the
-session: the text typed so far is scored as a completed session, with the usual
-results, saving, statistics, daily goal and unlock progress; ending before
-typing anything discards it and loads a new text. Unlimited texts race no ghost
+note above the text; a continuation without a note clears the previous
+continuation's note. If a continuation cannot be had at all, a note says so
+("No se pudo continuar el texto: …; reintentando…") and it is asked again: after
+2.5 seconds near the end, else 50 characters later. Reaching the end of the
+text never ends the session: it waits there with "Generando más texto…" and
+goes on as soon as the continuation arrives. Words mode always continues with
+more corpus words. Continuations are never cached, and only generated text is
+sent, never what you type. `Esc` (from the text) or the "Terminar" button under
+it ends the session: the text typed so far is scored as a completed session,
+with the usual results, saving, statistics, daily goal and unlock progress, from
+the keystrokes up to where the cursor first reached its final position (a wrong
+key at the cursor or characters typed past it and erased are not counted);
+ending before typing anything discards it and loads a new text. Unlimited texts race no ghost
 session and the adaptive metronome does not change the tempo after them; the
 metronome itself keeps playing. The first diagnostic text is never unlimited.
 
