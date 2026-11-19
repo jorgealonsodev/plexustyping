@@ -108,6 +108,7 @@
 <!-- Typeface of the practice text, prose and code (practice-font S1): each option and the preview in its own font. -->
 <SettingField label={FONT_SETTING.label} hint="{FONT_SETTING.hint} {font.hint}">
   {#snippet children({ id, hintId })}
+    <div class="font-pick">
     <select
       {id}
       aria-describedby={hintId}
@@ -123,6 +124,7 @@
       {/each}
     </select>
     <p class="preview" aria-hidden="true" style="font-family: {font.family}">Ñandú veloz: 0O 1lI ¿{"{}"}?</p>
+    </div>
   {/snippet}
 </SettingField>
 
@@ -181,8 +183,19 @@
   button + button {
     margin-left: 0.4rem;
   }
+  /* Select with its preview line under it: the preview never widens the row (it would squeeze the label). */
+  .font-pick {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 14rem;
+    max-width: 100%;
+  }
   .preview {
     margin: 0.4rem 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 1.05rem;
     font-feature-settings: "liga" 0, "calt" 0;
     color: var(--text);
