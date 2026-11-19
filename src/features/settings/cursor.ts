@@ -8,7 +8,7 @@ export const CURSOR_SETTING = {
 
 export const CURSOR_BLINK_SETTING = {
   label: "Cursor parpadeante",
-  hint: "El cursor parpadea; no lo hace con el movimiento reducido del sistema.",
+  hint: "El cursor parpadea mientras esperas y se queda fijo al escribir; no lo hace con el movimiento reducido del sistema.",
 };
 
 export interface CursorStyle {
@@ -38,7 +38,7 @@ export const loadCursorStyle = (storage: Storage = settingsStorage()): string =>
 
 export const saveCursorStyle = (id: string, storage: Storage = settingsStorage()) => storage.setItem(STYLE_KEY, id);
 
-/** Off unless turned on. */
-export const loadCursorBlink = (storage: Storage = settingsStorage()): boolean => storage.getItem(BLINK_KEY) === "true";
+/** On unless turned off ("tiene que parpadear"). */
+export const loadCursorBlink = (storage: Storage = settingsStorage()): boolean => storage.getItem(BLINK_KEY) !== "false";
 
 export const saveCursorBlink = (on: boolean, storage: Storage = settingsStorage()) => storage.setItem(BLINK_KEY, String(on));

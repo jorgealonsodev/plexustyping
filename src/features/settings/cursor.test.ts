@@ -55,13 +55,14 @@ describe("cursor style (cursor-style S1, S3)", () => {
 });
 
 describe("cursor blink (cursor-style S2, S3)", () => {
-  it("is named in Spanish, off by default and persisted", () => {
+  it("is named in Spanish, on by default and persisted", () => {
+    // "la barra tiene que ser como en monkey type, y tiene que parpadear"
     expect(CURSOR_BLINK_SETTING.label).toBe("Cursor parpadeante");
     const storage = memoryStorage();
-    expect(loadCursorBlink(storage)).toBe(false);
-    saveCursorBlink(true, storage);
     expect(loadCursorBlink(storage)).toBe(true);
     saveCursorBlink(false, storage);
     expect(loadCursorBlink(storage)).toBe(false);
+    saveCursorBlink(true, storage);
+    expect(loadCursorBlink(storage)).toBe(true);
   });
 });

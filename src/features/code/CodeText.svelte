@@ -149,11 +149,29 @@
   .cursor.error {
     --cur: var(--text-error);
   }
-  /* Square corners: the highlight's rounding would bend a thin bar into a bracket. */
+  /* Monkeytype-style caret: a thin straight line at the left edge of the next char, between it and
+     the typed one; the char keeps its own colour. */
   :global([data-cursor="bar"]) .cursor {
+    position: relative;
+    color: var(--syn-pending);
     background: transparent;
     border-radius: 0;
-    box-shadow: inset 0.1em 0 var(--cur);
+    box-shadow: none;
+  }
+  :global([data-cursor="bar"]) .cursor.error {
+    color: var(--text-error);
+  }
+  :global([data-cursor="bar"]) .cursor::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -0.05em;
+    width: max(2px, 0.1em);
+    height: 1.2em;
+    border-radius: 1px;
+    background: var(--cur);
+    transform: translateY(-50%);
+    pointer-events: none;
   }
   :global([data-cursor="block"]) .cursor {
     color: var(--bg);
@@ -172,6 +190,23 @@
   /* About once a second; the global prefers-reduced-motion rule stops it (a11y S6). */
   :global([data-cursor-blink]) .cursor {
     animation: cursor-blink 1.06s steps(1) infinite;
+  }
+  /* The bar fades like Monkeytype's caret; each keystroke moves it to a new char, which restarts the
+     fade from fully visible, so it stays solid while typing. */
+  :global([data-cursor="bar"][data-cursor-blink]) .cursor {
+    animation: none;
+  }
+  :global([data-cursor="bar"][data-cursor-blink]) .cursor::before {
+    animation: caret-fade 1s ease-in-out 0.5s infinite;
+  }
+  @keyframes caret-fade {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
   }
   @keyframes cursor-blink {
     50% {

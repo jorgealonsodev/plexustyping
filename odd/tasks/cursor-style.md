@@ -36,3 +36,7 @@ Let the user choose how the typing cursor looks in the practice text. Branch `fe
   - Practice: `data-cursor` and `data-cursor-blink` on the practice text region, and `--cur` rules in Practice.svelte and CodeText.svelte. They are placed after the `.cursor.error` rules so the error colour applies in every style.
   - Checks: vitest 500/500, check 0, build ok.
   - Not covered by any test: the GUI look of each style.
+- **L4 (user, verbatim, 2026-11-19):** "La bara no es una barra, esta redondeada" and then "la barra tiene que ser como en monkey type, y tiene que parpadear".
+  - The bar is now a `::before` caret line at the left edge of the next char: max(2px, 0.1em) wide, 1.2em tall, 1 px rounded ends, centred on the line. The char keeps its pending colour, or the error colour.
+  - "Cursor parpadeante" is now on by default; S2 changed from off to on. The bar fades over 1 s, and the fade restarts visible at each keystroke because the cursor moves to a new element, so the bar stays solid while typing. Reduced motion still stops it.
+  - Test updated first: RED, then GREEN. Checks: vitest 505, check 0.

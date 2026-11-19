@@ -76,9 +76,9 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   text and 4.5:1 for UI; every other theme meets WCAG AA), plus themes imported from
   VS Code (see below). "Texto", everything about how the practice text looks:
   "Cursor" (how the next char is marked: "Resaltado",
-  the default tint with an underline, "Barra", "Bloque", "Subrayado" or
+  the default tint with an underline, "Barra" (a thin caret line between chars, like Monkeytype's), "Bloque", "Subrayado" or
   "Contorno", in the error colour on a wrong char) and "Cursor parpadeante"
-  (off by default; never with the system's reduced motion); "Atenuar texto pendiente" (on by default: the text
+  (on by default: blinks while waiting and stays solid while typing; never with the system's reduced motion); "Atenuar texto pendiente" (on by default: the text
   still to type, prose and code, is dimmed to about 2.5:1 on its background,
   below AA, so the typed text stands out; off restores the AA colours; the
   high-contrast themes never dim); and the typography of the practice text, prose and
