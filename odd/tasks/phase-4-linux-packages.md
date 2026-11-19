@@ -33,6 +33,11 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
   - It runs the frontend and Rust tests, builds the `.deb`, packages the `.tar.gz`, writes `SHA256SUMS` and uploads all three as workflow artefacts.
   - On a tag it attaches them to a draft GitHub release. Publishing the release stays a human action.
   - Every third-party action is pinned to a full commit SHA.
+- **S7 — Windows installer and release (L4).**
+  - The workflow also builds `PlexusTyping_<versión>_x64-setup.exe` (NSIS, per-user, PRD §7) on `windows-latest`. It is unsigned, so SmartScreen warns: PRD: "sin firma, aparece el aviso de SmartScreen".
+  - The release attaches the `.deb`, the `.tar.gz`, the `.exe` and one `SHA256SUMS` covering all of them.
+  - After the workflow is merged, the parent pushes tag `v0.1.0`. Once the jobs pass, the parent publishes the release.
+  - The updater and signing stay out of scope.
 - **S6 — Docs.** README explains how to install each artefact and the system dependencies.
 
 ## Tasks
@@ -40,6 +45,7 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
 | T1 | S1–S6 | Bundle targets, tarball script with launcher, install.sh (+ --uninstall), tarball README, a shell test of the script, release workflow, README | worker | pending | |
+| T3 | S5, S7 | Merge, tag v0.1.0, watch the workflow, publish the release | parent | pending | |
 | T2 | S1–S4 | Local proof: real `tauri build --bundles deb`, `dpkg-deb -I` dependencies, the script on the real binary, launcher message with the library hidden, install/uninstall into a temporary HOME | parent | pending | |
 
 ## Log
@@ -56,3 +62,4 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
   - The existing licence files are shipped under their own names.
   - The workflow only drafts releases; publishing is the human's call.
   - Windows signing and the updater wait for the certificate decision.
+- **L4 (user, verbatim, 2026-11-19):** "habra que hacer release, crea los instaladores en github" → S7 added. The unsigned Windows NSIS installer is included, and the release v0.1.0 is created and published by the parent once CI passes.
