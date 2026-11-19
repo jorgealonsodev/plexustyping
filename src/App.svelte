@@ -251,6 +251,7 @@
     fontScale={settings.typography.fontScale}
     letterSpacing={settings.typography.letterSpacing}
     lineHeight={settings.typography.lineHeight}
+    fontId={settings.practiceFont}
   />
 {/if}
 

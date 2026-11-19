@@ -2,6 +2,7 @@
   import { MAX_THEME_FILE_CHARS, THEMES, TOO_LARGE } from "../themes";
   import SettingField from "./SettingField.svelte";
   import { TYPOGRAPHY_FIELDS, type Typography } from "./settings";
+  import { FONT_GROUPS, FONT_SETTING, PRACTICE_FONTS, fontById } from "./fonts";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -42,6 +43,8 @@
     const value = e.currentTarget.valueAsNumber;
     if (Number.isFinite(value)) settings.setTypography({ [key]: value });
   };
+
+  const font = $derived(fontById(settings.practiceFont));
 
   function remove(id: string) {
     settings.removeTheme(id);
@@ -88,6 +91,27 @@
   {/snippet}
 </SettingField>
 {#if notice}<p class="notice" class:error={notice.error} role={notice.error ? "alert" : "status"}>{notice.text}</p>{/if}
+
+<!-- Typeface of the practice text, prose and code (practice-font S1): each option and the preview in its own font. -->
+<SettingField label={FONT_SETTING.label} hint="{FONT_SETTING.hint} {font.hint}">
+  {#snippet children({ id, hintId })}
+    <select
+      {id}
+      aria-describedby={hintId}
+      style="font-family: {font.family}"
+      onchange={(e: Event & { currentTarget: HTMLSelectElement }) => settings.setPracticeFont(e.currentTarget.value)}
+    >
+      {#each FONT_GROUPS as g (g)}
+        <optgroup label={g}>
+          {#each PRACTICE_FONTS.filter((f) => f.group === g) as f (f.id)}
+            <option value={f.id} selected={f.id === font.id} style="font-family: {f.family}">{f.name}</option>
+          {/each}
+        </optgroup>
+      {/each}
+    </select>
+    <p class="preview" aria-hidden="true" style="font-family: {font.family}">Ñandú veloz: 0O 1lI ¿{"{}"}?</p>
+  {/snippet}
+</SettingField>
 
 <!-- Typography of the practice text, prose and code (a11y S4): applies live, out-of-range values are clamped. -->
 {#each TYPOGRAPHY_FIELDS as f (f.key)}
@@ -143,6 +167,12 @@
   }
   button + button {
     margin-left: 0.4rem;
+  }
+  .preview {
+    margin: 0.4rem 0 0;
+    font-size: 1.05rem;
+    font-feature-settings: "liga" 0, "calt" 0;
+    color: var(--text);
   }
   .notice {
     margin: 0.4rem 0 0;

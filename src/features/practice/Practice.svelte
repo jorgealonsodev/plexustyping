@@ -8,6 +8,7 @@
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
   import { freshen, keystrokeMessage, liveText, newTextMessage, resultMessage } from "./announce";
   import { DEFAULT_TYPOGRAPHY, typographyStyle } from "../settings/settings";
+  import { DEFAULT_FONT_ID, fontById, fontStyle } from "../settings/fonts";
   import {
     type PracticeText,
     type ScoredSession,
@@ -77,6 +78,7 @@
     fontScale = DEFAULT_TYPOGRAPHY.fontScale,
     letterSpacing = DEFAULT_TYPOGRAPHY.letterSpacing,
     lineHeight = DEFAULT_TYPOGRAPHY.lineHeight,
+    fontId = DEFAULT_FONT_ID,
   }: {
     mode: ErrorMode;
     liveStats: boolean;
@@ -120,12 +122,16 @@
     fontScale?: number;
     letterSpacing?: number;
     lineHeight?: number;
+    /** Practice font id (practice-font S1); an unknown id is the default. */
+    fontId?: string;
   } = $props();
 
   // The practice text region; the typing field is described by it (a11y S3).
   const uid = $props.id();
   const textId = `${uid}-text`;
-  const textStyle = $derived(typographyStyle({ fontScale, letterSpacing, lineHeight }));
+  const textStyle = $derived(
+    `${typographyStyle({ fontScale, letterSpacing, lineHeight })}; ${fontStyle(fontById(fontId))}`,
+  );
   // What the live region says; nothing is announced while the setting is off.
   let announcement = $state("");
   function announce(message: string) {
@@ -785,7 +791,9 @@
   }
   .text {
     margin: 0;
-    font-family: var(--mono);
+    /* The chosen practice font (practice-font S1), set by the practice text region. */
+    font-family: var(--practice-font, var(--mono));
+    font-feature-settings: var(--practice-features, normal);
     /* Also scales with the height, so the text and the keyboard fit at 720×480. */
     font-size: calc(clamp(1rem, min(2.4vw, 4vh), 2rem) * var(--text-scale, 1));
     letter-spacing: var(--text-spacing, 0);

@@ -71,6 +71,7 @@ import {
   saveScreenReader,
   saveTypography,
 } from "./settings";
+import { loadPracticeFont, savePracticeFont } from "./fonts";
 
 /** The live, persisted settings shared by the app and every settings section. Layout, language and
  * theme belong to the active profile (S5); localStorage keeps them only as the first-paint cache. */
@@ -132,6 +133,8 @@ export class SettingsStore {
   screenReader = $state(loadScreenReader());
   /** Size, letter spacing and line height of the practice text, prose and code (a11y S4). */
   typography = $state.raw<Typography>(loadTypography());
+  /** Typeface id of the practice text, prose and code (practice-font S1). */
+  practiceFont = $state(loadPracticeFont());
   /** Bumped whenever AI settings or keys change: a prefetched next text is then stale. */
   aiRevision = $state(0);
   /** The stored `AiSettings.enabled`, shared by the header "IA" toggle and Ajustes → IA; `null` until loaded. */
@@ -396,6 +399,12 @@ export class SettingsStore {
   setTypography(patch: Partial<Typography>) {
     this.typography = checkTypography({ ...this.typography, ...patch }, this.typography);
     saveTypography(this.typography);
+  }
+
+  /** Applies live; an unknown id falls back to the default font. */
+  setPracticeFont(id: string) {
+    this.practiceFont = id;
+    savePracticeFont(id);
   }
 
   setHeatmap(on: boolean) {

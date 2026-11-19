@@ -20,7 +20,7 @@ Let the user pick the typeface of the practice text from a curated, bundled list
 
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
-| T1 | S1–S4 | Font packages, the font list module with tests, the setting and its persistence, the Apariencia select, CSS for prose and code, notices, README | worker | pending | |
+| T1 | S1–S4 | Font packages, the font list module with tests, the setting and its persistence, the Apariencia select, CSS for prose and code, notices, README | worker | done | see L3 |
 
 ## Log
 
@@ -30,3 +30,12 @@ Let the user pick the typeface of the practice text from a curated, bundled list
   - Atkinson Hyperlegible (Mono) was made for the Braille Institute for low-vision readers.
   - Intel One Mono was designed with low-vision and blind developers.
   - The Readability Group study (2021: 20 typefaces, more than 3,000 respondents) found commercially marketed dyslexia fonts performed worse than several general sans-serif fonts.
+- **L3 (evidence, 2026-11-19):** T1 done by the worker.
+  - Code: `src/features/settings/fonts.ts` (the list, "Fuente", fallback, persistence), `fontFiles.ts` (the Fontsource imports), the Apariencia select with Mecanografía and Legibilidad groups plus a preview line, and `--practice-font`/`--practice-features` in Practice.svelte and CodeText.svelte.
+  - Fonts: 10 OFL-1.1 Fontsource packages at 5.3.x: Roboto Mono, JetBrains Mono, Fira Code (no ligatures), Source Code Pro, IBM Plex Mono, Inconsolata, Atkinson Hyperlegible Mono, Intel One Mono, Lexend Deca and OpenDyslexic (latin only).
+  - Skipped: Ubuntu Mono (UFL-1.0 licence, not OFL/Apache).
+  - Size: dist grows by 1.51 MiB (woff2 0.70 MiB plus unused woff fallbacks 0.80 MiB). No remote font URL.
+  - RED (missing module), then GREEN: vitest 424/424, check 0, build ok.
+  - Parent decisions:
+    - Accepted: `--mono` starts with "JetBrains Mono", so the default now always gets the bundled JetBrains Mono. The look is the same on every machine instead of depending on installed fonts. It also applies where the UI uses `var(--mono)`.
+    - Removed the empty `fonts.css` leftover.

@@ -67,7 +67,12 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   contraste oscuro" and "Alto contraste claro", whose colours reach 7:1 for
   text and 4.5:1 for UI; every other theme meets WCAG AA), plus themes imported from
   VS Code (see below), and the typography of the practice text, prose and
-  code, applied live: "Tamaño de letra" (80–200 %, default 100),
+  code, applied live: "Fuente" (the typeface; default "Predeterminada", the
+  font PlexusTyping always used; typing staples Roboto Mono, JetBrains Mono,
+  Fira Code without ligatures, Source Code Pro, IBM Plex Mono and Inconsolata;
+  for legibility Atkinson Hyperlegible Mono, Intel One Mono, Lexend Deca and
+  OpenDyslexic; all bundled, none loaded from the network; each option is
+  shown in its own font), "Tamaño de letra" (80–200 %, default 100),
   "Espaciado entre letras" (0–0.30 em, default 0) and "Interlineado"
   (1.2–2.4, default 1.75); a value outside its range is clamped. Everything is remembered
   locally; targets and length apply from the next text. `Escape`, `×` or a

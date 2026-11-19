@@ -45,8 +45,9 @@
     padding: 0.75rem 1rem;
     max-height: max(8rem, 42vh);
     overflow: auto;
-    font-family: var(--mono);
-    /* Typography settings (a11y S4), set by the practice text region. */
+    /* Font (practice-font S1) and typography settings (a11y S4), set by the practice text region. */
+    font-family: var(--practice-font, var(--mono));
+    font-feature-settings: var(--practice-features, normal);
     font-size: calc(clamp(0.9rem, min(1.8vw, 3vh), 1.5rem) * var(--text-scale, 1));
     letter-spacing: var(--text-spacing, 0);
     line-height: var(--text-leading, 1.6);

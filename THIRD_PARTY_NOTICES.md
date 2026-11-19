@@ -94,6 +94,23 @@ The copyright/license for each individual theme belongs to the author of that th
 
 `crates/plexustyping-corpus/data/<lang>/sentences-cv.txt` (es, en, pt, fr, de) are selected from `server/data/<lang>/sentence-collector.txt` of [Mozilla Common Voice](https://github.com/common-voice/common-voice) (commit `605c25e48f9fb87cb25ca794cb39bf91d3741f29`), dedicated to the public domain under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/). They are filtered and selected by `scripts/import-commonvoice.py`; the filters are listed in each file's header and in `crates/plexustyping-corpus/data/<lang>/LICENSE.md`.
 
+## Practice fonts
+
+The typefaces offered in Ajustes → Apariencia → "Fuente" are bundled with the app (no font is loaded from the network) from the [Fontsource](https://fontsource.org) npm packages listed below, only the latin and latin-ext subsets at weights 400 and 700 (OpenDyslexic: latin only). Each font belongs to its authors; the licence text ships in each package's `LICENSE` file.
+
+| Font | Package | Copyright | Licence |
+| --- | --- | --- | --- |
+| Roboto Mono | `@fontsource/roboto-mono` 5.3.0 | The Roboto Mono Project Authors ([googlefonts/robotomono](https://github.com/googlefonts/robotomono)) | SIL Open Font License 1.1 (OFL-1.1) |
+| JetBrains Mono | `@fontsource/jetbrains-mono` 5.3.0 | The JetBrains Mono Project Authors ([JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono)) | OFL-1.1 |
+| Fira Code | `@fontsource/fira-code` 5.3.0 | The Fira Code Project Authors ([tonsky/FiraCode](https://github.com/tonsky/FiraCode)) | OFL-1.1 |
+| Source Code Pro | `@fontsource/source-code-pro` 5.3.1 | Adobe ([adobe-fonts/source-code-pro](https://github.com/adobe-fonts/source-code-pro)); the package licence file names Google Inc. | OFL-1.1 |
+| IBM Plex Mono | `@fontsource/ibm-plex-mono` 5.3.0 | IBM Corp. ([IBM/plex](https://github.com/IBM/plex)) | OFL-1.1 |
+| Inconsolata | `@fontsource/inconsolata` 5.3.0 | The Inconsolata Project Authors ([cyrealtype/Inconsolata](https://github.com/cyrealtype/Inconsolata)) | OFL-1.1 |
+| Atkinson Hyperlegible Mono | `@fontsource/atkinson-hyperlegible-mono` 5.3.0 | The Atkinson Hyperlegible Mono Project Authors ([googlefonts/atkinson-hyperlegible-next-mono](https://github.com/googlefonts/atkinson-hyperlegible-next-mono)) | OFL-1.1 |
+| Intel One Mono | `@fontsource/intel-one-mono` 5.3.0 | The Intel One Mono Project Authors ([intel/intel-one-mono](https://github.com/intel/intel-one-mono)) | OFL-1.1 |
+| Lexend Deca | `@fontsource/lexend-deca` 5.3.0 | The Lexend Project Authors ([googlefonts/lexend](https://github.com/googlefonts/lexend)) | OFL-1.1 |
+| OpenDyslexic | `@fontsource/opendyslexic` 5.3.0 | Abbie Gonzalez ([antijingoist/opendyslexic](https://github.com/antijingoist/opendyslexic)) | OFL-1.1 |
+
 ## Syntax highlighting
 
 Code mode highlights snippets with [syntect](https://github.com/trishume/syntect) and the syntax definitions bundled by [two-face](https://codeberg.org/CosmicHarper/two-face), which are curated by the [bat](https://github.com/sharkdp/bat) project.
