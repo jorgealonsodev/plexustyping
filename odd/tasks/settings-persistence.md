@@ -31,3 +31,8 @@ UI settings and header toggles survive closing the app, in the dev app and the i
   - Known limits:
     - Only the origin of the build that starts first is migrated.
     - A write still queued in the page when the window is killed can be lost; each write is durable once handled.
+- **L4 (review follow-up, 2026-11-19):** review-9a6ea80b3804ab14 advisories R3/R4 (partial migration) are fixed.
+  - Migration is now gated on the `plexustyping.settingsInStore` marker, not on an empty store, and it copies only the keys the store lacks; the store's own values win.
+  - The marker is written only after every copy landed, counted with the new `StoreStorage.failures`. An interrupted or failed copy is therefore retried at the next start.
+  - RED: 2 new tests. One existing test now waits for the marker with a second flush.
+  - Checks: vitest 505/505, check 0.

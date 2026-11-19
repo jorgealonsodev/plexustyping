@@ -33,6 +33,7 @@ export class StoreStorage implements Storage {
   readonly #backend: SettingsBackend;
   readonly #log: Log;
   #queue: Promise<void> = Promise.resolve();
+  #failures = 0;
 
   constructor(initial: Record<string, string>, backend: SettingsBackend, log: Log = logError) {
     this.#values = new Map(Object.entries(initial));
@@ -72,8 +73,16 @@ export class StoreStorage implements Storage {
     return this.#queue;
   }
 
+  /** Writes that failed so far. */
+  get failures(): number {
+    return this.#failures;
+  }
+
   #enqueue(failure: string, write: () => Promise<void>) {
-    this.#queue = this.#queue.then(write).catch((err) => this.#log(failure, err));
+    this.#queue = this.#queue.then(write).catch((err) => {
+      this.#failures++;
+      this.#log(failure, err);
+    });
   }
 }
 
@@ -94,9 +103,10 @@ function uiValues(storage: Storage): Record<string, string> {
 }
 
 /**
- * Start-up, before the app mounts (S4): loads the stored UI settings. On the first start the store
- * holds none, so every `plexustyping.*` key of `local` is copied into it once, leaving `local` as is
- * (S3). When the store cannot be read, `local` is used as before and the error logged (S5).
+ * Start-up, before the app mounts (S4): loads the stored UI settings. Until the migration marker is
+ * stored, every `plexustyping.*` key of `local` the store lacks is copied into it, leaving `local` as
+ * is; the marker follows once every copy landed, so an interrupted or failed copy is retried at the
+ * next start (S3). When the store cannot be read, `local` is used as before and the error logged (S5).
  */
 export async function initSettingsStorage(
   backend: SettingsBackend = tauriSettingsBackend,
@@ -112,9 +122,17 @@ export async function initSettingsStorage(
     return local;
   }
   const storage = new StoreStorage(stored, backend, log);
-  if (Object.keys(stored).length === 0) {
-    for (const [key, value] of Object.entries(uiValues(local))) storage.setItem(key, value);
-    storage.setItem(MIGRATED_KEY, "true");
+  // Until the marker is stored, each start copies the keys the store still lacks (the store's own
+  // values win): a first start closed early, or a copy that failed, is completed later. The marker
+  // is written only once every copy landed.
+  if (!(MIGRATED_KEY in stored)) {
+    for (const [key, value] of Object.entries(uiValues(local))) {
+      if (!(key in stored)) storage.setItem(key, value);
+    }
+    const before = storage.failures;
+    void storage.flush().then(() => {
+      if (storage.failures === before) storage.setItem(MIGRATED_KEY, "true");
+    });
   }
   current = storage;
   return storage;

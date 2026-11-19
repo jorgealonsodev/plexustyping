@@ -135,6 +135,8 @@ describe("initSettingsStorage", () => {
     expect(storage.getItem("plexustyping.layout")).toBe("fr-azerty");
     expect(storage.getItem("plexustyping.keyboard")).toBe("false");
     expect(storage.getItem("other.key")).toBeNull();
+    // The copies, then the marker once they all landed.
+    await (storage as StoreStorage).flush();
     await (storage as StoreStorage).flush();
     expect(Object.fromEntries(fake.values)).toEqual({
       "plexustyping.layout": "fr-azerty",
@@ -156,9 +158,48 @@ describe("initSettingsStorage", () => {
     const fake = fakeBackend();
     const storage = await initSettingsStorage(fake.backend, memoryStorage());
     await (storage as StoreStorage).flush();
+    await (storage as StoreStorage).flush();
     expect(Object.fromEntries(fake.values)).toEqual({ [MIGRATED_KEY]: "true" });
     const again = await initSettingsStorage(fake.backend, memoryStorage({ "plexustyping.layout": "us-qwerty" }));
     expect(again.getItem("plexustyping.layout")).toBeNull();
+  });
+
+  it("resumes an interrupted migration: copies only the keys the store lacks, the store's values win (S3)", async () => {
+    // A first start that was closed before every copy landed: some keys, no marker.
+    const fake = fakeBackend({ "plexustyping.layout": "us-qwerty" });
+    const local = memoryStorage({ "plexustyping.layout": "fr-azerty", "plexustyping.keyboard": "false" });
+    const storage = await initSettingsStorage(fake.backend, local);
+    expect(storage.getItem("plexustyping.layout")).toBe("us-qwerty");
+    expect(storage.getItem("plexustyping.keyboard")).toBe("false");
+    await (storage as StoreStorage).flush();
+    await (storage as StoreStorage).flush();
+    expect(Object.fromEntries(fake.values)).toEqual({
+      "plexustyping.layout": "us-qwerty",
+      "plexustyping.keyboard": "false",
+      [MIGRATED_KEY]: "true",
+    });
+  });
+
+  it("leaves the marker unwritten when a migrated key fails, so the next start retries it (S3, S5)", async () => {
+    let full = true;
+    const fake = fakeBackend({}, { fail: (call) => full && call[1] === "plexustyping.keyboard" });
+    const local = memoryStorage({ "plexustyping.layout": "fr-azerty", "plexustyping.keyboard": "false" });
+    const log = vi.fn();
+    const storage = await initSettingsStorage(fake.backend, local, log);
+    await (storage as StoreStorage).flush();
+    await (storage as StoreStorage).flush();
+    expect(Object.fromEntries(fake.values)).toEqual({ "plexustyping.layout": "fr-azerty" });
+    expect(log).toHaveBeenCalled();
+
+    full = false;
+    const again = await initSettingsStorage(fake.backend, local, log);
+    await (again as StoreStorage).flush();
+    await (again as StoreStorage).flush();
+    expect(Object.fromEntries(fake.values)).toEqual({
+      "plexustyping.layout": "fr-azerty",
+      "plexustyping.keyboard": "false",
+      [MIGRATED_KEY]: "true",
+    });
   });
 
   it("falls back to localStorage and logs when the store cannot be read (S5)", async () => {
