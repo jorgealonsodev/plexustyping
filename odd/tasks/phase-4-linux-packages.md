@@ -82,3 +82,12 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
   2. R4-launcher-silent-menu-failure: without a terminal, the launcher also shows the message with zenity, kdialog or notify-send. Test with a fake zenity; `PLEXUSTYPING_NO_GUI` disables it. Tarball test 59/59, shellcheck clean.
 
   Still open: `%` in a HOME path is not escaped in `Exec`; a failed partial install leaves its directories; there is no relative-path test of the packager.
+- **L7 (review, 2026-11-19):** review-e01d890cba1800f6 (risk, resilience and reliability) covers the whole range origin/main..7a3462b: packages, the AI model fill and the fonts. Approved and acknowledged. Advisories left open for after v0.1.0:
+  - `%` is not escaped in `Exec`.
+  - A failed manifest write is swallowed by `|| true`.
+  - A reinstall drops the old file records.
+  - The launcher's ldconfig check accepts a 32-bit library.
+  - The `gh release view` error is hidden.
+  - The AI autofill wiring has no component test.
+
+  The .deb was rebuilt with the fonts: 12.5 MB, `Depends: libwebkit2gtk-4.1-0, libgtk-3-0`. Waiting for the user's try-out before the merge and the tag.

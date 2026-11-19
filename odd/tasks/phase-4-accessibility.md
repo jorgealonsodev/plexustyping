@@ -50,6 +50,14 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
   - The beat dot changes state without transition or animation.
   - The LED transition and every other CSS transition or animation in the app are off.
   - The metronome keeps a visual pulse equivalent to its sound (PRD: "el metrónomo tiene un pulso visual equivalente").
+- **S7 — Dimmed pending text (L9).** The user wants the typed text to stand out from the pending text as in Monkeytype: "lo escrito bien en [blanco], pendiente en gris claramente más apagado".
+  - A setting "Atenuar texto pendiente" in Ajustes → Apariencia, **on by default**.
+  - While on, the practice text's pending chars (prose and code) use a dimmed colour at about 2.5:1 on the background they are drawn on (`--bg` for prose, `--surface` for code). It is derived per theme in `colors.ts` as `--text-pending-dim` and the code `--syntax-pending-dim-*`. These are an explicit, user-controlled exception to S1.
+  - While off, the AA colours of S1 are used unchanged.
+  - The high-contrast themes (S5) never dim: they always use their 7:1 pending colours.
+  - Persisted with the other settings; it survives a restart.
+  - The S1 AA sweep stays unchanged. A new test checks the dimmed colours: about 2.5:1 (between 2.2 and 3.0) and below the AA pending colour.
+  - Error text, the cursor and correct text are unchanged.
 
 ## Tasks
 
@@ -59,6 +67,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 | T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
 | T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | done | see L6 |
 | T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | done | see L7 |
+| T6 | S7 | Dimmed pending text setting | worker | pending | |
 | T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | done | see L8 |
 
 ## Log
@@ -119,3 +128,4 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
     - The colour-blind blue flash label is 5.19:1 (AA, not 7:1) on the high-contrast themes.
     - No GUI check of the reduced motion, the badges or the legend.
 - **L8 (integration, 2026-11-19):** vitest 412/412, svelte-check 0, vite build ok (no Rust change in this feature). Native assess over origin/main..HEAD: risk medium, review not due (under_budget). Fast-forwarded into main and pushed. Pending: a GUI check of S2, S3 with Orca and S6, and the user's try-out.
+- **L9 (user, 2026-11-19):** the user showed a Monkeytype screenshot and chose "Más contraste entre escrito y pendiente". Told that AA allows only a small change in Mocha (#8f94ad to about #878ba1 on `--bg`), they chose "Ajuste «Atenuar texto pendiente» (recomendado)": on by default, about 2.5:1, AA when off, never on the high-contrast themes. S7 added.
