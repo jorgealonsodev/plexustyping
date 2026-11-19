@@ -474,6 +474,7 @@ mod tests {
             density: 3.0,
             length: 5..60,
             allowed_chars: "abcz".into(),
+            restrict_chars: false,
             topic: None,
         };
 

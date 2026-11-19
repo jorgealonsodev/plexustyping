@@ -660,7 +660,12 @@ impl Plan {
     /// The generation request: only targets (with their natural frequency in
     /// the prose or code corpus, 0 when it has none), language, length,
     /// allowed chars and topic (S5).
-    fn request(&self, language: &str, settings: &AiSettings) -> Result<GenerationRequest, String> {
+    fn request(
+        &self,
+        language: &str,
+        settings: &AiSettings,
+        restrict_chars: bool,
+    ) -> Result<GenerationRequest, String> {
         let targets = self.targets();
         let (mode, length, allowed_chars, frequencies) = match self {
             Plan::Prose(plan) => (
@@ -690,6 +695,7 @@ impl Plan {
             density: settings.density,
             length,
             allowed_chars,
+            restrict_chars: restrict_chars && matches!(self, Plan::Prose(_)),
             topic: settings.topic.clone(),
         })
     }
@@ -787,7 +793,9 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     let reason = if chain.is_empty() {
         missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned())
     } else {
-        let request = plan.request(&p.language, &settings)?;
+        // Unlock from 15 letters: the prompt names the active characters (S5).
+        let restricted = restriction.as_ref().is_some_and(|r| !r.all_letters);
+        let request = plan.request(&p.language, &settings, restricted)?;
         match state.ai.generate_with_fallback(&chain, &request).await {
             Ok(generated) => {
                 let provider = slug(generated.provider);

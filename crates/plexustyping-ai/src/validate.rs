@@ -204,6 +204,7 @@ mod tests {
             density: 2.0,
             length: 5..60,
             allowed_chars: "abcdefghijklmnopqrstuvwxyzñZ.,'\"-".into(),
+            restrict_chars: false,
             topic: None,
         }
     }

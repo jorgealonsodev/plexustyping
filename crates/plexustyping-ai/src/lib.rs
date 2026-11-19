@@ -134,6 +134,10 @@ pub struct GenerationRequest {
     pub length: Range<usize>,
     /// Characters the layout can type; space is always allowed.
     pub allowed_chars: String,
+    /// Prose only: `allowed_chars` is a restriction the prompt must name
+    /// (progressive unlock). Code always names them.
+    #[serde(default)]
+    pub restrict_chars: bool,
     /// Optional topic; `None` means free topic.
     pub topic: Option<String>,
 }

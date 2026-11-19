@@ -236,6 +236,7 @@ pub fn small_request() -> GenerationRequest {
         density: 3.0,
         length: 5..60,
         allowed_chars: "abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ.,".into(),
+        restrict_chars: false,
         topic: None,
     }
 }

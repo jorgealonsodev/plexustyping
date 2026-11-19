@@ -1072,7 +1072,7 @@ fn a_300_char_setting_accepts_ai_texts_from_240_to_375_chars() {
     };
     let model = plexustyping_core::adaptive::WeaknessModel::new();
     let plan = Plan::Prose(commands::plan_text(&model, &req).unwrap());
-    let request = plan.request("es", &AiSettings::default()).unwrap();
+    let request = plan.request("es", &AiSettings::default(), false).unwrap();
     for (len, ok) in [(239, false), (240, true), (375, true), (376, false)] {
         let text = "a".repeat(len);
         assert_eq!(
@@ -1349,7 +1349,7 @@ fn prose_plan(targets: &[&str]) -> Plan {
 fn a_prose_request_carries_the_corpus_frequency_of_each_target() {
     let es = plexustyping_corpus::corpus("es").unwrap();
     let req = prose_plan(&["ntr", "ú", "ti", "a"])
-        .request("es", &AiSettings::default())
+        .request("es", &AiSettings::default(), false)
         .unwrap();
     assert_eq!(
         req.frequencies,
@@ -1372,11 +1372,39 @@ fn a_prose_request_carries_the_corpus_frequency_of_each_target() {
 fn the_log_example_now_passes_validation() {
     assert_eq!(NATURAL_340.chars().count(), 340);
     let req = prose_plan(&["ntr", "ú", "ti"])
-        .request("es", &AiSettings::default())
+        .request("es", &AiSettings::default(), false)
         .unwrap();
     assert_eq!(
         plexustyping_ai::validate(NATURAL_340, &req).as_deref(),
         Ok(NATURAL_340)
+    );
+}
+
+#[test]
+fn only_a_restricted_prose_request_names_its_characters() {
+    let prose = prose_plan(&["a"]);
+    assert!(
+        !prose
+            .request("es", &AiSettings::default(), false)
+            .unwrap()
+            .restrict_chars
+    );
+    assert!(
+        prose
+            .request("es", &AiSettings::default(), true)
+            .unwrap()
+            .restrict_chars
+    );
+    let code = Plan::Code(code::CodePlan {
+        lang: "rust".into(),
+        targets: vec!["{".into()],
+        max_lines: 20,
+    });
+    assert!(
+        !code
+            .request("es", &AiSettings::default(), true)
+            .unwrap()
+            .restrict_chars
     );
 }
 
@@ -1387,7 +1415,7 @@ fn a_code_request_uses_the_code_corpus_frequency() {
         targets: vec!["{".into(), "ñ".into()],
         max_lines: 20,
     });
-    let req = plan.request("es", &AiSettings::default()).unwrap();
+    let req = plan.request("es", &AiSettings::default(), false).unwrap();
     let brace = plexustyping_corpus::code_frequency("rust", "{").unwrap();
     assert!(brace > 0.0);
     assert_eq!(req.frequencies, vec![brace, 0.0]);

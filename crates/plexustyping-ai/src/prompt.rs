@@ -41,12 +41,25 @@ pub fn free_topic(nonce: u64) -> &'static str {
     FREE_TOPICS[(z % FREE_TOPICS.len() as u64) as usize]
 }
 
+/// The non-blank characters of `chars`, each once, in order.
+fn distinct_chars(chars: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for ch in chars.chars().filter(|c| !c.is_whitespace()) {
+        let ch = ch.to_string();
+        if !out.contains(&ch) {
+            out.push(ch);
+        }
+    }
+    out
+}
+
 /// Builds the Spanish prompt for `req`. Only the request's own fields go into
 /// it.
 ///
 /// Prose asks only for a text in the language, its length range and topic
 /// (no targets or allowed characters; [`crate::validate`] checks no density
-/// for prose). Code also names the language, the targets with their minimum
+/// for prose), plus the allowed characters when
+/// [`GenerationRequest::restrict_chars`] is set (progressive unlock). Code also names the language, the targets with their minimum
 /// counts and the allowed characters; each count is
 /// [`GenerationRequest::min_counts`] at the longest accepted length, so a
 /// snippet that meets it always meets [`crate::validate`]. Prose also asks
@@ -62,16 +75,22 @@ pub fn build_prompt(req: &GenerationRequest) -> String {
         .filter(|t| !t.is_empty())
         .unwrap_or_else(|| "libre".into());
     let Mode::Code { lang } = &req.mode else {
-        return [
+        let mut lines = vec![
             format!(
                 "Escribe un texto en {language} de {}–{longest} caracteres.",
                 req.length.start
             ),
             format!("Tema: {topic}."),
             "No empieces con «El» ni con «La».".to_string(),
-            ANSWER.to_string(),
-        ]
-        .join("\n");
+        ];
+        if req.restrict_chars {
+            lines.push(format!(
+                "Usa solo estos caracteres: {} (y el espacio). Puedes usar palabras sueltas si no salen frases.",
+                distinct_chars(&req.allowed_chars).join(" ")
+            ));
+        }
+        lines.push(ANSWER.to_string());
+        return lines.join("\n");
     };
     let length = format!("Longitud: {}–{longest} caracteres.", req.length.start);
     let mut lines = vec![
@@ -97,16 +116,9 @@ pub fn build_prompt(req: &GenerationRequest) -> String {
     if !targets.is_empty() {
         lines.push(format!("Caracteres objetivo: {}.", targets.join(", ")));
     }
-    let mut allowed: Vec<String> = Vec::new();
-    for ch in req.allowed_chars.chars().filter(|c| !c.is_whitespace()) {
-        let ch = ch.to_string();
-        if !allowed.contains(&ch) {
-            allowed.push(ch);
-        }
-    }
     lines.push(format!(
         "Usa solo estos caracteres: {} (y el espacio y los saltos de línea).",
-        allowed.join(" ")
+        distinct_chars(&req.allowed_chars).join(" ")
     ));
     lines.push("Sin markdown ni bloques ```, sin comillas tipográficas.".to_string());
     lines.push(ANSWER.to_string());
@@ -158,6 +170,7 @@ mod tests {
             density: 3.0,
             length: 250..301,
             allowed_chars: "abcñ.,".into(),
+            restrict_chars: false,
             topic: Some("viajes".into()),
         }
     }
@@ -184,6 +197,23 @@ mod tests {
             lang: "rust".into(),
         };
         req
+    }
+
+    #[test]
+    fn restricted_prose_prompt_lists_only_the_allowed_characters() {
+        // Progressive unlock: the AI is told which characters are unlocked.
+        let req = GenerationRequest {
+            restrict_chars: true,
+            ..prd()
+        };
+        assert_eq!(
+            build_prompt(&req),
+            "Escribe un texto en español de 250–300 caracteres.\n\
+             Tema: viajes.\n\
+             No empieces con «El» ni con «La».\n\
+             Usa solo estos caracteres: a b c ñ . , (y el espacio). Puedes usar palabras sueltas si no salen frases.\n\
+             Responde solo con JSON: {\"text\": \"...\"}"
+        );
     }
 
     #[test]
