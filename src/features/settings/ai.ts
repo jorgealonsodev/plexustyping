@@ -100,6 +100,20 @@ export function setProvider(
   return chain.map((e, j) => (j === i ? { provider: id, model: info?.defaultModel ?? "" } : e));
 }
 
+/**
+ * Rows of provider `id` without a model get its first listed model (providers such as OpenCode Go
+ * and ChatGPT have no default); `null` when nothing changes.
+ */
+export function fillMissingModel(
+  chain: readonly ChainEntry[],
+  id: ProviderId,
+  list: readonly ModelOption[],
+): ChainEntry[] | null {
+  const first = list[0]?.id;
+  if (!first || !chain.some((e) => e.provider === id && e.model.trim() === "")) return null;
+  return chain.map((e) => (e.provider === id && e.model.trim() === "" ? { ...e, model: first } : e));
+}
+
 export function setModel(chain: readonly ChainEntry[], i: number, model: string): ChainEntry[] {
   return chain.map((e, j) => (j === i ? { ...e, model: model.trim() } : e));
 }

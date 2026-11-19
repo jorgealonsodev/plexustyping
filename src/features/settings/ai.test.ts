@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  fillMissingModel,
   type ChainEntry,
   type ProviderInfo,
   MAX_CHAIN,
@@ -187,5 +188,31 @@ describe("header AI toggle", () => {
     expect(toggleEnabled(s)).toEqual({ ...s, enabled: true });
     expect(toggleEnabled({ ...s, enabled: true })).toEqual(s);
     expect(s.enabled).toBe(false);
+  });
+});
+
+describe("fillMissingModel", () => {
+  const list = [
+    { id: "kimi-k2", name: "Kimi K2" },
+    { id: "glm-5", name: "GLM 5" },
+  ];
+
+  it("picks the first listed model for a row of that provider without one", () => {
+    // "cuando se elige un proveedor de ia, automaticamente tiene que elegirse un modelo"
+    const chain = [
+      { provider: "claude" as const, model: "claude-haiku-5-5" },
+      { provider: "opencode-go" as const, model: "" },
+    ];
+    expect(fillMissingModel(chain, "opencode-go", list)).toEqual([
+      { provider: "claude", model: "claude-haiku-5-5" },
+      { provider: "opencode-go", model: "kimi-k2" },
+    ]);
+  });
+
+  it("keeps a chosen model and returns null when nothing changes", () => {
+    const chain = [{ provider: "opencode-go" as const, model: "glm-5" }];
+    expect(fillMissingModel(chain, "opencode-go", list)).toBeNull();
+    expect(fillMissingModel([{ provider: "chatgpt" as const, model: "" }], "chatgpt", [])).toBeNull();
+    expect(fillMissingModel([{ provider: "chatgpt" as const, model: "" }], "opencode-go", list)).toBeNull();
   });
 });

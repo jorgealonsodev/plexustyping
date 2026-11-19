@@ -19,6 +19,7 @@
     chatgptReady,
     densityLabel,
     failureMessage,
+    fillMissingModel,
     modelOptions,
     moveEntry,
     needsKey,
@@ -150,6 +151,9 @@
     aiModelOptions(id)
       .then((list) => {
         models[id] = list.length > 0 ? list : null;
+        // A provider without a default model gets its first listed one.
+        const filled = ai ? fillMissingModel(ai.chain, id, list) : null;
+        if (filled) commitChain(filled);
       })
       .catch(() => {
         models[id] = null;
