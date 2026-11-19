@@ -40,3 +40,4 @@ Let the user choose how the typing cursor looks in the practice text. Branch `fe
   - The bar is now a `::before` caret line at the left edge of the next char: max(2px, 0.1em) wide, 1.2em tall, 1 px rounded ends, centred on the line. The char keeps its pending colour, or the error colour.
   - "Cursor parpadeante" is now on by default; S2 changed from off to on. The bar fades over 1 s, and the fade restarts visible at each keystroke because the cursor moves to a new element, so the bar stays solid while typing. Reduced motion still stops it.
   - Test updated first: RED, then GREEN. Checks: vitest 505, check 0.
+- **L5 (user, verbatim, 2026-11-19):** "la barra tiene que ser lo que aparece por defecto al instalar". "Barra" is now the first style and the default; "Resaltado" moves second. A stored choice is kept. Test changed first: RED 3, then GREEN. Checks: vitest 505, check 0.

@@ -16,10 +16,10 @@ export interface CursorStyle {
   name: string;
 }
 
-/** Display order; the first is today's look, the default. The practice text reads the id from `data-cursor`. */
+/** Display order; the first, the Monkeytype-style bar, is the default. The practice text reads the id from `data-cursor`. */
 export const CURSOR_STYLES: CursorStyle[] = [
-  { id: "highlight", name: "Resaltado" },
   { id: "bar", name: "Barra" },
+  { id: "highlight", name: "Resaltado" },
   { id: "block", name: "Bloque" },
   { id: "underline", name: "Subrayado" },
   { id: "outline", name: "Contorno" },

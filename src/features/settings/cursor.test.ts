@@ -26,31 +26,32 @@ const memoryStorage = (): Storage => {
 };
 
 describe("cursor style (cursor-style S1, S3)", () => {
-  it("lists the five styles with their Spanish names; the default is today's look", () => {
+  it("lists the five styles with their Spanish names; the bar is the default", () => {
     // "Tambien quiero que se pueda personalizar el tipo de cursor tipo barra y demas"
+    // "la barra tiene que ser lo que aparece por defecto al instalar"
     expect(CURSOR_SETTING.label).toBe("Cursor");
     expect(CURSOR_STYLES.map((s) => [s.id, s.name])).toEqual([
-      ["highlight", "Resaltado"],
       ["bar", "Barra"],
+      ["highlight", "Resaltado"],
       ["block", "Bloque"],
       ["underline", "Subrayado"],
       ["outline", "Contorno"],
     ]);
-    expect(DEFAULT_CURSOR_STYLE).toBe("highlight");
+    expect(DEFAULT_CURSOR_STYLE).toBe("bar");
   });
 
   it("falls back to the default for an unknown id", () => {
-    expect(cursorStyleById("bar").id).toBe("bar");
-    expect(cursorStyleById("nope").id).toBe("highlight");
+    expect(cursorStyleById("block").id).toBe("block");
+    expect(cursorStyleById("nope").id).toBe("bar");
   });
 
   it("persists the style and falls back for an unknown stored value", () => {
     const storage = memoryStorage();
-    expect(loadCursorStyle(storage)).toBe("highlight");
+    expect(loadCursorStyle(storage)).toBe("bar");
     saveCursorStyle("block", storage);
     expect(loadCursorStyle(storage)).toBe("block");
     storage.setItem("plexustyping.cursorStyle", "zigzag");
-    expect(loadCursorStyle(storage)).toBe("highlight");
+    expect(loadCursorStyle(storage)).toBe("bar");
   });
 });
 
