@@ -59,7 +59,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 | T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
 | T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | done | see L6 |
 | T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | done | see L7 |
-| T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | pending | |
+| T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | done | see L8 |
 
 ## Log
 
@@ -118,3 +118,4 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
   - Known limits:
     - The colour-blind blue flash label is 5.19:1 (AA, not 7:1) on the high-contrast themes.
     - No GUI check of the reduced motion, the badges or the legend.
+- **L8 (integration, 2026-11-19):** vitest 412/412, svelte-check 0, vite build ok (no Rust change in this feature). Native assess over origin/main..HEAD: risk medium, review not due (under_budget). Fast-forwarded into main and pushed. Pending: a GUI check of S2, S3 with Orca and S6, and the user's try-out.
