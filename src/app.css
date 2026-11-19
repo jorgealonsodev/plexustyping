@@ -33,3 +33,15 @@ button {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Reduced motion (a11y S6): no transition or animation anywhere; state changes are instant.
+   The key flashes become underlines (Keyboard.svelte) and the beat dot still lights on each beat. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

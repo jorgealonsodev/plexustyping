@@ -25,6 +25,9 @@ import {
   TEXT_LENGTHS,
   DEFAULT_TYPOGRAPHY,
   SCREEN_READER_SETTING,
+  COLOR_BLIND_SETTING,
+  loadColorBlind,
+  saveColorBlind,
   TYPOGRAPHY_FIELDS,
   checkTypography,
   loadScreenReader,
@@ -349,6 +352,25 @@ describe("screen reader setting (a11y S3)", () => {
     expect([loadLiveStats(storage), loadFlashes(storage), loadHeatmap(storage)]).toEqual([true, true, false]);
     saveScreenReader(false, storage);
     expect(loadScreenReader(storage)).toBe(false);
+  });
+});
+
+describe("colour-blind keyboard setting (a11y S5)", () => {
+  it("names the setting in Spanish", () => {
+    expect(COLOR_BLIND_SETTING.label).toBe("Modo daltónico");
+  });
+
+  it("is off by default and persists the toggle, apart from the other keyboard toggles", () => {
+    const storage = memoryStorage();
+    expect(loadColorBlind(storage)).toBe(false);
+    expect(loadColorBlind(memoryStorage({ "plexustyping.colorBlind": "yes" }))).toBe(false);
+    saveColorBlind(true, storage);
+    expect(storage.getItem("plexustyping.colorBlind")).toBe("true");
+    expect(loadColorBlind(storage)).toBe(true);
+    expect([loadFlashes(storage), loadHeatmap(storage), loadShowKeyboard(storage)]).toEqual([true, false, true]);
+    saveColorBlind(false, storage);
+    expect(storage.getItem("plexustyping.colorBlind")).toBe("false");
+    expect(loadColorBlind(storage)).toBe(false);
   });
 });
 

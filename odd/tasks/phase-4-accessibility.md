@@ -58,7 +58,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 | T1 | S1 | Contrast guard for derived theme colours, all-themes AA vitest, CodeText comment/plain colours | writer A (parallel with T2) | done | see L5 |
 | T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
 | T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | done | see L6 |
-| T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | pending | |
+| T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | done | see L7 |
 | T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | pending | |
 
 ## Log
@@ -108,3 +108,13 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
     - No screen-reader or GUI check yet (Orca).
     - Restarting the same text also announces "Texto nuevo…".
     - `aria-describedby` makes the screen reader read the whole text as the field description.
+- **L7 (evidence, 2026-11-19):** T4 done.
+  - High-contrast themes: "Alto contraste oscuro" and "Alto contraste claro", appended to THEMES. A `highContrast` flag holds every derived pair to 7:1 for text and 4.5:1 for UI. The lowest text pairs are 7.00 and 7.04.
+  - "Modo daltónico" (off by default) uses Okabe–Ito blue for a right key and orange for a wrong key, plus a bold underline on a wrong key.
+  - Heatmap: a 1–5 badge on each heated key and the legend «Errores por tecla: 1 muy pocos, 2 pocos, 3 algunos, 4 bastantes, 5 muchos».
+  - Reduced motion: a global rule in app.css turns off transitions and animations. The flash becomes an inset underline, and the beat dot keeps its per-beat pulse without transition.
+  - Parent fix: the Destellos hint now names the colour-blind colours.
+  - RED: 11 tests plus a missing module. Checks: vitest 412/412, check 0, build ok. Existing themes are unchanged (Mocha snapshot).
+  - Known limits:
+    - The colour-blind blue flash label is 5.19:1 (AA, not 7:1) on the high-contrast themes.
+    - No GUI check of the reduced motion, the badges or the legend.

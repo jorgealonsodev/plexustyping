@@ -56,6 +56,7 @@
     ghost: ghostEnabled = true,
     showKeyboard,
     flashes,
+    colorBlind = false,
     heatmap,
     targetCount,
     textLength,
@@ -83,6 +84,8 @@
     ghost?: boolean;
     showKeyboard: boolean;
     flashes: boolean;
+    /** Colour-blind keyboard flashes (a11y S5): Okabe–Ito blue/orange and an underlined wrong key. */
+    colorBlind?: boolean;
     heatmap: boolean;
     targetCount: number;
     textLength: number;
@@ -703,7 +706,7 @@
 
 {#if showKeyboard}
   <footer>
-    <Keyboard {layout} {highlights} {flash} {heat} {locked} />
+    <Keyboard {layout} {highlights} {flash} {heat} {locked} {colorBlind} />
   </footer>
 {/if}
 

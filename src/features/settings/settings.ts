@@ -106,6 +106,19 @@ export const loadHeatmap = (storage: Storage = localStorage) => storage.getItem(
 
 export const saveHeatmap = (on: boolean, storage: Storage = localStorage) => saveFlag(HEATMAP_KEY, on, storage);
 
+const COLOR_BLIND_KEY = "plexustyping.colorBlind";
+
+/** Ajustes → Teclado toggle of the colour-blind flashes (a11y S5). */
+export const COLOR_BLIND_SETTING = {
+  label: "Modo daltónico",
+  hint: "Destellos en azul y naranja en lugar de verde y rojo; una tecla errónea se subraya.",
+};
+
+/** Whether the keyboard flashes use the colour-blind pair (off unless turned on). */
+export const loadColorBlind = (storage: Storage = localStorage) => storage.getItem(COLOR_BLIND_KEY) === "true";
+
+export const saveColorBlind = (on: boolean, storage: Storage = localStorage) => saveFlag(COLOR_BLIND_KEY, on, storage);
+
 /** Choices of weak units practised per text (2 or 3); the first is the default. */
 export const TARGET_COUNTS = [2, 3];
 

@@ -38,6 +38,9 @@ export function contrastRatio(a: string, b: string): number {
 export const AA_TEXT = 4.5;
 /** AA minimum contrast for UI components and focus indicators (WCAG 1.4.11). */
 export const AA_UI = 3;
+/** Minimum contrast of the high-contrast themes (a11y S5): text (WCAG AAA 1.4.6) and UI components. */
+export const HIGH_TEXT = 7;
+export const HIGH_UI = 4.5;
 
 const BLACK = "#000000";
 const WHITE = "#ffffff";
@@ -75,9 +78,9 @@ export function ensureContrast(color: string, backgrounds: string[], min: number
 }
 
 /** Black or white for text on `background`: `readableOn` unless it falls short of AA, then the better one. */
-const textOn = (background: string) => {
+const textOn = (background: string, min = AA_TEXT) => {
   const pick = readableOn(background);
-  if (contrastRatio(pick, background) >= AA_TEXT) return pick;
+  if (contrastRatio(pick, background) >= min) return pick;
   return contrastRatio(BLACK, background) >= contrastRatio(WHITE, background) ? BLACK : WHITE;
 };
 
@@ -111,7 +114,10 @@ export const HEAT_TINTS = [0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 
  * Derived colours that fall short of WCAG AA on the layers they are drawn on (S1) are pushed toward
  * the foreground until they pass; the ones that already pass are kept as they are.
  */
-export function typingColors({ dark, palette }: ThemeEntry): Record<string, string> {
+export function typingColors({ dark, palette, highContrast = false }: ThemeEntry): Record<string, string> {
+  // High-contrast themes (a11y S5) hold every pair to 7:1 for text and 4.5:1 for UI instead of AA.
+  const minText = highContrast ? HIGH_TEXT : AA_TEXT;
+  const minUi = highContrast ? HIGH_UI : AA_UI;
   const bg = palette.background;
   const fg = palette.foreground;
   const surface = mix(bg, fg, 0.04);
@@ -119,18 +125,18 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
   const keyBg = surface2;
   const layers = [bg, surface, surface2];
   // The text colour: the foreground, or toward black or white when even it is short of AA.
-  const text = ensureContrast(fg, layers, AA_TEXT, fg);
-  const onLayers = (color: string, min = AA_TEXT) => ensureContrast(color, layers, min, text);
-  const accent = onLayers(palette.blue, AA_UI);
+  const text = ensureContrast(fg, layers, minText, fg);
+  const onLayers = (color: string, min = minText) => ensureContrast(color, layers, min, text);
+  const accent = onLayers(palette.blue, minUi);
   const errorBg = mix(bg, palette.red, 0.22);
   // Flashed keys show their label in --bg on these.
-  const success = ensureContrast(palette.green, [bg], AA_TEXT, text);
-  const danger = ensureContrast(palette.red, [bg], AA_TEXT, text);
-  const keyFg = ensureContrast(fg, [keyBg], AA_TEXT, text);
+  const success = ensureContrast(palette.green, [bg], minText, text);
+  const danger = ensureContrast(palette.red, [bg], minText, text);
+  const keyFg = ensureContrast(fg, [keyBg], minText, text);
   // Heatmap tint base: --danger, weakened toward the key only as far as the labels need to read on every tint.
   const heatBase = correctColor(
     danger,
-    (candidate) => HEAT_TINTS.every((weight) => contrastRatio(keyFg, mix(keyBg, candidate, weight)) >= AA_TEXT),
+    (candidate) => HEAT_TINTS.every((weight) => contrastRatio(keyFg, mix(keyBg, candidate, weight)) >= minText),
     keyBg,
     [keyBg],
   );
@@ -140,9 +146,9 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
     correctColor(
       color,
       (candidate) =>
-        contrastRatio(candidate, bg) >= AA_TEXT &&
-        contrastRatio(bg, mix(bg, candidate, MODIFIER_KEY_OPACITY)) >= AA_TEXT &&
-        contrastRatio(candidate, keyBg) >= AA_TEXT,
+        contrastRatio(candidate, bg) >= minText &&
+        contrastRatio(bg, mix(bg, candidate, MODIFIER_KEY_OPACITY)) >= minText &&
+        contrastRatio(candidate, keyBg) >= minText,
       text,
       [bg, keyBg],
     );
@@ -151,7 +157,7 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
     keyword: palette.magenta,
     string: palette.green,
     number: palette.yellow,
-    comment: ensureContrast(mix(bg, fg, 0.6), [surface], AA_TEXT, text),
+    comment: ensureContrast(mix(bg, fg, 0.6), [surface], minText, text),
     function: palette.blue,
     type: palette.cyan,
     variable: palette.brightCyan,
@@ -170,14 +176,14 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
     "--text": text,
     "--muted": onLayers(mix(bg, fg, 0.6)),
     "--accent": accent,
-    "--on-accent": textOn(accent),
+    "--on-accent": textOn(accent, minText),
     "--success": success,
     "--warning": palette.yellow,
     "--danger": danger,
     // Practice text: still to type, typed right, typed wrong.
     "--text-pending": onLayers(mix(bg, fg, 0.45)),
     "--text-correct": text,
-    "--text-error": ensureContrast(palette.red, [errorBg], AA_TEXT, text),
+    "--text-error": ensureContrast(palette.red, [errorBg], minText, text),
     "--error-bg": errorBg,
     "--cursor": palette.cursor,
     "--cursor-text": palette.cursorAccent ?? bg,
@@ -202,7 +208,7 @@ export function typingColors({ dark, palette }: ThemeEntry): Record<string, stri
   // still to type, the class colour dimmed toward the code block (`--surface`), kept readable on it.
   for (const cls of SYNTAX_CLASSES) colors[`--syntax-${cls}`] = syntax[cls];
   for (const cls of SYNTAX_CLASSES)
-    colors[`--syntax-pending-${cls}`] = ensureContrast(mix(surface, syntax[cls], 0.45), [surface], AA_TEXT, text);
+    colors[`--syntax-pending-${cls}`] = ensureContrast(mix(surface, syntax[cls], 0.45), [surface], minText, text);
   colors["color-scheme"] = dark ? "dark" : "light";
   return colors;
 }

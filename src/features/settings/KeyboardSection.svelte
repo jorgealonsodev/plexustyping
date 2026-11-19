@@ -1,6 +1,6 @@
 <script lang="ts">
   import SettingField from "./SettingField.svelte";
-  import { LAYOUTS } from "./settings";
+  import { COLOR_BLIND_SETTING, LAYOUTS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -34,7 +34,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField toggle label="Destellos" hint="Las teclas pulsadas se iluminan en verde o rojo.">
+<SettingField toggle label="Destellos" hint="Las teclas pulsadas se iluminan en verde o rojo (azul o naranja con el modo daltónico).">
   {#snippet children({ id, hintId })}
     <input
       {id}
@@ -46,7 +46,19 @@
   {/snippet}
 </SettingField>
 
-<SettingField toggle label="Mapa de calor" hint="Tiñe cada tecla según tus errores y lentitud.">
+<SettingField toggle label={COLOR_BLIND_SETTING.label} hint={COLOR_BLIND_SETTING.hint}>
+  {#snippet children({ id, hintId })}
+    <input
+      {id}
+      type="checkbox"
+      aria-describedby={hintId}
+      checked={settings.colorBlind}
+      onchange={(e: Change) => settings.setColorBlind(e.currentTarget.checked)}
+    />
+  {/snippet}
+</SettingField>
+
+<SettingField toggle label="Mapa de calor" hint="Tiñe cada tecla según tus errores y lentitud y la marca con su nivel, de 1 a 5.">
   {#snippet children({ id, hintId })}
     <input
       {id}

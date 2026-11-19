@@ -66,15 +66,38 @@ function pairs(entry: ThemeEntry): Pair[] {
   return out;
 }
 
-const failures = (entry: ThemeEntry) =>
+/** The pairs short of their minimum; `high` raises text pairs to 7:1 and UI pairs to 4.5:1 (a11y S5). */
+const failures = (entry: ThemeEntry, high = false) =>
   pairs(entry)
+    .map((p) => ({ ...p, min: high ? (p.min === TEXT ? HIGH_TEXT : HIGH_UI) : p.min }))
     .map((p) => ({ ...p, ratio: contrastRatio(p.fg, p.bg) }))
     .filter((p) => !(p.ratio >= p.min))
     .map((p) => `${p.label}: ${p.fg} / ${p.bg} = ${p.ratio.toFixed(2)} < ${p.min}`);
 
+// High contrast (a11y S5): text pairs need 7:1, UI pairs 4.5:1.
+const HIGH_TEXT = 7;
+const HIGH_UI = 4.5;
+
 describe("WCAG AA contrast of every built-in theme (S1)", () => {
   it.each(THEMES.map((entry) => [entry.id, entry] as const))("%s meets AA on every S1 pair", (_id, entry) => {
     expect(failures(entry)).toEqual([]);
+  });
+});
+
+describe("high-contrast themes (a11y S5)", () => {
+  const high = ["alto-contraste-oscuro", "alto-contraste-claro"];
+
+  it("ships both as built-in themes", () => {
+    expect(high.map((id) => THEMES.find((t) => t.id === id)?.name)).toEqual([
+      "Alto contraste oscuro",
+      "Alto contraste claro",
+    ]);
+  });
+
+  it.each(high)("%s reaches 7:1 on every text pair and 4.5:1 on every UI pair", (id) => {
+    const entry = THEMES.find((t) => t.id === id)!;
+    expect(entry.highContrast).toBe(true);
+    expect(failures(entry, true)).toEqual([]);
   });
 });
 

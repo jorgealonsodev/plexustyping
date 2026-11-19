@@ -21,10 +21,10 @@ const ANSI = [
 ] as const;
 
 describe("themes", () => {
-  it("ships PlexusTerm's 57 schemes, each with a unique id", () => {
+  it("ships PlexusTerm's 57 schemes plus the two high-contrast ones, each with a unique id", () => {
     const names = THEMES.map((t) => t.name);
-    expect(THEMES).toHaveLength(57);
-    expect(new Set(THEMES.map((t) => t.id)).size).toBe(57);
+    expect(THEMES).toHaveLength(59);
+    expect(new Set(THEMES.map((t) => t.id)).size).toBe(59);
     for (const name of ["PlexusTerm", "Catppuccin Mocha", "Catppuccin Frappé", "Rosé Pine Dawn", "Laser", "3024 Day"]) {
       expect(names).toContain(name);
     }
@@ -35,6 +35,14 @@ describe("themes", () => {
     expect(THEMES[0].palette.background).toBe("#0f1419");
     expect(THEMES[1].id).toBe("catppuccin-mocha");
     expect(THEMES[56].id).toBe("laser");
+  });
+
+  it("ends with the high-contrast themes, dark then light (a11y S5)", () => {
+    expect(THEMES.slice(57).map(({ id, name, dark, highContrast }) => ({ id, name, dark, highContrast }))).toEqual([
+      { id: "alto-contraste-oscuro", name: "Alto contraste oscuro", dark: true, highContrast: true },
+      { id: "alto-contraste-claro", name: "Alto contraste claro", dark: false, highContrast: true },
+    ]);
+    expect(THEMES.slice(0, 57).every((t) => !t.highContrast)).toBe(true);
   });
 
   it("leaves out the paid schemes", () => {

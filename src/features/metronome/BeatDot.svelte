@@ -39,6 +39,13 @@
     background: var(--accent);
     border-color: var(--accent);
   }
+  /* Reduced motion (a11y S6): the dot still lights on every beat, instantly, with no transition or animation. */
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      transition: none;
+      animation: none;
+    }
+  }
   .on.accent {
     background: var(--warning);
     border-color: var(--warning);

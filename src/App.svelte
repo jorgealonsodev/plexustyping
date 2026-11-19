@@ -231,6 +231,7 @@
     ghost={settings.ghost}
     showKeyboard={settings.showKeyboard}
     flashes={settings.flashes}
+    colorBlind={settings.colorBlind}
     heatmap={settings.heatmap}
     targetCount={settings.targetCount}
     textLength={settings.textLength}
@@ -289,6 +290,7 @@
   /* Off: an unlit bar; on: a green light, like Caps Lock. */
   .led {
     fill: #5b6078;
+    /* Off under reduced motion, with every other transition (app.css, a11y S6). */
     transition: fill 150ms ease-out;
   }
   /* A vivid LED green with a glow, the same in every theme. */

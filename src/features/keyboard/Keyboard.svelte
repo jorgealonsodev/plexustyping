@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onDestroy, untrack } from "svelte";
   import { NAMED_LABELS, fingerOf, rowsFor } from "./geometry";
-  import { heatLevel } from "./heat";
+  import { flashVars } from "./flash";
+  import { HEAT_LEGEND, HEAT_LEGEND_TITLE, heatLegendText, heatLevel, heatRank } from "./heat";
   import { type Flash, type Highlight, keyLabels } from "./keys";
   import type { Layout } from "./types";
 
@@ -11,6 +12,7 @@
     flash,
     heat = null,
     locked = null,
+    colorBlind = false,
   }: {
     layout: Layout | null;
     highlights: Highlight[];
@@ -19,7 +21,17 @@
     heat?: Map<string, number> | null;
     /** Codes of the keys progressive unlock has not reached yet (S6): drawn dimmed. */
     locked?: Set<string> | null;
+    /** Colour-blind mode (a11y S5): Okabe–Ito blue/orange flashes and a bold underline on a wrong key. */
+    colorBlind?: boolean;
   } = $props();
+
+  let root = $state<HTMLDivElement>();
+
+  // Flash colours through the CSSOM: the CSP blocks style attributes, not `style.setProperty`.
+  $effect(() => {
+    if (!root) return;
+    for (const [name, value] of Object.entries(flashVars(colorBlind))) root.style.setProperty(name, value);
+  });
 
   const FLASH_MS = 150;
 
@@ -60,12 +72,13 @@
 </script>
 
 <!-- Decorative: the practice text already says what to type. -->
-<div class="keyboard" aria-hidden="true">
+<div class="keyboard" class:colorblind={colorBlind} aria-hidden="true" bind:this={root}>
   {#each rows as row, r (r)}
     <div class="row">
       {#each row as key, i (i)}
         {@const role = roles.get(key.code)}
         {@const level = heat ? heatLevel(heat.get(key.code) ?? 0) : 0}
+        {@const rank = heatRank(level)}
         <div
           class="key {key.widthClass} {role && key.finger ? `finger-${key.finger}` : ''} {level ? `heat heat-${level}` : ''}"
           class:primary={role === "primary"}
@@ -83,13 +96,21 @@
             <span class="name">{key.name}</span>
           {/if}
           {#if key.labels.altgr}<span class="altgr" class:dead={key.labels.altgr.dead}>{key.labels.altgr.text}</span>{/if}
+          <!-- Heat level 1–5: the heatmap does not rely on colour alone (a11y S5). -->
+          {#if rank}<span class="rank">{rank}</span>{/if}
         </div>
       {/each}
     </div>
   {/each}
 </div>
 {#if heat}
-  <p class="legend">menos ← <span class="scale" aria-hidden="true"></span> → más errores</p>
+  <!-- Each level with its number and its tint, as drawn on the keys (a11y S5). -->
+  <p class="legend" title={heatLegendText()}>
+    <span>{HEAT_LEGEND_TITLE}:</span>
+    {#each HEAT_LEGEND as entry (entry.rank)}
+      <span class="level"><span class="swatch heat heat-{entry.tint}">{entry.rank}</span> {entry.name}</span>
+    {/each}
+  </p>
 {/if}
 
 <style>
@@ -145,6 +166,14 @@
     right: 0.3em;
     bottom: 0.2em;
   }
+  .rank {
+    position: absolute;
+    top: 0.2em;
+    right: 0.3em;
+    font-family: system-ui, sans-serif;
+    font-size: 0.6em;
+    font-weight: 700;
+  }
   .name {
     font-family: system-ui, sans-serif;
     font-size: 0.72em;
@@ -182,10 +211,19 @@
     line-height: 1;
     color: var(--muted);
   }
-  .scale {
-    width: 8rem;
-    height: 0.5rem;
-    background: linear-gradient(to right, var(--key-bg), color-mix(in srgb, var(--heat-base) 60%, var(--key-bg)));
+  .level {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    font-weight: 700;
+    color: var(--key-fg);
     border: 1px solid var(--key-border);
     border-radius: 0.25rem;
   }
@@ -216,18 +254,37 @@
   .locked {
     opacity: 0.3;
   }
-  /* After the highlight rules, so a flash wins on the same key. */
-  .flash-ok,
-  .flash-bad {
-    color: var(--bg);
-    opacity: 1;
+  /* After the highlight rules, so a flash wins on the same key. Colours: --flash-* (`flash.ts`). */
+  @media (prefers-reduced-motion: no-preference) {
+    .flash-ok,
+    .flash-bad {
+      opacity: 1;
+    }
+    .flash-ok {
+      color: var(--flash-ok-fg);
+      background: var(--flash-ok);
+      border-color: var(--flash-ok);
+    }
+    .flash-bad {
+      color: var(--flash-bad-fg);
+      background: var(--flash-bad);
+      border-color: var(--flash-bad);
+    }
   }
-  .flash-ok {
-    background: var(--success);
-    border-color: var(--success);
+  /* Reduced motion (a11y S6): no flash; the key keeps its look and is underlined in the flash colour. */
+  @media (prefers-reduced-motion: reduce) {
+    .flash-ok {
+      box-shadow: inset 0 calc(var(--u) * -0.1) 0 var(--flash-ok);
+    }
+    .flash-bad {
+      box-shadow: inset 0 calc(var(--u) * -0.1) 0 var(--flash-bad);
+    }
   }
-  .flash-bad {
-    background: var(--danger);
-    border-color: var(--danger);
+  /* Colour-blind mode (a11y S5): a wrong key is also marked by a bold underline, not by colour alone. */
+  .colorblind .flash-bad .main,
+  .colorblind .flash-bad .name {
+    text-decoration: underline;
+    text-decoration-thickness: 0.15em;
+    text-underline-offset: 0.2em;
   }
 </style>

@@ -41,6 +41,7 @@ import {
   saveCodeLines,
   savePracticeKind,
   loadErrorMode,
+  loadColorBlind,
   loadFlashes,
   loadGhost,
   loadLanguage,
@@ -54,6 +55,7 @@ import {
   loadTargetCount,
   loadTextLength,
   saveErrorMode,
+  saveColorBlind,
   saveFlashes,
   saveGhost,
   saveHeatmap,
@@ -108,6 +110,8 @@ export class SettingsStore {
   ghost = $state(loadGhost());
   showKeyboard = $state(loadShowKeyboard());
   flashes = $state(loadFlashes());
+  /** Okabe–Ito blue/orange flashes and an underlined wrong key (a11y S5); off by default. */
+  colorBlind = $state(loadColorBlind());
   /** Themes imported from VS Code; loaded before the theme id so a saved import is known. */
   customThemes = $state.raw(initCustomThemes());
   themeId = $state(loadThemeId());
@@ -196,6 +200,11 @@ export class SettingsStore {
   setFlashes(on: boolean) {
     this.flashes = on;
     saveFlashes(on);
+  }
+
+  setColorBlind(on: boolean) {
+    this.colorBlind = on;
+    saveColorBlind(on);
   }
 
   /** Loads a new text for the layout (the practice screen watches it); saved to the active profile. */

@@ -43,6 +43,10 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   Shift, AltGr; dead keys underlined): it highlights the next key, plus Shift or
   AltGr, coloured by finger, and flashes typed keys green or red. `F2` or a click on the logo key in the header
   shows or hides it; the bar under its P is lit green while the keyboard shows.
+- Reduced motion: with the system's `prefers-reduced-motion: reduce`, no CSS
+  transition or animation runs anywhere in the app; a typed key is underlined
+  in the flash colour instead of flashing, and the metronome dot still lights
+  on every beat, without transition.
 - Settings: the gear button in the header (or `Ctrl+,`) opens the "Ajustes"
   window, with one section per topic. "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
@@ -54,8 +58,13 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   («error: esperaba e, pulsaste r»), the start of a new text and the result
   line; while off it is not rendered and announces nothing. The typing field
   is described by the practice text region.
-  "Teclado": layout (see below), on-screen keyboard (`F2`), flashes and heatmap. "Apariencia": 57
-  colour themes, dark and light, switched live, plus themes imported from
+  "Teclado": layout (see below), on-screen keyboard (`F2`), flashes, "Modo
+  daltónico" (off by default: the flashes use the Okabe–Ito blue `#0072B2` and
+  orange `#E69F00`, the same in every theme, and a wrong key's label also gets
+  a bold underline) and heatmap. "Apariencia": 59
+  colour themes, dark and light, switched live (PlexusTerm's 57 plus "Alto
+  contraste oscuro" and "Alto contraste claro", whose colours reach 7:1 for
+  text and 4.5:1 for UI; every other theme meets WCAG AA), plus themes imported from
   VS Code (see below), and the typography of the practice text, prose and
   code, applied live: "Tamaño de letra" (80–200 %, default 100),
   "Espaciado entre letras" (0–0.30 em, default 0) and "Interlineado"
@@ -73,7 +82,9 @@ errors (weight 0.7) and slowness relative to your own pace (weight 0.3). The
 next text picks the 2 or 3 worst units, with some randomness, and builds sentences
 from words that contain them ("Practicando: ñ · qu · z" above the text). Results
 list your top weaknesses, and the optional "Mapa de calor" tints each key of
-the on-screen keyboard by its score.
+the on-screen keyboard by its score and marks it with its level, 1 to 5, so it
+does not rely on colour alone; the legend under the keyboard names the levels
+("Errores por tecla: 1 muy pocos, 2 pocos, 3 algunos, 4 bastantes, 5 muchos").
 
 ### AI texts (optional)
 

@@ -28,3 +28,27 @@ export function heatLevel(score: number): number {
   if (!(score > 0)) return 0;
   return Math.min(HEAT_LEVELS, Math.round(score * HEAT_LEVELS));
 }
+
+/** Numeric heat levels shown on the keys (a11y S5): two tint steps per level. */
+export const HEAT_RANKS = 5;
+
+/** Level 1–5 of a tint step 1–10 (0 without tint), shown on the key as a non-colour cue. */
+export function heatRank(level: number): number {
+  if (!(level > 0)) return 0;
+  return Math.min(HEAT_RANKS, Math.ceil(level / (HEAT_LEVELS / HEAT_RANKS)));
+}
+
+export const HEAT_LEGEND_TITLE = "Errores por tecla";
+
+/** The legend of the heatmap: each level, its name and the tint step its swatch is drawn with. */
+export const HEAT_LEGEND: { rank: number; name: string; tint: number }[] = [
+  "muy pocos",
+  "pocos",
+  "algunos",
+  "bastantes",
+  "muchos",
+].map((name, i) => ({ rank: i + 1, name, tint: (i + 1) * (HEAT_LEVELS / HEAT_RANKS) }));
+
+/** The legend as one line, e.g. for its accessible name. */
+export const heatLegendText = () =>
+  `${HEAT_LEGEND_TITLE}: ${HEAT_LEGEND.map(({ rank, name }) => `${rank} ${name}`).join(", ")}`;
