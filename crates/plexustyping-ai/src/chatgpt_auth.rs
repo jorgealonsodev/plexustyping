@@ -656,15 +656,17 @@ impl ChatgptAuth {
         // Only the token response's granted scopes count (not the callback's).
         let granted = tokens.scope.clone().unwrap_or_default();
 
-        let _guard = self.lock.lock().await;
+        let guard = self.lock.lock().await;
         // Checked under the lock a sign-out clears the tokens with: a sign-out or cancel
-        // during the exchange wins over its answer.
+        // during the exchange wins over its answer, whose grant is then revoked.
         if self.cancelled_since(epoch) {
-            return Err(AuthError::Cancelled);
+            drop(guard);
+            return self.discard(tokens.refresh_token, client_id).await;
         }
-        let mut record = self.load().await?;
+        let previous = self.load().await?;
+        let mut record = previous.clone();
         record.host_id = saved.host_id.clone();
-        record.client_id = Some(client_id);
+        record.client_id = Some(client_id.clone());
         record.subject = Some(claims.sub);
         record.email = claims.email;
         record.id_token = Some(id_token);
@@ -673,7 +675,26 @@ impl ChatgptAuth {
         record.scopes = granted.split_whitespace().map(str::to_string).collect();
         record.expires_at = expiry(tokens.expires_in);
         self.save(&record).await?;
+        // A plain cancel takes no lock: one that landed during the save still wins.
+        if self.cancelled_since(epoch) {
+            self.save(&previous).await?;
+            drop(guard);
+            return self.discard(record.refresh_token, client_id).await;
+        }
         Ok(record.status())
+    }
+
+    /// Ends a cancelled sign-in: the refresh token its answer carried is revoked
+    /// (best effort), so no unused grant stays alive.
+    async fn discard(
+        &self,
+        refresh: Option<String>,
+        client_id: String,
+    ) -> Result<Status, AuthError> {
+        if let Some(refresh) = refresh {
+            self.revoke(&refresh, &client_id).await;
+        }
+        Err(AuthError::Cancelled)
     }
 
     /// A valid access token for inference, renewed first when it is about to expire.

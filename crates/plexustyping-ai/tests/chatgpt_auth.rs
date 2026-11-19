@@ -615,6 +615,47 @@ async fn a_sign_out_during_the_code_exchange_wins_over_its_answer() {
 }
 
 #[tokio::test]
+async fn a_cancel_during_the_code_exchange_revokes_the_tokens_it_got() {
+    let f = Arc::new(Fixture::new().await);
+    f.mock.route(REVOKE, Reply::status(200, ""));
+    let (mock, signer) = (f.mock.clone(), f.signer.clone());
+    let slow: Step = Box::new(move |p| {
+        let id = signer.sign(&claims(&mock.base, &p["nonce"]));
+        mock.route(
+            TOKEN,
+            tokens(&id, ACCESS, REFRESH, 3600, PLAN).delayed(Duration::from_millis(500)),
+        );
+        Some(format!(
+            "code={CODE}&state={}&client_id={CLIENT}&scope={}",
+            p["state"],
+            PLAN.replace(' ', "+")
+        ))
+    });
+    let signing = f.clone();
+    let task = tokio::spawn(async move { signing.sign_in(vec![slow]).await.result });
+    for _ in 0..3000 {
+        if !f.calls(TOKEN).is_empty() {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert_eq!(f.calls(TOKEN).len(), 1, "the exchange is under way");
+
+    f.auth.cancel();
+
+    assert_eq!(task.await.unwrap().unwrap_err(), AuthError::Cancelled);
+    let record = f.record();
+    assert!(record["accessToken"].is_null(), "{record}");
+    assert!(record["refreshToken"].is_null(), "{record}");
+    // The grant the answer carried is not left alive at OpenAI.
+    let revoked = f.calls(REVOKE);
+    assert_eq!(revoked.len(), 1, "the received refresh token is revoked");
+    let body = &revoked[0].body;
+    assert!(body.contains(&format!("token={REFRESH}")), "{body}");
+    assert!(body.contains("token_type_hint=refresh_token"), "{body}");
+}
+
+#[tokio::test]
 async fn a_browser_that_does_not_open_leaves_no_pending_sign_in() {
     let f = Fixture::new().await;
     let err = f
