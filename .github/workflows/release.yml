@@ -77,6 +77,10 @@ jobs:
           pnpm check
           pnpm test
 
+      # tauri::generate_context! needs the built frontend (frontendDist) to compile.
+      - name: Build the frontend
+        run: pnpm build
+
       - name: Rust tests
         run: cargo test --workspace --locked
 

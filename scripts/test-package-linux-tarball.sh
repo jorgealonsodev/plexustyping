@@ -5,6 +5,8 @@
 #
 # Usage: scripts/test-package-linux-tarball.sh
 set -euo pipefail
+# The launcher's GUI fallback is tested explicitly below; elsewhere it must not open windows.
+export PLEXUSTYPING_NO_GUI=1
 
 repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 packager="$repo/scripts/package-linux-tarball.sh"
@@ -138,6 +140,18 @@ set -e
 expect_eq "launcher exits 1 when the library is missing" 1 "$code"
 expect_eq "launcher missing-library message" "$missing_msg" "$(cat "$work/stderr")"
 expect_eq "launcher does not start the binary when the library is missing" "" "$stdout"
+
+# Without a terminal the launcher also shows the message in a window (fake zenity on PATH).
+mkdir -p "$work/gui"
+printf '#!/bin/sh\nprintf "%%s\\n" "$*" > "%s/gui/zenity.args"\n' "$work" > "$work/gui/zenity"
+chmod +x "$work/gui/zenity"
+set +e
+PLEXUSTYPING_NO_GUI='' PATH="$work/gui:$PATH" PLEXUSTYPING_LDCONFIG="$work/tools/ldconfig-empty" \
+  PLEXUSTYPING_LIB_DIRS="$work/nolibs" "$pkg/plexustyping" 2>"$work/stderr-gui" >/dev/null </dev/null
+code=$?
+set -e
+expect_eq "launcher without a terminal still exits 1" 1 "$code"
+check "launcher without a terminal shows the message with zenity" grep -q "WebKitGTK 4.1" "$work/gui/zenity.args"
 
 set +e
 stdout=$(PLEXUSTYPING_LDCONFIG="$work/tools/no-such-ldconfig" \

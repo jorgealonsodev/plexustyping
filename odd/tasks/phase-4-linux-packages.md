@@ -77,3 +77,8 @@ Ship the two Linux artefacts of PRD §7 «Distribución y actualizaciones» from
     - With the library hidden, the launcher prints the Spanish message and exits 1.
   - Checks: cargo 586, vitest 412, check 0.
   - Not yet run: the workflow itself (the Windows build and the ubuntu-22.04 package list).
+- **L6 (review, 2026-11-19):** review-de5cd96b7a9b4814 (risk, resilience and reliability) approved 3222e3e with advisories. Two were applied:
+  1. R3-cargo-test-before-frontend-build: the linux job now runs `pnpm build` before `cargo test`, because `generate_context!` needs `dist/`. Locally it passed only because `dist/` already existed.
+  2. R4-launcher-silent-menu-failure: without a terminal, the launcher also shows the message with zenity, kdialog or notify-send. Test with a fake zenity; `PLEXUSTYPING_NO_GUI` disables it. Tarball test 59/59, shellcheck clean.
+
+  Still open: `%` in a HOME path is not escaped in `Exec`; a failed partial install leaves its directories; there is no relative-path test of the packager.

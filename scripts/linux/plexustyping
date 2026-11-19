@@ -45,8 +45,8 @@ in_lib_dirs() {
   return 1
 }
 
-if ! in_ldconfig && ! in_lib_dirs; then
-  cat >&2 <<'EOF'
+missing_message() {
+  cat <<'EOF'
 PlexusTyping necesita WebKitGTK 4.1 (libwebkit2gtk-4.1), que no está instalada.
 Instálala con el gestor de paquetes de tu distribución:
   Debian/Ubuntu:  sudo apt install libwebkit2gtk-4.1-0
@@ -54,6 +54,20 @@ Instálala con el gestor de paquetes de tu distribución:
   Arch Linux:     sudo pacman -S webkit2gtk-4.1
 Después vuelve a abrir PlexusTyping.
 EOF
+}
+
+if ! in_ldconfig && ! in_lib_dirs; then
+  missing_message >&2
+  # Started from the menu (no terminal): also show it in a window, when a dialog tool exists.
+  if [[ ! -t 2 && -z "${PLEXUSTYPING_NO_GUI:-}" ]]; then
+    if command -v zenity >/dev/null 2>&1; then
+      zenity --error --title=PlexusTyping --text="$(missing_message)" >/dev/null 2>&1 || true
+    elif command -v kdialog >/dev/null 2>&1; then
+      kdialog --title PlexusTyping --error "$(missing_message)" >/dev/null 2>&1 || true
+    elif command -v notify-send >/dev/null 2>&1; then
+      notify-send PlexusTyping "$(missing_message)" >/dev/null 2>&1 || true
+    fi
+  fi
   exit 1
 fi
 
