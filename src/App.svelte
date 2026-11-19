@@ -11,7 +11,7 @@
   import { isSettingsShortcut } from "./features/settings/sections";
   import SettingsModal from "./features/settings/SettingsModal.svelte";
   import { SettingsStore } from "./features/settings/store.svelte";
-  import { focusTyping } from "./features/practice/focus";
+  import { focusTyping, isHeaderShortcut, isPointerClick, isTypingFocused } from "./features/practice/focus";
   import { ghostToggleTitle } from "./features/practice/ghost";
   import { aiSettingsGet, aiSettingsSet } from "./features/settings/aiApi";
   import { aiToggleTitle, toggleEnabled } from "./features/settings/ai";
@@ -24,6 +24,10 @@
   let modal: SettingsModal | undefined = $state();
   let history: HistoryModal | undefined = $state();
   let practiceScreen: Practice | undefined = $state();
+  /** The first header control: F6 moves the focus here from the typing field. */
+  let logo: HTMLButtonElement | undefined = $state();
+  /** A mouse click on a header toggle gives the keyboard back to the text; a keyboard activation keeps the focus on it. */
+  const backToText = (e: MouseEvent) => isPointerClick(e) && focusTyping();
   /** "Cargando texto…" or "Generando texto…" while a text loads; `null` otherwise. */
   let loadingText = $state<string | null>(null);
   // Why sessions are not kept on disk; `null` while persistent or unknown.
@@ -56,8 +60,15 @@
   });
 
   // F2 shows or hides the keyboard from anywhere (S11), F4 turns the metronome on or off (S7) and
-  // Ctrl+, opens the settings (S8) and Ctrl+H the history; none reaches the practice text.
+  // Ctrl+, opens the settings (S8) and Ctrl+H the history; none reaches the practice text. F6 moves
+  // the focus from the typing field to the header (accessibility S2). A dialog opened by a shortcut
+  // gives the focus back to the typing field; one opened by a header button, to that button.
   function onKeydown(e: KeyboardEvent) {
+    if (isHeaderShortcut(e) && isTypingFocused()) {
+      e.preventDefault();
+      logo?.focus();
+      return;
+    }
     if (isSettingsShortcut(e)) {
       e.preventDefault();
       modal?.open();
@@ -90,13 +101,15 @@
   <div class="brand">
     <!-- The logo key toggles the on-screen keyboard (like F2); its bar lights while the keyboard shows. -->
     <button
+      bind:this={logo}
       type="button"
       class="logo"
       aria-pressed={settings.showKeyboard}
+      aria-label="Teclado en pantalla"
       title={settings.showKeyboard ? "Ocultar teclado (F2)" : "Mostrar teclado (F2)"}
-      onclick={() => {
+      onclick={(e) => {
         settings.setShowKeyboard(!settings.showKeyboard);
-        focusTyping();
+        backToText(e);
       }}
     >
       <svg viewBox="16 16 224 224" width="28" height="28" aria-hidden="true">
@@ -135,7 +148,7 @@
         type="button"
         class="profile"
         title="Perfil activo: {settings.activeProfile.name}. Cambiar en Ajustes → Perfiles"
-        onclick={() => modal?.open("profiles")}>{settings.activeProfile.name}</button
+        onclick={(e) => modal?.open("profiles", e.currentTarget)}>{settings.activeProfile.name}</button
       >
       <!-- Today's daily goal progress and streak (S5). -->
       {#if goalText}<span class="goal" title="Meta diaria del perfil activo">{goalText}</span>{/if}
@@ -149,9 +162,9 @@
     aria-pressed={settings.aiEnabled === true}
     title={aiToggleTitle(settings.aiEnabled === true)}
     disabled={settings.aiEnabled === null || aiSaving}
-    onclick={() => {
+    onclick={(e) => {
       void toggleAi();
-      focusTyping();
+      backToText(e);
     }}><span class="ai-label">IA</span></button
   >
   <button
@@ -161,9 +174,9 @@
     aria-pressed={settings.ghost}
     aria-label="Sesión fantasma"
     title={ghostToggleTitle(settings.ghost)}
-    onclick={() => {
+    onclick={(e) => {
       settings.setGhost(!settings.ghost);
-      focusTyping();
+      backToText(e);
     }}
   >
     <!-- A ghost: round head, wavy hem, two eyes. -->
@@ -194,13 +207,13 @@
       <path d="M6.2 21.2v-4h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
-  <button type="button" class="gear" aria-label="Historial" title="Historial" onclick={() => history?.open()}>
+  <button type="button" class="gear" aria-label="Historial" title="Historial" onclick={(e) => history?.open(e.currentTarget)}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.5" stroke-width="2" />
       <path d="M12 7v5l3.5 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
-  <button type="button" class="gear" aria-label="Ajustes" title="Ajustes" onclick={() => modal?.open()}>
+  <button type="button" class="gear" aria-label="Ajustes" title="Ajustes" onclick={(e) => modal?.open(undefined, e.currentTarget)}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.4" stroke-width="3" stroke-dasharray="3.3 3.3" />
       <circle cx="12" cy="12" r="5.6" stroke-width="2.6" />

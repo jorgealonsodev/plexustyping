@@ -1,53 +1,83 @@
 <script lang="ts">
+  import { tick } from "svelte";
+  import { nextFocusIndex } from "../practice/focus";
   import type { Sound } from "./api";
   import BeatDot from "./BeatDot.svelte";
   import { type BeatAnchor, MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS, stepBpm } from "./beat";
 
   // The beat dot is also the metronome's quick settings: a click opens a small panel to tune it
-  // without leaving the text. Classes only (CSP).
+  // without leaving the text. Classes only (CSP). Keyboard (accessibility S2): opening moves the
+  // focus into the panel, Tab stays inside it while open, and Escape (from the toggle or the panel)
+  // closes it and gives the focus back to the toggle.
   let {
     anchor,
     metronome,
     onChange,
-    onClose,
   }: {
     anchor: BeatAnchor;
     metronome: MetronomeSettings;
     onChange: (change: Partial<MetronomeSettings>) => void;
-    /** The panel closed: the caller gives the focus back to the text. */
-    onClose: () => void;
   } = $props();
 
   let open = $state(false);
+  let toggle = $state<HTMLButtonElement>();
+  let panel = $state<HTMLDivElement>();
   type Change<T extends HTMLElement> = Event & { currentTarget: T };
   const number = (e: Change<HTMLInputElement>) => e.currentTarget.valueAsNumber;
 
+  const controls = () =>
+    panel ? [...panel.querySelectorAll<HTMLElement>("button, input, select")].filter((c) => !c.hasAttribute("disabled")) : [];
+
+  async function show() {
+    open = true;
+    await tick();
+    (controls()[0] ?? panel)?.focus();
+  }
   function close() {
     open = false;
-    onClose();
+    toggle?.focus();
+  }
+  function onToggleKeydown(e: KeyboardEvent) {
+    // Escape on the toggle closes an open panel; it never reaches the practice (no restart).
+    if (e.key !== "Escape") return;
+    e.stopPropagation();
+    e.preventDefault();
+    if (open) close();
   }
   function onKeydown(e: KeyboardEvent) {
     // Keys typed in the panel never reach the practice (Escape would restart the text).
     e.stopPropagation();
-    if (e.key === "Escape") close();
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const list = controls();
+    const next = nextFocusIndex(list.indexOf(document.activeElement as HTMLElement), list.length, e.shiftKey);
+    e.preventDefault();
+    if (next !== null) list[next].focus();
   }
 </script>
 
 <div class="metro-quick">
   <button
+    bind:this={toggle}
     type="button"
     class="toggle"
     aria-expanded={open}
+    aria-haspopup="dialog"
     aria-label="Ajustes rápidos del metrónomo: {metronome.bpm} BPM"
     title="Ajustar el metrónomo"
-    onclick={() => (open ? close() : (open = true))}
+    onclick={() => (open ? close() : void show())}
+    onkeydown={onToggleKeydown}
   >
     <BeatDot {anchor} />
     <span class="bpm">{metronome.bpm} BPM</span>
   </button>
   {#if open}
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-    <div class="panel" role="dialog" aria-label="Metrónomo" tabindex="-1" onkeydown={onKeydown}>
+    <div bind:this={panel} class="panel" role="dialog" aria-label="Metrónomo" tabindex="-1" onkeydown={onKeydown}>
       <div class="row">
         <label class="name" for="mq-bpm">Tempo</label>
         <button type="button" aria-label="Más lento" onclick={() => onChange({ bpm: stepBpm(metronome.bpm, -1) })}>−</button>

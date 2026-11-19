@@ -1,6 +1,6 @@
 <script lang="ts">
   import { LANGUAGES } from "../code/languages.svelte";
-  import { focusTyping } from "../practice/focus";
+  import { type FocusTarget, returnFocus } from "../practice/focus";
   import {
     exportSessionsCsv,
     historyByChar,
@@ -69,8 +69,13 @@
   // Labels of the character chart sit just under its plot area.
   const CHAR_LABEL_Y = CHAR_BOX.height - CHAR_BOX.bottom + 14;
 
-  export function open() {
+  // The control that opened the window; `null` when a shortcut did (focus goes back to the typing field).
+  let opener: FocusTarget | null = null;
+
+  /** Opens the window; closing it gives the focus back to `from`, or to the typing field without one (a shortcut). */
+  export function open(from: FocusTarget | null = null) {
     if (!dialog || dialog.open) return;
+    opener = from;
     void LANGUAGES.load();
     notice = null;
     exports.invalidate();
@@ -125,9 +130,12 @@
     }
   }
 
-  // Escape (native cancel), ×, backdrop and Ctrl+H all end here: give the keyboard back.
+  // Escape (native cancel), ×, backdrop and Ctrl+H all end here: give the keyboard back to the
+  // control that opened the window, or to the typing field.
   function onClose() {
-    focusTyping();
+    const to = opener;
+    opener = null;
+    returnFocus(to);
   }
 
   // Keys stay in the modal: Escape closes it instead of restarting the text. F2 still reaches the

@@ -22,15 +22,24 @@
     if (list.length > 0 && !list.some((l) => l.id === settings.codeLanguage)) settings.setCodeLanguage(list[0].id);
   });
 
+  // Back to the text only after a mouse pick: arrow keys change the select too, and
+  // keyboard users keep focus on it (accessibility S2).
+  let pointerPick = false;
+
   function choose(e: Event & { currentTarget: HTMLSelectElement }) {
     settings.setCodeLanguage(e.currentTarget.value);
-    focusTyping();
+    if (pointerPick) focusTyping();
   }
 </script>
 
 <div class="mode">
   {#if settings.practiceKind === "code"}
-    <select aria-label="Lenguaje de programación" onchange={choose}>
+    <select
+      aria-label="Lenguaje de programación"
+      onchange={choose}
+      onpointerdown={() => (pointerPick = true)}
+      onkeydown={() => (pointerPick = false)}
+    >
       {#each LANGUAGES.list as l (l.id)}
         <option value={l.id} selected={l.id === settings.codeLanguage}>{l.name}</option>
       {/each}

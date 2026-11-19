@@ -29,7 +29,7 @@
   import CodeText from "../code/CodeText.svelte";
   import { LANGUAGES } from "../code/languages.svelte";
   import { type TokenClass, codeKeyEvent, tokenClasses } from "../code/syntax";
-  import { focusTyping, setTypingField } from "./focus";
+  import { escapeRestarts, focusTyping, isPointerClick, setTypingField, tabTypes, typingHint } from "./focus";
   import { Prefetcher, generationKey, isProfileSwitch, provisionalFailedChars, sourceLabel } from "./prefetch";
   import { type Phase, indentChangeRestarts, shouldApply } from "./replies";
   import Results from "./Results.svelte";
@@ -387,9 +387,10 @@
   function onKeydown(e: KeyboardEvent) {
     if (isFormControl(e.target)) return;
     const action = keyAction(e);
-    // Escape restarts only a text being typed or reviewed; while a text loads or is scored,
-    // restarting would silently discard the pending result.
-    if (action === "escape" && (phase === "typing" || phase === "results")) {
+    // Escape restarts only a text being typed or reviewed, and only from the typing field (never
+    // from the metronome toggle or another control); while a text loads or is scored, restarting
+    // would silently discard the pending result.
+    if (action === "escape" && escapeRestarts(e.target === field, phase)) {
       e.preventDefault();
       restart();
       return;
@@ -408,7 +409,8 @@
       return;
     }
     if (e.target !== field) return;
-    if (action === "tab" && phase === "typing") {
+    // In code, Tab types indentation; in prose and words it moves focus out as usual (F6 leaves in every mode).
+    if (action === "tab" && tabTypes(phase, isCode)) {
       e.preventDefault();
       const event = codeKeyEvent(action, isCode, performance.now());
       if (event) applyEvent(event);
@@ -419,8 +421,10 @@
     }
   }
 
-  // Any click outside a settings control, or focus lost to the page, returns to the typing field.
+  // A mouse click outside a settings control, or focus lost to the page, returns to the typing
+  // field. A control activated by keyboard (Enter or Space) keeps the focus it received.
   function onWindowClick(e: MouseEvent) {
+    if (!isPointerClick(e)) return;
     if (e.target instanceof Element && e.target.closest("select, input, label, .metro-quick")) return;
     focusTyping();
   }
@@ -597,7 +601,6 @@
             {anchor}
             {metronome}
             onChange={(change) => onMetronomeChange?.(change)}
-            onClose={() => focusTyping()}
           />
         {/if}
         {#if liveStats && view}
@@ -649,7 +652,7 @@
             >{/each}</p>
       {/if}
       <p class="hint">
-        {#if phase === "scoring"}Calculando resultado…{:else if view.cursor === 0}Empieza a escribir cuando quieras · {#if isCode}Intro = salto de línea · Tab = sangría · {/if}Esc reinicia · F4 metrónomo{:else}Esc reinicia el texto · F4 metrónomo{/if}
+        {#if phase === "scoring"}Calculando resultado…{:else}{typingHint(view.cursor !== 0, isCode)}{/if}
       </p>
     {/if}
   </section>

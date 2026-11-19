@@ -56,7 +56,7 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
 | T1 | S1 | Contrast guard for derived theme colours, all-themes AA vitest, CodeText comment/plain colours | writer A (parallel with T2) | pending | |
-| T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | pending | |
+| T2 | S2 | Keyboard navigation: Tab/F6 out of the typing field, refocus rules, Escape scope, metronome panel focus, focus return in dialogs, logo label | writer B (parallel with T1) | done | see L4 |
 | T3 | S3, S4 | Screen reader mode and typography settings (practice text, settings store, settings UI) | writer after T2 | pending | |
 | T4 | S5, S6 | High-contrast themes, colour-blind keyboard mode, heatmap levels, reduced motion | writer after T1 | pending | |
 | T5 | S1–S6 | Integration checks (cargo, vitest, check, build), README, native review, merge | parent | pending | |
@@ -79,3 +79,12 @@ Close the PRD §6.3 accessibility requirements so the phase 4 checklist has 0 bl
   - The colour-blind pair is Okabe–Ito orange `#E69F00` and blue `#0072B2`.
   - The contrast fix moves derived colours toward the theme foreground rather than changing imported palettes.
   - The typography ranges are the ones in S4.
+- **L4 (evidence, 2026-11-19):** T2 done by writer B plus a parent fix.
+  - Pure decisions live in `src/features/practice/focus.ts` (`tabTypes`, `escapeRestarts`, `isHeaderShortcut`, `isPointerClick`, `nextFocusIndex`, `typingHint`, `returnFocus`), with 17 vitest. RED 17/17, then GREEN.
+  - Wiring: Practice.svelte, MetronomeQuick.svelte, SettingsModal.svelte, HistoryModal.svelte and App.svelte. F6 focuses the logo button, now labelled «Teclado en pantalla».
+  - Parent fix: ModeSwitch.svelte refocused the typing field on every select change, which broke arrow-key use. It now refocuses only after a pointer pick.
+  - Checks: vitest without themes 286/286; check 0.
+  - Known limits:
+    - A focused button that disappears or becomes disabled drops focus to the page, and the typing field then takes it.
+    - Shift+Tab in code mode still types indentation.
+    - The Svelte focus wiring has no component test; it needs a GUI check.

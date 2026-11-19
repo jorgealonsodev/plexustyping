@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { focusTyping } from "../practice/focus";
+  import { type FocusTarget, returnFocus } from "../practice/focus";
   import { SECTIONS } from "./registry";
   import { isSettingsShortcut, moveSection } from "./sections";
   import type { SettingsStore } from "./store.svelte";
@@ -12,11 +12,17 @@
   let current = $state(SECTIONS[0].id);
   const ids = SECTIONS.map((s) => s.id);
   const tabs: Record<string, HTMLButtonElement | undefined> = $state({});
+  // The control that opened the modal; `null` when a shortcut did (focus goes back to the typing field).
+  let opener: FocusTarget | null = null;
 
-  /** Opens the modal, on `section` when given (e.g. the header's profile name opens "Perfiles"). */
-  export function open(section?: string) {
+  /**
+   * Opens the modal, on `section` when given (e.g. the header's profile name opens "Perfiles");
+   * closing it gives the focus back to `from`, or to the typing field without one (a shortcut).
+   */
+  export function open(section?: string, from: FocusTarget | null = null) {
     if (section && ids.includes(section)) current = section;
     if (!dialog || dialog.open) return;
+    opener = from;
     dialog.showModal();
     tabs[current]?.focus();
   }
@@ -25,9 +31,12 @@
     dialog?.close();
   }
 
-  // Escape (native cancel), ×, backdrop and Ctrl+, all end here: give the keyboard back.
+  // Escape (native cancel), ×, backdrop and Ctrl+, all end here: give the keyboard back to the
+  // control that opened the modal, or to the typing field.
   function onClose() {
-    focusTyping();
+    const to = opener;
+    opener = null;
+    returnFocus(to);
   }
 
   // Keys stay in the modal: Escape closes it instead of restarting the text, Enter never starts
