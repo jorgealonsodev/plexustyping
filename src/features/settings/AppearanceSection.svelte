@@ -105,7 +105,7 @@
   {/snippet}
 </SettingField>
 
-<!-- Typeface of the practice text, prose and code (practice-font S1): each option and the preview in its own font. -->
+<!-- Typeface of the practice text, prose and code (practice-font S1): each option and the try-out field in its own font. -->
 <SettingField label={FONT_SETTING.label} hint="{FONT_SETTING.hint} {font.hint}">
   {#snippet children({ id, hintId })}
     <div class="font-pick">
@@ -123,7 +123,15 @@
         </optgroup>
       {/each}
     </select>
-    <p class="preview" aria-hidden="true" style="font-family: {font.family}">Ñandú veloz: 0O 1lI ¿{"{}"}?</p>
+    <input
+      type="text"
+      class="preview"
+      aria-label="Prueba la fuente"
+      placeholder="Escribe aquí para probarla: Ñandú 0O 1lI ¿{'{}'}?"
+      spellcheck="false"
+      autocomplete="off"
+      style="font-family: {font.family}"
+    />
     </div>
   {/snippet}
 </SettingField>
@@ -183,7 +191,7 @@
   button + button {
     margin-left: 0.4rem;
   }
-  /* Select with its preview line under it: the preview never widens the row (it would squeeze the label). */
+  /* Select with a field under it to try the font: it never widens the row (it would squeeze the label). */
   .font-pick {
     display: flex;
     flex-direction: column;
@@ -192,13 +200,19 @@
     max-width: 100%;
   }
   .preview {
+    box-sizing: border-box;
+    width: 100%;
     margin: 0.4rem 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 0.35rem 0.5rem;
     font-size: 1.05rem;
     font-feature-settings: "liga" 0, "calt" 0;
     color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0.35rem;
+  }
+  .preview::placeholder {
+    color: var(--muted);
   }
   .notice {
     margin: 0.4rem 0 0;
