@@ -252,7 +252,9 @@
     void tick;
     if (!session) return null;
     const s = session;
-    return { states: s.chars.map((_, i) => s.state(i)), cursor: s.cursor, stats: s.result().stats };
+    // `chars` is a copy: `extend` grows the session's own array in place (unlimited S2), which the
+    // markup would never see, since `session` itself does not change.
+    return { chars: [...s.chars], states: s.chars.map((_, i) => s.state(i)), cursor: s.cursor, stats: s.result().stats };
   });
   const elapsed = $derived.by(() => {
     void tick;
@@ -831,10 +833,10 @@
         data-cursor-blink={cursorBlink || undefined}
       >
       {#if isCode}
-        <CodeText chars={session.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} dim={dimPending} />
+        <CodeText chars={view.chars} states={view.states} cursor={view.cursor} {classes} ghost={ghostIndex} {ghostEnd} dim={dimPending} />
       {:else}
         <!-- No whitespace inside: the text uses white-space: pre-wrap. -->
-        <p class="text" class:dim={dimPending} bind:this={proseText}>{#each session.chars as c, i (i)}<span
+        <p class="text" class:dim={dimPending} bind:this={proseText}>{#each view.chars as c, i (i)}<span
               class="ch {view.states[i]}"
               class:space={c === " "}
               class:cursor={i === view.cursor}
@@ -843,7 +845,7 @@
             >{/each}</p>
       {/if}
       </div>
-      {#if unlimited && phase === "typing" && view.cursor === session.chars.length}
+      {#if unlimited && phase === "typing" && view.cursor === view.chars.length}
         <p class="hint" role="status">Generando más texto…</p>
       {/if}
       <p class="hint">

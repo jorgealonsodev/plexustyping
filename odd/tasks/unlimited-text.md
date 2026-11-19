@@ -85,3 +85,11 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
   - Checks: vitest 546/546, check 0; cargo 606 and clippy 0 from the worker.
   - Not covered by any test: the Svelte wiring, which needs a GUI check.
 - **L6 (user, verbatim, 2026-11-19):** "si no esta por ia, vamos encadenando textos no ia". `continue_text` accepts an optional `offline` flag that goes straight to the corpus (Rust test: no AI request, no usage). After one failed, empty or timed-out continuation, the frontend sets it for the rest of the text, so later pieces chain local texts with no AI wait. RED first in Rust and in the api test. Checks: vitest 547, check 0, cargo 607, clippy 0.
+- **L7 (user report, root cause and fix, 2026-11-19):** the user wrote "no puede avanzar … esta ilimitado no deberia parar nunca de aparecer texto". Reproduced by the parent on the real release build under Xvfb with isolated data (target/e2e/unlimited.sh, AI off).
+  - Symptom: the text never grew on screen, while the on-screen keyboard already pointed at the continuation's next char.
+  - Root cause: `session` is `$state.raw` and `extend` grows `session.chars` in place, while the markup iterated `session.chars`, so it never re-rendered.
+  - Fix (worker): `view` carries a copy of the chars (`view.chars`), and the prose text, CodeText and the waiting line read it.
+  - Regression test `Practice.unlimited.test.ts` mounts Practice in jsdom (dev dependency `jsdom` 31.0.1, Svelte browser condition under vitest in vite.config.ts). RED: the text did not grow. GREEN after the fix.
+  - Checks: vitest 548/548, check 0, build ok.
+  - Re-run of the e2e test on the rebuilt binary: 320 keys on the diagnostic text, then 700 and 200 keys on the unlimited text. The text kept growing with corpus continuations and there was always text ahead.
+  - The AI path is still not exercised on a GUI build (isolated data has no AI).
