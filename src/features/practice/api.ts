@@ -76,6 +76,19 @@ export const nextText = (
     maxLines,
   });
 
+/**
+ * The continuation of an unlimited text (unlimited S2, S4): about 600 more chars after `tail`, the
+ * last ≤ 400 chars of the current (generated, never typed) text. Not cached by the backend.
+ */
+export const continueText = (
+  language: string,
+  layout: string,
+  mode: "prose" | "words",
+  tail: string,
+  targetCount: number,
+  seed: number,
+) => invoke<PracticeText>("continue_text", { language, layout, mode, tail, targetCount, seed, day: localDay() });
+
 /** How a text was typed: prose, words or code of a language, and the code indentation. */
 export interface Practice {
   mode: PracticeMode;

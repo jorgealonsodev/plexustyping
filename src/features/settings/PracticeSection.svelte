@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ErrorMode } from "../practice/engine";
   import SettingField from "./SettingField.svelte";
-  import { ERROR_MODES, GHOST_SETTING, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS } from "./settings";
+  import { ERROR_MODES, GHOST_SETTING, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS, lengthLabel } from "./settings";
   import type { SettingsStore } from "./store.svelte";
   import type { UnlockChange } from "../unlock/api";
   import { DEFAULT_TARGET_WPM, TARGET_SETTING, TARGET_WPMS, UNLOCK_SETTING } from "../unlock/unlock";
@@ -61,7 +61,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Longitud" hint="Caracteres por texto, desde el siguiente.">
+<SettingField label="Longitud" hint="Caracteres por texto, desde el siguiente. Ilimitado: el texto crece mientras escribes; Esc o «Terminar» lo acaban.">
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -69,7 +69,7 @@
       onchange={(e: Change<HTMLSelectElement>) => settings.setTextLength(Number(e.currentTarget.value))}
     >
       {#each TEXT_LENGTHS as n (n)}
-        <option value={n} selected={n === settings.textLength}>{n}</option>
+        <option value={n} selected={n === settings.textLength}>{lengthLabel(n)}</option>
       {/each}
     </select>
   {/snippet}

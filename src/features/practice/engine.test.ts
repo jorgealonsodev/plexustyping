@@ -177,3 +177,51 @@ describe("keyAction", () => {
     expect(keyAction(key("Backspace", { ctrlKey: true, altKey: true, altGraph: true }))).toBe("backspace");
   });
 });
+
+describe("TypingSession.extend (unlimited S2)", () => {
+  const typeAll = (s: TypingSession, value: string, t0 = 0) =>
+    [...value].forEach((ch, i) => s.apply({ kind: "char", ch, tMs: t0 + i * 100 }));
+
+  it("appends text without touching records, cursor or stats", () => {
+    const s = new TypingSession("hola mundo", "allow-continue");
+    typeAll(s, "holx m");
+    const before = s.result();
+    const states = s.chars.map((_, i) => s.state(i));
+    const events = s.events.length;
+    s.extend(" y adios");
+    expect(s.chars.join("")).toBe("hola mundo y adios");
+    expect(s.result()).toEqual({ ...before });
+    expect(s.cursor).toBe(6);
+    expect(s.events.length).toBe(events);
+    expect(s.chars.slice(0, 10).map((_, i) => s.state(i))).toEqual(states);
+    for (let i = 10; i < s.chars.length; i++) expect(s.state(i), String(i)).toBe("pending");
+  });
+
+  it("keeps typing over the appended text as if it had been there from the start", () => {
+    const s = new TypingSession("ab", "backspace-correct");
+    typeAll(s, "a");
+    s.extend(" cd");
+    typeAll(s, "bx", 100);
+    s.apply({ kind: "backspace", tMs: 300 });
+    typeAll(s, " cd", 400);
+    const whole = replay("ab cd", "backspace-correct", s.events);
+    expect(s.result()).toEqual(whole);
+    expect(s.completed).toBe(true);
+  });
+
+  it("reopens a completed session and counts each appended char once", () => {
+    const s = new TypingSession("añ", "stop-on-error");
+    typeAll(s, "añ");
+    expect(s.completed).toBe(true);
+    s.extend(" ñu");
+    expect(s.completed).toBe(false);
+    expect(s.chars.length).toBe(5);
+    expect(s.result().completed).toBe(false);
+  });
+
+  it("an empty extension changes nothing", () => {
+    const s = new TypingSession("ab", "allow-continue");
+    s.extend("");
+    expect(s.chars).toEqual(["a", "b"]);
+  });
+});

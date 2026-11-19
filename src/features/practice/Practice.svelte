@@ -14,6 +14,7 @@
     type PracticeText,
     type ScoredSession,
     type Weakness,
+    continueText,
     firstText,
     heatmap as fetchHeatmap,
     nextText,
@@ -33,7 +34,7 @@
   import CodeText from "../code/CodeText.svelte";
   import { LANGUAGES } from "../code/languages.svelte";
   import { type TokenClass, codeKeyEvent, tokenClasses } from "../code/syntax";
-  import { escapeRestarts, focusTyping, isPointerClick, setTypingField, tabTypes, typingHint } from "./focus";
+  import { escapeAction, focusTyping, isPointerClick, setTypingField, tabTypes, typingHint } from "./focus";
   import { Prefetcher, generationKey, isProfileSwitch, provisionalFailedChars, sourceLabel } from "./prefetch";
   import { type Phase, indentChangeRestarts, shouldApply } from "./replies";
   import Results from "./Results.svelte";
@@ -51,6 +52,16 @@
   import { MetronomeController } from "../metronome/controller";
   import type { UnlockStatus } from "../unlock/api";
   import { lockedKeys, progressLine, unlockApplies } from "../unlock/unlock";
+  import {
+    RETRY_AFTER_CHARS,
+    continuationPiece,
+    continuationTail,
+    endAction,
+    isUnlimited,
+    requestLength,
+    shouldContinue,
+    typedPrefix,
+  } from "./unlimited";
 
   let {
     mode,
@@ -173,6 +184,11 @@
   let textMode = $state.raw<PracticeMode>("prose");
   let classes = $state.raw<TokenClass[]>([]);
   const isCode = $derived(isCodeMode(textMode));
+  // The current text grows while typed (unlimited S2): a continuation is under way, or after a
+  // failure none is asked before the cursor reaches `retryFrom`.
+  let unlimited = $state(false);
+  let continuing = false;
+  let retryFrom = 0;
   const practiceId = $derived(practiceKey(practice));
   // Profile, mode, layout and language of the latest requested text: a different one loads a new text.
   // Code texts do not depend on the prose language (S1); prose and words texts do.
@@ -252,6 +268,8 @@
   function restart() {
     if (!text) return;
     run++;
+    continuing = false;
+    retryFrom = 0;
     session = new TypingSession(text, mode, isCodeMode(textMode) ? indent : "manual");
     track = { offsets: [], bpms: new Set(), switched: false };
     scored = null;
@@ -263,12 +281,14 @@
   }
 
   // A record set in this attempt is read by the next restart, so it races the next attempt (S1).
+  // An unlimited text races no ghost (unlimited S3).
   function fetchGhost(of: string, practiceOf: PracticeMode) {
     const id = ++ghostRun;
     ghost = null;
     race = null;
     ghostDelta = null;
     raced = null;
+    if (unlimited) return;
     ghostForText(of, practiceOf)
       .then((next) => {
         if (id !== ghostRun) return;
@@ -285,7 +305,7 @@
     textPractice: PracticeMode = practice,
   ) {
     const id = ++run;
-    const [forLayout, forLanguage] = [layoutId, languageId];
+    const [forLayout, forLanguage, forLength] = [layoutId, languageId, textLength];
     requestedKey = requestKey(textPractice, forLayout, forLanguage);
     loadingLabel = label;
     phase = "loading";
@@ -299,6 +319,7 @@
       text = next.text;
       targets = next.targets;
       diagnostic = next.diagnostic ?? false;
+      unlimited = isUnlimited(forLength, textPractice, diagnostic);
       source = sourceLabel(next);
       notice = next.notice ?? null;
       restart();
@@ -323,7 +344,7 @@
     // Failed chars of a text in another mode say nothing about this one.
     const fallback = practiceKey(textMode) === practiceId ? (scored?.failedChars ?? []) : [];
     const seed = randomSeed();
-    const [count, length, chosen, lines, lay, lang] = [targetCount, textLength, practice, codeLines, layoutId, languageId];
+    const [count, length, chosen, lines, lay, lang] = [targetCount, requestLength(textLength), practice, codeLines, layoutId, languageId];
     const fresh = () => nextText(lang, lay, seed, count, length, fallback, chosen, lines);
     const again = () => void load(fresh, again, "Generando texto…", chosen);
     const ready = prefetch.take(genKey);
@@ -335,8 +356,50 @@
   function startPrefetch() {
     if (!session || diagnostic) return;
     const fallback = provisionalFailedChars(session.result().records);
-    const [count, length, chosen, lines, lay, lang] = [targetCount, textLength, practice, codeLines, layoutId, languageId];
+    const [count, length, chosen, lines, lay, lang] = [targetCount, requestLength(textLength), practice, codeLines, layoutId, languageId];
     prefetch.start(genKey, () => nextText(lang, lay, randomSeed(), count, length, fallback, chosen, lines));
+  }
+
+  // Unlimited S2: at half of the current text, one continuation at a time is asked in the background
+  // and appended after a single space; a reply after a restart, a new text or the end is stale.
+  function maybeContinue() {
+    if (!unlimited || !session || phase !== "typing" || isCodeMode(textMode)) return;
+    const s = session;
+    if (!shouldContinue({ cursor: s.cursor, length: s.chars.length, pending: continuing, retryFrom })) return;
+    continuing = true;
+    const id = run;
+    const stale = () => id !== run || session !== s;
+    continueText(textLanguage, textLayout, textMode, continuationTail(s.chars), targetCount, randomSeed())
+      .then((next) => {
+        if (stale()) return;
+        continuing = false;
+        if (next.notice) notice = next.notice;
+        const piece = continuationPiece(s.chars, next.text);
+        if (!piece) {
+          retryFrom = s.cursor + RETRY_AFTER_CHARS;
+          return;
+        }
+        retryFrom = 0;
+        s.extend(piece);
+        text = s.chars.join("");
+        classes = tokenClasses(s.chars.length, undefined);
+        tick++;
+        maybeContinue();
+      })
+      .catch((err) => {
+        if (stale()) return;
+        continuing = false;
+        retryFrom = s.cursor + RETRY_AFTER_CHARS;
+        console.warn("continue_text failed; asking again later", err);
+      });
+  }
+
+  // Unlimited S3: Escape or "Terminar" scores the typed prefix as a completed session; with nothing
+  // typed the text is dropped unscored and a new one loads.
+  function endUnlimited() {
+    if (!unlimited || phase !== "typing" || !session) return;
+    if (endAction(session.cursor) === "discard") loadNext();
+    else void finish(session, track, typedPrefix(session.chars, session.cursor));
   }
 
   // Weaknesses and heatmap scores from the stored model; missing ones only hide those views.
@@ -352,20 +415,22 @@
       .catch((err) => console.warn("heatmap failed", err));
   }
 
-  async function finish(done: TypingSession, measured: Track) {
+  // `scoredText` is the text replayed: the whole text, or the typed prefix of an ended unlimited one.
+  async function finish(done: TypingSession, measured: Track, scoredText: string = text) {
     const id = ++run;
     phase = "scoring";
-    const against = ghostEnabled ? ghost : null;
+    const against = ghostEnabled && !unlimited ? ghost : null;
     try {
       // Wall-clock start: `performance.now()` stamps are relative to the page's time origin.
       const startedAtMs = Math.round(performance.timeOrigin + (done.firstT ?? performance.now()));
       const bpm = measured.bpms.size === 1 ? [...measured.bpms][0] : null;
       const typed = { mode: textMode, indent: done.indent };
-      const result = await scoreSession(isCodeMode(textMode) ? null : textLanguage, textLayout, text, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
+      const result = await scoreSession(isCodeMode(textMode) ? null : textLanguage, textLayout, scoredText, done.mode, done.events, startedAtMs, measured.offsets, bpm, typed);
       if (id !== run) return;
       scored = result;
       raced = against;
-      tempo = metronome.adaptive ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
+      // The adaptive tempo change is off for unlimited texts (unlimited S3).
+      tempo = metronome.adaptive && !unlimited ? tempoChangeFor(bpm, result.result.stats.accuracy, result.offsetsMs, measured.switched) : null;
       if (tempo && tempo.to !== tempo.from) onTempo(tempo.to);
       weak = [];
       goalMet = false;
@@ -378,7 +443,7 @@
           .catch((err) => console.warn("goal refresh failed", err));
     } catch (err) {
       if (id !== run) return;
-      retry = () => void finish(done, measured);
+      retry = () => void finish(done, measured, scoredText);
       message = `No se pudo calcular el resultado: ${String(err)}`;
       phase = "error";
     }
@@ -413,6 +478,7 @@
       if (code) flash = { code, ok: event.ch === expected };
     }
     if (session.completed) void finish(session, track);
+    else maybeContinue();
   }
 
   // Typed chars come only from text the field received; reading and clearing it makes the
@@ -436,10 +502,12 @@
     const action = keyAction(e);
     // Escape restarts only a text being typed or reviewed, and only from the typing field (never
     // from the metronome toggle or another control); while a text loads or is scored, restarting
-    // would silently discard the pending result.
-    if (action === "escape" && escapeRestarts(e.target === field, phase)) {
+    // would silently discard the pending result. An unlimited text being typed ends instead (S3).
+    const escape = action === "escape" ? escapeAction(e.target === field, phase, unlimited) : null;
+    if (escape) {
       e.preventDefault();
-      restart();
+      if (escape === "end") endUnlimited();
+      else restart();
       return;
     }
     if (action === "enter") {
@@ -482,14 +550,21 @@
     });
   }
 
+  // An unlimited text that only grew keeps the sequences it has until the longer ones arrive.
+  let sequencesOf = "";
+  let sequencesLayout = "";
   $effect(() => {
     const [current, lay] = [text, layoutId];
-    sequences = null;
+    const grew = untrack(() => sequences !== null && sequencesOf !== "" && current.startsWith(sequencesOf) && lay === sequencesLayout);
+    if (!grew) sequences = null;
     if (!current) return;
     let live = true;
     keySequences(lay, current)
       .then((next) => {
-        if (live) sequences = next;
+        if (!live) return;
+        sequences = next;
+        sequencesOf = current;
+        sequencesLayout = lay;
       })
       .catch((err) => console.warn("key_sequences failed; no key highlight", err));
     return () => (live = false);
@@ -570,7 +645,7 @@
         refreshModel(run, practice);
         return;
       }
-      const [count, length, chosen, lines, lay, lang] = [targetCount, textLength, practice, codeLines, layoutId, languageId];
+      const [count, length, chosen, lines, lay, lang] = [targetCount, requestLength(textLength), practice, codeLines, layoutId, languageId];
       const fresh = () => nextText(lang, lay, randomSeed(), count, length, [], chosen, lines);
       const again = () => void load(fresh, again, "Generando texto…", chosen);
       again();
@@ -720,8 +795,11 @@
       {/if}
       </div>
       <p class="hint">
-        {#if phase === "scoring"}Calculando resultado…{:else}{typingHint(view.cursor !== 0, isCode)}{/if}
+        {#if phase === "scoring"}Calculando resultado…{:else}{typingHint(view.cursor !== 0, isCode, unlimited)}{/if}
       </p>
+      {#if unlimited && phase === "typing"}
+        <button type="button" class="end" onclick={focusAnd(endUnlimited)}>Terminar</button>
+      {/if}
     {/if}
   </section>
 </main>
@@ -971,6 +1049,9 @@
   }
   .kind .sep {
     margin-left: 0.3rem;
+  }
+  .end {
+    align-self: flex-start;
   }
   .hint,
   .status {

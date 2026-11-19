@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  escapeAction,
   escapeRestarts,
   isHeaderShortcut,
   isPointerClick,
@@ -133,5 +134,35 @@ describe("typingHint", () => {
       "Empieza a escribir cuando quieras · Intro = salto de línea · Tab = sangría · Esc reinicia · F4 metrónomo · F6 menú",
     );
     expect(typingHint(true, false)).toBe("Esc reinicia el texto · F4 metrónomo · F6 menú");
+  });
+});
+
+describe("escapeAction (unlimited S3)", () => {
+  it("ends an unlimited text being typed, from the typing field only", () => {
+    expect(escapeAction(true, "typing", true)).toBe("end");
+    expect(escapeAction(false, "typing", true)).toBeNull();
+  });
+
+  it("restarts as before otherwise", () => {
+    for (const phase of PHASES) {
+      const expected = escapeRestarts(true, phase) ? "restart" : null;
+      expect(escapeAction(true, phase, false), phase).toBe(expected);
+      expect(escapeAction(false, phase, false), phase).toBeNull();
+    }
+    expect(escapeAction(true, "results", true)).toBe("restart");
+    for (const phase of ["loading", "scoring", "error"] as Phase[]) expect(escapeAction(true, phase, true), phase).toBeNull();
+  });
+});
+
+describe("typingHint in unlimited mode (unlimited S3)", () => {
+  it("names Esc terminar before and after the first keystroke", () => {
+    expect(typingHint(false, false, true)).toBe("Empieza a escribir cuando quieras · Esc terminar · F4 metrónomo · F6 menú");
+    expect(typingHint(true, false, true)).toBe("Esc terminar · F4 metrónomo · F6 menú");
+  });
+
+  it("keeps the limited hints byte-identical", () => {
+    for (const started of [false, true])
+      for (const code of [false, true]) expect(typingHint(started, code, false)).toBe(typingHint(started, code));
+    expect(typingHint(true, true, false)).toBe("Esc reinicia el texto · F4 metrónomo · F6 menú");
   });
 });

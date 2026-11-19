@@ -23,6 +23,8 @@ import {
   savePracticeKind,
   TARGET_COUNTS,
   TEXT_LENGTHS,
+  UNLIMITED_LENGTH,
+  lengthLabel,
   DEFAULT_TYPOGRAPHY,
   SCREEN_READER_SETTING,
   COLOR_BLIND_SETTING,
@@ -173,15 +175,28 @@ describe("settings", () => {
       expect(loadTargetCount(memoryStorage({ "plexustyping.targetCount": bad }))).toBe(2);
   });
 
-  it("offers five text lengths, 300 by default, and persists the choice", () => {
-    expect(TEXT_LENGTHS).toEqual([100, 200, 300, 450, 600]);
+  it("offers nine text lengths plus unlimited, 300 by default, and persists the choice", () => {
+    expect(TEXT_LENGTHS).toEqual([100, 200, 300, 450, 600, 800, 1000, 1500, 2000, UNLIMITED_LENGTH]);
+    expect(TEXT_LENGTHS.map(lengthLabel)).toEqual(["100", "200", "300", "450", "600", "800", "1000", "1500", "2000", "Ilimitado"]);
     const storage = memoryStorage();
     expect(loadTextLength(storage)).toBe(300);
     saveTextLength(600, storage);
     expect(storage.getItem("plexustyping.textLength")).toBe("600");
     expect(loadTextLength(storage)).toBe(600);
-    for (const bad of ["50", "301", "", "abc"])
+    for (const bad of ["50", "301", "", "abc", "2500", "-1"])
       expect(loadTextLength(memoryStorage({ "plexustyping.textLength": bad }))).toBe(300);
+  });
+
+  it("persists the new lengths and the unlimited choice (S1)", () => {
+    for (const length of [800, 1000, 1500, 2000, UNLIMITED_LENGTH]) {
+      const storage = memoryStorage();
+      saveTextLength(length, storage);
+      expect(storage.getItem("plexustyping.textLength")).toBe(String(length));
+      expect(loadTextLength(storage)).toBe(length);
+    }
+    // A missing value is the default, never the unlimited choice.
+    expect(loadTextLength(memoryStorage())).toBe(300);
+    expect(loadTargetCount(memoryStorage())).toBe(2);
   });
 
   it("keeps the new settings apart from the toggles", () => {

@@ -57,7 +57,9 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   goes to the first one and `Escape` clears the search (a second `Escape`
   closes the window). "Práctica": language (see below), error mode (continue, stop
   until corrected, or fix with Backspace; changing it restarts the text),
-  targets per text (2 or 3), text length (100–600 characters), live stats,
+  targets per text (2 or 3), text length ("Longitud": 100, 200, 300, 450, 600,
+  800, 1000, 1500 or 2000 characters, default 300, or "Ilimitado", see
+  [Unlimited texts](#unlimited-texts)), live stats,
   the ghost session (on by default) and progressive unlock.
   "Accesibilidad": "Anunciar con lector de pantalla"
   (off by default): a polite `aria-live` region then announces the next
@@ -106,6 +108,26 @@ list your top weaknesses, and the optional "Mapa de calor" tints each key of
 the on-screen keyboard by its score and marks it with its level, 1 to 5, so it
 does not rely on colour alone; the legend under the keyboard names the levels
 ("Errores por tecla: 1 muy pocos, 2 pocos, 3 algunos, 4 bastantes, 5 muchos").
+
+### Unlimited texts
+
+"Longitud" → "Ilimitado" (prose and words; code ignores it and keeps its line
+limit) gives a text that keeps growing while you type. It starts with a
+600-character text from the usual source (AI, cache or corpus). When the cursor
+reaches half of the text, a continuation of about 600 characters is requested
+in the background, one at a time, and appended after a single space without
+interrupting you; the next one is asked at half of the new total, so there is
+always text ahead. Prose continues with the AI from the last ~400 characters
+(same language, only characters the layout and progressive unlock allow);
+without the AI, or when it fails, a corpus text follows, with the reason as a
+note above the text. Words mode always continues with more corpus words.
+Continuations are never cached, and only generated text is sent, never what
+you type. `Esc` (from the text) or the "Terminar" button under it ends the
+session: the text typed so far is scored as a completed session, with the usual
+results, saving, statistics, daily goal and unlock progress; ending before
+typing anything discards it and loads a new text. Unlimited texts race no ghost
+session and the adaptive metronome does not change the tempo after them; the
+metronome itself keeps playing. The first diagnostic text is never unlimited.
 
 ### AI texts (optional)
 

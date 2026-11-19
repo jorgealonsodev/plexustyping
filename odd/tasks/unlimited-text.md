@@ -31,9 +31,9 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
 
 | ID | Specs | Work | Route | Status | Commit |
 |---|---|---|---|---|---|
-| T1 | S1 (backend), S2 (continuation), S4 | Length clamp to 2000, `continue_text` command, continuation prompt (AI crate), corpus and words fallback, tests | worker A (parallel) | pending | |
-| T2 | S1 (frontend), S2 (session growth), S3 | Length choices with "Ilimitado", engine `extend`, Practice wiring (trigger at half, append, end with Esc or Terminar, score the prefix, ghost and adaptive off), api `continueText`, hint, README, tests | worker B (parallel) | pending | |
-| T3 | S1–S4 | Integration: cargo, clippy, vitest, check, build; .deb for the user's try-out | parent | pending | |
+| T1 | S1 (backend), S2 (continuation), S4 | Length clamp to 2000, `continue_text` command, continuation prompt (AI crate), corpus and words fallback, tests | worker A (parallel) | done | see L4 |
+| T2 | S1 (frontend), S2 (session growth), S3 | Length choices with "Ilimitado", engine `extend`, Practice wiring (trigger at half, append, end with Esc or Terminar, score the prefix, ghost and adaptive off), api `continueText`, hint, README, tests | worker B (parallel) | done | see L4 |
+| T3 | S1–S4 | Integration: cargo, clippy, vitest, check, build; .deb for the user's try-out | parent | done | see L4 |
 
 ## Log
 
@@ -51,3 +51,20 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
   - Today's frontend lengths are `TEXT_LENGTHS = [100, 200, 300, 450, 600]` (src/features/settings/settings.ts:140).
   - The backend clamps to 50..=600 (src-tauri/src/commands.rs:380) and computes the AI range in `ai_length` (commands.rs:400).
   - Providers cap the output at `MAX_TOKENS = 4096` (crates/plexustyping-ai/src/providers.rs:41), which is enough for 2000 characters.
+- **L4 (evidence, 2026-11-19):**
+  - Backend (worker A): lengths are clamped to 50..=2000 (MIN_LENGTH/MAX_LENGTH).
+    - `continue_text(language, layout, mode, tail, targetCount, seed, day)` is backed by `GenerationRequest::continue_from` and a continuation prompt.
+    - Continuations are not cached but count usage; `ai_text` is shared with `next_text`.
+    - Corpus or words fallback; a tail over 2000 is refused with «El texto a continuar admite como máximo 2000 caracteres».
+  - Frontend (worker B):
+    - Lengths 100–2000 plus «Ilimitado» (stored as 0). loadChoice now treats a missing stored value as the default.
+    - `TypingSession.extend`; `unlimited.ts` (start 600, tail 400, trigger at half, retry 50 chars after a failure).
+    - `escapeAction` and «Terminar» score the typed prefix. Ghost and adaptive tempo are off in unlimited mode.
+    - The hint names «Esc terminar»; README updated.
+  - RED observed in both. Integration: cargo 605/605, clippy 0, fmt ok, vitest 530/530, check 0, build ok, tarball 62/62.
+  - Known limits:
+    - «Repetir» after ending repeats the whole grown text.
+    - Lengths 800–2000 were tested with the Spanish corpus only.
+    - With the AI off, a continuation is a corpus text without a notice, as next_text does.
+    - Scoring the prefix ignores keystrokes made after the prefix point that were then backspaced.
+    - The Svelte wiring is untested; it needs a GUI check.

@@ -136,12 +136,19 @@ export const saveDimPending = (on: boolean, storage: Storage = settingsStorage()
 /** Choices of weak units practised per text (2 or 3); the first is the default. */
 export const TARGET_COUNTS = [2, 3];
 
-/** Choices of practice text length in chars; 300 is the default. */
-export const TEXT_LENGTHS = [100, 200, 300, 450, 600];
+/** The "Ilimitado" length (unlimited S1, S2): a prose or words text that keeps growing while typed. */
+export const UNLIMITED_LENGTH = 0;
 
-/** The stored number if it is one of `choices`, else `fallback`. */
+/** Choices of practice text length in chars, then "Ilimitado"; 300 is the default. */
+export const TEXT_LENGTHS = [100, 200, 300, 450, 600, 800, 1000, 1500, 2000, UNLIMITED_LENGTH];
+
+/** How a length choice reads in "Longitud". */
+export const lengthLabel = (length: number) => (length === UNLIMITED_LENGTH ? "Ilimitado" : String(length));
+
+/** The stored number if it is one of `choices`, else `fallback` (also when missing or empty). */
 function loadChoice(key: string, choices: number[], fallback: number, storage: Storage): number {
-  const value = Number(storage.getItem(key));
+  const raw = storage.getItem(key);
+  const value = raw === null || raw.trim() === "" ? NaN : Number(raw);
   return choices.includes(value) ? value : fallback;
 }
 

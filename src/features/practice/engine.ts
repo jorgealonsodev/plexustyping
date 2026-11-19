@@ -72,6 +72,18 @@ export class TypingSession {
     this.autoFilled = this.chars.map(() => false);
   }
 
+  /**
+   * Appends text to the session (unlimited S2): the new chars are pending; records, cursor, events
+   * and stats are untouched, so typing goes on as if the text had always been this long.
+   */
+  extend(more: string): void {
+    for (const ch of more) {
+      this.chars.push(ch);
+      this.typedAt.push(null);
+      this.autoFilled.push(false);
+    }
+  }
+
   /** The record of the latest char or Tab keystroke, for the screen reader mode (a11y S3). */
   get lastRecord(): Readonly<KeystrokeRecord> | undefined {
     return this.records.at(-1);

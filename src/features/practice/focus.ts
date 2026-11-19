@@ -39,6 +39,15 @@ export const tabTypes = (phase: Phase, isCode: boolean): boolean => isCode && ph
 export const escapeRestarts = (onField: boolean, phase: Phase): boolean =>
   onField && (phase === "typing" || phase === "results");
 
+/**
+ * What Escape on the typing field does: an unlimited text being typed ends (unlimited S3); otherwise
+ * it restarts as `escapeRestarts` says, and `null` does nothing.
+ */
+export function escapeAction(onField: boolean, phase: Phase, unlimited: boolean): "restart" | "end" | null {
+  if (!escapeRestarts(onField, phase)) return null;
+  return unlimited && phase === "typing" ? "end" : "restart";
+}
+
 type ShortcutKey = Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey" | "shiftKey" | "repeat">;
 
 /** A bare F6 moves focus from the typing field to the first header control, in every mode. */
@@ -58,8 +67,9 @@ export function nextFocusIndex(current: number, count: number, back: boolean): n
   return (current + (back ? -1 : 1) + count) % count;
 }
 
-/** The hint under the practice text; names the keys that act on it (F6 leaves it for the header). */
-export function typingHint(started: boolean, isCode: boolean): string {
+/** The hint under the practice text; names the keys that act on it (F6 leaves it for the header; unlimited S3: Esc ends). */
+export function typingHint(started: boolean, isCode: boolean, unlimited = false): string {
+  if (unlimited) return `${started ? "" : "Empieza a escribir cuando quieras · "}Esc terminar · F4 metrónomo · F6 menú`;
   if (started) return "Esc reinicia el texto · F4 metrónomo · F6 menú";
   return `Empieza a escribir cuando quieras · ${isCode ? "Intro = salto de línea · Tab = sangría · " : ""}Esc reinicia · F4 metrónomo · F6 menú`;
 }
