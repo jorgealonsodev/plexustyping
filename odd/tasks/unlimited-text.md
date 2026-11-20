@@ -101,5 +101,5 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
 - **L8 (user, verbatim, 2026-11-20):** "haz lo que consideres mas optimo", after the list of what remained.
   - Agent decision: of the known limits in L4, "Repetir" repeating the whole grown text is fixed (S6). The others stay as documented: the notice-less corpus fallback with the AI off matches next_text, and backspaced keystrokes past the prefix are excluded by design (S5).
   - Incident: `node_modules` lacked `jsdom`, although it is in the lockfile; `pnpm install --frozen-lockfile` restored it.
-  - T5: RED in `Practice.unlimited.test.ts` (the repeat showed the whole 600-char text), GREEN after `restart` swaps in the ended prefix. Checks: vitest 549/549, check 0. The ghost race of the repeat is not asserted by a test.
+  - T5: RED in `Practice.unlimited.test.ts` (the repeat showed the whole 600-char text), GREEN after `restart` swaps in the ended prefix. Checks: vitest 549/549, check 0. After the review (review-1f6bd6c11079c78a, approved), the test also asserts the ghost lookup by the prefix and that «Siguiente» is unlimited again.
   - Still pending: the AI continuation on a GUI build, with the user's account.

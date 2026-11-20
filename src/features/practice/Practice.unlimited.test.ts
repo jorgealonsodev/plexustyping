@@ -181,5 +181,15 @@ describe("Practice in unlimited mode", () => {
     expect(scores).toHaveLength(2);
     expect(scores[1].args.text).toBe("perro casa");
     expect(continueCalls()).toHaveLength(0);
+    // The repeat races the attempt just saved, looked up by the prefix.
+    expect(calls.filter((c) => c.cmd === "ghost_for_text").map((c) => c.args.text)).toContain("perro casa");
+
+    // «Siguiente» (Enter) is unlimited again.
+    field().dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await settle();
+    expect(shown()).toBe(FIRST);
+    expect(target.textContent).toContain("Esc terminar");
+    type(200);
+    expect(continueCalls()).toHaveLength(1);
   });
 });
