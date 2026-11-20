@@ -278,8 +278,17 @@
   const unlockLine = $derived(unlockShown ? progressLine(unlock) : null);
   const highlights = $derived(phase === "typing" && view && sequences ? highlightsFor(sequences[view.cursor]) : []);
 
+  // The typed prefix of the unlimited text just ended: «Repetir» repeats it as a normal text.
+  let endedPrefix: string | null = null;
+
   function restart() {
     if (!text) return;
+    if (unlimited && phase === "results" && endedPrefix) {
+      text = endedPrefix;
+      classes = tokenClasses([...text].length, undefined);
+      unlimited = false;
+    }
+    endedPrefix = null;
     run++;
     continuing = false;
     retryFrom = 0;
@@ -443,6 +452,7 @@
     // their offsets: the backend replay of the prefix stops there (S5).
     const prefix = typedPrefix(session.chars, session.cursor);
     const kept = prefixEvents(prefix, session.mode, session.events, track.offsets, session.indent);
+    endedPrefix = prefix;
     void finish(session, { ...track, offsets: kept.offsets }, prefix, kept.events);
   }
 

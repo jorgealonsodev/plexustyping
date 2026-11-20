@@ -32,6 +32,10 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
   - A continuation that arrives without a notice clears the previous continuation notice.
   - Ending a session scores only the events up to the cursor's last position, so a wrong keystroke right before Esc, or erased characters past the cursor, never make the replay of the prefix fail. The backend replay of the prefix must succeed for every error mode (backspace-correct, stop-on-error, allow-continue) and is tested with each.
 
+- **S6 — Repeating an ended unlimited text.** Under the standing "haz lo que consideres mas optimo" (L8).
+  - "Repetir" (button or Esc) after ending an unlimited text repeats only the typed prefix that was scored, as a normal text: it ends at its last char, asks no continuation, shows no "Terminar" or "Esc terminar", and races the attempt just saved as its ghost.
+  - The next text ("Siguiente") is unlimited again.
+
 ## Tasks
 
 | ID | Specs | Work | Route | Status | Commit |
@@ -39,6 +43,7 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
 | T1 | S1 (backend), S2 (continuation), S4 | Length clamp to 2000, `continue_text` command, continuation prompt (AI crate), corpus and words fallback, tests | worker A (parallel) | done | see L4 |
 | T2 | S1 (frontend), S2 (session growth), S3 | Length choices with "Ilimitado", engine `extend`, Practice wiring (trigger at half, append, end with Esc or Terminar, score the prefix, ghost and adaptive off), api `continueText`, hint, README, tests | worker B (parallel) | done | see L4 |
 | T4 | S5 | Hardening of the unlimited session | worker | done | see L5 |
+| T5 | S6 | Repeat the typed prefix after ending; jsdom test; README | parent (inline) | done | see L8 (the fix commit) |
 | T3 | S1–S4 | Integration: cargo, clippy, vitest, check, build; .deb for the user's try-out | parent | done | see L4 |
 
 ## Log
@@ -93,3 +98,8 @@ More length choices, plus an "Ilimitado" length: a text that keeps growing while
   - Checks: vitest 548/548, check 0, build ok.
   - Re-run of the e2e test on the rebuilt binary: 320 keys on the diagnostic text, then 700 and 200 keys on the unlimited text. The text kept growing with corpus continuations and there was always text ahead.
   - The AI path is still not exercised on a GUI build (isolated data has no AI).
+- **L8 (user, verbatim, 2026-11-20):** "haz lo que consideres mas optimo", after the list of what remained.
+  - Agent decision: of the known limits in L4, "Repetir" repeating the whole grown text is fixed (S6). The others stay as documented: the notice-less corpus fallback with the AI off matches next_text, and backspaced keystrokes past the prefix are excluded by design (S5).
+  - Incident: `node_modules` lacked `jsdom`, although it is in the lockfile; `pnpm install --frozen-lockfile` restored it.
+  - T5: RED in `Practice.unlimited.test.ts` (the repeat showed the whole 600-char text), GREEN after `restart` swaps in the ended prefix. Checks: vitest 549/549, check 0. The ghost race of the repeat is not asserted by a test.
+  - Still pending: the AI continuation on a GUI build, with the user's account.

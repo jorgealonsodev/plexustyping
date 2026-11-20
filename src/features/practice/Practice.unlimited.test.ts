@@ -11,6 +11,20 @@ const continuations: Pending[] = [];
 // 600 chars, not ending in a space: a continuation is appended after one.
 const FIRST = `${"perro casa ".repeat(54)}perros`;
 
+const SCORED = {
+  result: {
+    records: [],
+    stats: {
+      durationMs: 1000, keystrokes: 10, charKeystrokes: 10, correctKeystrokes: 10, errors: 0,
+      uncorrectedErrors: 0, charsTyped: 10, accuracy: 1, grossWpm: 120, netWpm: 120, kpm: 600,
+    },
+  },
+  failedChars: [],
+  saved: true,
+  saveError: null,
+  offsetsMs: [],
+};
+
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: (cmd: string, args: Record<string, unknown> = {}) => {
     calls.push({ cmd, args });
@@ -28,6 +42,8 @@ vi.mock("@tauri-apps/api/core", () => ({
         return Promise.resolve([]);
       case "ghost_for_text":
         return Promise.resolve(null);
+      case "score_session":
+        return Promise.resolve(SCORED);
       case "get_layout":
         return Promise.reject(new Error("no layout in tests"));
       default:
@@ -101,6 +117,11 @@ function type(n: number) {
   }
 }
 
+const escape = () => {
+  field().dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  flushSync();
+};
+
 describe("Practice in unlimited mode", () => {
   it("asks for a continuation before the end, appends it, waits at the end and chains offline after a failure", async () => {
     await start();
@@ -139,4 +160,26 @@ describe("Practice in unlimited mode", () => {
     expect(continueCalls()).toHaveLength(3);
     expect(continueCalls()[2].args.offline).toBe(true);
   }, 10_000);
+
+  it("«Repetir» after ending repeats only the typed prefix, as a normal text that finishes at its end", async () => {
+    await start();
+    type(10);
+    escape();
+    await settle();
+    expect(calls.filter((c) => c.cmd === "score_session")).toHaveLength(1);
+    expect(calls.find((c) => c.cmd === "score_session")?.args.text).toBe("perro casa");
+
+    escape(); // «Repetir»
+    await settle();
+    expect(shown()).toBe("perro casa");
+    expect(target.textContent).not.toContain("Esc terminar");
+    expect(target.querySelector(".end")).toBeNull();
+
+    type(10);
+    await settle();
+    const scores = calls.filter((c) => c.cmd === "score_session");
+    expect(scores).toHaveLength(2);
+    expect(scores[1].args.text).toBe("perro casa");
+    expect(continueCalls()).toHaveLength(0);
+  });
 });

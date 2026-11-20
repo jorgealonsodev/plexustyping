@@ -135,7 +135,9 @@ the keystrokes up to where the cursor first reached its final position (a wrong
 key at the cursor or characters typed past it and erased are not counted);
 ending before typing anything discards it and loads a new text. Unlimited texts race no ghost
 session and the adaptive metronome does not change the tempo after them; the
-metronome itself keeps playing. The first diagnostic text is never unlimited.
+metronome itself keeps playing. "Repetir" after ending repeats only the text you
+typed, as a normal text that ends at its last character (and races the attempt
+just saved as a ghost). The first diagnostic text is never unlimited.
 
 ### AI texts (optional)
 
