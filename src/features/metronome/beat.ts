@@ -1,13 +1,17 @@
 // Pure metronome helpers (S7): beat timing, offsets and the rhythm summary.
 
 import type { MetronomeConfig, Sound } from "./api";
+import { t } from "./messages";
 
-/** Sounds in display order; the first is the default. */
-export const SOUNDS: { id: Sound; label: string }[] = [
-  { id: "click", label: "Clic" },
-  { id: "wood", label: "Madera" },
-  { id: "beep", label: "Bip" },
-];
+/** Sounds in display order; the first is the default. Labels follow the interface language. */
+export const SOUNDS: readonly { readonly id: Sound; readonly label: string }[] = (["click", "wood", "beep"] as const).map(
+  (id) => ({
+    id,
+    get label() {
+      return t(id);
+    },
+  }),
+);
 
 export const MIN_BPM = 30;
 export const MAX_BPM = 300;
@@ -126,7 +130,7 @@ export function tempoChangeFor(
 }
 
 export const tempoNotice = ({ from, to }: TempoChange) =>
-  from === to ? `Tempo: se mantiene en ${from} BPM` : `Tempo: ${from} → ${to} BPM`;
+  from === to ? t("tempoKept", { bpm: from }) : t("tempoChanged", { from, to });
 
 type ShortcutKey = Pick<KeyboardEvent, "key" | "ctrlKey" | "altKey" | "metaKey" | "shiftKey" | "repeat">;
 

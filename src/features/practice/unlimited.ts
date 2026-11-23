@@ -3,6 +3,7 @@
 import { type PracticeMode, isCodeMode } from "../code/api";
 import { UNLIMITED_LENGTH } from "../settings/settings";
 import { type ErrorMode, type IndentMode, type InputEvent, TypingSession } from "./engine";
+import { t } from "./messages";
 
 /** Chars of the first text, and about of each continuation, in unlimited mode. */
 export const UNLIMITED_START = 600;
@@ -21,7 +22,7 @@ export const CONTINUE_DEADLINE_MS = 25_000;
 export function withDeadline<T>(promise: Promise<T>, ms: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const late = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error("La IA tardó demasiado en responder")), ms);
+    timer = setTimeout(() => reject(new Error(t("aiTooSlow"))), ms);
   });
   return Promise.race([promise, late]).finally(() => clearTimeout(timer));
 }
@@ -61,7 +62,10 @@ export function retryPlan(cursor: number, length: number): { retryFrom: number; 
 }
 
 /** The non-blocking notice of a failed continuation (S5). */
-export const continuationFailureNotice = (reason: string) => `No se pudo continuar el texto: ${reason}; reintentando…`;
+export const continuationFailureNotice = (reason: string) => t("continueFailed", { reason });
+
+/** The reason of a continuation that came back empty. */
+export const emptyContinuationReason = () => t("continuationEmpty");
 
 /** The notice above the text, and whether a continuation set it. */
 export interface NoticeState {

@@ -2,21 +2,20 @@
 
 import { settingsStorage } from "../settings/persist";
 import { readableOn } from "./colors";
+import { t } from "./messages";
 import { type Palette, type ThemeEntry, THEMES, setCustomThemes } from "./themes";
 
 const KEY = "plexustyping.customThemes";
 const ID_PREFIX = "custom-";
 const MAX_NAME_CHARS = 60;
-const FALLBACK_NAME = "Tema importado";
 
 export const MAX_CUSTOM_THEMES = 30;
 /** About 1 MB of text; real theme files are a few tens of KB. */
 export const MAX_THEME_FILE_CHARS = 1_000_000;
 
-export const TOO_LARGE = "El archivo es demasiado grande (máximo 1 MB).";
-const NOT_JSON = "El archivo no es un JSON válido.";
-const NOT_A_THEME = "El archivo no parece un tema de VS Code: faltan editor.background y editor.foreground.";
-export const TOO_MANY = `Hay demasiados temas importados (máximo ${MAX_CUSTOM_THEMES}); elimina alguno.`;
+/** Import errors, in the interface language. */
+export const tooLargeError = () => t("tooLarge");
+export const tooManyError = () => t("tooMany", { max: MAX_CUSTOM_THEMES });
 
 /** Palette colour → the VS Code workbench colour it is read from. */
 const ANSI = {
@@ -86,7 +85,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const themeName = (declared: unknown, fileName: string) => {
   const fromFile = fileName.replace(/\.[^.]*$/, "");
-  const name = (typeof declared === "string" && declared.trim()) || fromFile.trim() || FALLBACK_NAME;
+  const name = (typeof declared === "string" && declared.trim()) || fromFile.trim() || t("importedName");
   return name.slice(0, MAX_NAME_CHARS).trim();
 };
 
@@ -113,17 +112,17 @@ export type ParsedTheme = { ok: true; theme: ThemeEntry } | { ok: false; error: 
  * built-in base scheme of the same kind (dark or light).
  */
 export function parseVsCodeTheme(text: string, fileName: string): ParsedTheme {
-  if (text.length > MAX_THEME_FILE_CHARS) return { ok: false, error: TOO_LARGE };
+  if (text.length > MAX_THEME_FILE_CHARS) return { ok: false, error: tooLargeError() };
   let file: unknown;
   try {
     file = JSON.parse(stripJsonComments(text));
   } catch {
-    return { ok: false, error: NOT_JSON };
+    return { ok: false, error: t("notJson") };
   }
   const colors = isRecord(file) && isRecord(file.colors) ? file.colors : {};
   const background = hexColor(colors["editor.background"]);
   const foreground = hexColor(colors["editor.foreground"]);
-  if (!isRecord(file) || !background || !foreground) return { ok: false, error: NOT_A_THEME };
+  if (!isRecord(file) || !background || !foreground) return { ok: false, error: t("notATheme") };
 
   const dark = isDark(file.type, background);
   const base = THEMES.find((t) => t.dark === dark)!.palette;

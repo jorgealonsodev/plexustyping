@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type BeatAnchor, beatAt, isAccent } from "./beat";
+  import { t } from "./messages";
 
   // Flashes on each beat (S7), driven by requestAnimationFrame from beat 0; classes only (CSP).
   let { anchor }: { anchor: BeatAnchor } = $props();
@@ -24,7 +25,7 @@
   });
 </script>
 
-<span class="dot" class:on class:accent role="img" aria-label="Metrónomo: {anchor.bpm} BPM" title="{anchor.bpm} BPM"></span>
+<span class="dot" class:on class:accent role="img" aria-label={t("dot", { bpm: anchor.bpm })} title="{anchor.bpm} BPM"></span>
 
 <style>
   .dot {

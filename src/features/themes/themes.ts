@@ -1,3 +1,4 @@
+import { t } from "./messages";
 import { IMPORTED_THEMES } from "./palettes.generated";
 
 /** A terminal-style colour palette: base colours plus the 16 ANSI colours, all `#rrggbb` (or `#rrggbbaa`). */
@@ -68,7 +69,9 @@ const PLEXUSTERM: ThemeEntry = {
 /** High contrast on black (a11y S5): white text and saturated, light ANSI colours. */
 const HIGH_CONTRAST_DARK: ThemeEntry = {
   id: "alto-contraste-oscuro",
-  name: "Alto contraste oscuro",
+  get name() {
+    return t("highContrastDark");
+  },
   dark: true,
   highContrast: true,
   palette: {
@@ -99,7 +102,9 @@ const HIGH_CONTRAST_DARK: ThemeEntry = {
 /** High contrast on white (a11y S5): black text and dark, saturated ANSI colours. */
 const HIGH_CONTRAST_LIGHT: ThemeEntry = {
   id: "alto-contraste-claro",
-  name: "Alto contraste claro",
+  get name() {
+    return t("highContrastLight");
+  },
   dark: false,
   highContrast: true,
   palette: {

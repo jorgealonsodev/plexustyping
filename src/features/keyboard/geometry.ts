@@ -1,3 +1,4 @@
+import { t } from "./messages";
 import type { Layout } from "./types";
 
 // Physical ISO, ANSI and ABNT2 keyboards: rows of `KeyboardEvent.code` with widths in key units, and the
@@ -107,14 +108,22 @@ export const fingerOf = (code: string): Finger | null => FINGERS.get(code) ?? nu
 export const handOf = (finger: Finger): "left" | "right" | null =>
   finger.startsWith("l-") ? "left" : finger.startsWith("r-") ? "right" : null;
 
-/** Labels of keys that type no character. */
+/** Labels of keys that type no character; the worded ones follow the interface language. */
 export const NAMED_LABELS: Record<string, string> = {
   Backspace: "⌫",
   Tab: "Tab",
-  Enter: "Intro",
-  CapsLock: "Bloq Mayús",
-  ShiftLeft: "Mayús",
-  ShiftRight: "Mayús",
+  get Enter() {
+    return t("enter");
+  },
+  get CapsLock() {
+    return t("capsLock");
+  },
+  get ShiftLeft() {
+    return t("shift");
+  },
+  get ShiftRight() {
+    return t("shift");
+  },
   ControlLeft: "Ctrl",
   ControlRight: "Ctrl",
   MetaLeft: "Super",

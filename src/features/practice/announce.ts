@@ -1,72 +1,22 @@
 // What the screen reader mode (a11y S3) says in its polite `aria-live` region. Pure, so the wording is tested.
 import { formatPercent, formatTime, formatWpm } from "./format";
+import { SPOKEN_CHARS, type SpokenChar, spoken, t } from "./messages";
 
-/** Spoken names of the chars a screen reader would skip or read ambiguously. */
-const NAMES: Record<string, string> = {
-  " ": "espacio",
-  "\n": "salto de línea",
-  "\t": "tabulador",
-  ",": "coma",
-  ".": "punto",
-  ";": "punto y coma",
-  ":": "dos puntos",
-  "¿": "abre interrogación",
-  "?": "cierra interrogación",
-  "¡": "abre exclamación",
-  "!": "cierra exclamación",
-  "(": "abre paréntesis",
-  ")": "cierra paréntesis",
-  "[": "abre corchete",
-  "]": "cierra corchete",
-  "{": "abre llave",
-  "}": "cierra llave",
-  "<": "menor que",
-  ">": "mayor que",
-  "«": "abre comillas angulares",
-  "»": "cierra comillas angulares",
-  '"': "comillas",
-  "'": "apóstrofo",
-  "`": "acento grave",
-  "´": "acento agudo",
-  "^": "circunflejo",
-  "¨": "diéresis",
-  "~": "virgulilla",
-  "-": "guion",
-  "_": "guion bajo",
-  "–": "guion medio",
-  "—": "raya",
-  "…": "puntos suspensivos",
-  "/": "barra",
-  "\\": "barra invertida",
-  "|": "barra vertical",
-  "@": "arroba",
-  "#": "almohadilla",
-  $: "dólar",
-  "€": "euro",
-  "%": "por ciento",
-  "&": "et",
-  "*": "asterisco",
-  "+": "más",
-  "=": "igual",
-  "·": "punto medio",
-  "º": "ordinal masculino",
-  "ª": "ordinal femenino",
-};
+const isSpoken = (c: string): c is SpokenChar => (SPOKEN_CHARS as readonly string[]).includes(c);
 
-/** How a char is spoken: invisible chars and punctuation by name, a capital letter as "e mayúscula". */
+/** How a char is spoken: invisible chars and punctuation by name, a capital letter as "e mayúscula" in Spanish. */
 export function spokenChar(c: string): string {
-  const name = NAMES[c];
-  if (name) return name;
+  if (isSpoken(c)) return spoken(c);
   const lower = c.toLowerCase();
-  return lower !== c ? `${lower} mayúscula` : c;
+  return lower !== c ? t("capital", { char: lower }) : c;
 }
 
 /** «siguiente: a»; nothing once the text has no next char. */
-export const nextCharMessage = (next: string | undefined) => (next === undefined ? "" : `siguiente: ${spokenChar(next)}`);
+export const nextCharMessage = (next: string | undefined) => (next === undefined ? "" : t("next", { char: spokenChar(next) }));
 
 /** «error: esperaba e, pulsaste r». */
 export const errorMessage = (expected: string, typed: string) =>
-  `error: esperaba ${spokenChar(expected)}, pulsaste ${spokenChar(typed)}`;
+  t("error", { expected: spokenChar(expected), typed: spokenChar(typed) });
 
 /** After a keystroke: the error of a wrong one, then the next char (after a wrong one only when the cursor moved). */
 export function keystrokeMessage(
@@ -82,15 +32,19 @@ export function keystrokeMessage(
 
 /** The start of a new text: its length and the first char to type. */
 export function newTextMessage(chars: readonly string[]): string {
-  const length = `${chars.length} ${chars.length === 1 ? "carácter" : "caracteres"}`;
+  const intro = t("newText", { count: chars.length });
   const first = nextCharMessage(chars[0]);
-  return first ? `Texto nuevo de ${length}. ${first}` : `Texto nuevo de ${length}.`;
+  return first ? `${intro} ${first}` : intro;
 }
 
 /** The result line, with the figures the results screen shows first. */
 export function resultMessage(stats: { netWpm: number; accuracy: number; durationMs: number; errors: number }): string {
-  const errors = stats.errors === 0 ? "sin errores" : `${stats.errors} ${stats.errors === 1 ? "error" : "errores"}`;
-  return `Resultado: ${formatWpm(stats.netWpm)} PPM netas, precisión ${formatPercent(stats.accuracy)}, tiempo ${formatTime(stats.durationMs)}, ${errors}.`;
+  return t("result", {
+    wpm: formatWpm(stats.netWpm),
+    accuracy: formatPercent(stats.accuracy),
+    time: formatTime(stats.durationMs),
+    errors: t("errorCount", { count: stats.errors }),
+  });
 }
 
 /** `message`, changed invisibly when it repeats `previous`: a live region announces only changed text. */

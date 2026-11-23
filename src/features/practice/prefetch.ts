@@ -1,6 +1,7 @@
 // Background prefetch of the next text (S6) and the label of a text's origin.
 
 import type { PracticeText } from "./api";
+import { t } from "./messages";
 
 /** Short provider names, as the backend uses them in notices. */
 export const PROVIDER_NAMES: Record<string, string> = {
@@ -12,17 +13,17 @@ export const PROVIDER_NAMES: Record<string, string> = {
 };
 
 /** Where a text came from, shown discreetly above it. */
-export function sourceLabel(t: Pick<PracticeText, "source" | "provider" | "model" | "diagnostic">): string {
-  if (t.diagnostic) return "Texto de diagnóstico";
-  switch (t.source) {
+export function sourceLabel(text: Pick<PracticeText, "source" | "provider" | "model" | "diagnostic">): string {
+  if (text.diagnostic) return t("sourceDiagnostic");
+  switch (text.source) {
     case "ai": {
-      const provider = t.provider ? (PROVIDER_NAMES[t.provider] ?? t.provider) : null;
-      return ["Generado con IA", provider, t.model].filter(Boolean).join(" · ");
+      const provider = text.provider ? (PROVIDER_NAMES[text.provider] ?? text.provider) : null;
+      return [t("sourceAi"), provider, text.model].filter(Boolean).join(" · ");
     }
     case "cache":
-      return "Texto del caché";
+      return t("sourceCache");
     default:
-      return "Corpus local";
+      return t("sourceCorpus");
   }
 }
 

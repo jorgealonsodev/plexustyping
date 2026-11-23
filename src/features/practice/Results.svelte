@@ -4,8 +4,9 @@
   import { focusTyping } from "./focus";
   import { charLabel, formatPercent, formatTime, formatWpm } from "./format";
   import { type TempoChange, rhythmSummary, tempoNotice } from "../metronome/beat";
-  import { GOAL_MET_NOTICE } from "../goals/goals";
-  import { NEW_RECORD, recordLines } from "./ghost";
+  import { goalMetNotice } from "../goals/goals";
+  import { newRecordLine, recordLines } from "./ghost";
+  import { t } from "./messages";
   import { unlockNotice } from "../unlock/unlock";
 
   let {
@@ -44,49 +45,49 @@
 </script>
 
 <section class="results" aria-labelledby="results-title">
-  <h2 id="results-title">Resultado{#if language}<span class="lang"> · Código · {language}</span>{/if}</h2>
-  {#if goalMet}<p class="goal-met" role="status">{GOAL_MET_NOTICE}</p>{/if}
+  <h2 id="results-title">{t("resultTitle")}{#if language}<span class="lang"> · {t("code")} · {language}</span>{/if}</h2>
+  {#if goalMet}<p class="goal-met" role="status">{goalMetNotice()}</p>{/if}
   {#if unlocked}<p class="goal-met" role="status">{unlocked}</p>{/if}
   <dl class="figures">
-    <div class="main"><dt>PPM netas</dt><dd>{formatWpm(stats.netWpm)}</dd></div>
-    <div><dt>PPM brutas</dt><dd>{formatWpm(stats.grossWpm)}</dd></div>
-    <div><dt>Precisión</dt><dd>{formatPercent(stats.accuracy)}</dd></div>
-    <div><dt>Tiempo</dt><dd>{formatTime(stats.durationMs)}</dd></div>
-    <div><dt>Errores</dt><dd>{stats.errors}</dd></div>
+    <div class="main"><dt>{t("netWpm")}</dt><dd>{formatWpm(stats.netWpm)}</dd></div>
+    <div><dt>{t("grossWpm")}</dt><dd>{formatWpm(stats.grossWpm)}</dd></div>
+    <div><dt>{t("accuracy")}</dt><dd>{formatPercent(stats.accuracy)}</dd></div>
+    <div><dt>{t("time")}</dt><dd>{formatTime(stats.durationMs)}</dd></div>
+    <div><dt>{t("errors")}</dt><dd>{stats.errors}</dd></div>
   </dl>
-  {#each records as line (line)}<p class="record" class:new-record={line === NEW_RECORD} role="status">{line}</p>{/each}
+  {#each records as line (line)}<p class="record" class:new-record={line === newRecordLine()} role="status">{line}</p>{/each}
   {#if rhythm}
     <p class="rhythm">
-      Ritmo: desvío medio ±{Math.round(rhythm.meanAbsMs)} ms
-      <span class="note">· adelantadas {Math.round(rhythm.earlyPct)}% / atrasadas {Math.round(rhythm.latePct)}%</span>
+      {t("rhythm", { ms: Math.round(rhythm.meanAbsMs) })}
+      <span class="note">{t("rhythmShares", { early: Math.round(rhythm.earlyPct), late: Math.round(rhythm.latePct) })}</span>
     </p>
   {/if}
   {#if tempo}<p class="rhythm">{tempoNotice(tempo)}</p>{/if}
   {#if scored.failedChars.length > 0}
     <p class="failed">
-      Caracteres fallados:
+      {t("failedChars")}
       {#each scored.failedChars as c, i (i)}<kbd>{charLabel(c)}</kbd>{/each}
     </p>
   {:else}
-    <p class="note">Sin fallos.</p>
+    <p class="note">{t("noFailures")}</p>
   {/if}
   {#if weak.length > 0}
     <div class="weak">
-      <h3>{language ? "Tus puntos débiles en código" : "Tus puntos débiles"}</h3>
+      <h3>{language ? t("weakCode") : t("weak")}</h3>
       <ol>
         {#each weak as w (w.unit)}
           <li><kbd>{charLabel(w.unit)}</kbd><span class="bar"><span class="fill fill-{heatLevel(w.score)}"></span></span></li>
         {/each}
       </ol>
-      <p class="note">El siguiente texto los practica.</p>
+      <p class="note">{t("weakNote")}</p>
     </div>
   {/if}
   {#if !scored.saved && scored.saveError}
-    <p class="note" role="status">No se pudo guardar la sesión: {scored.saveError}</p>
+    <p class="note" role="status">{t("saveFailed", { error: scored.saveError })}</p>
   {/if}
   <div class="actions">
-    <button type="button" class="primary" onclick={focusAnd(onNext)}>Siguiente texto <kbd>Intro</kbd></button>
-    <button type="button" onclick={focusAnd(onRepeat)}>Repetir <kbd>Esc</kbd></button>
+    <button type="button" class="primary" onclick={focusAnd(onNext)}>{t("nextText")} <kbd>{t("enterKey")}</kbd></button>
+    <button type="button" onclick={focusAnd(onRepeat)}>{t("repeat")} <kbd>Esc</kbd></button>
   </div>
 </section>
 

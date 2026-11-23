@@ -1,6 +1,7 @@
 // The practice screen's hidden typing field, shared so other controls can hand the keyboard back,
 // and the keyboard-navigation rules around it (accessibility S2).
 
+import { t } from "./messages";
 import type { Phase } from "./replies";
 
 let field: HTMLElement | null = null;
@@ -69,7 +70,7 @@ export function nextFocusIndex(current: number, count: number, back: boolean): n
 
 /** The hint under the practice text; names the keys that act on it (F6 leaves it for the header; unlimited S3: Esc ends). */
 export function typingHint(started: boolean, isCode: boolean, unlimited = false): string {
-  if (unlimited) return `${started ? "" : "Empieza a escribir cuando quieras · "}Esc terminar · F4 metrónomo · F6 menú`;
-  if (started) return "Esc reinicia el texto · F4 metrónomo · F6 menú";
-  return `Empieza a escribir cuando quieras · ${isCode ? "Intro = salto de línea · Tab = sangría · " : ""}Esc reinicia · F4 metrónomo · F6 menú`;
+  if (unlimited) return `${started ? "" : t("hintStart")}${t("hintUnlimited")}`;
+  if (started) return t("hintStarted");
+  return `${t("hintStart")}${isCode ? t("hintCode") : ""}${t("hintRestart")}`;
 }

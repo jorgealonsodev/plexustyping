@@ -1,6 +1,7 @@
 import { type PracticeMode } from "../code/api";
 import type { Layout } from "../keyboard/types";
 import type { UnlockStatus } from "./api";
+import { t } from "./messages";
 
 // Progressive unlock (S1, S6): settings, the progress line, the dimmed keys and the unlock notice.
 
@@ -8,15 +9,24 @@ import type { UnlockStatus } from "./api";
 export const TARGET_WPMS: readonly number[] = [20, 30, 40, 50];
 export const DEFAULT_TARGET_WPM = 30;
 
+/** The toggle's label and hint, in the interface language. */
 export const UNLOCK_SETTING = {
-  label: "Desbloqueo progresivo",
-  hint: "Empieza por la fila base y añade una tecla cada vez que dominas las activas",
-} as const;
+  get label() {
+    return t("label");
+  },
+  get hint() {
+    return t("hint");
+  },
+};
 
 export const TARGET_SETTING = {
-  label: "Velocidad objetivo",
-  hint: "Velocidad a la que una tecla cuenta como dominada.",
-} as const;
+  get label() {
+    return t("targetLabel");
+  },
+  get hint() {
+    return t("targetHint");
+  },
+};
 
 /** The mode shapes only prose texts: words and code ignore it (S1). */
 export const unlockApplies = (status: UnlockStatus | null, practice: PracticeMode): status is UnlockStatus =>
@@ -33,8 +43,8 @@ const allUnlocked = (status: UnlockStatus) => status.next === null && activeLett
 /** "Teclas: 9/27 · siguiente: e" ("Teclas: 27/27" once done); `null` with the mode off. */
 export function progressLine(status: UnlockStatus | null): string | null {
   if (!status?.enabled) return null;
-  const count = `Teclas: ${activeLetters(status)}/${status.total}`;
-  return status.next === null ? count : `${count} · siguiente: ${status.next}`;
+  const keys = t("keys", { active: activeLetters(status), total: status.total });
+  return status.next === null ? keys : t("next", { keys, key: status.next });
 }
 
 /**
@@ -55,4 +65,4 @@ export function lockedKeys(layout: Layout | null, status: UnlockStatus | null): 
 
 /** Shown on the result screen of the session that unlocked `unlocked` (S6). */
 export const unlockNotice = (unlocked: string | null | undefined): string | null =>
-  unlocked ? `Nueva tecla desbloqueada: ${unlocked}` : null;
+  unlocked ? t("unlocked", { key: unlocked }) : null;

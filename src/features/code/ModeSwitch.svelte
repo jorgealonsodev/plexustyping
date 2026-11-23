@@ -4,15 +4,12 @@
   import type { SettingsStore } from "../settings/store.svelte";
   import type { PracticeKind } from "./api";
   import { LANGUAGES } from "./languages.svelte";
+  import { t } from "./messages";
 
   // Prose / words / code switch and the code language, in the header (S1, S6).
   let { settings }: { settings: SettingsStore } = $props();
 
-  const KINDS: { id: PracticeKind; label: string }[] = [
-    { id: "prose", label: "Prosa" },
-    { id: "words", label: "Palabras" },
-    { id: "code", label: "Código" },
-  ];
+  const KINDS: readonly PracticeKind[] = ["prose", "words", "code"];
 
   onMount(() => void LANGUAGES.load());
 
@@ -35,7 +32,7 @@
 <div class="mode">
   {#if settings.practiceKind === "code"}
     <select
-      aria-label="Lenguaje de programación"
+      aria-label={t("language")}
       onchange={choose}
       onpointerdown={() => (pointerPick = true)}
       onkeydown={() => (pointerPick = false)}
@@ -45,13 +42,13 @@
       {/each}
     </select>
   {/if}
-  <div class="kinds" role="group" aria-label="Modo de práctica">
-    {#each KINDS as k (k.id)}
+  <div class="kinds" role="group" aria-label={t("mode")}>
+    {#each KINDS as k (k)}
       <button
         type="button"
-        aria-pressed={settings.practiceKind === k.id}
-        class:active={settings.practiceKind === k.id}
-        onclick={() => settings.setPracticeKind(k.id)}>{k.label}</button
+        aria-pressed={settings.practiceKind === k}
+        class:active={settings.practiceKind === k}
+        onclick={() => settings.setPracticeKind(k)}>{t(k)}</button
       >
     {/each}
   </div>

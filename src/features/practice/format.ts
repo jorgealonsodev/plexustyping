@@ -1,3 +1,6 @@
+import { formatNumber } from "../../i18n/i18n.svelte";
+import { t } from "./messages";
+
 /** `m:ss` from milliseconds. */
 export function formatTime(ms: number): string {
   const s = Math.floor(ms / 1000);
@@ -6,8 +9,9 @@ export function formatTime(ms: number): string {
 
 export const formatWpm = (wpm: number) => String(Math.round(wpm));
 
-/** A `0..=1` ratio as a Spanish percentage, e.g. `90,5 %`. */
-export const formatPercent = (ratio: number) => `${String(Math.round(ratio * 1000) / 10).replace(".", ",")} %`;
+/** A `0..=1` ratio as a percentage with at most one decimal, in the interface language (`90,5 %`, `90.5%`). */
+export const formatPercent = (ratio: number) =>
+  t("percent", { n: formatNumber(Math.round(ratio * 1000) / 10, { maximumFractionDigits: 1 }) });
 
 const VISIBLE: Record<string, string> = { " ": "␣", "\n": "↵", "\t": "⇥" };
 

@@ -1,4 +1,5 @@
 import { keyForChar } from "./keys";
+import { t } from "./messages";
 import type { Layout } from "./types";
 
 /** Score of one char, as the `heatmap` command returns it. */
@@ -38,17 +39,22 @@ export function heatRank(level: number): number {
   return Math.min(HEAT_RANKS, Math.ceil(level / (HEAT_LEVELS / HEAT_RANKS)));
 }
 
-export const HEAT_LEGEND_TITLE = "Errores por tecla";
+/** The heading of the heatmap legend. */
+export const heatLegendTitle = () => t("heatTitle");
 
-/** The legend of the heatmap: each level, its name and the tint step its swatch is drawn with. */
-export const HEAT_LEGEND: { rank: number; name: string; tint: number }[] = [
-  "muy pocos",
-  "pocos",
-  "algunos",
-  "bastantes",
-  "muchos",
-].map((name, i) => ({ rank: i + 1, name, tint: (i + 1) * (HEAT_LEVELS / HEAT_RANKS) }));
+const LEVEL_NAMES = ["heat1", "heat2", "heat3", "heat4", "heat5"] as const;
+
+/** The legend of the heatmap: each level, its name (in the interface language) and the tint step its swatch is drawn with. */
+export const HEAT_LEGEND: readonly { readonly rank: number; readonly name: string; readonly tint: number }[] = LEVEL_NAMES.map(
+  (key, i) => ({
+    rank: i + 1,
+    get name() {
+      return t(key);
+    },
+    tint: (i + 1) * (HEAT_LEVELS / HEAT_RANKS),
+  }),
+);
 
 /** The legend as one line, e.g. for its accessible name. */
 export const heatLegendText = () =>
-  `${HEAT_LEGEND_TITLE}: ${HEAT_LEGEND.map(({ rank, name }) => `${rank} ${name}`).join(", ")}`;
+  `${heatLegendTitle()}: ${HEAT_LEGEND.map(({ rank, name }) => `${rank} ${name}`).join(", ")}`;

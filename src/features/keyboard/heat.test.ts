@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HEAT_LEGEND, HEAT_LEGEND_TITLE, HEAT_LEVELS, HEAT_RANKS, heatLegendText, heatLevel, heatRank, heatScores } from "./heat";
+import { HEAT_LEGEND, HEAT_LEVELS, HEAT_RANKS, heatLegendText, heatLegendTitle, heatLevel, heatRank, heatScores } from "./heat";
 import type { Layout } from "./types";
 
 const LAYOUT: Layout = {
@@ -69,7 +69,7 @@ describe("heatRank (a11y S5)", () => {
 
 describe("heat legend (a11y S5)", () => {
   it("names the five levels in Spanish, each with the tint step it is drawn with", () => {
-    expect(HEAT_LEGEND_TITLE).toBe("Errores por tecla");
+    expect(heatLegendTitle()).toBe("Errores por tecla");
     expect(HEAT_LEGEND).toEqual([
       { rank: 1, name: "muy pocos", tint: 2 },
       { rank: 2, name: "pocos", tint: 4 },

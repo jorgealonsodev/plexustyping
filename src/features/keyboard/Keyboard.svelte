@@ -2,7 +2,7 @@
   import { onDestroy, untrack } from "svelte";
   import { NAMED_LABELS, fingerOf, rowsFor } from "./geometry";
   import { flashVars } from "./flash";
-  import { HEAT_LEGEND, HEAT_LEGEND_TITLE, heatLegendText, heatLevel, heatRank } from "./heat";
+  import { HEAT_LEGEND, heatLegendText, heatLegendTitle, heatLevel, heatRank } from "./heat";
   import { type Flash, type Highlight, keyLabels } from "./keys";
   import type { Layout } from "./types";
 
@@ -106,7 +106,7 @@
 {#if heat}
   <!-- Each level with its number and its tint, as drawn on the keys (a11y S5). -->
   <p class="legend" title={heatLegendText()}>
-    <span>{HEAT_LEGEND_TITLE}:</span>
+    <span>{heatLegendTitle()}:</span>
     {#each HEAT_LEGEND as entry (entry.rank)}
       <span class="level"><span class="swatch heat heat-{entry.tint}">{entry.rank}</span> {entry.name}</span>
     {/each}

@@ -3,6 +3,7 @@
   import { nextFocusIndex } from "../practice/focus";
   import type { Sound } from "./api";
   import BeatDot from "./BeatDot.svelte";
+  import { t } from "./messages";
   import { type BeatAnchor, MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS, parseBpm, stepBpm } from "./beat";
 
   // The beat dot is also the metronome's quick settings: a click opens a small panel to tune it
@@ -67,8 +68,8 @@
     class="toggle"
     aria-expanded={open}
     aria-haspopup="dialog"
-    aria-label="Ajustes rápidos del metrónomo: {metronome.bpm} BPM"
-    title="Ajustar el metrónomo"
+    aria-label={t("toggleLabel", { bpm: metronome.bpm })}
+    title={t("toggleTitle")}
     onclick={() => (open ? close() : void show())}
     onkeydown={onToggleKeydown}
   >
@@ -77,10 +78,10 @@
   </button>
   {#if open}
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-    <div bind:this={panel} class="panel" role="dialog" aria-label="Metrónomo" tabindex="-1" onkeydown={onKeydown}>
+    <div bind:this={panel} class="panel" role="dialog" aria-label={t("panel")} tabindex="-1" onkeydown={onKeydown}>
       <div class="row">
-        <label class="name" for="mq-bpm">Tempo</label>
-        <button type="button" aria-label="Más lento" onclick={() => onChange({ bpm: stepBpm(metronome.bpm, -1) })}>−</button>
+        <label class="name" for="mq-bpm">{t("tempo")}</label>
+        <button type="button" aria-label={t("slower")} onclick={() => onChange({ bpm: stepBpm(metronome.bpm, -1) })}>−</button>
         <!-- Typed tempo applies on Enter or when leaving the field, not per key (typing 120 passes "1"). -->
         <input
           id="mq-bpm"
@@ -90,7 +91,7 @@
           min={MIN_BPM}
           max={MAX_BPM}
           value={metronome.bpm}
-          aria-label="Tempo en BPM"
+          aria-label={t("tempoInput")}
           onchange={(e: Change<HTMLInputElement>) => {
             const bpm = parseBpm(e.currentTarget.value, metronome.bpm);
             e.currentTarget.value = String(bpm);
@@ -98,10 +99,10 @@
           }}
         />
         <span class="unit">BPM</span>
-        <button type="button" aria-label="Más rápido" onclick={() => onChange({ bpm: stepBpm(metronome.bpm, 1) })}>+</button>
+        <button type="button" aria-label={t("faster")} onclick={() => onChange({ bpm: stepBpm(metronome.bpm, 1) })}>+</button>
       </div>
       <div class="row">
-        <label class="name" for="mq-sound">Sonido</label>
+        <label class="name" for="mq-sound">{t("sound")}</label>
         <select id="mq-sound" onchange={(e: Change<HTMLSelectElement>) => onChange({ sound: e.currentTarget.value as Sound })}>
           {#each SOUNDS as s (s.id)}
             <option value={s.id} selected={s.id === metronome.sound}>{s.label}</option>
@@ -109,7 +110,7 @@
         </select>
       </div>
       <div class="row">
-        <label class="name" for="mq-volume">Volumen</label>
+        <label class="name" for="mq-volume">{t("volume")}</label>
         <input
           id="mq-volume"
           type="range"
@@ -118,10 +119,10 @@
           value={metronome.volume}
           oninput={(e: Change<HTMLInputElement>) => onChange({ volume: number(e) })}
         />
-        <span class="value">{metronome.volume} %</span>
+        <span class="value">{t("volumeValue", { n: metronome.volume })}</span>
       </div>
       <div class="row">
-        <label class="name" for="mq-accent">Acento cada</label>
+        <label class="name" for="mq-accent">{t("accentEvery")}</label>
         <input
           id="mq-accent"
           type="number"
@@ -138,11 +139,11 @@
           checked={metronome.adaptive}
           onchange={(e: Change<HTMLInputElement>) => onChange({ adaptive: e.currentTarget.checked })}
         />
-        <label for="mq-adaptive">Tempo adaptativo</label>
+        <label for="mq-adaptive">{t("adaptive")}</label>
       </div>
       <div class="row end">
-        <button type="button" onclick={() => onChange({ enabled: false })}>Apagar <kbd>F4</kbd></button>
-        <button type="button" onclick={close}>Cerrar</button>
+        <button type="button" onclick={() => onChange({ enabled: false })}>{t("off")} <kbd>F4</kbd></button>
+        <button type="button" onclick={close}>{t("close")}</button>
       </div>
     </div>
   {/if}

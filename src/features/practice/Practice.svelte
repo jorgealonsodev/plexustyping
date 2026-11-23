@@ -51,7 +51,7 @@
   import MetronomeQuick from "../metronome/MetronomeQuick.svelte";
   import { MetronomeController } from "../metronome/controller";
   import type { UnlockStatus } from "../unlock/api";
-  import { lockedKeys, progressLine, unlockApplies } from "../unlock/unlock";
+  import { UNLOCK_SETTING, lockedKeys, progressLine, unlockApplies } from "../unlock/unlock";
   import {
     continuationFailureNotice,
     continuationPiece,
@@ -61,6 +61,7 @@
     noticeAfterContinuation,
     prefixEvents,
     requestLength,
+    emptyContinuationReason,
     retryPlan,
     shouldContinue,
     withDeadline,
@@ -68,6 +69,7 @@
     typedPrefix,
   } from "./unlimited";
   import { failureMessage } from "../settings/ai";
+  import { t } from "./messages";
 
   let {
     mode,
@@ -182,12 +184,14 @@
   // Weak units the current text practises, and whether it is the diagnostic text.
   let targets = $state.raw<string[]>([]);
   let diagnostic = $state(false);
-  // Origin of the current text, and why the AI was not used (when enabled).
-  let source = $state("");
+  // Origin of the current text (its label follows the interface language), and why the AI was not used (when enabled).
+  let sourceOf = $state.raw<Pick<PracticeText, "source" | "provider" | "model" | "diagnostic"> | null>(null);
+  const source = $derived(sourceOf ? sourceLabel(sourceOf) : "");
   let notice = $state<string | null>(null);
   // The notice was set by a continuation (unlimited S5): the next continuation replaces or clears it.
   let continuationNotice = false;
-  let loadingLabel = $state("Cargando texto…");
+  let loadingKey = $state<"loading" | "generating">("loading");
+  const loadingLabel = $derived(t(loadingKey));
   // Practice mode of the current text, and the syntax class of each of its chars (code only).
   let textMode = $state.raw<PracticeMode>("prose");
   let classes = $state.raw<TokenClass[]>([]);
@@ -324,13 +328,13 @@
   async function load(
     fetch: () => Promise<PracticeText>,
     again: () => void,
-    label = "Cargando texto…",
+    label: "loading" | "generating" = "loading",
     textPractice: PracticeMode = practice,
   ) {
     const id = ++run;
     const [forLayout, forLanguage, forLength] = [layoutId, languageId, textLength];
     requestedKey = requestKey(textPractice, forLayout, forLanguage);
-    loadingLabel = label;
+    loadingKey = label;
     phase = "loading";
     try {
       const next = await fetch();
@@ -343,21 +347,21 @@
       targets = next.targets;
       diagnostic = next.diagnostic ?? false;
       unlimited = isUnlimited(forLength, textPractice, diagnostic);
-      source = sourceLabel(next);
+      sourceOf = next;
       notice = next.notice ?? null;
       continuationNotice = false;
       restart();
     } catch (err) {
       if (id !== run) return;
       retry = again;
-      message = `No se pudo cargar el texto: ${String(err)}`;
+      message = t("loadFailed", { error: String(err) });
       phase = "error";
     }
   }
 
   function loadFirst() {
     const [chosen, lines, lay, lang] = [practice, codeLines, layoutId, languageId];
-    void load(() => firstText(lang, lay, chosen, lines), loadFirst, "Cargando texto…", chosen);
+    void load(() => firstText(lang, lay, chosen, lines), loadFirst, "loading", chosen);
   }
 
   const randomSeed = () => Math.floor(Math.random() * 2 ** 32);
@@ -370,9 +374,9 @@
     const seed = randomSeed();
     const [count, length, chosen, lines, lay, lang] = [targetCount, requestLength(textLength), practice, codeLines, layoutId, languageId];
     const fresh = () => nextText(lang, lay, seed, count, length, fallback, chosen, lines);
-    const again = () => void load(fresh, again, "Generando texto…", chosen);
+    const again = () => void load(fresh, again, "generating", chosen);
     const ready = prefetch.take(genKey);
-    if (ready) void load(() => ready.catch(fresh), again, "Generando texto…", chosen);
+    if (ready) void load(() => ready.catch(fresh), again, "generating", chosen);
     else again();
   }
 
@@ -417,7 +421,7 @@
         const piece = continuationPiece(s.chars, next.text);
         if (!piece) {
           continueOffline = true;
-          retryLater("la continuación llegó vacía");
+          retryLater(emptyContinuationReason());
           return;
         }
         continuing = false;
@@ -499,7 +503,7 @@
     } catch (err) {
       if (id !== run) return;
       retry = () => void finish(done, measured, scoredText, events);
-      message = `No se pudo calcular el resultado: ${String(err)}`;
+      message = t("scoreFailed", { error: String(err) });
       phase = "error";
     }
   }
@@ -708,7 +712,7 @@
       }
       const [count, length, chosen, lines, lay, lang] = [targetCount, requestLength(textLength), practice, codeLines, layoutId, languageId];
       const fresh = () => nextText(lang, lay, randomSeed(), count, length, [], chosen, lines);
-      const again = () => void load(fresh, again, "Generando texto…", chosen);
+      const again = () => void load(fresh, again, "generating", chosen);
       again();
       refreshModel(run, chosen);
     });
@@ -771,7 +775,7 @@
 <textarea
   bind:this={field}
   class="capture"
-  aria-label="Entrada de mecanografía"
+  aria-label={t("inputLabel")}
   aria-describedby={textId}
   autocomplete="off"
   {...noAutocorrect}
@@ -798,16 +802,16 @@
           />
         {/if}
         {#if liveStats && view}
-          <dl class="live" aria-label="Estadísticas en vivo">
-            <div><dt>PPM</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
-            <div><dt>Pulsaciones/min</dt><dd>{formatWpm(view.stats.kpm)}</dd></div>
-            <div><dt>Precisión</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
-            <div><dt>Tiempo</dt><dd>{formatTime(elapsed)}</dd></div>
+          <dl class="live" aria-label={t("liveStats")}>
+            <div><dt>{t("wpm")}</dt><dd>{formatWpm(view.stats.netWpm)}</dd></div>
+            <div><dt>{t("kpm")}</dt><dd>{formatWpm(view.stats.kpm)}</dd></div>
+            <div><dt>{t("accuracy")}</dt><dd>{formatPercent(view.stats.accuracy)}</dd></div>
+            <div><dt>{t("time")}</dt><dd>{formatTime(elapsed)}</dd></div>
           </dl>
         {/if}
         {#if showDelta && ghostDelta !== null}
           {@const delta = formatDelta(ghostDelta)}
-          <p class="ghost-delta" class:behind={delta.startsWith("+")} class:ahead={delta.startsWith("−")} aria-label="Diferencia con tu récord">{delta}</p>
+          <p class="ghost-delta" class:behind={delta.startsWith("+")} class:ahead={delta.startsWith("−")} aria-label={t("ghostDelta")}>{delta}</p>
         {/if}
       </div>
     {/if}
@@ -817,7 +821,7 @@
     {:else if phase === "error"}
       <div class="status" role="alert">
         <p>{message}</p>
-        <button type="button" onclick={focusAnd(() => retry())}>Reintentar</button>
+        <button type="button" onclick={focusAnd(() => retry())}>{t("retry")}</button>
       </div>
     {:else if phase === "results" && scored}
       <Results {scored} {weak} {tempo} {goalMet} record={raced?.netWpm ?? null} language={isCodeMode(textMode) ? LANGUAGES.name(textMode.lang) : null} onNext={loadNext} onRepeat={restart} />
@@ -826,18 +830,18 @@
         {#if isCodeMode(textMode)}{LANGUAGES.name(textMode.lang)} ·{/if}
         {source}
         {#if targets.length > 0}
-          · Practicando:
+          · {t("practising")}
           {#each targets as t, i (i)}{#if i > 0}<span class="sep">·</span>{/if}<kbd>{charLabel(t)}</kbd>{/each}
         {/if}
       </p>
-      {#if unlockLine}<p class="kind" aria-label="Desbloqueo progresivo">{unlockLine}</p>{/if}
+      {#if unlockLine}<p class="kind" aria-label={UNLOCK_SETTING.label}>{unlockLine}</p>{/if}
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
-      {#if metronomeError && metronome.enabled}<p class="notice" role="status">Metrónomo: {metronomeError}</p>{/if}
+      {#if metronomeError && metronome.enabled}<p class="notice" role="status">{t("metronomeError", { error: metronomeError })}</p>{/if}
       <!-- A named region (a11y S3) carrying the typography variables (a11y S4) for prose and code. -->
       <div
         id={textId}
         role="region"
-        aria-label={isCode ? "Código de práctica" : "Texto de práctica"}
+        aria-label={isCode ? t("codeRegion") : t("textRegion")}
         style={textStyle}
         data-cursor={cursorStyle}
         data-cursor-blink={cursorBlink || undefined}
@@ -856,13 +860,13 @@
       {/if}
       </div>
       {#if unlimited && phase === "typing" && view.cursor === view.chars.length}
-        <p class="hint" role="status">Generando más texto…</p>
+        <p class="hint" role="status">{t("moreText")}</p>
       {/if}
       <p class="hint">
-        {#if phase === "scoring"}Calculando resultado…{:else}{typingHint(view.cursor !== 0, isCode, unlimited)}{/if}
+        {#if phase === "scoring"}{t("scoring")}{:else}{typingHint(view.cursor !== 0, isCode, unlimited)}{/if}
       </p>
       {#if unlimited && phase === "typing"}
-        <button type="button" class="end" onclick={focusAnd(endUnlimited)}>Terminar</button>
+        <button type="button" class="end" onclick={focusAnd(endUnlimited)}>{t("end")}</button>
       {/if}
     {/if}
   </section>

@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { PracticeMode } from "../code/api";
+import { formatNumber } from "../../i18n/i18n.svelte";
 import { formatWpm } from "./format";
+import { t } from "./messages";
 
 // Ghost session (S1–S5): the profile's best earlier session with the same text races along.
 
@@ -17,13 +19,13 @@ export const ghostForText = (text: string, mode: PracticeMode) => invoke<Ghost |
 
 /**
  * The live difference with the record (S4): `+1,2 s` behind, `−0,8 s` ahead, `0,0 s` when equal;
- * one decimal (halves away from zero), Spanish comma, sign always shown.
+ * one decimal (halves away from zero) in the interface language's format, sign always shown.
  */
 export function formatDelta(ms: number): string {
   const tenths = Math.round(Math.abs(ms) / 100);
-  if (tenths === 0) return "0,0 s";
-  const sign = ms > 0 ? "+" : "−";
-  return `${sign}${(tenths / 10).toFixed(1).replace(".", ",")} s`;
+  const value = `${formatNumber(tenths / 10, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} s`;
+  if (tenths === 0) return value;
+  return `${ms > 0 ? "+" : "−"}${value}`;
 }
 
 /**
@@ -55,15 +57,16 @@ export class GhostRace {
   }
 }
 
-export const NEW_RECORD = "¡Nuevo récord para este texto!";
+/** The line that celebrates a new record. */
+export const newRecordLine = () => t("newRecord");
 
 /** Result lines of a raced text (S5); a saved session faster than the record is the new record. */
 export function recordLines(recordWpm: number, netWpm: number, saved: boolean): string[] {
-  const lines = [`Récord anterior: ${formatWpm(recordWpm)} PPM`];
-  if (saved && netWpm > recordWpm) lines.push(NEW_RECORD);
+  const lines = [t("previousRecord", { wpm: formatWpm(recordWpm) })];
+  if (saved && netWpm > recordWpm) lines.push(newRecordLine());
   return lines;
 }
 
 /** Tooltip of the ghost button in the header. */
 export const ghostToggleTitle = (on: boolean) =>
-  on ? "Sesión fantasma activada: corres contra tu mejor sesión con el mismo texto" : "Sesión fantasma desactivada";
+  on ? t("ghostOn") : t("ghostOff");

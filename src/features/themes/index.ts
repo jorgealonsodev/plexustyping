@@ -4,10 +4,10 @@ export { applyTheme, contrastRatio, ensureContrast, mix, readableOn, typingColor
 export { loadThemeId, saveThemeId } from "./storage";
 export {
   MAX_THEME_FILE_CHARS,
-  TOO_LARGE,
-  TOO_MANY,
   addCustomTheme,
   initCustomThemes,
   parseVsCodeTheme,
   saveCustomThemes,
+  tooLargeError,
+  tooManyError,
 } from "./custom";

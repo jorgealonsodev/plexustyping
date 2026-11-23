@@ -1,0 +1,62 @@
+import { defineMessages } from "../../i18n/i18n.svelte";
+
+// Daily goal and streak: choices, header text and the one-time notice (ui-i18n S1).
+export const t = defineMessages(
+  {
+    off: "Desactivada",
+    minutes: "Minutos al día",
+    texts: "Textos al día",
+    metNotice: "¡Meta diaria cumplida!",
+    streak: " · racha {days}",
+    met: "Meta cumplida{streak}",
+    minutesUnit: "min",
+    textsUnit: "textos",
+    today: "Hoy {done}/{goal} {unit}{streak}",
+  },
+  {
+    en: {
+      off: "Off",
+      minutes: "Minutes a day",
+      texts: "Texts a day",
+      metNotice: "Daily goal met!",
+      streak: " · streak {days}",
+      met: "Goal met{streak}",
+      minutesUnit: "min",
+      textsUnit: "texts",
+      today: "Today {done}/{goal} {unit}{streak}",
+    },
+    pt: {
+      off: "Desativada",
+      minutes: "Minutos por dia",
+      texts: "Textos por dia",
+      metNotice: "Meta diária cumprida!",
+      streak: " · sequência {days}",
+      met: "Meta cumprida{streak}",
+      minutesUnit: "min",
+      textsUnit: "textos",
+      today: "Hoje {done}/{goal} {unit}{streak}",
+    },
+    fr: {
+      off: "Désactivé",
+      minutes: "Minutes par jour",
+      texts: "Textes par jour",
+      metNotice: "Objectif du jour atteint !",
+      streak: " · série {days}",
+      met: "Objectif atteint{streak}",
+      minutesUnit: "min",
+      textsUnit: "textes",
+      today: "Aujourd’hui {done}/{goal} {unit}{streak}",
+    },
+    de: {
+      off: "Aus",
+      minutes: "Minuten pro Tag",
+      texts: "Texte pro Tag",
+      metNotice: "Tagesziel erreicht!",
+      streak: " · Serie {days}",
+      met: "Ziel erreicht{streak}",
+      minutesUnit: "Min.",
+      textsUnit: "Texte",
+      today: "Heute {done}/{goal} {unit}{streak}",
+    },
+  },
+);

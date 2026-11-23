@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { GoalStatus } from "./api";
 import {
   GOAL_KINDS,
-  GOAL_MET_NOTICE,
+  goalMetNotice,
   MINUTE_GOALS,
   TEXT_GOALS,
   amountsFor,
@@ -76,7 +76,7 @@ describe("goal met notice (S5)", () => {
   const at = (s: GoalStatus, d = day) => ({ status: s, day: d });
 
   it("is the exact Spanish text", () => {
-    expect(GOAL_MET_NOTICE).toBe("¡Meta diaria cumplida!");
+    expect(goalMetNotice()).toBe("¡Meta diaria cumplida!");
   });
 
   it("shows only on the session that meets the goal", () => {

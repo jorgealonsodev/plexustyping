@@ -1,5 +1,6 @@
 import { localDay } from "../practice/prefetch";
 import type { DailyGoal, GoalKind, GoalStatus } from "./api";
+import { t } from "./messages";
 
 // Daily goal and streak (S1, S5): choices, header text and the one-time notice.
 
@@ -9,17 +10,21 @@ export const TEXT_GOALS: readonly number[] = [1, 3, 5, 10, 15, 20, 30];
 
 export type GoalChoice = GoalKind | "off";
 
-export const GOAL_KINDS: readonly { id: GoalChoice; label: string }[] = [
-  { id: "off", label: "Desactivada" },
-  { id: "minutes", label: "Minutos al día" },
-  { id: "texts", label: "Textos al día" },
-];
+/** The goal kinds; labels follow the interface language. */
+export const GOAL_KINDS: readonly { readonly id: GoalChoice; readonly label: string }[] = (
+  ["off", "minutes", "texts"] as const
+).map((id) => ({
+  id,
+  get label() {
+    return t(id);
+  },
+}));
 
 /** Amount picked when a kind is chosen without a fitting one. */
 const DEFAULT_AMOUNT: Record<GoalKind, number> = { minutes: 20, texts: 5 };
 
 /** Shown once on the result screen of the session that meets the goal (S5). */
-export const GOAL_MET_NOTICE = "¡Meta diaria cumplida!";
+export const goalMetNotice = () => t("metNotice");
 
 export const amountsFor = (kind: GoalChoice): readonly number[] =>
   kind === "minutes" ? MINUTE_GOALS : kind === "texts" ? TEXT_GOALS : [];
@@ -38,10 +43,10 @@ export function chooseGoal(
 export function goalHeaderText(status: GoalStatus | null): string | null {
   const goal = status?.goal;
   if (!status || !goal) return null;
-  const streak = status.streak > 0 ? ` · racha ${status.streak}` : "";
-  if (status.met) return `Meta cumplida${streak}`;
-  const unit = goal.kind === "minutes" ? "min" : "textos";
-  return `Hoy ${status.today}/${goal.amount} ${unit}${streak}`;
+  const streak = status.streak > 0 ? t("streak", { days: status.streak }) : "";
+  if (status.met) return t("met", { streak });
+  const unit = goal.kind === "minutes" ? t("minutesUnit") : t("textsUnit");
+  return t("today", { done: status.today, goal: goal.amount, unit, streak });
 }
 
 /** A goal status and the local day (`YYYY-MM-DD`) it was read on. */
