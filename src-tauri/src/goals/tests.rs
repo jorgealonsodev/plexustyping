@@ -115,16 +115,16 @@ fn expect(goal: Option<DailyGoal>, today: u32, met: bool, streak: u32) -> GoalSt
 fn every_allowed_goal_is_set_for_the_active_profile() {
     let state = memory();
     for amount in [5, 10, 15, 20, 30, 45, 60, 90, 120] {
-        let status = set(&state, "minutes", Some(amount), 0, NOON_UTC).unwrap();
+        let status = set(Locale::Es, &state, "minutes", Some(amount), 0, NOON_UTC).unwrap();
         assert_eq!(status.goal, goal(GoalKind::Minutes, amount));
         assert_eq!(stored_goal(&state), goal(GoalKind::Minutes, amount));
     }
     for amount in [1, 3, 5, 10, 15, 20, 30] {
-        let status = set(&state, "texts", Some(amount), 0, NOON_UTC).unwrap();
+        let status = set(Locale::Es, &state, "texts", Some(amount), 0, NOON_UTC).unwrap();
         assert_eq!(status.goal, goal(GoalKind::Texts, amount));
         assert_eq!(stored_goal(&state), goal(GoalKind::Texts, amount));
     }
-    let status = set(&state, "off", None, 0, NOON_UTC).unwrap();
+    let status = set(Locale::Es, &state, "off", None, 0, NOON_UTC).unwrap();
     assert_eq!(status, expect(None, 0, false, 0));
     assert_eq!(stored_goal(&state), None);
 }
@@ -132,8 +132,8 @@ fn every_allowed_goal_is_set_for_the_active_profile() {
 #[test]
 fn anything_outside_s1_is_refused_and_changes_nothing() {
     let state = memory();
-    set(&state, "texts", Some(5), 0, NOON_UTC).unwrap();
-    let before = status(&state, 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(5), 0, NOON_UTC).unwrap();
+    let before = status(Locale::Es, &state, 0, NOON_UTC).unwrap();
     let refused: [(&str, Option<u32>); 12] = [
         ("minutes", None),
         ("minutes", Some(0)),
@@ -149,24 +149,32 @@ fn anything_outside_s1_is_refused_and_changes_nothing() {
         ("texts", Some(u32::MAX)),
     ];
     for (kind, amount) in refused {
-        let err = set(&state, kind, amount, 0, NOON_UTC).unwrap_err();
+        let err = set(Locale::Es, &state, kind, amount, 0, NOON_UTC).unwrap_err();
         assert_eq!(err, "Meta diaria no válida", "{kind:?} {amount:?}");
         assert_eq!(stored_goal(&state), goal(GoalKind::Texts, 5));
-        assert_eq!(status(&state, 0, NOON_UTC).unwrap(), before);
+        assert_eq!(status(Locale::Es, &state, 0, NOON_UTC).unwrap(), before);
     }
 }
 
 #[test]
 fn an_invalid_time_zone_is_refused_and_changes_nothing() {
     let state = memory();
-    set(&state, "texts", Some(5), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(5), 0, NOON_UTC).unwrap();
     assert_eq!(
-        set(&state, "minutes", Some(20), 18 * 60 + 1, NOON_UTC).unwrap_err(),
+        set(
+            Locale::Es,
+            &state,
+            "minutes",
+            Some(20),
+            18 * 60 + 1,
+            NOON_UTC
+        )
+        .unwrap_err(),
         "Zona horaria no válida: 1081"
     );
     assert_eq!(stored_goal(&state), goal(GoalKind::Texts, 5));
     assert_eq!(
-        status(&state, -18 * 60 - 1, NOON_UTC).unwrap_err(),
+        status(Locale::Es, &state, -18 * 60 - 1, NOON_UTC).unwrap_err(),
         "Zona horaria no válida: -1081"
     );
 }
@@ -180,17 +188,17 @@ fn goals_are_independent_per_profile_and_follow_the_switch() {
         main_id = state.active_profile().id;
         let work = profiles::create(&state, "Trabajo", "es", "es-qwerty").unwrap();
         work_id = work.id;
-        set(&state, "minutes", Some(20), 0, NOON_UTC).unwrap();
+        set(Locale::Es, &state, "minutes", Some(20), 0, NOON_UTC).unwrap();
         text_at(&state, NOON_UTC - HOUR);
         profiles::switch(&state, work.id).unwrap();
         // The other profile has no goal and none of the first one's sessions.
         assert_eq!(
-            status(&state, 0, NOON_UTC).unwrap(),
+            status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
             expect(None, 0, false, 0)
         );
-        set(&state, "texts", Some(1), 0, NOON_UTC).unwrap();
+        set(Locale::Es, &state, "texts", Some(1), 0, NOON_UTC).unwrap();
         assert_eq!(
-            status(&state, 0, NOON_UTC).unwrap(),
+            status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
             expect(goal(GoalKind::Texts, 1), 0, false, 0)
         );
     }
@@ -199,7 +207,7 @@ fn goals_are_independent_per_profile_and_follow_the_switch() {
     assert_eq!(stored_goal(&state), goal(GoalKind::Texts, 1));
     profiles::switch(&state, main_id).unwrap();
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Minutes, 20), 0, false, 0)
     );
 }
@@ -209,13 +217,13 @@ fn goals_are_independent_per_profile_and_follow_the_switch() {
 #[test]
 fn the_status_serializes_in_camel_case() {
     let state = memory();
-    let off = set(&state, "off", None, 0, NOON_UTC).unwrap();
+    let off = set(Locale::Es, &state, "off", None, 0, NOON_UTC).unwrap();
     assert_eq!(
         serde_json::to_value(off).unwrap(),
         json!({"goal": null, "today": 0, "met": false, "streak": 0})
     );
     text_at(&state, NOON_UTC - HOUR);
-    let on = set(&state, "texts", Some(1), 0, NOON_UTC).unwrap();
+    let on = set(Locale::Es, &state, "texts", Some(1), 0, NOON_UTC).unwrap();
     assert_eq!(
         serde_json::to_value(on).unwrap(),
         json!({"goal": {"kind": "texts", "amount": 1}, "today": 1, "met": true, "streak": 1})
@@ -227,11 +235,11 @@ fn the_status_serializes_in_camel_case() {
 #[test]
 fn minutes_sum_the_durations_rounded_down_and_are_met_at_the_exact_sum() {
     let state = memory();
-    set(&state, "minutes", Some(20), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "minutes", Some(20), 0, NOON_UTC).unwrap();
     session_at(&state, "prose", MIDNIGHT_UTC + HOUR, (12 * MINUTE) as f64);
     session_at(&state, "code", MIDNIGHT_UTC + 2 * HOUR, 59_999.0);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Minutes, 20), 12, false, 0)
     );
     // 19:59.999 shows 19 and is not met.
@@ -242,13 +250,13 @@ fn minutes_sum_the_durations_rounded_down_and_are_met_at_the_exact_sum() {
         (7 * MINUTE) as f64,
     );
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Minutes, 20), 19, false, 0)
     );
     // Exactly 20:00.000 is met.
     session_at(&state, "prose", MIDNIGHT_UTC + 4 * HOUR, 1.0);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Minutes, 20), 20, true, 1)
     );
 }
@@ -256,16 +264,16 @@ fn minutes_sum_the_durations_rounded_down_and_are_met_at_the_exact_sum() {
 #[test]
 fn texts_count_the_sessions_of_every_mode() {
     let state = memory();
-    set(&state, "texts", Some(3), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(3), 0, NOON_UTC).unwrap();
     session_at(&state, "prose", MIDNIGHT_UTC + HOUR, 500.0);
     session_at(&state, "code", MIDNIGHT_UTC + 2 * HOUR, 500.0);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 3), 2, false, 0)
     );
     session_at(&state, "words", MIDNIGHT_UTC + 3 * HOUR, 500.0);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 3), 3, true, 1)
     );
 }
@@ -273,45 +281,45 @@ fn texts_count_the_sessions_of_every_mode() {
 #[test]
 fn a_positive_offset_moves_local_midnight_before_utc_midnight() {
     let state = memory();
-    set(&state, "texts", Some(1), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(1), 0, NOON_UTC).unwrap();
     let tz = 120; // UTC+2: local 2026-11-18 starts at 2026-11-17T22:00Z.
     let local_midnight = MIDNIGHT_UTC - 2 * HOUR;
     text_at(&state, local_midnight - 1);
     assert_eq!(
-        status(&state, tz, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, tz, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 0, false, 1)
     );
     // In UTC both instants are the 17th: still yesterday.
-    assert_eq!(status(&state, 0, NOON_UTC).unwrap().today, 0);
+    assert_eq!(status(Locale::Es, &state, 0, NOON_UTC).unwrap().today, 0);
     text_at(&state, local_midnight);
     assert_eq!(
-        status(&state, tz, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, tz, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 1, true, 2)
     );
-    assert_eq!(status(&state, 0, NOON_UTC).unwrap().today, 0);
+    assert_eq!(status(Locale::Es, &state, 0, NOON_UTC).unwrap().today, 0);
 }
 
 #[test]
 fn a_negative_offset_moves_local_midnight_after_utc_midnight() {
     let state = memory();
-    set(&state, "texts", Some(1), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(1), 0, NOON_UTC).unwrap();
     let tz = -300; // UTC-5: local 2026-11-18 starts at 2026-11-18T05:00Z.
     let local_midnight = MIDNIGHT_UTC + 5 * HOUR;
     text_at(&state, local_midnight - 1);
     assert_eq!(
-        status(&state, tz, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, tz, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 0, false, 1)
     );
     // In UTC that instant is already today.
-    assert_eq!(status(&state, 0, NOON_UTC).unwrap().today, 1);
+    assert_eq!(status(Locale::Es, &state, 0, NOON_UTC).unwrap().today, 1);
     text_at(&state, local_midnight);
     assert_eq!(
-        status(&state, tz, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, tz, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 1, true, 2)
     );
     // Just before local midnight "now" is still the 17th: both sessions are after it.
     assert_eq!(
-        status(&state, tz, local_midnight - 1).unwrap(),
+        status(Locale::Es, &state, tz, local_midnight - 1).unwrap(),
         expect(goal(GoalKind::Texts, 1), 1, true, 1)
     );
 }
@@ -321,12 +329,12 @@ fn a_negative_offset_moves_local_midnight_after_utc_midnight() {
 #[test]
 fn the_streak_ends_today_when_today_is_met() {
     let state = memory();
-    set(&state, "texts", Some(1), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(1), 0, NOON_UTC).unwrap();
     for days_ago in [0, 1, 2, 4, 5] {
         text_at(&state, NOON_UTC - days_ago * DAY);
     }
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 1, true, 3)
     );
 }
@@ -334,20 +342,20 @@ fn the_streak_ends_today_when_today_is_met() {
 #[test]
 fn the_streak_ends_yesterday_while_today_is_not_met() {
     let state = memory();
-    set(&state, "texts", Some(3), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(3), 0, NOON_UTC).unwrap();
     for days_ago in [1, 2] {
         for i in 0..3 {
             text_at(&state, NOON_UTC - days_ago * DAY + i * MINUTE);
         }
     }
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 3), 0, false, 2)
     );
     // Some practice today that does not reach the goal keeps yesterday's streak.
     text_at(&state, NOON_UTC - HOUR);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 3), 1, false, 2)
     );
 }
@@ -355,20 +363,20 @@ fn the_streak_ends_yesterday_while_today_is_not_met() {
 #[test]
 fn a_day_without_sessions_or_below_the_current_goal_breaks_the_streak() {
     let state = memory();
-    set(&state, "texts", Some(1), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "texts", Some(1), 0, NOON_UTC).unwrap();
     // Nothing yesterday: the day before does not count.
     text_at(&state, NOON_UTC - 2 * DAY);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 0, false, 0)
     );
     text_at(&state, NOON_UTC);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Texts, 1), 1, true, 1)
     );
     // The current goal is applied to past days: with 2 texts a day, none was met.
-    let two = set(&state, "minutes", Some(5), 0, NOON_UTC).unwrap();
+    let two = set(Locale::Es, &state, "minutes", Some(5), 0, NOON_UTC).unwrap();
     assert_eq!(two, expect(goal(GoalKind::Minutes, 5), 0, false, 0));
 }
 
@@ -379,7 +387,7 @@ fn no_goal_means_no_progress_and_no_streak() {
         text_at(&state, NOON_UTC - days_ago * DAY);
     }
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(None, 0, false, 0)
     );
 }
@@ -390,10 +398,27 @@ fn no_goal_means_no_progress_and_no_streak() {
 fn the_temporary_mode_keeps_the_goal_and_sessions_in_memory() {
     let state = memory();
     assert!(!state.status.persistent);
-    set(&state, "minutes", Some(5), 0, NOON_UTC).unwrap();
+    set(Locale::Es, &state, "minutes", Some(5), 0, NOON_UTC).unwrap();
     session_at(&state, "prose", NOON_UTC - HOUR, (5 * MINUTE) as f64);
     assert_eq!(
-        status(&state, 0, NOON_UTC).unwrap(),
+        status(Locale::Es, &state, 0, NOON_UTC).unwrap(),
         expect(goal(GoalKind::Minutes, 5), 5, true, 1)
+    );
+}
+
+#[test]
+fn goal_errors_follow_the_interface_language() {
+    assert_eq!(
+        parse_goal(Locale::En, "minutes", Some(7)),
+        Err("Invalid daily goal".to_owned())
+    );
+    assert_eq!(
+        parse_goal(Locale::De, "weeks", Some(5)),
+        Err("Ungültiges Tagesziel".to_owned())
+    );
+    let state = memory();
+    assert_eq!(
+        status(Locale::En, &state, 1081, 0),
+        Err("Invalid time zone: 1081".to_owned())
     );
 }

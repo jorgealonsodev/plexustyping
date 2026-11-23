@@ -12,6 +12,11 @@ use super::*;
 use crate::commands::{STATS_MODE, lock_store, open_state, score_session};
 use crate::secrets::{NoStore, SharedSecrets};
 
+/// A profile error as the Spanish interface shows it.
+fn es(err: ProfileError) -> String {
+    err.message(Locale::Es)
+}
+
 /// Fresh directory under the system temp dir, removed on drop.
 struct TempDir(PathBuf);
 
@@ -297,7 +302,7 @@ fn profile_create_rejections_are_spanish_and_change_nothing() {
     ];
     for (name, language, layout, message) in cases {
         assert_eq!(
-            create(&state, name, language, layout),
+            create(&state, name, language, layout).map_err(es),
             Err(message.to_owned()),
             "{name:?} {language} {layout}"
         );
@@ -395,7 +400,7 @@ fn profile_update_rejections_are_spanish_and_change_nothing() {
     ];
     for (id, n, language, layout, message) in cases {
         assert_eq!(
-            update(&state, id, n, language, layout, Some("nord".into())),
+            update(&state, id, n, language, layout, Some("nord".into())).map_err(es),
             Err(message.to_owned())
         );
     }
@@ -409,11 +414,11 @@ fn profile_delete_rejections_are_spanish_and_change_nothing() {
     practise(&state, &main);
     let before = snapshot(&state);
     assert_eq!(
-        delete(&state, main.id),
+        delete(&state, main.id).map_err(es),
         Err("No se puede borrar el único perfil".to_owned())
     );
     assert_eq!(
-        delete(&state, 9_999),
+        delete(&state, 9_999).map_err(es),
         Err("Ese perfil no existe".to_owned())
     );
     assert_eq!(snapshot(&state), before);
@@ -426,8 +431,35 @@ fn profile_switch_to_an_unknown_id_is_refused_and_changes_nothing() {
     let state = memory();
     let before = snapshot(&state);
     assert_eq!(
-        switch(&state, 9_999),
+        switch(&state, 9_999).map_err(es),
         Err("Ese perfil no existe".to_owned())
     );
     assert_eq!(snapshot(&state), before);
+}
+
+#[test]
+fn profile_errors_follow_the_interface_language() {
+    let state = memory();
+    let main = state.active_profile();
+    let en = |err: ProfileError| err.message(Locale::En);
+    assert_eq!(
+        create(&state, "", "es", "es-qwerty").map_err(en),
+        Err("The profile name cannot be empty".to_owned())
+    );
+    assert_eq!(
+        create(&state, "Nuevo", "xx", "es-qwerty").map_err(en),
+        Err("Unknown language".to_owned())
+    );
+    assert_eq!(
+        update(&state, main.id, None, None, Some("xx".into()), None).map_err(en),
+        Err("Unknown layout".to_owned())
+    );
+    assert_eq!(
+        delete(&state, main.id).map_err(|e| e.message(Locale::De)),
+        Err("Das einzige Profil kann nicht gelöscht werden".to_owned())
+    );
+    assert_eq!(
+        switch(&state, 9_999).map_err(|e| e.message(Locale::Pt)),
+        Err("Esse perfil não existe".to_owned())
+    );
 }

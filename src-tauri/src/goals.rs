@@ -10,7 +10,9 @@ use plexustyping_store::{DailyGoal, GoalKind, SessionSummary, StoreError};
 use serde::Serialize;
 
 use crate::commands::{AppState, lock_store};
-use crate::history::MAX_TZ_OFFSET_MIN;
+use crate::history::check_tz;
+use crate::i18n::Locale;
+use crate::messages;
 
 const DAY_MS: i64 = 86_400_000;
 const MINUTE_MS: f64 = 60_000.0;
@@ -31,30 +33,35 @@ pub struct GoalStatus {
 
 /// The goal of `goal_set(kind, amount)`: `"off"` without amount, or
 /// `"minutes"` / `"texts"` with an allowed amount; else "Meta diaria no válida".
-pub fn parse_goal(kind: &str, amount: Option<u32>) -> Result<Option<DailyGoal>, String> {
+pub fn parse_goal(
+    locale: Locale,
+    kind: &str,
+    amount: Option<u32>,
+) -> Result<Option<DailyGoal>, String> {
     let kind = match (kind, amount) {
         ("off", None) => return Ok(None),
         ("minutes", Some(_)) => GoalKind::Minutes,
         ("texts", Some(_)) => GoalKind::Texts,
-        _ => return Err(StoreError::InvalidGoal.to_string()),
+        _ => return Err(messages::store_error(locale, &StoreError::InvalidGoal)),
     };
     let amount = amount.unwrap_or_default();
     DailyGoal::new(kind, amount)
         .map(Some)
-        .map_err(|e| e.to_string())
+        .map_err(|e| messages::store_error(locale, &e))
 }
 
 /// `goal_set`: sets the active profile's goal and returns its status;
 /// a refused goal or time zone changes nothing.
 pub fn set(
+    locale: Locale,
     state: &AppState,
     kind: &str,
     amount: Option<u32>,
     tz_offset_min: i32,
     now_ms: i64,
 ) -> Result<GoalStatus, String> {
-    let goal = parse_goal(kind, amount)?;
-    check_tz(tz_offset_min)?;
+    let goal = parse_goal(locale, kind, amount)?;
+    check_tz(locale, tz_offset_min)?;
     let store = lock_store(&state.store);
     let profile = state.active_profile();
     store
@@ -68,8 +75,13 @@ pub fn set(
 
 /// `goal_status` of the active profile at `now_ms`; `tz_offset_min` is minutes
 /// east of UTC (`-new Date().getTimezoneOffset()`).
-pub fn status(state: &AppState, tz_offset_min: i32, now_ms: i64) -> Result<GoalStatus, String> {
-    check_tz(tz_offset_min)?;
+pub fn status(
+    locale: Locale,
+    state: &AppState,
+    tz_offset_min: i32,
+    now_ms: i64,
+) -> Result<GoalStatus, String> {
+    check_tz(locale, tz_offset_min)?;
     let store = lock_store(&state.store);
     let profile = state.active_profile();
     let goal = store.daily_goal(profile.id).map_err(|e| e.to_string())?;
@@ -80,14 +92,6 @@ pub fn status(state: &AppState, tz_offset_min: i32, now_ms: i64) -> Result<GoalS
         None => Vec::new(),
     };
     Ok(progress(goal, &sessions, tz_offset_min, now_ms))
-}
-
-fn check_tz(tz_offset_min: i32) -> Result<(), String> {
-    if (-MAX_TZ_OFFSET_MIN..=MAX_TZ_OFFSET_MIN).contains(&tz_offset_min) {
-        Ok(())
-    } else {
-        Err(format!("Zona horaria no válida: {tz_offset_min}"))
-    }
 }
 
 /// Local day number (days since 1970-01-01 in the local calendar) of `ms`.

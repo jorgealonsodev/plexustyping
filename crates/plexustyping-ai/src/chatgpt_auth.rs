@@ -178,6 +178,80 @@ pub enum AuthError {
     BadResponse,
 }
 
+impl AuthError {
+    /// The error whose message is `message`, if any: how the app finds the
+    /// error behind a [`crate::ProviderError`] built from one, to translate it.
+    /// [`AuthError::Unavailable`] (a number in its text) is never recognized.
+    pub fn recognize(message: &str) -> Option<Self> {
+        // A private-use char cannot come from OpenAI's codes or our texts.
+        const SLOT: &str = "\u{E000}";
+        let slot = || SLOT.to_owned();
+        let shapes = [
+            AuthError::NoStorage,
+            AuthError::Storage { message: slot() },
+            AuthError::DamagedFile,
+            AuthError::Listener { message: slot() },
+            AuthError::Browser,
+            AuthError::Cancelled,
+            AuthError::Timeout,
+            AuthError::AccessDenied,
+            AuthError::Authorization { code: slot() },
+            AuthError::MissingCode,
+            AuthError::MissingClientId,
+            AuthError::ClientIdMismatch,
+            AuthError::CodeExchange { detail: slot() },
+            AuthError::KeysUnavailable,
+            AuthError::InvalidIdToken { reason: slot() },
+            AuthError::IdentityMismatch,
+            AuthError::NotSignedIn,
+            AuthError::PlanNotEnabled,
+            AuthError::SessionExpired,
+            AuthError::InvalidClient,
+            AuthError::RefreshRefused { detail: slot() },
+            AuthError::Network { message: slot() },
+            AuthError::BadResponse,
+        ];
+        shapes.into_iter().find_map(|shape| {
+            let text = shape.to_string();
+            let Some((before, after)) = text.split_once(SLOT) else {
+                return (text == message).then_some(shape);
+            };
+            let value = message.strip_prefix(before)?.strip_suffix(after)?;
+            Some(shape.with_text(value.to_owned()))
+        })
+    }
+
+    /// `self` with its one text field set to `value` (unchanged without one).
+    fn with_text(self, value: String) -> Self {
+        match self {
+            AuthError::Storage { .. } => AuthError::Storage { message: value },
+            AuthError::Listener { .. } => AuthError::Listener { message: value },
+            AuthError::Authorization { .. } => AuthError::Authorization { code: value },
+            AuthError::CodeExchange { .. } => AuthError::CodeExchange { detail: value },
+            AuthError::InvalidIdToken { .. } => AuthError::InvalidIdToken { reason: value },
+            AuthError::RefreshRefused { .. } => AuthError::RefreshRefused { detail: value },
+            AuthError::Network { .. } => AuthError::Network { message: value },
+            AuthError::NoStorage
+            | AuthError::DamagedFile
+            | AuthError::Browser
+            | AuthError::Cancelled
+            | AuthError::Timeout
+            | AuthError::AccessDenied
+            | AuthError::MissingCode
+            | AuthError::MissingClientId
+            | AuthError::ClientIdMismatch
+            | AuthError::KeysUnavailable
+            | AuthError::IdentityMismatch
+            | AuthError::NotSignedIn
+            | AuthError::PlanNotEnabled
+            | AuthError::SessionExpired
+            | AuthError::InvalidClient
+            | AuthError::Unavailable { .. }
+            | AuthError::BadResponse => self,
+        }
+    }
+}
+
 /// The saved registration and token set. The host and client ids outlive a sign-out.
 #[derive(Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]

@@ -72,12 +72,12 @@ fn enable(state: &AppState, chain: &[(ProviderId, &str)]) {
         density: 3.0,
         topic: Some("comida".into()),
     };
-    save_settings(&lock_store(&state.store), settings).unwrap();
+    save_settings(Locale::Es, &lock_store(&state.store), settings).unwrap();
 }
 
 async fn with_key(secrets: &Arc<MemoryStore>, id: ProviderId) {
     let shared: SharedSecrets = secrets.clone();
-    key_save(&shared, id, KEY.into()).await.unwrap();
+    key_save(Locale::Es, &shared, id, KEY.into()).await.unwrap();
 }
 
 /// One char event per typed char, 100 ms apart.
@@ -100,6 +100,7 @@ fn params(seed: u64) -> TextParams {
         day: DAY.into(),
         mode: PracticeMode::Prose,
         max_lines: DEFAULT_MAX_LINES,
+        locale: Locale::Es,
     }
 }
 
@@ -168,7 +169,7 @@ fn save_settings_normalizes_and_round_trips() {
         "topic": "  viajes "
     }))
     .unwrap();
-    let saved = save_settings(&store, input).unwrap();
+    let saved = save_settings(Locale::Es, &store, input).unwrap();
     assert_eq!(saved.chain[0].model, "");
     assert_eq!(saved.chain[1].model, "gemini-x");
     assert_eq!(saved.topic.as_deref(), Some("viajes"));
@@ -177,13 +178,17 @@ fn save_settings_normalizes_and_round_trips() {
         topic: Some("   ".into()),
         ..AiSettings::default()
     };
-    assert_eq!(save_settings(&store, blank).unwrap().topic, None);
+    assert_eq!(
+        save_settings(Locale::Es, &store, blank).unwrap().topic,
+        None
+    );
 }
 
 #[test]
 fn invalid_settings_are_rejected_and_keep_the_stored_ones() {
     let store = Store::open_in_memory().unwrap();
     let good = save_settings(
+        Locale::Es,
         &store,
         AiSettings {
             enabled: true,
@@ -269,7 +274,7 @@ fn invalid_settings_are_rejected_and_keep_the_stored_ones() {
         ),
     ];
     for (bad, message) in cases {
-        let err = save_settings(&store, bad.clone()).unwrap_err();
+        let err = save_settings(Locale::Es, &store, bad.clone()).unwrap_err();
         assert_eq!(err, AiFailure::settings(message), "{bad:?}");
         assert_eq!(load_settings(&store), good);
     }
@@ -280,7 +285,10 @@ fn invalid_settings_are_rejected_and_keep_the_stored_ones() {
         topic: Some("ñ".repeat(60)),
         ..base()
     };
-    assert_eq!(save_settings(&store, edge.clone()).unwrap(), edge);
+    assert_eq!(
+        save_settings(Locale::Es, &store, edge.clone()).unwrap(),
+        edge
+    );
 }
 
 #[test]
@@ -349,8 +357,14 @@ fn provider_errors_map_to_spanish_reasons_in_one_place() {
         ),
     ];
     for (err, reason) in cases {
-        assert_eq!(provider_reason(ProviderId::Gemini, &err), reason);
-        assert_eq!(provider_failure(ProviderId::Gemini, &err).message, reason);
+        assert_eq!(
+            provider_reason(Locale::Es, ProviderId::Gemini, &err),
+            reason
+        );
+        assert_eq!(
+            provider_failure(Locale::Es, ProviderId::Gemini, &err).message,
+            reason
+        );
     }
 }
 
@@ -374,23 +388,31 @@ async fn keys_are_saved_trimmed_in_the_keychain_and_only_their_status_returns() 
     let memory = MemoryStore::shared();
     let secrets: SharedSecrets = memory.clone();
     let id = ProviderId::OpencodeGo;
-    assert_eq!(key_status(&offline(), &secrets, id).await, Ok(false));
-    key_save(&secrets, id, format!("  {KEY}\n")).await.unwrap();
+    assert_eq!(
+        key_status(Locale::Es, &offline(), &secrets, id).await,
+        Ok(false)
+    );
+    key_save(Locale::Es, &secrets, id, format!("  {KEY}\n"))
+        .await
+        .unwrap();
     assert_eq!(memory.get("ai:opencode-go").unwrap().as_deref(), Some(KEY));
     assert_eq!(
         memory.label("ai:opencode-go").as_deref(),
         Some("PlexusTyping AI key (OpenCode Go)")
     );
-    let status = key_status(&offline(), &secrets, id).await;
+    let status = key_status(Locale::Es, &offline(), &secrets, id).await;
     assert_eq!(status, Ok(true));
     assert_eq!(serde_json::to_string(&status.unwrap()).unwrap(), "true");
     assert_eq!(
-        key_status(&offline(), &secrets, ProviderId::Claude).await,
+        key_status(Locale::Es, &offline(), &secrets, ProviderId::Claude).await,
         Ok(false)
     );
-    key_delete(&secrets, id).await.unwrap();
-    key_delete(&secrets, id).await.unwrap();
-    assert_eq!(key_status(&offline(), &secrets, id).await, Ok(false));
+    key_delete(Locale::Es, &secrets, id).await.unwrap();
+    key_delete(Locale::Es, &secrets, id).await.unwrap();
+    assert_eq!(
+        key_status(Locale::Es, &offline(), &secrets, id).await,
+        Ok(false)
+    );
 }
 
 #[tokio::test]
@@ -398,7 +420,7 @@ async fn an_empty_key_is_rejected_and_nothing_is_stored() {
     let memory = MemoryStore::shared();
     let secrets: SharedSecrets = memory.clone();
     with_key(&memory, ProviderId::Claude).await;
-    let err = key_save(&secrets, ProviderId::Claude, " \n ".into()).await;
+    let err = key_save(Locale::Es, &secrets, ProviderId::Claude, " \n ".into()).await;
     assert_eq!(err, Err(AiFailure::new("noKey", "La clave está vacía")));
     assert_eq!(memory.get("ai:claude").unwrap().as_deref(), Some(KEY));
 }
@@ -406,17 +428,24 @@ async fn an_empty_key_is_rejected_and_nothing_is_stored() {
 #[tokio::test]
 async fn an_unavailable_keychain_is_an_error_never_a_plain_text_fallback() {
     let secrets: SharedSecrets = Arc::new(NoStore);
-    let unavailable = Err(AiFailure::new("keychain", KEYCHAIN_UNAVAILABLE));
+    let unavailable = Err(AiFailure::new(
+        "keychain",
+        messages::KEYCHAIN_UNAVAILABLE.es,
+    ));
     assert_eq!(
-        key_status(&offline(), &secrets, ProviderId::Claude).await,
+        messages::KEYCHAIN_UNAVAILABLE.es,
+        "Llavero no disponible: las claves nunca se guardan en texto plano"
+    );
+    assert_eq!(
+        key_status(Locale::Es, &offline(), &secrets, ProviderId::Claude).await,
         unavailable
     );
     assert_eq!(
-        key_save(&secrets, ProviderId::Claude, KEY.into()).await,
+        key_save(Locale::Es, &secrets, ProviderId::Claude, KEY.into()).await,
         unavailable.clone().map(|_| ())
     );
     assert_eq!(
-        key_delete(&secrets, ProviderId::Claude).await,
+        key_delete(Locale::Es, &secrets, ProviderId::Claude).await,
         unavailable.map(|_| ())
     );
 }
@@ -441,16 +470,16 @@ async fn models_use_the_stored_key_and_opencode_go_needs_none() {
     let memory = MemoryStore::shared();
     let secrets: SharedSecrets = memory.clone();
     let client = srv.client();
-    let got = models(&client, &secrets, ProviderId::OpencodeGo).await;
+    let got = models(Locale::Es, &client, &secrets, ProviderId::OpencodeGo).await;
     assert_eq!(got, Ok(vec!["kimi-k2".to_owned()]));
-    let no_key = models(&client, &secrets, ProviderId::Openai).await;
+    let no_key = models(Locale::Es, &client, &secrets, ProviderId::Openai).await;
     assert_eq!(
         no_key,
         Err(AiFailure::new("noKey", "Falta la clave de OpenAI"))
     );
     assert_eq!(srv.requests().len(), 1, "no request without a key");
     with_key(&memory, ProviderId::Openai).await;
-    let got = models(&client, &secrets, ProviderId::Openai).await;
+    let got = models(Locale::Es, &client, &secrets, ProviderId::Openai).await;
     assert_eq!(got, Ok(vec!["gpt-5-mini".to_owned()]));
 }
 
@@ -469,15 +498,29 @@ async fn test_connection_reports_ok_or_a_typed_failure_without_the_key() {
     let secrets: SharedSecrets = memory.clone();
     let client = srv.client();
     assert_eq!(
-        test_connection(&client, &secrets, ProviderId::Openai, "").await,
+        test_connection(Locale::Es, &client, &secrets, ProviderId::Openai, "").await,
         Err(AiFailure::new("noKey", "Falta la clave de OpenAI"))
     );
     with_key(&memory, ProviderId::Openai).await;
     assert_eq!(
-        test_connection(&client, &secrets, ProviderId::Openai, "gpt-5-mini").await,
+        test_connection(
+            Locale::Es,
+            &client,
+            &secrets,
+            ProviderId::Openai,
+            "gpt-5-mini"
+        )
+        .await,
         Ok(())
     );
-    let failed = test_connection(&client, &secrets, ProviderId::Openai, "gpt-5-mini").await;
+    let failed = test_connection(
+        Locale::Es,
+        &client,
+        &secrets,
+        ProviderId::Openai,
+        "gpt-5-mini",
+    )
+    .await;
     let failed = failed.unwrap_err();
     assert_eq!(failed, AiFailure::new("auth", "OpenAI rechazó la clave"));
     assert!(!serde_json::to_string(&failed).unwrap().contains(KEY));
@@ -899,6 +942,7 @@ async fn a_missing_key_or_model_or_keychain_falls_back_with_a_notice() {
 async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
     let state = state(MemoryStore::shared(), offline());
     let first = first_text(
+        Locale::Es,
         &state,
         "es",
         "es-qwerty",
@@ -933,6 +977,7 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
         assert!(scored.saved);
     }
     let next = first_text(
+        Locale::Es,
         &state,
         "es",
         "es-qwerty",
@@ -952,6 +997,7 @@ async fn first_text_is_the_diagnostic_for_a_new_profile_then_like_next_text() {
     assert_eq!(next.text, next_text(&state, &p).await.unwrap());
     assert!(
         first_text(
+            Locale::Es,
             &state,
             "xx",
             "es-qwerty",
@@ -1038,6 +1084,7 @@ async fn first_text_in_words_mode_skips_the_diagnostic_and_the_ai() {
     let state = state(memory, srv.client());
     enable(&state, &[(ProviderId::Openai, "gpt-5-mini")]);
     let first = first_text(
+        Locale::Es,
         &state,
         "es",
         "es-qwerty",
@@ -1072,6 +1119,7 @@ fn continue_params(seed: u64, mode: ContinueMode) -> ContinueParams {
         seed,
         day: DAY.into(),
         offline: false,
+        locale: Locale::Es,
     }
 }
 
@@ -1517,6 +1565,7 @@ async fn html_css_ai_texts_are_highlighted_as_html() {
 async fn first_text_skips_the_diagnostic_a_layout_cannot_type() {
     let state = state(MemoryStore::shared(), offline());
     let first = first_text(
+        Locale::Es,
         &state,
         "es",
         "us-qwerty",
@@ -1543,7 +1592,7 @@ async fn first_text_skips_the_diagnostic_a_layout_cannot_type() {
 #[tokio::test]
 async fn first_text_in_code_mode_skips_the_prose_diagnostic() {
     let state = state(MemoryStore::shared(), offline());
-    let first = first_text(&state, "es", "es-qwerty", &rust(), 5, 1, DAY)
+    let first = first_text(Locale::Es, &state, "es", "es-qwerty", &rust(), 5, 1, DAY)
         .await
         .unwrap();
     assert!(!first.diagnostic);
@@ -1566,6 +1615,7 @@ fn generation_futures_hold_no_store_lock_across_await() {
     let p = params(1);
     assert_send(next_text(&state, &p));
     assert_send(first_text(
+        Locale::Es,
         &state,
         "es",
         "es-qwerty",
@@ -1574,8 +1624,14 @@ fn generation_futures_hold_no_store_lock_across_await() {
         1,
         DAY,
     ));
-    assert_send(models(&state.ai, &state.secrets, ProviderId::Claude));
+    assert_send(models(
+        Locale::Es,
+        &state.ai,
+        &state.secrets,
+        ProviderId::Claude,
+    ));
     assert_send(test_connection(
+        Locale::Es,
         &state.ai,
         &state.secrets,
         ProviderId::Claude,
@@ -2041,7 +2097,7 @@ fn chatgpt_errors_show_their_own_spanish_message() {
         ),
     ];
     for (err, reason) in cases {
-        assert_eq!(provider_reason(id, &err), reason, "{err:?}");
+        assert_eq!(provider_reason(Locale::Es, id, &err), reason, "{err:?}");
     }
     assert_eq!(short_name(id), "ChatGPT");
     assert_eq!(slug(id), "chatgpt");
@@ -2053,7 +2109,7 @@ async fn chatgpt_takes_no_key_and_its_status_is_the_sign_in() {
     let memory = MemoryStore::shared();
     let secrets: SharedSecrets = memory.clone();
     let id = ProviderId::Chatgpt;
-    let refused = key_save(&secrets, id, KEY.into()).await;
+    let refused = key_save(Locale::Es, &secrets, id, KEY.into()).await;
     assert_eq!(
         refused,
         Err(AiFailure::new(
@@ -2069,17 +2125,26 @@ async fn chatgpt_takes_no_key_and_its_status_is_the_sign_in() {
     ] {
         let dir = Scratch::new();
         let client = chatgpt_client(&srv, &dir, account);
-        assert_eq!(key_status(&client, &secrets, id).await, Ok(ready));
+        assert_eq!(
+            key_status(Locale::Es, &client, &secrets, id).await,
+            Ok(ready)
+        );
         // Deleting does not touch the keychain nor sign out: sign-out is its own action.
-        assert_eq!(key_delete(&secrets, id).await, Ok(()));
-        assert_eq!(key_status(&client, &secrets, id).await, Ok(ready));
+        assert_eq!(key_delete(Locale::Es, &secrets, id).await, Ok(()));
+        assert_eq!(
+            key_status(Locale::Es, &client, &secrets, id).await,
+            Ok(ready)
+        );
     }
-    assert_eq!(key_status(&srv.client(), &secrets, id).await, Ok(false));
+    assert_eq!(
+        key_status(Locale::Es, &srv.client(), &secrets, id).await,
+        Ok(false)
+    );
     // A keychain that cannot be used does not matter to ChatGPT.
     let none: SharedSecrets = Arc::new(NoStore);
     let dir = Scratch::new();
     let client = chatgpt_client(&srv, &dir, Account::SignedIn);
-    assert_eq!(key_status(&client, &none, id).await, Ok(true));
+    assert_eq!(key_status(Locale::Es, &client, &none, id).await, Ok(true));
     assert!(srv.requests().is_empty());
 }
 
@@ -2095,14 +2160,14 @@ async fn chatgpt_models_come_from_the_signed_in_account() {
     let dir = Scratch::new();
     let signed_out = chatgpt_client(&srv, &dir, Account::SignedOut);
     assert_eq!(
-        models(&signed_out, &secrets, ProviderId::Chatgpt).await,
+        models(Locale::Es, &signed_out, &secrets, ProviderId::Chatgpt).await,
         Err(AiFailure::new("auth", "Inicia sesión en ChatGPT"))
     );
     assert!(srv.requests().is_empty());
     let dir = Scratch::new();
     let client = chatgpt_client(&srv, &dir, Account::SignedIn);
     assert_eq!(
-        models(&client, &secrets, ProviderId::Chatgpt).await,
+        models(Locale::Es, &client, &secrets, ProviderId::Chatgpt).await,
         Ok(vec!["gpt-6.2-sol".to_owned(), "gpt-6.1-sol".to_owned()])
     );
     assert_eq!(srv.requests()[0].path, "/v1/models");
@@ -2131,12 +2196,12 @@ async fn the_chatgpt_connection_test_is_the_sign_in_without_any_inference() {
         let dir = Scratch::new();
         let client = chatgpt_client(&srv, &dir, account);
         assert_eq!(
-            test_connection(&client, &secrets, id, CHATGPT_MODEL).await,
+            test_connection(Locale::Es, &client, &secrets, id, CHATGPT_MODEL).await,
             expected
         );
     }
     assert_eq!(
-        test_connection(&srv.client(), &secrets, id, "").await,
+        test_connection(Locale::Es, &srv.client(), &secrets, id, "").await,
         Err(AiFailure::new("auth", "Inicia sesión en ChatGPT"))
     );
     assert!(srv.requests().is_empty(), "no inference request");
@@ -2201,7 +2266,7 @@ async fn chatgpt_status_shows_the_account_and_plan_but_never_a_token() {
     for (account, expected) in cases {
         let dir = Scratch::new();
         let client = chatgpt_client(&srv, &dir, account);
-        let status = chatgpt_status(&client).await.unwrap();
+        let status = chatgpt_status(Locale::Es, &client).await.unwrap();
         assert_eq!(status, expected);
         let json = serde_json::to_value(&status).unwrap();
         assert_eq!(
@@ -2212,7 +2277,7 @@ async fn chatgpt_status_shows_the_account_and_plan_but_never_a_token() {
     }
     // No sign-in configured (no config dir): simply signed out.
     assert_eq!(
-        chatgpt_status(&srv.client()).await,
+        chatgpt_status(Locale::Es, &srv.client()).await,
         Ok(signed(false, None, false))
     );
     assert!(srv.requests().is_empty(), "the status needs no network");
@@ -2231,7 +2296,7 @@ async fn a_chatgpt_sign_in_can_be_cancelled_while_the_browser_is_open() {
     let task = {
         let (client, opened) = (client.clone(), opened.clone());
         tokio::spawn(async move {
-            chatgpt_sign_in(&client, |url: &str| {
+            chatgpt_sign_in(Locale::Es, &client, |url: &str| {
                 opened.lock().unwrap().push(url.to_owned());
                 Ok(())
             })
@@ -2252,7 +2317,7 @@ async fn a_chatgpt_sign_in_can_be_cancelled_while_the_browser_is_open() {
     let opened = opened.lock().unwrap().clone();
     assert_eq!(opened.len(), 1, "the browser opened once");
     assert!(opened[0].starts_with(&format!("{}/api/accounts/authorize?", srv.base())));
-    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
+    assert!(!chatgpt_status(Locale::Es, &client).await.unwrap().signed_in);
     // Cancelling with nothing pending, or without a sign-in at all, is harmless.
     chatgpt_cancel(&client);
     chatgpt_cancel(&srv.client());
@@ -2265,7 +2330,7 @@ async fn chatgpt_sign_in_failures_are_spanish_and_sign_nobody_in() {
 
     let dir = Scratch::new();
     let client = sign_in_client(&srv, &dir, std::time::Duration::from_secs(60));
-    let denied = chatgpt_sign_in(&client, |url: &str| {
+    let denied = chatgpt_sign_in(Locale::Es, &client, |url: &str| {
         answer_callback(url, "error=access_denied");
         Ok(())
     })
@@ -2277,12 +2342,12 @@ async fn chatgpt_sign_in_failures_are_spanish_and_sign_nobody_in() {
             "Has rechazado el permiso, así que PlexusTyping no puede usar tu plan de ChatGPT"
         ))
     );
-    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
+    assert!(!chatgpt_status(Locale::Es, &client).await.unwrap().signed_in);
 
     let dir = Scratch::new();
     let client = sign_in_client(&srv, &dir, short);
     assert_eq!(
-        chatgpt_sign_in(&client, |_: &str| Ok(())).await,
+        chatgpt_sign_in(Locale::Es, &client, |_: &str| Ok(())).await,
         Err(AiFailure::new(
             "timeout",
             "El inicio de sesión en ChatGPT ha caducado. Inténtalo de nuevo"
@@ -2292,12 +2357,12 @@ async fn chatgpt_sign_in_failures_are_spanish_and_sign_nobody_in() {
     let dir = Scratch::new();
     let client = sign_in_client(&srv, &dir, short);
     assert_eq!(
-        chatgpt_sign_in(&client, |_: &str| Err("no browser".to_owned())).await,
+        chatgpt_sign_in(Locale::Es, &client, |_: &str| Err("no browser".to_owned())).await,
         Err(AiFailure::new("config", "No se pudo abrir el navegador"))
     );
 
     assert_eq!(
-        chatgpt_sign_in(&srv.client(), |_: &str| Ok(())).await,
+        chatgpt_sign_in(Locale::Es, &srv.client(), |_: &str| Ok(())).await,
         Err(AiFailure::new(
             "config",
             "PlexusTyping no tiene una carpeta donde guardar la sesión de ChatGPT"
@@ -2342,7 +2407,7 @@ fn chatgpt_sign_in_errors_keep_their_spanish_message_with_a_kind() {
         ),
     ];
     for (err, kind, message) in cases {
-        assert_eq!(auth_failure(err), AiFailure::new(kind, message));
+        assert_eq!(auth_failure(Locale::Es, err), AiFailure::new(kind, message));
     }
 }
 
@@ -2369,7 +2434,7 @@ async fn chatgpt_sign_out_revokes_and_forgets_the_tokens() {
     .await;
     let dir = Scratch::new();
     let client = chatgpt_client(&srv, &dir, Account::SignedIn);
-    let out = chatgpt_sign_out(&client).await.unwrap();
+    let out = chatgpt_sign_out(Locale::Es, &client).await.unwrap();
     assert_eq!(
         serde_json::to_value(&out).unwrap(),
         json!({"revoked": true})
@@ -2377,17 +2442,17 @@ async fn chatgpt_sign_out_revokes_and_forgets_the_tokens() {
     let revoked = srv.requests();
     let revoke = revoked.iter().find(|r| r.path == "/revoke").unwrap();
     assert!(revoke.body.contains("token=rt-SECRET-chatgpt-1"));
-    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
+    assert!(!chatgpt_status(Locale::Es, &client).await.unwrap().signed_in);
     let file = std::fs::read_to_string(dir.0.join("chatgpt-auth.json")).unwrap();
     assert!(!file.contains("SECRET"), "no token left in the file");
     assert!(file.contains("oaiapp_TEST-client-1"), "the client id stays");
     let secrets: SharedSecrets = MemoryStore::shared();
     assert_eq!(
-        models(&client, &secrets, ProviderId::Chatgpt).await,
+        models(Locale::Es, &client, &secrets, ProviderId::Chatgpt).await,
         Err(AiFailure::new("auth", "Inicia sesión en ChatGPT"))
     );
     assert_eq!(
-        key_status(&client, &secrets, ProviderId::Chatgpt).await,
+        key_status(Locale::Es, &client, &secrets, ProviderId::Chatgpt).await,
         Ok(false)
     );
 }
@@ -2399,14 +2464,16 @@ async fn an_unconfirmed_chatgpt_sign_out_still_forgets_the_tokens() {
     let dir = Scratch::new();
     let client = chatgpt_client(&srv, &dir, Account::SignedIn);
     assert_eq!(
-        chatgpt_sign_out(&client).await.map(|s| s.revoked),
+        chatgpt_sign_out(Locale::Es, &client)
+            .await
+            .map(|s| s.revoked),
         Ok(false)
     );
-    assert!(!chatgpt_status(&client).await.unwrap().signed_in);
+    assert!(!chatgpt_status(Locale::Es, &client).await.unwrap().signed_in);
     let file = std::fs::read_to_string(dir.0.join("chatgpt-auth.json")).unwrap();
     assert!(!file.contains("SECRET"), "no token left in the file");
     assert_eq!(
-        chatgpt_sign_out(&srv.client()).await,
+        chatgpt_sign_out(Locale::Es, &srv.client()).await,
         Err(AiFailure::new(
             "config",
             "PlexusTyping no tiene una carpeta donde guardar la sesión de ChatGPT"
@@ -2426,13 +2493,13 @@ async fn chatgpt_models_carry_their_display_names_and_store_the_slug() {
     let dir = Scratch::new();
     let signed_out = chatgpt_client(&srv, &dir, Account::SignedOut);
     assert_eq!(
-        chatgpt_models(&signed_out).await,
+        chatgpt_models(Locale::Es, &signed_out).await,
         Err(AiFailure::new("auth", "Inicia sesión en ChatGPT"))
     );
     assert!(srv.requests().is_empty());
     let dir = Scratch::new();
     let client = chatgpt_client(&srv, &dir, Account::SignedIn);
-    let got = chatgpt_models(&client).await.unwrap();
+    let got = chatgpt_models(Locale::Es, &client).await.unwrap();
     assert_eq!(
         serde_json::to_value(&got).unwrap(),
         json!([
@@ -2442,4 +2509,118 @@ async fn chatgpt_models_carry_their_display_names_and_store_the_slug() {
         ])
     );
     assert_eq!(srv.requests().len(), 1);
+}
+
+// ---- Interface language (ui-i18n S1) ----
+
+#[test]
+fn provider_reasons_follow_the_interface_language() {
+    let m = || "detail".to_owned();
+    assert_eq!(
+        provider_reason(Locale::En, ProviderId::Gemini, &ProviderError::NoKey),
+        "The Gemini key is missing"
+    );
+    assert_eq!(
+        provider_reason(
+            Locale::De,
+            ProviderId::Openai,
+            &ProviderError::Auth { message: m() }
+        ),
+        "OpenAI hat den Schlüssel abgelehnt"
+    );
+    assert_eq!(
+        provider_failure(
+            Locale::En,
+            ProviderId::Claude,
+            &ProviderError::Network { message: m() }
+        ),
+        AiFailure::new("network", "No connection to the AI")
+    );
+    // ChatGPT's plan and sign-in messages come in Spanish from the crate.
+    let plan = ProviderError::RateLimit {
+        message: "Has alcanzado el límite de tu plan de ChatGPT".into(),
+    };
+    assert_eq!(
+        provider_reason(Locale::En, ProviderId::Chatgpt, &plan),
+        "You have reached the limit of your ChatGPT plan"
+    );
+    assert_eq!(
+        provider_reason(Locale::Es, ProviderId::Chatgpt, &plan),
+        "Has alcanzado el límite de tu plan de ChatGPT"
+    );
+    let expired: ProviderError = AuthError::SessionExpired.into();
+    assert_eq!(
+        provider_reason(Locale::Fr, ProviderId::Chatgpt, &expired),
+        "Votre session ChatGPT a expiré. Reconnectez-vous"
+    );
+}
+
+#[test]
+fn settings_and_sign_in_failures_follow_the_interface_language() {
+    let store = Store::open_in_memory().unwrap();
+    let bad = AiSettings {
+        density: 9.0,
+        ..AiSettings::default()
+    };
+    assert_eq!(
+        save_settings(Locale::En, &store, bad),
+        Err(AiFailure::settings("The density must be between 2× and 5×"))
+    );
+    let long = AiSettings {
+        topic: Some("x".repeat(61)),
+        ..AiSettings::default()
+    };
+    assert_eq!(
+        save_settings(Locale::De, &store, long),
+        Err(AiFailure::settings(
+            "Das Thema darf höchstens 60 Zeichen haben"
+        ))
+    );
+    assert_eq!(
+        auth_failure(Locale::En, AuthError::Cancelled),
+        AiFailure::new("cancelled", "The ChatGPT sign-in was cancelled")
+    );
+}
+
+#[tokio::test]
+async fn key_failures_follow_the_interface_language() {
+    let secrets: SharedSecrets = MemoryStore::shared();
+    assert_eq!(
+        key_save(Locale::En, &secrets, ProviderId::Openai, "  ".into()).await,
+        Err(AiFailure::new("noKey", "The key is empty"))
+    );
+    let none: SharedSecrets = Arc::new(NoStore);
+    assert_eq!(
+        key_status(Locale::En, &offline(), &none, ProviderId::Openai).await,
+        Err(AiFailure::new(
+            "keychain",
+            "Keychain unavailable: keys are never stored in plain text"
+        ))
+    );
+}
+
+#[tokio::test]
+async fn notices_follow_the_interface_language() {
+    let srv = server(vec![]).await;
+    let state = state(MemoryStore::shared(), srv.client());
+    weak_in_n(&state);
+    enable(&state, &[(ProviderId::Gemini, "gemini-3.5-flash-lite")]);
+    let english = TextParams {
+        locale: Locale::En,
+        ..params(4)
+    };
+    let got = next_text(&state, &english).await.unwrap();
+    assert_eq!(
+        got.notice.as_deref(),
+        Some("The Gemini key is missing: text from the local corpus")
+    );
+    let german = ContinueParams {
+        locale: Locale::De,
+        tail: "ñ".repeat(2001),
+        ..continue_params(1, ContinueMode::Prose)
+    };
+    assert_eq!(
+        continue_text(&state, &german).await,
+        Err("Der fortzusetzende Text darf höchstens 2000 Zeichen haben".to_owned())
+    );
 }

@@ -204,3 +204,33 @@ fn defaults_follow_the_docs() {
         "https://auth.openai.com/api/accounts/oauth/token"
     );
 }
+
+#[test]
+fn auth_errors_are_recognized_from_their_message() {
+    let errors = [
+        AuthError::NoStorage,
+        AuthError::Storage {
+            message: "disk full".into(),
+        },
+        AuthError::DamagedFile,
+        AuthError::Authorization {
+            code: "server_error".into(),
+        },
+        AuthError::SessionExpired,
+        AuthError::RefreshRefused {
+            detail: "invalid_request".into(),
+        },
+        AuthError::Network {
+            message: "dns: failed".into(),
+        },
+        AuthError::BadResponse,
+    ];
+    for err in errors {
+        assert_eq!(AuthError::recognize(&err.to_string()), Some(err));
+    }
+    assert_eq!(AuthError::recognize("Has alcanzado otra cosa"), None);
+    assert_eq!(
+        AuthError::recognize(&AuthError::Unavailable { status: 503 }.to_string()),
+        None
+    );
+}

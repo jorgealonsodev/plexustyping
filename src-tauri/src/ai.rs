@@ -24,6 +24,8 @@ use crate::commands::{
     self, AppState, DEFAULT_LENGTH, DEFAULT_TARGETS, FirstText, NextText, NextTextRequest,
     TextSource, lock_store,
 };
+use crate::i18n::Locale;
+use crate::messages;
 use crate::secrets::{self, SecretError, SharedSecrets};
 use crate::unlock;
 
@@ -86,7 +88,7 @@ pub struct ProviderInfo {
     pub default_model: &'static str,
 }
 
-/// A failed AI command, serialized as `{ kind, message }` (message in Spanish).
+/// A failed AI command, serialized as `{ kind, message }` (message in the interface language).
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct AiFailure {
     pub kind: &'static str,
@@ -107,15 +109,14 @@ impl AiFailure {
 }
 
 /// Why the keychain could not be used, without secret bytes.
-const KEYCHAIN_UNAVAILABLE: &str =
-    "Llavero no disponible: las claves nunca se guardan en texto plano";
-
-fn keychain_failure(err: SecretError) -> AiFailure {
+fn keychain_failure(locale: Locale, err: SecretError) -> AiFailure {
     match err {
-        SecretError::Unavailable => AiFailure::new("keychain", KEYCHAIN_UNAVAILABLE),
+        SecretError::Unavailable => {
+            AiFailure::new("keychain", locale.pick(messages::KEYCHAIN_UNAVAILABLE))
+        }
         SecretError::Keyring { message } => AiFailure::new(
             "keychain",
-            format!("Error del llavero del sistema: {message}"),
+            messages::KEYCHAIN_ERROR.fill(locale, &[("message", &message)]),
         ),
     }
 }
@@ -165,32 +166,29 @@ pub fn providers() -> Vec<ProviderInfo> {
         .collect()
 }
 
-/// The one place that turns a provider error into a short Spanish reason.
-/// ChatGPT's sign-in, plan and request errors already carry a Spanish message
-/// meant for the user (e.g. "Has alcanzado el límite de tu plan de ChatGPT").
-pub fn provider_reason(id: ProviderId, err: &ProviderError) -> String {
-    let name = short_name(id);
+/// The one place that turns a provider error into a short reason in `locale`.
+/// ChatGPT's sign-in, plan and request errors carry a message meant for the
+/// user (in Spanish, e.g. "Has alcanzado el límite de tu plan de ChatGPT"),
+/// which [`messages::chatgpt_message`] translates.
+pub fn provider_reason(locale: Locale, id: ProviderId, err: &ProviderError) -> String {
     if id == ProviderId::Chatgpt
         && let ProviderError::Auth { message }
         | ProviderError::RateLimit { message }
         | ProviderError::Config { message } = err
     {
-        return message.clone();
+        return messages::chatgpt_message(locale, message);
     }
-    match err {
-        ProviderError::NoKey => format!("Falta la clave de {name}"),
-        ProviderError::Auth { .. } => format!("{name} rechazó la clave"),
-        ProviderError::RateLimit { .. } => format!("{name} está limitando las peticiones"),
-        ProviderError::Network { .. } => "Sin conexión con la IA".to_owned(),
-        ProviderError::Timeout => format!("{name} no respondió a tiempo"),
-        ProviderError::Refused { .. } => format!("{name} se negó a generar el texto"),
-        ProviderError::BadResponse { .. } | ProviderError::Invalid { .. } => {
-            "La IA no devolvió un texto válido".to_owned()
-        }
-        ProviderError::Config { .. } => {
-            format!("{name} rechazó la petición (revisa el modelo)")
-        }
-    }
+    let texts = match err {
+        ProviderError::NoKey => messages::NO_KEY,
+        ProviderError::Auth { .. } => messages::KEY_REJECTED,
+        ProviderError::RateLimit { .. } => messages::RATE_LIMITED,
+        ProviderError::Network { .. } => messages::NO_CONNECTION,
+        ProviderError::Timeout => messages::TIMED_OUT,
+        ProviderError::Refused { .. } => messages::REFUSED,
+        ProviderError::BadResponse { .. } | ProviderError::Invalid { .. } => messages::BAD_TEXT,
+        ProviderError::Config { .. } => messages::REQUEST_REJECTED,
+    };
+    texts.fill(locale, &[("name", short_name(id))])
 }
 
 /// One stderr line per failed attempt (S3): a rejected text lists every
@@ -231,7 +229,7 @@ fn rejection_lines(errors: &[(ProviderId, ProviderError)]) -> Vec<String> {
 }
 
 /// [`ProviderError`] as a command failure.
-fn provider_failure(id: ProviderId, err: &ProviderError) -> AiFailure {
+fn provider_failure(locale: Locale, id: ProviderId, err: &ProviderError) -> AiFailure {
     let kind = match err {
         ProviderError::NoKey => "noKey",
         ProviderError::Auth { .. } => "auth",
@@ -243,36 +241,36 @@ fn provider_failure(id: ProviderId, err: &ProviderError) -> AiFailure {
         ProviderError::Config { .. } => "config",
         ProviderError::Invalid { .. } => "invalid",
     };
-    AiFailure::new(kind, provider_reason(id, err))
+    AiFailure::new(kind, provider_reason(locale, id, err))
 }
 
 /// Normalized `s` (trimmed model and topic, empty topic = none) or why it is invalid.
-pub fn validate_settings(mut s: AiSettings) -> Result<AiSettings, AiFailure> {
+pub fn validate_settings(locale: Locale, mut s: AiSettings) -> Result<AiSettings, AiFailure> {
+    let refuse = |texts: crate::i18n::Texts| Err(AiFailure::settings(locale.pick(texts)));
     if s.chain.is_empty() || s.chain.len() > MAX_CHAIN {
-        return Err(AiFailure::settings(format!(
-            "La cadena de respaldo necesita de 1 a {MAX_CHAIN} proveedores"
-        )));
+        let max = MAX_CHAIN.to_string();
+        return Err(AiFailure::settings(
+            messages::CHAIN_SIZE.fill(locale, &[("max", &max)]),
+        ));
     }
     for i in 0..s.chain.len() {
         let model = s.chain[i].model.trim().to_owned();
         if model.chars().count() > MAX_MODEL_CHARS {
-            return Err(AiFailure::settings(
-                "El nombre del modelo es demasiado largo",
-            ));
+            return refuse(messages::MODEL_TOO_LONG);
         }
         s.chain[i].model = model;
         if s.chain[..i]
             .iter()
             .any(|e| e.provider == s.chain[i].provider)
         {
-            return Err(AiFailure::settings(format!(
-                "{} aparece dos veces en la cadena de respaldo",
-                short_name(s.chain[i].provider)
-            )));
+            let name = short_name(s.chain[i].provider);
+            return Err(AiFailure::settings(
+                messages::CHAIN_DUPLICATE.fill(locale, &[("name", name)]),
+            ));
         }
     }
     if !s.density.is_finite() || !DENSITY_RANGE.contains(&s.density) {
-        return Err(AiFailure::settings("La densidad debe estar entre 2× y 5×"));
+        return refuse(messages::DENSITY_RANGE);
     }
     s.topic = s
         .topic
@@ -280,14 +278,13 @@ pub fn validate_settings(mut s: AiSettings) -> Result<AiSettings, AiFailure> {
         .filter(|t| !t.is_empty());
     if let Some(topic) = &s.topic {
         if topic.chars().count() > MAX_TOPIC_CHARS {
-            return Err(AiFailure::settings(format!(
-                "El tema admite como máximo {MAX_TOPIC_CHARS} caracteres"
-            )));
+            let max = MAX_TOPIC_CHARS.to_string();
+            return Err(AiFailure::settings(
+                messages::TOPIC_TOO_LONG.fill(locale, &[("max", &max)]),
+            ));
         }
         if topic.chars().any(char::is_control) {
-            return Err(AiFailure::settings(
-                "El tema no puede tener saltos de línea",
-            ));
+            return refuse(messages::TOPIC_LINE_BREAKS);
         }
     }
     Ok(s)
@@ -298,22 +295,35 @@ pub fn load_settings(store: &Store) -> AiSettings {
     let stored = store.get_setting(SETTINGS_KEY).ok().flatten();
     stored
         .and_then(|json| serde_json::from_str(&json).ok())
-        .and_then(|s| validate_settings(s).ok())
+        // Only whether it is valid matters here, not the message's language.
+        .and_then(|s| validate_settings(Locale::default(), s).ok())
         .unwrap_or_default()
 }
 
 /// Validates and stores `s`; returns what was stored.
-pub fn save_settings(store: &Store, s: AiSettings) -> Result<AiSettings, AiFailure> {
-    let s = validate_settings(s)?;
+pub fn save_settings(
+    locale: Locale,
+    store: &Store,
+    s: AiSettings,
+) -> Result<AiSettings, AiFailure> {
+    let s = validate_settings(locale, s)?;
     let json = serde_json::to_string(&s).map_err(|e| AiFailure::new("storage", e.to_string()))?;
-    store
-        .set_setting(SETTINGS_KEY, &json)
-        .map_err(|e| AiFailure::new("storage", format!("No se pudo guardar: {e}")))?;
+    store.set_setting(SETTINGS_KEY, &json).map_err(|e| {
+        let error = e.to_string();
+        AiFailure::new(
+            "storage",
+            messages::SAVE_FAILED.fill(locale, &[("error", &error)]),
+        )
+    })?;
     Ok(s)
 }
 
 /// The stored key of `id`, `None` when there is none.
-async fn load_key(secrets: &SharedSecrets, id: ProviderId) -> Result<Option<ApiKey>, AiFailure> {
+async fn load_key(
+    locale: Locale,
+    secrets: &SharedSecrets,
+    id: ProviderId,
+) -> Result<Option<ApiKey>, AiFailure> {
     let account = account(id);
     let stored = secrets::run(secrets, move |s| {
         if !s.available() {
@@ -322,13 +332,14 @@ async fn load_key(secrets: &SharedSecrets, id: ProviderId) -> Result<Option<ApiK
         s.get(&account)
     })
     .await
-    .map_err(keychain_failure)?;
+    .map_err(|e| keychain_failure(locale, e))?;
     Ok(stored.and_then(|k| ApiKey::new(k).ok()))
 }
 
 /// Whether a key is saved for `id`; the key itself never leaves the backend.
 /// For ChatGPT: whether its account is signed in with plan use enabled.
 pub async fn key_status(
+    locale: Locale,
     client: &AiClient,
     secrets: &SharedSecrets,
     id: ProviderId,
@@ -340,28 +351,30 @@ pub async fn key_status(
         return match auth.status().await {
             Ok(status) => Ok(status.plan_enabled),
             Err(AuthError::NoStorage) => Ok(false),
-            Err(err) => Err(provider_failure(id, &err.into())),
+            Err(err) => Err(provider_failure(locale, id, &err.into())),
         };
     }
-    Ok(load_key(secrets, id).await?.is_some())
+    Ok(load_key(locale, secrets, id).await?.is_some())
 }
-
-/// Why ChatGPT takes no key.
-const CHATGPT_NO_KEY: &str = "ChatGPT no usa clave: inicia sesión con ChatGPT en Ajustes → IA";
 
 /// Saves `key` (trimmed) for `id` in the system keychain. ChatGPT is refused:
 /// it uses the signed-in account.
 pub async fn key_save(
+    locale: Locale,
     secrets: &SharedSecrets,
     id: ProviderId,
     key: String,
 ) -> Result<(), AiFailure> {
     if id == ProviderId::Chatgpt {
-        return Err(AiFailure::new("config", CHATGPT_NO_KEY));
+        // Why ChatGPT takes no key.
+        return Err(AiFailure::new(
+            "config",
+            locale.pick(messages::CHATGPT_NO_KEY),
+        ));
     }
     let key = key.trim().to_owned();
     if key.is_empty() {
-        return Err(AiFailure::new("noKey", "La clave está vacía"));
+        return Err(AiFailure::new("noKey", locale.pick(messages::EMPTY_KEY)));
     }
     let (account, label) = (account(id), key_label(id));
     secrets::run(secrets, move |s| {
@@ -371,12 +384,16 @@ pub async fn key_save(
         s.set(&account, &label, &key)
     })
     .await
-    .map_err(keychain_failure)
+    .map_err(|e| keychain_failure(locale, e))
 }
 
 /// Deletes `id`'s key; deleting a missing key succeeds. ChatGPT keeps nothing
 /// in the keychain (signing out is its own action), so it is a no-op.
-pub async fn key_delete(secrets: &SharedSecrets, id: ProviderId) -> Result<(), AiFailure> {
+pub async fn key_delete(
+    locale: Locale,
+    secrets: &SharedSecrets,
+    id: ProviderId,
+) -> Result<(), AiFailure> {
     if id == ProviderId::Chatgpt {
         return Ok(());
     }
@@ -388,12 +405,13 @@ pub async fn key_delete(secrets: &SharedSecrets, id: ProviderId) -> Result<(), A
         s.delete(&account)
     })
     .await
-    .map_err(keychain_failure)
+    .map_err(|e| keychain_failure(locale, e))
 }
 
 /// Models `id` offers, with its stored key; OpenCode Go's list needs none and
 /// ChatGPT's uses the signed-in account (slugs, in the plan's order).
 pub async fn models(
+    locale: Locale,
     client: &AiClient,
     secrets: &SharedSecrets,
     id: ProviderId,
@@ -401,15 +419,15 @@ pub async fn models(
     let key = match id {
         ProviderId::OpencodeGo | ProviderId::Chatgpt => None,
         _ => Some(
-            load_key(secrets, id)
+            load_key(locale, secrets, id)
                 .await?
-                .ok_or_else(|| provider_failure(id, &ProviderError::NoKey))?,
+                .ok_or_else(|| provider_failure(locale, id, &ProviderError::NoKey))?,
         ),
     };
     client
         .list_models(id, key.as_ref())
         .await
-        .map_err(|e| provider_failure(id, &e))
+        .map_err(|e| provider_failure(locale, id, &e))
 }
 
 /// The ChatGPT access token of the signed-in account (renewed when it is
@@ -423,6 +441,7 @@ async fn chatgpt_token(client: &AiClient) -> Result<ApiKey, ProviderError> {
 /// ChatGPT, checks the sign-in (renewing its token if needed) without any
 /// inference request.
 pub async fn test_connection(
+    locale: Locale,
     client: &AiClient,
     secrets: &SharedSecrets,
     id: ProviderId,
@@ -432,11 +451,11 @@ pub async fn test_connection(
         return chatgpt_token(client)
             .await
             .map(|_| ())
-            .map_err(|e| provider_failure(id, &e));
+            .map_err(|e| provider_failure(locale, id, &e));
     }
-    let key = load_key(secrets, id)
+    let key = load_key(locale, secrets, id)
         .await?
-        .ok_or_else(|| provider_failure(id, &ProviderError::NoKey))?;
+        .ok_or_else(|| provider_failure(locale, id, &ProviderError::NoKey))?;
     let mut cfg = ProviderConfig::new(id, key);
     if !model.trim().is_empty() {
         cfg.model = model.trim().to_owned();
@@ -444,12 +463,12 @@ pub async fn test_connection(
     client
         .test_connection(&cfg)
         .await
-        .map_err(|e| provider_failure(id, &e))
+        .map_err(|e| provider_failure(locale, id, &e))
 }
 
-/// A Sign in with ChatGPT failure as a command failure: its Spanish message
-/// (never a credential) with a kind the settings can tell apart.
-pub fn auth_failure(err: AuthError) -> AiFailure {
+/// A Sign in with ChatGPT failure as a command failure: its message in
+/// `locale` (never a credential) with a kind the settings can tell apart.
+pub fn auth_failure(locale: Locale, err: AuthError) -> AiFailure {
     let kind = match err {
         AuthError::Cancelled => "cancelled",
         AuthError::Timeout => "timeout",
@@ -459,7 +478,7 @@ pub fn auth_failure(err: AuthError) -> AiFailure {
         }
         _ => "config",
     };
-    AiFailure::new(kind, err.to_string())
+    AiFailure::new(kind, messages::auth_error(locale, &err))
 }
 
 /// Signed out, as shown when there is no sign-in or nowhere to keep one.
@@ -471,26 +490,32 @@ const SIGNED_OUT: Status = Status {
 
 /// Whether ChatGPT is signed in, with which account and whether plan use is
 /// enabled; signed out when the app has no place to keep a sign-in.
-pub async fn chatgpt_status(client: &AiClient) -> Result<Status, AiFailure> {
+pub async fn chatgpt_status(locale: Locale, client: &AiClient) -> Result<Status, AiFailure> {
     let Some(auth) = client.chatgpt() else {
         return Ok(SIGNED_OUT);
     };
     match auth.status().await {
         Err(AuthError::NoStorage) => Ok(SIGNED_OUT),
-        other => other.map_err(auth_failure),
+        other => other.map_err(|e| auth_failure(locale, e)),
     }
 }
 
 /// Signs in with ChatGPT: `open` shows the authorization URL in the system
 /// browser; resolves once the browser comes back, is cancelled or times out.
-pub async fn chatgpt_sign_in<F>(client: &AiClient, open: F) -> Result<Status, AiFailure>
+pub async fn chatgpt_sign_in<F>(
+    locale: Locale,
+    client: &AiClient,
+    open: F,
+) -> Result<Status, AiFailure>
 where
     F: Fn(&str) -> Result<(), String> + Send + Sync,
 {
     let auth = client
         .chatgpt()
-        .ok_or_else(|| auth_failure(AuthError::NoStorage))?;
-    auth.sign_in(open).await.map_err(auth_failure)
+        .ok_or_else(|| auth_failure(locale, AuthError::NoStorage))?;
+    auth.sign_in(open)
+        .await
+        .map_err(|e| auth_failure(locale, e))
 }
 
 /// Ends a pending ChatGPT sign-in, if any.
@@ -502,11 +527,11 @@ pub fn chatgpt_cancel(client: &AiClient) {
 
 /// Revokes the ChatGPT session and forgets its tokens (even when OpenAI could
 /// not confirm the revocation: `revoked` is then false).
-pub async fn chatgpt_sign_out(client: &AiClient) -> Result<SignOut, AiFailure> {
+pub async fn chatgpt_sign_out(locale: Locale, client: &AiClient) -> Result<SignOut, AiFailure> {
     let auth = client
         .chatgpt()
-        .ok_or_else(|| auth_failure(AuthError::NoStorage))?;
-    auth.sign_out().await.map_err(auth_failure)
+        .ok_or_else(|| auth_failure(locale, AuthError::NoStorage))?;
+    auth.sign_out().await.map_err(|e| auth_failure(locale, e))
 }
 
 /// A listed model: `id` is stored and sent, `name` is shown.
@@ -518,12 +543,15 @@ pub struct ModelName {
 
 /// The ChatGPT plan's models with their display names, read with the
 /// signed-in account (the other providers keep `ai_models`).
-pub async fn chatgpt_models(client: &AiClient) -> Result<Vec<ModelName>, AiFailure> {
+pub async fn chatgpt_models(
+    locale: Locale,
+    client: &AiClient,
+) -> Result<Vec<ModelName>, AiFailure> {
     let id = ProviderId::Chatgpt;
     let listed = client
         .chatgpt_model_names()
         .await
-        .map_err(|e| provider_failure(id, &e))?;
+        .map_err(|e| provider_failure(locale, id, &e))?;
     Ok(listed
         .into_iter()
         .map(|(id, name)| ModelName { id, name })
@@ -550,6 +578,8 @@ pub struct TextParams {
     pub mode: PracticeMode,
     /// Longest code snippet in lines (code only), clamped to 5..=20.
     pub max_lines: usize,
+    /// Language of the notices (why the AI was not used).
+    pub locale: Locale,
 }
 
 /// `day` when it looks like `YYYY-MM-DD`, else today in UTC.
@@ -595,6 +625,7 @@ fn now_ms() -> i64 {
 /// Configs of the chain entries that have a model and a key (for ChatGPT, a
 /// signed-in account with plan use), and the reason for the first unusable entry.
 async fn usable_chain(
+    locale: Locale,
     client: &AiClient,
     secrets: &SharedSecrets,
     settings: &AiSettings,
@@ -604,7 +635,9 @@ async fn usable_chain(
     for entry in &settings.chain {
         let id = entry.provider;
         if entry.model.is_empty() {
-            reason.get_or_insert_with(|| format!("Falta el modelo de {}", short_name(id)));
+            reason.get_or_insert_with(|| {
+                messages::MISSING_MODEL.fill(locale, &[("name", short_name(id))])
+            });
             continue;
         }
         if id == ProviderId::Chatgpt {
@@ -615,22 +648,22 @@ async fn usable_chain(
                     configs.push(cfg);
                 }
                 Err(err) => {
-                    reason.get_or_insert_with(|| provider_reason(id, &err));
+                    reason.get_or_insert_with(|| provider_reason(locale, id, &err));
                 }
             }
             continue;
         }
-        match load_key(secrets, id).await {
+        match load_key(locale, secrets, id).await {
             Ok(Some(key)) => {
                 let mut cfg = ProviderConfig::new(id, key);
                 cfg.model = entry.model.clone();
                 configs.push(cfg);
             }
             Ok(None) => {
-                reason.get_or_insert_with(|| provider_reason(id, &ProviderError::NoKey));
+                reason.get_or_insert_with(|| provider_reason(locale, id, &ProviderError::NoKey));
             }
             Err(_) => {
-                reason.get_or_insert_with(|| "Llavero no disponible".to_owned());
+                reason.get_or_insert_with(|| locale.pick(messages::KEYCHAIN_SHORT).to_owned());
             }
         }
     }
@@ -794,7 +827,16 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
     // Unlock from 15 letters: the prompt names the active characters (S5).
     let restricted = restriction.as_ref().is_some_and(|r| !r.all_letters);
     let request = plan.request(&p.language, &settings, restricted)?;
-    let reason = match ai_text(state, &plan, &settings, &request, &p.day, Some(&cache_mode)).await {
+    let ai = ai_text(
+        p.locale,
+        state,
+        &plan,
+        &settings,
+        &request,
+        &p.day,
+        Some(&cache_mode),
+    );
+    let reason = match ai.await {
         Ok(text) => return Ok(text),
         Err(reason) => reason,
     };
@@ -811,7 +853,7 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
                 source: TextSource::Cache,
                 provider: Some(c.provider),
                 model: Some(c.model),
-                notice: Some(format!("{reason}: texto del caché")),
+                notice: Some(messages::FROM_CACHE.fill(p.locale, &[("reason", &reason)])),
                 ..NextText::corpus(c.text, c.targets)
             }));
         }
@@ -819,7 +861,7 @@ pub async fn next_text(state: &AppState, p: &TextParams) -> Result<NextText, Str
         Err(e) => eprintln!("PlexusTyping: could not read the text cache: {e}"),
     }
     let mut text = plan.corpus(p.seed)?;
-    text.notice = Some(format!("{reason}: texto del corpus local"));
+    text.notice = Some(messages::FROM_CORPUS.fill(p.locale, &[("reason", &reason)]));
     Ok(text)
 }
 
@@ -850,12 +892,15 @@ pub struct ContinueParams {
     pub day: String,
     /// Skip the AI: the frontend asks so after a failed or slow continuation, chaining corpus texts.
     pub offline: bool,
+    /// Language of the notices and errors.
+    pub locale: Locale,
 }
 
 /// An AI text for `request` through the usable chain of `settings`, with its
 /// usage counted and, when `cache_mode` is given, cached as already used; or
-/// the Spanish reason the AI could not give one.
+/// the reason (in `locale`) the AI could not give one.
 async fn ai_text(
+    locale: Locale,
     state: &AppState,
     plan: &Plan,
     settings: &AiSettings,
@@ -863,9 +908,9 @@ async fn ai_text(
     day: &str,
     cache_mode: Option<&str>,
 ) -> Result<NextText, String> {
-    let (chain, missing) = usable_chain(&state.ai, &state.secrets, settings).await;
+    let (chain, missing) = usable_chain(locale, &state.ai, &state.secrets, settings).await;
     if chain.is_empty() {
-        return Err(missing.unwrap_or_else(|| "La cadena de respaldo está vacía".to_owned()));
+        return Err(missing.unwrap_or_else(|| locale.pick(messages::CHAIN_EMPTY).to_owned()));
     }
     let generated = match state.ai.generate_with_fallback(&chain, request).await {
         Ok(generated) => generated,
@@ -875,8 +920,8 @@ async fn ai_text(
             }
             return Err(errors
                 .first()
-                .map(|(id, err)| provider_reason(*id, err))
-                .unwrap_or_else(|| "La IA no respondió".to_owned()));
+                .map(|(id, err)| provider_reason(locale, *id, err))
+                .unwrap_or_else(|| locale.pick(messages::NO_ANSWER).to_owned()));
         }
     };
     let provider = slug(generated.provider);
@@ -942,9 +987,8 @@ async fn ai_text(
 /// the cache; usage is counted as for [`next_text`].
 pub async fn continue_text(state: &AppState, p: &ContinueParams) -> Result<NextText, String> {
     if p.tail.chars().count() > MAX_TAIL_CHARS {
-        return Err(format!(
-            "El texto a continuar admite como máximo {MAX_TAIL_CHARS} caracteres"
-        ));
+        let max = MAX_TAIL_CHARS.to_string();
+        return Err(messages::TAIL_TOO_LONG.fill(p.locale, &[("max", &max)]));
     }
     let (model, settings, restriction) = {
         let store = lock_store(&state.store);
@@ -986,11 +1030,11 @@ pub async fn continue_text(state: &AppState, p: &ContinueParams) -> Result<NextT
         continue_from: Some(p.tail.clone()),
         ..plan.request(&p.language, &settings, restricted)?
     };
-    match ai_text(state, &plan, &settings, &request, &p.day, None).await {
+    match ai_text(p.locale, state, &plan, &settings, &request, &p.day, None).await {
         Ok(text) => Ok(text),
         Err(reason) => {
             let mut text = plan.corpus(p.seed)?;
-            text.notice = Some(format!("{reason}: texto del corpus local"));
+            text.notice = Some(messages::FROM_CORPUS.fill(p.locale, &[("reason", &reason)]));
             Ok(text)
         }
     }
@@ -999,7 +1043,12 @@ pub async fn continue_text(state: &AppState, p: &ContinueParams) -> Result<NextT
 /// The diagnostic text for a new profile practising prose on a `layout` that
 /// can type it, otherwise like [`next_text`] with the default target count and
 /// length. Words mode never shows the diagnostic (it has capitals and signs).
+#[allow(
+    clippy::too_many_arguments,
+    reason = "the command's arguments plus the interface language"
+)]
 pub async fn first_text(
+    locale: Locale,
     state: &AppState,
     language: &str,
     layout: &str,
@@ -1033,6 +1082,7 @@ pub async fn first_text(
         day: day.to_owned(),
         mode: mode.clone(),
         max_lines,
+        locale,
     };
     Ok(FirstText {
         text: next_text(state, &params).await?,

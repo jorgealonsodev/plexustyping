@@ -6,6 +6,8 @@
 use std::collections::HashMap;
 
 use crate::commands::{AppState, lock_store};
+use crate::i18n::{Locale, Texts};
+use crate::messages;
 
 /// Prefix of every UI setting in the `settings` table (`ui:plexustyping.layout`).
 pub const STORE_PREFIX: &str = "ui:";
@@ -17,22 +19,21 @@ pub const MAX_KEY_BYTES: usize = 128;
 pub const MAX_VALUE_BYTES: usize = 256 * 1024;
 
 /// Why a temporary (in-memory) store is not read: the app keeps localStorage (S5).
-pub const TEMPORARY: &str =
-    "La base de datos no está disponible: los ajustes siguen en el almacenamiento del navegador";
+pub const TEMPORARY: Texts = messages::UI_SETTINGS_TEMPORARY;
 
-fn checked_key(key: &str) -> Result<String, String> {
+fn checked_key(locale: Locale, key: &str) -> Result<String, String> {
     if key.len() > KEY_PREFIX.len() && key.len() <= MAX_KEY_BYTES && key.starts_with(KEY_PREFIX) {
         Ok(format!("{STORE_PREFIX}{key}"))
     } else {
-        Err(format!("Ajuste no válido: «{key}»"))
+        Err(messages::INVALID_SETTING.fill(locale, &[("key", key)]))
     }
 }
 
 /// Every stored UI setting, by its `plexustyping.*` key; [`TEMPORARY`] when the
 /// database could not be opened.
-pub fn get(state: &AppState) -> Result<HashMap<String, String>, String> {
+pub fn get(locale: Locale, state: &AppState) -> Result<HashMap<String, String>, String> {
     if !state.status.persistent {
-        return Err(TEMPORARY.to_owned());
+        return Err(locale.pick(TEMPORARY).to_owned());
     }
     let rows = lock_store(&state.store)
         .settings_with_prefix(STORE_PREFIX)
@@ -44,13 +45,11 @@ pub fn get(state: &AppState) -> Result<HashMap<String, String>, String> {
 }
 
 /// Stores UI setting `key` (`plexustyping.*`, at most [`MAX_VALUE_BYTES`]).
-pub fn set(state: &AppState, key: &str, value: &str) -> Result<(), String> {
-    let stored = checked_key(key)?;
+pub fn set(locale: Locale, state: &AppState, key: &str, value: &str) -> Result<(), String> {
+    let stored = checked_key(locale, key)?;
     if value.len() > MAX_VALUE_BYTES {
-        return Err(format!(
-            "El ajuste «{key}» es demasiado grande (máximo {} KiB)",
-            MAX_VALUE_BYTES / 1024
-        ));
+        let max = (MAX_VALUE_BYTES / 1024).to_string();
+        return Err(messages::SETTING_TOO_LARGE.fill(locale, &[("key", key), ("max", &max)]));
     }
     lock_store(&state.store)
         .set_setting(&stored, value)
@@ -58,8 +57,8 @@ pub fn set(state: &AppState, key: &str, value: &str) -> Result<(), String> {
 }
 
 /// Forgets UI setting `key`; nothing happens when it is not set.
-pub fn remove(state: &AppState, key: &str) -> Result<(), String> {
-    let stored = checked_key(key)?;
+pub fn remove(locale: Locale, state: &AppState, key: &str) -> Result<(), String> {
+    let stored = checked_key(locale, key)?;
     lock_store(&state.store)
         .delete_setting(&stored)
         .map_err(|e| e.to_string())

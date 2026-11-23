@@ -19,6 +19,8 @@ use serde::{Deserialize, Serialize};
 use crate::commands::{
     AppState, NextText, STATS_MODE, TextPlan, get_layout, lock_store, unknown_language,
 };
+use crate::i18n::Locale;
+use crate::messages;
 
 /// Target speeds offered, in PPM (S1).
 pub const TARGET_WPMS: [u32; 4] = [20, 30, 40, 50];
@@ -37,7 +39,7 @@ pub const AI_MIN_LETTERS: usize = 15;
 /// Weak active keys weighted up below [`AI_MIN_LETTERS`], besides the new key.
 pub const WEAK_KEYS: usize = 2;
 /// Why `unlock_set` refused a target speed.
-pub const INVALID_TARGET: &str = "Velocidad objetivo no válida";
+pub const INVALID_TARGET: crate::i18n::Texts = messages::INVALID_TARGET;
 
 /// Home-row keys in unlock order (PRD: "f j d k s l a ñ", then g h).
 const HOME_KEYS: [&str; 10] = [
@@ -310,6 +312,7 @@ pub fn status(state: &AppState, language: &str, layout: &str) -> Result<UnlockSt
 /// its target speed (one of [`TARGET_WPMS`], else [`INVALID_TARGET`] and
 /// nothing changes); missing values are kept. Progress is never touched.
 pub fn set(
+    locale: Locale,
     state: &AppState,
     language: &str,
     layout: &str,
@@ -317,7 +320,7 @@ pub fn set(
     target_wpm: Option<u32>,
 ) -> Result<UnlockStatus, String> {
     if target_wpm.is_some_and(|t| !TARGET_WPMS.contains(&t)) {
-        return Err(INVALID_TARGET.to_owned());
+        return Err(locale.pick(INVALID_TARGET).to_owned());
     }
     let store = lock_store(&state.store);
     let profile = state.active_profile();

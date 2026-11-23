@@ -28,6 +28,7 @@ mod prompt;
 mod providers;
 mod validate;
 
+pub use chatgpt::PlanMessage;
 pub use client::{AiClient, TextProvider};
 pub use parse::parse_text_json;
 pub use prompt::build_prompt;

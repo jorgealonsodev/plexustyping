@@ -87,7 +87,7 @@ fn es(state: &AppState) -> UnlockStatus {
 }
 
 fn enable(state: &AppState) {
-    set(state, "es", "es-qwerty", Some(true), None).unwrap();
+    set(Locale::Es, state, "es", "es-qwerty", Some(true), None).unwrap();
 }
 
 /// One char event per typed char, 500 ms apart: slower than every target,
@@ -195,6 +195,7 @@ fn params(seed: u64, mode: PracticeMode) -> TextParams {
         day: DAY.into(),
         mode,
         max_lines: DEFAULT_MAX_LINES,
+        locale: Locale::Es,
     }
 }
 
@@ -322,9 +323,9 @@ fn the_target_is_twelve_thousand_ms_over_the_ppm() {
     set_stat(&state, 'l', 30, 0.0);
     save_latencies(&state, 'l', &[600.0], 0);
     assert!(es(&state).mastered.is_empty());
-    set(&state, "es", "es-qwerty", None, Some(20)).unwrap();
+    set(Locale::Es, &state, "es", "es-qwerty", None, Some(20)).unwrap();
     assert_eq!(es(&state).mastered, ["l"]);
-    set(&state, "es", "es-qwerty", None, Some(50)).unwrap();
+    set(Locale::Es, &state, "es", "es-qwerty", None, Some(50)).unwrap();
     assert!(es(&state).mastered.is_empty());
 }
 
@@ -454,7 +455,7 @@ fn ai_on(state: &AppState) {
         density: 3.0,
         topic: None,
     };
-    ai::save_settings(&lock_store(&state.store), settings).unwrap();
+    ai::save_settings(Locale::Es, &lock_store(&state.store), settings).unwrap();
 }
 
 fn chat_reply(text: &str) -> String {
@@ -469,7 +470,7 @@ async fn ai_state(reply: &str) -> (AppState, Mock) {
     let srv = mock(vec![(OPENAI, 200, chat_reply(reply))]).await;
     let memory = MemoryStore::shared();
     let shared: SharedSecrets = memory.clone();
-    ai::key_save(&shared, ProviderId::Openai, "sk-test".into())
+    ai::key_save(Locale::Es, &shared, ProviderId::Openai, "sk-test".into())
         .await
         .unwrap();
     let state = state_with(memory, srv.client());
@@ -511,9 +512,18 @@ async fn below_fifteen_letters_texts_are_active_words_without_the_ai() {
         assert!((300..361).contains(&len), "{len}: {}", text.text);
     }
     // A new profile gets no diagnostic text in this mode.
-    let first = ai::first_text(&state, "es", "es-qwerty", &PracticeMode::Prose, 12, 1, DAY)
-        .await
-        .unwrap();
+    let first = ai::first_text(
+        Locale::Es,
+        &state,
+        "es",
+        "es-qwerty",
+        &PracticeMode::Prose,
+        12,
+        1,
+        DAY,
+    )
+    .await
+    .unwrap();
     assert!(!first.diagnostic);
     only(&first.text.text, &home);
     assert!(srv.requests().is_empty(), "the AI was called");
@@ -566,7 +576,7 @@ async fn from_fifteen_letters_a_locked_ai_text_falls_back_to_a_restricted_corpus
     // With the AI off, no cached text either.
     let mut settings = ai::load_settings(&lock_store(&state.store));
     settings.enabled = false;
-    ai::save_settings(&lock_store(&state.store), settings).unwrap();
+    ai::save_settings(Locale::Es, &lock_store(&state.store), settings).unwrap();
     let text = ai::next_text(&state, &params(2, PracticeMode::Prose))
         .await
         .unwrap();
@@ -588,6 +598,7 @@ async fn a_continuation_keeps_the_unlock_restriction() {
         seed: 1,
         day: DAY.into(),
         offline: false,
+        locale: Locale::Es,
     };
     // Below fifteen letters: active words, never the AI.
     let text = ai::continue_text(&state, &p).await.unwrap();
@@ -635,7 +646,7 @@ fn unlock_set_refuses_other_targets_without_side_effects() {
     let state = memory();
     for bad in [0, 25, 35, 60] {
         assert_eq!(
-            set(&state, "es", "es-qwerty", Some(true), Some(bad)),
+            set(Locale::Es, &state, "es", "es-qwerty", Some(true), Some(bad)),
             Err("Velocidad objetivo no válida".to_owned())
         );
     }
@@ -643,13 +654,13 @@ fn unlock_set_refuses_other_targets_without_side_effects() {
     assert!(!unchanged.enabled);
     assert_eq!(unchanged.target_wpm, 30);
     for ok in TARGET_WPMS {
-        let got = set(&state, "es", "es-qwerty", None, Some(ok)).unwrap();
+        let got = set(Locale::Es, &state, "es", "es-qwerty", None, Some(ok)).unwrap();
         assert_eq!((got.enabled, got.target_wpm), (false, ok));
     }
-    let on = set(&state, "es", "es-qwerty", Some(true), None).unwrap();
+    let on = set(Locale::Es, &state, "es", "es-qwerty", Some(true), None).unwrap();
     assert_eq!((on.enabled, on.target_wpm), (true, 50));
     assert_eq!(
-        set(&state, "es", "nope", Some(true), None),
+        set(Locale::Es, &state, "es", "nope", Some(true), None),
         Err("unknown layout: nope".to_owned())
     );
     assert_eq!(
@@ -666,13 +677,13 @@ fn progress_survives_reopening_and_turning_the_mode_off_and_on() {
         enable(&state);
         stall_unlock(&state, 1);
         practise(&state, "ff");
-        set(&state, "es", "es-qwerty", Some(false), Some(40)).unwrap();
+        set(Locale::Es, &state, "es", "es-qwerty", Some(false), Some(40)).unwrap();
     }
     let state = reopen(dir.db());
     let got = es(&state);
     assert_eq!((got.enabled, got.target_wpm), (false, 40));
     assert_eq!((got.active.len(), got.stalled_sessions), (11, 1));
-    let on = set(&state, "es", "es-qwerty", Some(true), None).unwrap();
+    let on = set(Locale::Es, &state, "es", "es-qwerty", Some(true), None).unwrap();
     assert_eq!((on.active.len(), on.stalled_sessions), (11, 1));
 }
 
@@ -730,9 +741,18 @@ fn temporary_mode_keeps_the_state_in_memory() {
 #[tokio::test]
 async fn with_the_mode_off_nothing_changes() {
     let state = memory();
-    let first = ai::first_text(&state, "es", "es-qwerty", &PracticeMode::Prose, 12, 1, DAY)
-        .await
-        .unwrap();
+    let first = ai::first_text(
+        Locale::Es,
+        &state,
+        "es",
+        "es-qwerty",
+        &PracticeMode::Prose,
+        12,
+        1,
+        DAY,
+    )
+    .await
+    .unwrap();
     assert!(first.diagnostic);
     for _ in 0..4 {
         let scored = practise(&state, "ff");
@@ -750,4 +770,17 @@ async fn with_the_mode_off_nothing_changes() {
             .unwrap();
         assert_eq!(text, normal_text(&state, seed));
     }
+}
+
+#[test]
+fn an_invalid_target_follows_the_interface_language() {
+    let state = memory();
+    assert_eq!(
+        set(Locale::En, &state, "es", "es-qwerty", None, Some(25)),
+        Err("Invalid target speed".to_owned())
+    );
+    assert_eq!(
+        set(Locale::Fr, &state, "es", "es-qwerty", None, Some(25)),
+        Err("Vitesse cible non valide".to_owned())
+    );
 }

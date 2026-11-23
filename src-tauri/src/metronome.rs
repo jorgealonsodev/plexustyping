@@ -7,6 +7,9 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use plexustyping_audio::{AudioError, Metronome, MetronomeConfig};
 use serde::Serialize;
 
+use crate::i18n::Locale;
+use crate::messages;
+
 /// A playing metronome; dropping it stops the sound.
 pub trait Player: Send {
     /// Applies a config with the same tempo live.
@@ -67,10 +70,10 @@ impl MetronomeState {
     }
 
     /// Starts the metronome; a running one is stopped first (beat 0 restarts).
-    pub fn start(&self, cfg: MetronomeConfig) -> Result<MetronomeStarted, String> {
-        let cfg = cfg.validated().map_err(spanish)?;
+    pub fn start(&self, cfg: MetronomeConfig, locale: Locale) -> Result<MetronomeStarted, String> {
+        let cfg = cfg.validated().map_err(|e| user_message(locale, e))?;
         drop(self.lock().take());
-        let player = (self.starter)(cfg).map_err(spanish)?;
+        let player = (self.starter)(cfg).map_err(|e| user_message(locale, e))?;
         let epoch_ms = epoch_ms(player.started_at(), Instant::now(), now_epoch_ms());
         let running = Running {
             player,
@@ -85,21 +88,28 @@ impl MetronomeState {
 
     /// Applies `cfg` live; a new tempo restarts beat 0. Returns the current beat 0,
     /// or `None` (and does nothing) when the metronome is stopped.
-    pub fn update(&self, cfg: MetronomeConfig) -> Result<Option<MetronomeStarted>, String> {
-        let cfg = cfg.validated().map_err(spanish)?;
+    pub fn update(
+        &self,
+        cfg: MetronomeConfig,
+        locale: Locale,
+    ) -> Result<Option<MetronomeStarted>, String> {
+        let cfg = cfg.validated().map_err(|e| user_message(locale, e))?;
         {
             let guard = self.lock();
             let Some(running) = guard.as_ref() else {
                 return Ok(None);
             };
             if running.bpm == cfg.bpm {
-                running.player.update(cfg).map_err(spanish)?;
+                running
+                    .player
+                    .update(cfg)
+                    .map_err(|e| user_message(locale, e))?;
                 return Ok(Some(MetronomeStarted {
                     epoch_ms: running.epoch_ms,
                 }));
             }
         }
-        self.start(cfg).map(Some)
+        self.start(cfg, locale).map(Some)
     }
 
     /// Stops the metronome; a no-op when stopped.
@@ -114,16 +124,12 @@ impl MetronomeState {
     }
 }
 
-/// The audio error, for the user.
-pub fn spanish(error: AudioError) -> String {
+/// The audio error, for the user, in `locale`.
+pub fn user_message(locale: Locale, error: AudioError) -> String {
     match error {
-        AudioError::InvalidConfig(_) => {
-            "Configuración del metrónomo no válida: tempo de 30 a 300 BPM, \
-             volumen de 0 a 100 % y acento cada 0 a 16 pulsaciones"
-                .into()
-        }
-        AudioError::NoOutputDevice => "No hay dispositivo de audio".into(),
-        AudioError::Stream(detail) => format!("No se pudo reproducir el audio: {detail}"),
+        AudioError::InvalidConfig(_) => locale.pick(messages::METRONOME_INVALID).to_owned(),
+        AudioError::NoOutputDevice => locale.pick(messages::NO_AUDIO_DEVICE).to_owned(),
+        AudioError::Stream(detail) => messages::AUDIO_FAILED.fill(locale, &[("detail", &detail)]),
     }
 }
 
@@ -205,10 +211,10 @@ mod tests {
     #[test]
     fn start_restarts_a_running_metronome_and_stop_is_idempotent() {
         let (state, c) = fake();
-        let first = state.start(cfg(60)).unwrap();
+        let first = state.start(cfg(60), Locale::Es).unwrap();
         assert!(state.is_running());
         std::thread::sleep(Duration::from_millis(5));
-        let second = state.start(cfg(60)).unwrap();
+        let second = state.start(cfg(60), Locale::Es).unwrap();
         assert!(second.epoch_ms > first.epoch_ms);
         assert_eq!(counts(&c), [2, 0, 1]);
         state.stop();
@@ -220,21 +226,21 @@ mod tests {
     #[test]
     fn update_keeps_beat_0_unless_the_tempo_changes_and_is_a_no_op_when_stopped() {
         let (state, c) = fake();
-        assert_eq!(state.update(cfg(60)), Ok(None));
+        assert_eq!(state.update(cfg(60), Locale::Es), Ok(None));
         assert_eq!(counts(&c), [0, 0, 0]);
-        let started = state.start(cfg(60)).unwrap();
-        assert_eq!(state.update(cfg(60)), Ok(Some(started)));
+        let started = state.start(cfg(60), Locale::Es).unwrap();
+        assert_eq!(state.update(cfg(60), Locale::Es), Ok(Some(started)));
         assert_eq!(counts(&c), [1, 1, 0]);
-        let restarted = state.update(cfg(120)).unwrap().unwrap();
+        let restarted = state.update(cfg(120), Locale::Es).unwrap().unwrap();
         assert_ne!(restarted, started);
         assert_eq!(counts(&c), [2, 1, 1]);
-        assert_eq!(state.update(cfg(120)), Ok(Some(restarted)));
+        assert_eq!(state.update(cfg(120), Locale::Es), Ok(Some(restarted)));
     }
 
     #[test]
     fn invalid_configs_are_refused_in_spanish_and_change_nothing() {
         let (state, c) = fake();
-        state.start(cfg(60)).unwrap();
+        state.start(cfg(60), Locale::Es).unwrap();
         let volume = MetronomeConfig {
             volume: 1.5,
             ..cfg(60)
@@ -244,12 +250,23 @@ mod tests {
             ..cfg(60)
         };
         for bad in [cfg(29), cfg(301), volume, accent] {
-            let start = state.start(bad).unwrap_err();
+            let start = state.start(bad, Locale::Es).unwrap_err();
             assert!(
                 start.starts_with("Configuración del metrónomo no válida"),
                 "{start}"
             );
-            assert_eq!(state.update(bad).unwrap_err(), start);
+            assert_eq!(state.update(bad, Locale::Es).unwrap_err(), start);
+            assert_eq!(
+                start,
+                "Configuración del metrónomo no válida: tempo de 30 a 300 BPM, \
+                 volumen de 0 a 100 % y acento cada 0 a 16 pulsaciones"
+            );
+            assert!(
+                state
+                    .start(bad, Locale::En)
+                    .unwrap_err()
+                    .starts_with("Invalid metronome settings"),
+            );
         }
         assert!(state.is_running());
         assert_eq!(counts(&c), [1, 0, 0]);
@@ -259,13 +276,21 @@ mod tests {
     fn a_device_error_leaves_the_metronome_stopped() {
         let state = MetronomeState::new(Arc::new(|_| Err(AudioError::NoOutputDevice)));
         assert_eq!(
-            state.start(cfg(60)),
+            state.start(cfg(60), Locale::Es),
             Err("No hay dispositivo de audio".into())
         );
         assert!(!state.is_running());
         assert_eq!(
-            spanish(AudioError::Stream("boom".into())),
+            user_message(Locale::Es, AudioError::Stream("boom".into())),
             "No se pudo reproducir el audio: boom"
+        );
+        assert_eq!(
+            user_message(Locale::En, AudioError::Stream("boom".into())),
+            "Could not play the audio: boom"
+        );
+        assert_eq!(
+            user_message(Locale::De, AudioError::NoOutputDevice),
+            "Kein Audiogerät"
         );
     }
 
@@ -289,7 +314,7 @@ mod tests {
     #[ignore]
     fn audio_device_starts_and_stops() {
         let state = MetronomeState::audio();
-        let started = state.start(cfg(120)).unwrap();
+        let started = state.start(cfg(120), Locale::Es).unwrap();
         assert!((started.epoch_ms - now_epoch_ms()).abs() < 5_000.0);
         std::thread::sleep(Duration::from_millis(600));
         state.stop();

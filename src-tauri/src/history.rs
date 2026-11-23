@@ -10,11 +10,13 @@ use serde::Serialize;
 
 use crate::code::CODE_STATS_MODE;
 use crate::commands::STATS_MODE;
+use crate::i18n::Locale;
+use crate::messages;
 
 /// First line of every export (S7).
 pub const CSV_HEADER: &str = "fecha,modo,lenguaje_codigo,idioma,layout,duracion_s,ppm_brutas,ppm_netas,precision,pulsaciones,bpm";
 /// Error when the active filter has no sessions (S7).
-pub const NO_SESSIONS: &str = "No hay sesiones que exportar.";
+pub const NO_SESSIONS: crate::i18n::Texts = messages::NO_SESSIONS;
 /// Largest accepted UTC offset, in minutes (ISO 8601: ±18:00).
 pub const MAX_TZ_OFFSET_MIN: i32 = 18 * 60;
 
@@ -29,26 +31,27 @@ pub struct CsvExport {
 }
 
 /// The stored mode of a history filter: `None` (all), `"prose"`, `"words"` or `"code"`.
-pub fn parse_mode(mode: Option<&str>) -> Result<Option<&'static str>, String> {
+pub fn parse_mode(locale: Locale, mode: Option<&str>) -> Result<Option<&'static str>, String> {
     match mode {
         None => Ok(None),
         Some("prose") => Ok(Some("prose")),
         Some("words") => Ok(Some("words")),
         Some("code") => Ok(Some("code")),
-        Some(other) => Err(format!("Modo desconocido: {other}")),
+        Some(other) => Err(messages::UNKNOWN_MODE.fill(locale, &[("mode", other)])),
     }
 }
 
 /// Sessions of `profile` for the filter `mode`, newest first, at most `limit`;
 /// empty in temporary mode (`persistent == false`).
 pub fn session_history(
+    locale: Locale,
     store: &Store,
     profile: &Profile,
     persistent: bool,
     mode: Option<&str>,
     limit: Option<u32>,
 ) -> Result<Vec<SessionSummary>, String> {
-    let mode = parse_mode(mode)?;
+    let mode = parse_mode(locale, mode)?;
     if !persistent {
         return Ok(Vec::new());
     }
@@ -96,11 +99,12 @@ pub struct CharRow {
 }
 
 /// Refuses an offset outside ±[`MAX_TZ_OFFSET_MIN`] with "Zona horaria no válida: N".
-pub fn check_tz(tz_offset_min: i32) -> Result<(), String> {
+pub fn check_tz(locale: Locale, tz_offset_min: i32) -> Result<(), String> {
     if (-MAX_TZ_OFFSET_MIN..=MAX_TZ_OFFSET_MIN).contains(&tz_offset_min) {
         Ok(())
     } else {
-        Err(format!("Zona horaria no válida: {tz_offset_min}"))
+        let offset = tz_offset_min.to_string();
+        Err(messages::INVALID_TZ.fill(locale, &[("offset", &offset)]))
     }
 }
 
@@ -109,6 +113,7 @@ pub fn check_tz(tz_offset_min: i32) -> Result<(), String> {
 /// newest first; `tz_offset_min` is minutes east of UTC. Net WPM and accuracy
 /// are means weighted by session duration. Empty in temporary mode.
 pub fn history_by_day(
+    locale: Locale,
     store: &Store,
     profile: &Profile,
     persistent: bool,
@@ -116,10 +121,10 @@ pub fn history_by_day(
     tz_offset_min: i32,
     days: Option<u32>,
 ) -> Result<Vec<DayRow>, String> {
-    let mode = parse_mode(mode)?;
-    check_tz(tz_offset_min)?;
+    let mode = parse_mode(locale, mode)?;
+    check_tz(locale, tz_offset_min)?;
     let days = days.unwrap_or(DEFAULT_DAYS).min(MAX_DAYS) as usize;
-    let sessions = session_history(store, profile, persistent, mode, None)?;
+    let sessions = session_history(locale, store, profile, persistent, mode, None)?;
     // Sessions come newest first, so each day's sessions are contiguous.
     let mut groups: Vec<(i64, Vec<&SessionSummary>)> = Vec::new();
     for s in &sessions {
@@ -168,12 +173,13 @@ fn day_row(day: i64, group: &[&SessionSummary]) -> DayRow {
 /// words share the prose statistics), worst first: by error, then slowness,
 /// then character. Empty in temporary mode.
 pub fn history_by_char(
+    locale: Locale,
     store: &Store,
     profile: &Profile,
     persistent: bool,
     mode: Option<&str>,
 ) -> Result<Vec<CharRow>, String> {
-    let modes: &[&str] = match parse_mode(mode)? {
+    let modes: &[&str] = match parse_mode(locale, mode)? {
         None => &[STATS_MODE, CODE_STATS_MODE],
         Some("code") => &[CODE_STATS_MODE],
         Some(_) => &[STATS_MODE],
@@ -321,8 +327,13 @@ pub fn sessions_csv(sessions: &[SessionSummary], tz_offset_min: i32) -> String {
 
 /// Writes `contents` to `dir/plexustyping-sesiones-<date>.csv`, or `-2`, `-3`…
 /// when taken; never overwrites. Returns the path written.
-pub fn write_unique(dir: &Path, date: &str, contents: &str) -> Result<PathBuf, String> {
-    write_unique_with(dir, date, contents, |file, bytes| {
+pub fn write_unique(
+    locale: Locale,
+    dir: &Path,
+    date: &str,
+    contents: &str,
+) -> Result<PathBuf, String> {
+    write_unique_with(locale, dir, date, contents, |file, bytes| {
         file.write_all(bytes)?;
         file.flush()
     })
@@ -330,12 +341,13 @@ pub fn write_unique(dir: &Path, date: &str, contents: &str) -> Result<PathBuf, S
 
 /// [`write_unique`] with the write step injected, so tests can make it fail.
 fn write_unique_with(
+    locale: Locale,
     dir: &Path,
     date: &str,
     contents: &str,
     write: impl Fn(&mut File, &[u8]) -> std::io::Result<()>,
 ) -> Result<PathBuf, String> {
-    let fail = |e: std::io::Error| format!("No se pudo exportar el CSV: {e}");
+    let fail = |e: std::io::Error| messages::CSV_FAILED.fill(locale, &[("error", &e.to_string())]);
     for n in 1u32.. {
         let name = match n {
             1 => format!("plexustyping-sesiones-{date}.csv"),
@@ -357,13 +369,18 @@ fn write_unique_with(
             Err(e) => return Err(fail(e)),
         }
     }
-    Err("No se pudo exportar el CSV: no hay nombre libre".to_owned())
+    Err(locale.pick(messages::CSV_NO_FREE_NAME).to_owned())
 }
 
 /// Exports every session of the filter `mode` to the directory given by `dir`
 /// (resolved only when there is something to write), naming the file after
 /// the local date of `now_ms`.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "the command's arguments plus the interface language"
+)]
 pub fn export_sessions_csv(
+    locale: Locale,
     store: &Store,
     profile: &Profile,
     persistent: bool,
@@ -372,16 +389,16 @@ pub fn export_sessions_csv(
     now_ms: i64,
     dir: impl FnOnce() -> Result<PathBuf, String>,
 ) -> Result<CsvExport, String> {
-    parse_mode(mode)?;
-    check_tz(tz_offset_min)?;
-    let sessions = session_history(store, profile, persistent, mode, None)?;
+    parse_mode(locale, mode)?;
+    check_tz(locale, tz_offset_min)?;
+    let sessions = session_history(locale, store, profile, persistent, mode, None)?;
     if sessions.is_empty() {
-        return Err(NO_SESSIONS.to_owned());
+        return Err(locale.pick(NO_SESSIONS).to_owned());
     }
     let rows = u32::try_from(sessions.len()).map_err(|e| e.to_string())?;
-    let dir = dir().map_err(|e| format!("No se pudo exportar el CSV: {e}"))?;
+    let dir = dir().map_err(|e| messages::CSV_FAILED.fill(locale, &[("error", &e)]))?;
     let csv = sessions_csv(&sessions, tz_offset_min);
-    let path = write_unique(&dir, &local_date(now_ms, tz_offset_min), &csv)?;
+    let path = write_unique(locale, &dir, &local_date(now_ms, tz_offset_min), &csv)?;
     Ok(CsvExport {
         path: path.display().to_string(),
         rows,
@@ -501,17 +518,40 @@ mod tests {
 
     #[test]
     fn parse_mode_accepts_all_prose_and_code_and_rejects_others() {
-        assert_eq!(parse_mode(None), Ok(None));
-        assert_eq!(parse_mode(Some("prose")), Ok(Some("prose")));
-        assert_eq!(parse_mode(Some("code")), Ok(Some("code")));
-        assert_eq!(parse_mode(Some("words")), Ok(Some("words")));
+        assert_eq!(parse_mode(Locale::Es, None), Ok(None));
+        assert_eq!(parse_mode(Locale::Es, Some("prose")), Ok(Some("prose")));
+        assert_eq!(parse_mode(Locale::Es, Some("code")), Ok(Some("code")));
+        assert_eq!(parse_mode(Locale::Es, Some("words")), Ok(Some("words")));
         for bad in ["xx", "", "Prose"] {
             assert_eq!(
-                parse_mode(Some(bad)),
+                parse_mode(Locale::Es, Some(bad)),
                 Err(format!("Modo desconocido: {bad}")),
                 "{bad:?}"
             );
         }
+    }
+
+    #[test]
+    fn errors_follow_the_interface_language() {
+        let (mut store, profile) = memory();
+        assert_eq!(
+            parse_mode(Locale::En, Some("xx")),
+            Err("Unknown mode: xx".to_owned())
+        );
+        assert_eq!(
+            check_tz(Locale::De, 2000),
+            Err("Ungültige Zeitzone: 2000".to_owned())
+        );
+        let resolve = || -> Result<PathBuf, String> { Err("no Downloads".to_owned()) };
+        assert_eq!(
+            export_sessions_csv(Locale::En, &store, &profile, true, None, 60, T0_MS, resolve),
+            Err("There are no sessions to export.".to_owned())
+        );
+        save(&mut store, &profile, "prose", T0_MS);
+        assert_eq!(
+            export_sessions_csv(Locale::En, &store, &profile, true, None, 60, T0_MS, resolve),
+            Err("Could not export the CSV: no Downloads".to_owned())
+        );
     }
 
     #[test]
@@ -520,7 +560,8 @@ mod tests {
         let p1 = save(&mut store, &profile, "prose", 100);
         let c1 = save(&mut store, &profile, "code", 200);
         let p2 = save(&mut store, &profile, "prose", 300);
-        let history = |mode, limit| session_history(&store, &profile, true, mode, limit);
+        let history =
+            |mode, limit| session_history(Locale::Es, &store, &profile, true, mode, limit);
         assert_eq!(history(None, None).map(|s| ids(&s)), Ok(vec![p2, c1, p1]));
         assert_eq!(
             history(Some("prose"), None).map(|s| ids(&s)),
@@ -541,7 +582,7 @@ mod tests {
         let (mut store, profile) = memory();
         save(&mut store, &profile, "prose", 100);
         assert_eq!(
-            session_history(&store, &profile, true, Some("xx"), None),
+            session_history(Locale::Es, &store, &profile, true, Some("xx"), None),
             Err("Modo desconocido: xx".to_owned())
         );
     }
@@ -552,7 +593,7 @@ mod tests {
         save(&mut store, &profile, "prose", 100);
         for mode in [None, Some("prose")] {
             assert_eq!(
-                session_history(&store, &profile, false, mode, None),
+                session_history(Locale::Es, &store, &profile, false, mode, None),
                 Ok(vec![])
             );
         }
@@ -674,11 +715,11 @@ mod tests {
     #[test]
     fn write_unique_appends_a_suffix_and_never_overwrites() {
         let dir = TempDir::new();
-        let first = write_unique(&dir.0, "20261117", "uno\n").unwrap();
+        let first = write_unique(Locale::Es, &dir.0, "20261117", "uno\n").unwrap();
         assert_eq!(first, dir.0.join("plexustyping-sesiones-20261117.csv"));
-        let second = write_unique(&dir.0, "20261117", "dos\n").unwrap();
+        let second = write_unique(Locale::Es, &dir.0, "20261117", "dos\n").unwrap();
         assert_eq!(second, dir.0.join("plexustyping-sesiones-20261117-2.csv"));
-        let third = write_unique(&dir.0, "20261117", "tres\n").unwrap();
+        let third = write_unique(Locale::Es, &dir.0, "20261117", "tres\n").unwrap();
         assert_eq!(third, dir.0.join("plexustyping-sesiones-20261117-3.csv"));
         assert_eq!(std::fs::read_to_string(&first).unwrap(), "uno\n");
         assert_eq!(std::fs::read_to_string(&second).unwrap(), "dos\n");
@@ -692,7 +733,7 @@ mod tests {
         // A file that was already there is skipped and left untouched.
         let taken = dir.0.join("plexustyping-sesiones-20261117.csv");
         std::fs::write(&taken, "previo\n").unwrap();
-        let result = write_unique_with(&dir.0, "20261117", "uno\n", |file, bytes| {
+        let result = write_unique_with(Locale::Es, &dir.0, "20261117", "uno\n", |file, bytes| {
             file.write_all(&bytes[..1])?;
             Err(std::io::Error::other("disco lleno"))
         });
@@ -708,7 +749,7 @@ mod tests {
     fn write_unique_reports_a_missing_directory() {
         let dir = TempDir::new();
         let missing = dir.0.join("no-existe");
-        let result = write_unique(&missing, "20261117", "uno\n");
+        let result = write_unique(Locale::Es, &missing, "20261117", "uno\n");
         let err = result.unwrap_err();
         assert!(err.starts_with("No se pudo exportar el CSV: "), "{err}");
         assert!(!missing.exists());
@@ -724,8 +765,11 @@ mod tests {
         save(&mut store, &profile, "prose", T0_MS + 2_000);
         // Exported at 2026-11-17T23:30:00Z: already the 18th at +01:00.
         let now = 1_794_958_200_000;
-        let export =
-            |mode| export_sessions_csv(&store, &profile, true, mode, 60, now, || Ok(dir.0.clone()));
+        let export = |mode| {
+            export_sessions_csv(Locale::Es, &store, &profile, true, mode, 60, now, || {
+                Ok(dir.0.clone())
+            })
+        };
         let all = export(None).unwrap();
         let path = dir.0.join("plexustyping-sesiones-20261118.csv");
         let expected = CsvExport {
@@ -770,20 +814,38 @@ mod tests {
         let (mut store, profile) = memory();
         let resolve = || -> Result<PathBuf, String> { Ok(dir.0.clone()) };
         assert_eq!(
-            export_sessions_csv(&store, &profile, true, None, 60, T0_MS, resolve),
-            Err(NO_SESSIONS.to_owned())
+            export_sessions_csv(Locale::Es, &store, &profile, true, None, 60, T0_MS, resolve),
+            Err(NO_SESSIONS.es.to_owned())
         );
-        assert_eq!(NO_SESSIONS, "No hay sesiones que exportar.");
+        assert_eq!(NO_SESSIONS.es, "No hay sesiones que exportar.");
         save(&mut store, &profile, "prose", T0_MS);
         // The filter has no session.
         assert_eq!(
-            export_sessions_csv(&store, &profile, true, Some("code"), 60, T0_MS, resolve),
-            Err(NO_SESSIONS.to_owned())
+            export_sessions_csv(
+                Locale::Es,
+                &store,
+                &profile,
+                true,
+                Some("code"),
+                60,
+                T0_MS,
+                resolve
+            ),
+            Err(NO_SESSIONS.es.to_owned())
         );
         // Temporary mode behaves as an empty history.
         assert_eq!(
-            export_sessions_csv(&store, &profile, false, None, 60, T0_MS, resolve),
-            Err(NO_SESSIONS.to_owned())
+            export_sessions_csv(
+                Locale::Es,
+                &store,
+                &profile,
+                false,
+                None,
+                60,
+                T0_MS,
+                resolve
+            ),
+            Err(NO_SESSIONS.es.to_owned())
         );
         assert_eq!(dir.files(), Vec::<String>::new());
     }
@@ -795,12 +857,30 @@ mod tests {
         save(&mut store, &profile, "prose", T0_MS);
         let resolve = || -> Result<PathBuf, String> { Ok(dir.0.clone()) };
         assert_eq!(
-            export_sessions_csv(&store, &profile, true, Some("xx"), 60, T0_MS, resolve),
+            export_sessions_csv(
+                Locale::Es,
+                &store,
+                &profile,
+                true,
+                Some("xx"),
+                60,
+                T0_MS,
+                resolve
+            ),
             Err("Modo desconocido: xx".to_owned())
         );
         for bad in [MAX_TZ_OFFSET_MIN + 1, -MAX_TZ_OFFSET_MIN - 1] {
             assert_eq!(
-                export_sessions_csv(&store, &profile, true, None, bad, T0_MS, resolve),
+                export_sessions_csv(
+                    Locale::Es,
+                    &store,
+                    &profile,
+                    true,
+                    None,
+                    bad,
+                    T0_MS,
+                    resolve
+                ),
                 Err(format!("Zona horaria no válida: {bad}"))
             );
         }
@@ -811,9 +891,10 @@ mod tests {
     fn export_reports_an_unavailable_directory() {
         let (mut store, profile) = memory();
         save(&mut store, &profile, "prose", T0_MS);
-        let result = export_sessions_csv(&store, &profile, true, None, 60, T0_MS, || {
-            Err("sin Descargas".to_owned())
-        });
+        let result =
+            export_sessions_csv(Locale::Es, &store, &profile, true, None, 60, T0_MS, || {
+                Err("sin Descargas".to_owned())
+            });
         assert_eq!(
             result,
             Err("No se pudo exportar el CSV: sin Descargas".to_owned())
@@ -844,7 +925,7 @@ mod tests {
         tz: i32,
         days: Option<u32>,
     ) -> Result<Vec<DayRow>, String> {
-        history_by_day(store, profile, true, mode, tz, days)
+        history_by_day(Locale::Es, store, profile, true, mode, tz, days)
     }
 
     #[test]
@@ -1005,7 +1086,7 @@ mod tests {
             );
             // Refused in temporary mode too.
             assert_eq!(
-                history_by_day(&store, &profile, false, None, bad, None),
+                history_by_day(Locale::Es, &store, &profile, false, None, bad, None),
                 Err(format!("Zona horaria no válida: {bad}"))
             );
         }
@@ -1024,7 +1105,7 @@ mod tests {
         save(&mut store, &profile, "prose", MIDNIGHT_18_UTC);
         for mode in [None, Some("prose")] {
             assert_eq!(
-                history_by_day(&store, &profile, false, mode, 60, None),
+                history_by_day(Locale::Es, &store, &profile, false, mode, 60, None),
                 Ok(vec![])
             );
         }
@@ -1099,7 +1180,7 @@ mod tests {
         );
         assert_eq!(MIN_CHAR_SAMPLES, 5);
         assert_eq!(
-            history_by_char(&store, &profile, true, Some("prose")),
+            history_by_char(Locale::Es, &store, &profile, true, Some("prose")),
             Ok(vec![
                 char_row(" ", 6, 0.5, 0.0),
                 char_row("\n", 5, 0.2, 0.3),
@@ -1110,11 +1191,11 @@ mod tests {
         );
         // Words practice shares the prose statistics; code has its own.
         assert_eq!(
-            history_by_char(&store, &profile, true, Some("words")),
-            history_by_char(&store, &profile, true, Some("prose"))
+            history_by_char(Locale::Es, &store, &profile, true, Some("words")),
+            history_by_char(Locale::Es, &store, &profile, true, Some("prose"))
         );
         assert_eq!(
-            history_by_char(&store, &profile, true, Some("code")),
+            history_by_char(Locale::Es, &store, &profile, true, Some("code")),
             Ok(vec![])
         );
     }
@@ -1136,7 +1217,7 @@ mod tests {
         );
         // "a" has 3 samples in each mode: only listed when merged.
         assert_eq!(
-            history_by_char(&store, &profile, true, None),
+            history_by_char(Locale::Es, &store, &profile, true, None),
             Ok(vec![
                 char_row("{", 8, 0.75, 0.5),
                 char_row("a", 6, 0.25, 0.625),
@@ -1144,11 +1225,11 @@ mod tests {
             ])
         );
         assert_eq!(
-            history_by_char(&store, &profile, true, Some("prose")),
+            history_by_char(Locale::Es, &store, &profile, true, Some("prose")),
             Ok(vec![char_row("p", 5, 0.1, 0.0)])
         );
         assert_eq!(
-            history_by_char(&store, &profile, true, Some("code")),
+            history_by_char(Locale::Es, &store, &profile, true, Some("code")),
             Ok(vec![char_row("{", 8, 0.75, 0.5)])
         );
     }
@@ -1159,15 +1240,18 @@ mod tests {
         save_units(&mut store, &profile, "prose", &[("a", 9, 0.5, 0.5, 9)]);
         let before = store.load_stats(profile.id, "prose").unwrap();
         assert_eq!(
-            history_by_char(&store, &profile, true, Some("xx")),
+            history_by_char(Locale::Es, &store, &profile, true, Some("xx")),
             Err("Modo desconocido: xx".to_owned())
         );
         assert_eq!(
-            history_by_char(&store, &profile, false, Some("xx")),
+            history_by_char(Locale::Es, &store, &profile, false, Some("xx")),
             Err("Modo desconocido: xx".to_owned())
         );
         for mode in [None, Some("prose"), Some("code")] {
-            assert_eq!(history_by_char(&store, &profile, false, mode), Ok(vec![]));
+            assert_eq!(
+                history_by_char(Locale::Es, &store, &profile, false, mode),
+                Ok(vec![])
+            );
         }
         assert_eq!(store.load_stats(profile.id, "prose").unwrap(), before);
     }

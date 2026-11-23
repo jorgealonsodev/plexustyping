@@ -5,6 +5,7 @@ pub mod ghost;
 pub mod goals;
 pub mod history;
 pub mod i18n;
+pub mod messages;
 pub mod metronome;
 pub mod oauth;
 pub mod profiles;
@@ -26,7 +27,7 @@ use commands::{
 use goals::GoalStatus;
 use history::{CharRow, CsvExport, DayRow};
 use metronome::{MetronomeStarted, MetronomeState};
-use plexustyping_ai::chatgpt_auth::{SignOut, Status};
+use plexustyping_ai::chatgpt_auth::{AuthError, SignOut, Status};
 use plexustyping_ai::{AiClient, Endpoints, ProviderId};
 use plexustyping_audio::MetronomeConfig;
 use plexustyping_core::{ErrorMode, IndentMode, InputEvent};
@@ -74,6 +75,7 @@ async fn first_text(
     let max_lines = max_lines.unwrap_or(code::DEFAULT_MAX_LINES);
     let layout = layout.unwrap_or_else(|| state.active_profile().layout);
     ai::first_text(
+        i18n::current(),
         &state,
         &language,
         &layout,
@@ -109,6 +111,7 @@ async fn next_text(
         day,
         mode: mode.unwrap_or_default(),
         max_lines: max_lines.unwrap_or(code::DEFAULT_MAX_LINES),
+        locale: i18n::current(),
     };
     ai::next_text(&state, &params).await
 }
@@ -138,6 +141,7 @@ async fn continue_text(
         seed,
         day,
         offline: offline.unwrap_or(false),
+        locale: i18n::current(),
     };
     ai::continue_text(&state, &params).await
 }
@@ -184,7 +188,10 @@ async fn on_audio_thread<T: Send + 'static>(
 ) -> Result<T, String> {
     let state = MetronomeState::clone(state);
     let joined = tauri::async_runtime::spawn_blocking(move || call(state)).await;
-    joined.map_err(|e| format!("Error interno del metrónomo: {e}"))?
+    joined.map_err(|e| {
+        let error = e.to_string();
+        messages::METRONOME_INTERNAL.fill(i18n::current(), &[("error", &error)])
+    })?
 }
 
 #[tauri::command]
@@ -192,7 +199,8 @@ async fn metronome_start(
     state: State<'_, MetronomeState>,
     config: MetronomeConfig,
 ) -> Result<MetronomeStarted, String> {
-    on_audio_thread(&state, move |m| m.start(config)).await
+    let locale = i18n::current();
+    on_audio_thread(&state, move |m| m.start(config, locale)).await
 }
 
 #[tauri::command]
@@ -200,7 +208,8 @@ async fn metronome_update(
     state: State<'_, MetronomeState>,
     config: MetronomeConfig,
 ) -> Result<Option<MetronomeStarted>, String> {
-    on_audio_thread(&state, move |m| m.update(config)).await
+    let locale = i18n::current();
+    on_audio_thread(&state, move |m| m.update(config, locale)).await
 }
 
 #[tauri::command]
@@ -261,7 +270,14 @@ fn session_history(
     let persistent = state.status.persistent;
     let store = store(&state);
     let profile = state.active_profile();
-    history::session_history(&store, &profile, persistent, mode.as_deref(), limit)
+    history::session_history(
+        i18n::current(),
+        &store,
+        &profile,
+        persistent,
+        mode.as_deref(),
+        limit,
+    )
 }
 
 /// Writes the sessions of `mode` to the Downloads directory (S7);
@@ -282,6 +298,7 @@ fn export_sessions_csv(
     let store = store(&state);
     let profile = state.active_profile();
     history::export_sessions_csv(
+        i18n::current(),
         &store,
         &profile,
         persistent,
@@ -306,6 +323,7 @@ fn history_by_day(
     let store = store(&state);
     let profile = state.active_profile();
     history::history_by_day(
+        i18n::current(),
         &store,
         &profile,
         persistent,
@@ -322,7 +340,13 @@ fn history_by_char(state: State<AppState>, mode: Option<String>) -> Result<Vec<C
     let persistent = state.status.persistent;
     let store = store(&state);
     let profile = state.active_profile();
-    history::history_by_char(&store, &profile, persistent, mode.as_deref())
+    history::history_by_char(
+        i18n::current(),
+        &store,
+        &profile,
+        persistent,
+        mode.as_deref(),
+    )
 }
 
 #[tauri::command]
@@ -347,7 +371,7 @@ fn ai_settings_get(state: State<AppState>) -> AiSettings {
 
 #[tauri::command]
 fn ai_settings_set(state: State<AppState>, settings: AiSettings) -> Result<AiSettings, AiFailure> {
-    ai::save_settings(&store(&state), settings)
+    ai::save_settings(i18n::current(), &store(&state), settings)
 }
 
 #[tauri::command]
@@ -360,7 +384,7 @@ async fn ai_key_status(
     state: State<'_, AppState>,
     provider: ProviderId,
 ) -> Result<bool, AiFailure> {
-    ai::key_status(&state.ai, &state.secrets, provider).await
+    ai::key_status(i18n::current(), &state.ai, &state.secrets, provider).await
 }
 
 /// The key goes straight to the keychain; it is never returned or logged.
@@ -371,12 +395,12 @@ async fn ai_key_save(
     provider: ProviderId,
     key: String,
 ) -> Result<(), AiFailure> {
-    ai::key_save(&state.secrets, provider, key).await
+    ai::key_save(i18n::current(), &state.secrets, provider, key).await
 }
 
 #[tauri::command]
 async fn ai_key_delete(state: State<'_, AppState>, provider: ProviderId) -> Result<(), AiFailure> {
-    ai::key_delete(&state.secrets, provider).await
+    ai::key_delete(i18n::current(), &state.secrets, provider).await
 }
 
 #[tauri::command]
@@ -384,7 +408,7 @@ async fn ai_models(
     state: State<'_, AppState>,
     provider: ProviderId,
 ) -> Result<Vec<String>, AiFailure> {
-    ai::models(&state.ai, &state.secrets, provider).await
+    ai::models(i18n::current(), &state.ai, &state.secrets, provider).await
 }
 
 #[tauri::command]
@@ -393,20 +417,20 @@ async fn ai_test(
     provider: ProviderId,
     model: String,
 ) -> Result<(), AiFailure> {
-    ai::test_connection(&state.ai, &state.secrets, provider, &model).await
+    ai::test_connection(i18n::current(), &state.ai, &state.secrets, provider, &model).await
 }
 
 /// Whether ChatGPT is signed in, with which account and whether plan use is enabled.
 #[tauri::command]
 async fn ai_chatgpt_status(state: State<'_, AppState>) -> Result<Status, AiFailure> {
-    ai::chatgpt_status(&state.ai).await
+    ai::chatgpt_status(i18n::current(), &state.ai).await
 }
 
 /// Signs in with ChatGPT in the system browser; resolves once the browser comes
 /// back (or the sign-in is cancelled or times out).
 #[tauri::command]
 async fn ai_chatgpt_sign_in(state: State<'_, AppState>) -> Result<Status, AiFailure> {
-    ai::chatgpt_sign_in(&state.ai, oauth::open_browser).await
+    ai::chatgpt_sign_in(i18n::current(), &state.ai, oauth::open_browser).await
 }
 
 /// Ends a pending ChatGPT sign-in.
@@ -418,14 +442,14 @@ fn ai_chatgpt_cancel(state: State<AppState>) {
 /// Revokes the ChatGPT session and forgets its tokens.
 #[tauri::command]
 async fn ai_chatgpt_sign_out(state: State<'_, AppState>) -> Result<SignOut, AiFailure> {
-    ai::chatgpt_sign_out(&state.ai).await
+    ai::chatgpt_sign_out(i18n::current(), &state.ai).await
 }
 
 /// The ChatGPT plan's models as `{ id: slug, name: display name }`
 /// (`ai_models` keeps returning plain ids for every provider).
 #[tauri::command]
 async fn ai_chatgpt_models(state: State<'_, AppState>) -> Result<Vec<ModelName>, AiFailure> {
-    ai::chatgpt_models(&state.ai).await
+    ai::chatgpt_models(i18n::current(), &state.ai).await
 }
 
 /// Opens the ChatGPT plan usage page in the system browser.
@@ -433,7 +457,7 @@ async fn ai_chatgpt_models(state: State<'_, AppState>) -> Result<Vec<ModelName>,
 fn ai_chatgpt_open_usage() -> Result<(), AiFailure> {
     oauth::open_usage_page().map_err(|_| AiFailure {
         kind: "config",
-        message: "No se pudo abrir el navegador".to_owned(),
+        message: messages::auth_error(i18n::current(), &AuthError::Browser),
     })
 }
 
@@ -444,7 +468,7 @@ fn ai_usage(state: State<AppState>, day: String) -> Result<Vec<UsageRow>, String
 
 #[tauri::command]
 fn profiles_list(state: State<AppState>) -> Result<ProfileList, String> {
-    profiles::list(&state)
+    profiles::list(&state).map_err(|e| e.message(i18n::current()))
 }
 
 /// Creates a profile; the active one stays (S3).
@@ -455,7 +479,7 @@ fn profile_create(
     language: String,
     layout: String,
 ) -> Result<Profile, String> {
-    profiles::create(&state, &name, &language, &layout)
+    profiles::create(&state, &name, &language, &layout).map_err(|e| e.message(i18n::current()))
 }
 
 /// Missing or `null` fields are left; `theme: ""` clears the theme (S3).
@@ -469,17 +493,18 @@ fn profile_update(
     theme: Option<String>,
 ) -> Result<Profile, String> {
     profiles::update(&state, id, name, language, layout, theme)
+        .map_err(|e| e.message(i18n::current()))
 }
 
 /// Deletes the profile with its history and statistics (S3).
 #[tauri::command]
 fn profile_delete(state: State<AppState>, id: i64) -> Result<ProfileDeleted, String> {
-    profiles::delete(&state, id)
+    profiles::delete(&state, id).map_err(|e| e.message(i18n::current()))
 }
 
 #[tauri::command]
 fn profile_switch(state: State<AppState>, id: i64) -> Result<Profile, String> {
-    profiles::switch(&state, id)
+    profiles::switch(&state, id).map_err(|e| e.message(i18n::current()))
 }
 
 fn now_ms() -> i64 {
@@ -499,14 +524,22 @@ fn goal_set(
     amount: Option<u32>,
     tz_offset_min: Option<i32>,
 ) -> Result<GoalStatus, String> {
-    goals::set(&state, &kind, amount, tz_offset_min.unwrap_or(0), now_ms())
+    let tz_offset_min = tz_offset_min.unwrap_or(0);
+    goals::set(
+        i18n::current(),
+        &state,
+        &kind,
+        amount,
+        tz_offset_min,
+        now_ms(),
+    )
 }
 
 /// The active profile's goal, today's progress and streak (S2–S4);
 /// `tz_offset_min` is minutes east of UTC (`-new Date().getTimezoneOffset()`).
 #[tauri::command]
 fn goal_status(state: State<AppState>, tz_offset_min: i32) -> Result<GoalStatus, String> {
-    goals::status(&state, tz_offset_min, now_ms())
+    goals::status(i18n::current(), &state, tz_offset_min, now_ms())
 }
 
 /// The active profile's progressive unlock for `language` and `layout` (S7).
@@ -529,20 +562,27 @@ fn unlock_set(
     enabled: Option<bool>,
     target_wpm: Option<u32>,
 ) -> Result<UnlockStatus, String> {
-    unlock::set(&state, &language, &layout, enabled, target_wpm)
+    unlock::set(
+        i18n::current(),
+        &state,
+        &language,
+        &layout,
+        enabled,
+        target_wpm,
+    )
 }
 
 /// Every stored UI setting (`plexustyping.*` keys), read once before the app mounts (S1, S4);
 /// an error when the database could not be opened, so the app keeps localStorage (S5).
 #[tauri::command]
 fn ui_settings_get(state: State<AppState>) -> Result<HashMap<String, String>, String> {
-    ui_settings::get(&state)
+    ui_settings::get(i18n::current(), &state)
 }
 
 /// Stores one UI setting; on disk when it returns (S1).
 #[tauri::command]
 fn ui_settings_set(state: State<AppState>, key: String, value: String) -> Result<(), String> {
-    ui_settings::set(&state, &key, &value)
+    ui_settings::set(i18n::current(), &state, &key, &value)
 }
 
 /// Language of the backend's messages to the interface (ui-i18n S1).
@@ -554,7 +594,7 @@ fn set_ui_language(language: String) -> Result<(), String> {
 /// Forgets one UI setting (S1).
 #[tauri::command]
 fn ui_settings_remove(state: State<AppState>, key: String) -> Result<(), String> {
-    ui_settings::remove(&state, &key)
+    ui_settings::remove(i18n::current(), &state, &key)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
