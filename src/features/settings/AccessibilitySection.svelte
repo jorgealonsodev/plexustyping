@@ -1,5 +1,6 @@
 <script lang="ts">
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import { COLOR_BLIND_SETTING, SCREEN_READER_SETTING } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
@@ -34,10 +35,7 @@
   {/snippet}
 </SettingField>
 
-<p class="note">
-  Más ayudas: los temas «Alto contraste» en Apariencia; el tamaño, el espaciado y el cursor en Texto. Con el
-  movimiento reducido del sistema no hay destellos ni animaciones.
-</p>
+<p class="note">{t("accessibilityNote")}</p>
 
 <style>
   .note {

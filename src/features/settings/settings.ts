@@ -2,6 +2,9 @@ import { MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, type MetronomeSettings, SOUNDS } fr
 import { settingsStorage } from "./persist";
 import type { PracticeKind } from "../code/api";
 import type { ErrorMode, IndentMode } from "../practice/engine";
+import { formatNumber } from "../../i18n/i18n.svelte";
+import { t } from "./messages";
+import { t as textT } from "./textMessages";
 
 const MODE_KEY = "plexustyping.errorMode";
 const LIVE_KEY = "plexustyping.liveStats";
@@ -55,11 +58,26 @@ export function loadLanguage(storage: Storage = settingsStorage()): string {
 
 export const saveLanguage = (id: string, storage: Storage = settingsStorage()) => storage.setItem(LANGUAGE_KEY, id);
 
-/** Error modes in display order; the first is the default (S3). */
-export const ERROR_MODES: { id: ErrorMode; label: string }[] = [
-  { id: "allow-continue", label: "Permitir seguir" },
-  { id: "stop-on-error", label: "Parar hasta corregir" },
-  { id: "backspace-correct", label: "Borrar con Retroceso" },
+/** Error modes in display order; the first is the default (S3). Labels follow the interface language. */
+export const ERROR_MODES: { readonly id: ErrorMode; readonly label: string }[] = [
+  {
+    id: "allow-continue",
+    get label() {
+      return t("errorAllowContinue");
+    },
+  },
+  {
+    id: "stop-on-error",
+    get label() {
+      return t("errorStopOnError");
+    },
+  },
+  {
+    id: "backspace-correct",
+    get label() {
+      return t("errorBackspaceCorrect");
+    },
+  },
 ];
 
 export function loadErrorMode(storage: Storage = settingsStorage()): ErrorMode {
@@ -83,8 +101,12 @@ export const saveLiveStats = (on: boolean, storage: Storage = settingsStorage())
 
 /** Ajustes → Práctica toggle of the ghost session (ghost S3). */
 export const GHOST_SETTING = {
-  label: "Sesión fantasma",
-  hint: "Corre contra tu mejor sesión con el mismo texto",
+  get label() {
+    return t("ghostLabel");
+  },
+  get hint() {
+    return t("ghostHint");
+  },
 };
 
 /** Whether a text with a record races its ghost session (on unless turned off). */
@@ -111,8 +133,12 @@ const COLOR_BLIND_KEY = "plexustyping.colorBlind";
 
 /** Ajustes → Teclado toggle of the colour-blind flashes (a11y S5). */
 export const COLOR_BLIND_SETTING = {
-  label: "Modo daltónico",
-  hint: "Destellos en azul y naranja en lugar de verde y rojo; una tecla errónea se subraya.",
+  get label() {
+    return t("colorBlindLabel");
+  },
+  get hint() {
+    return t("colorBlindHint");
+  },
 };
 
 /** Whether the keyboard flashes use the colour-blind pair (off unless turned on). */
@@ -124,8 +150,12 @@ const DIM_PENDING_KEY = "plexustyping.dimPending";
 
 /** Ajustes → Apariencia toggle of the dimmed pending text (a11y S7). */
 export const DIM_PENDING_SETTING = {
-  label: "Atenuar texto pendiente",
-  hint: "Baja el contraste del texto por escribir por debajo del nivel AA para que destaque lo escrito; desactívalo para recuperarlo.",
+  get label() {
+    return textT("dimPendingLabel");
+  },
+  get hint() {
+    return textT("dimPendingHint");
+  },
 };
 
 /** Whether the practice text's pending chars use the dimmed colours (on unless turned off). */
@@ -143,7 +173,7 @@ export const UNLIMITED_LENGTH = 0;
 export const TEXT_LENGTHS = [100, 200, 300, 450, 600, 800, 1000, 1500, 2000, UNLIMITED_LENGTH];
 
 /** How a length choice reads in "Longitud". */
-export const lengthLabel = (length: number) => (length === UNLIMITED_LENGTH ? "Ilimitado" : String(length));
+export const lengthLabel = (length: number) => (length === UNLIMITED_LENGTH ? t("unlimited") : String(length));
 
 /** The stored number if it is one of `choices`, else `fallback` (also when missing or empty). */
 function loadChoice(key: string, choices: number[], fallback: number, storage: Storage): number {
@@ -232,9 +262,19 @@ export function loadCodeLanguage(storage: Storage = settingsStorage()): string {
 export const saveCodeLanguage = (id: string, storage: Storage = settingsStorage()) => storage.setItem(CODE_LANGUAGE_KEY, id);
 
 /** Indentation modes in display order; the first is the default (S4). */
-export const CODE_INDENTS: { id: IndentMode; label: string }[] = [
-  { id: "auto", label: "Automática al pulsar Enter" },
-  { id: "manual", label: "Manual" },
+export const CODE_INDENTS: { readonly id: IndentMode; readonly label: string }[] = [
+  {
+    id: "auto",
+    get label() {
+      return t("indentAuto");
+    },
+  },
+  {
+    id: "manual",
+    get label() {
+      return t("indentManual");
+    },
+  },
 ];
 
 export function loadCodeIndent(storage: Storage = settingsStorage()): IndentMode {
@@ -263,8 +303,12 @@ const SCREEN_READER_KEY = "plexustyping.screenReader";
 
 /** Ajustes → Práctica toggle of the screen reader mode (a11y S3). */
 export const SCREEN_READER_SETTING = {
-  label: "Anunciar con lector de pantalla",
-  hint: "Anuncia el siguiente carácter, los errores, cada texto nuevo y el resultado (aria-live).",
+  get label() {
+    return t("screenReaderLabel");
+  },
+  get hint() {
+    return t("screenReaderHint");
+  },
 };
 
 /** Whether the practice announces to screen readers (off unless turned on). */
@@ -285,11 +329,48 @@ export interface Typography {
 export const DEFAULT_TYPOGRAPHY: Typography = { fontScale: 100, letterSpacing: 0, lineHeight: 1.75 };
 
 /** The Ajustes → Apariencia rows in display order, with each range and step (a11y S4). */
-export const TYPOGRAPHY_FIELDS: { key: keyof Typography; label: string; min: number; max: number; step: number }[] = [
-  { key: "fontScale", label: "Tamaño de letra", min: 80, max: 200, step: 10 },
-  { key: "letterSpacing", label: "Espaciado entre letras", min: 0, max: 0.3, step: 0.02 },
-  { key: "lineHeight", label: "Interlineado", min: 1.2, max: 2.4, step: 0.1 },
+export const TYPOGRAPHY_FIELDS: {
+  readonly key: keyof Typography;
+  readonly label: string;
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+}[] = [
+  {
+    key: "fontScale",
+    get label() {
+      return textT("fontScaleLabel");
+    },
+    min: 80,
+    max: 200,
+    step: 10,
+  },
+  {
+    key: "letterSpacing",
+    get label() {
+      return textT("letterSpacingLabel");
+    },
+    min: 0,
+    max: 0.3,
+    step: 0.02,
+  },
+  {
+    key: "lineHeight",
+    get label() {
+      return textT("lineHeightLabel");
+    },
+    min: 1.2,
+    max: 2.4,
+    step: 0.1,
+  },
 ];
+
+/** A typography value as its hint shows it, in the interface language's number format: `0,12 em`, `150 %`. */
+export function typographyValue(key: keyof Typography, value: number): string {
+  const n = formatNumber(value, { maximumFractionDigits: 2 });
+  if (key === "fontScale") return textT("percent", { n });
+  return key === "letterSpacing" ? `${n} em` : n;
+}
 
 /** `stored` with each value clamped to its range (to 2 decimals) and each non-number taken from `d`. */
 export function checkTypography(

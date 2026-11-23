@@ -2,6 +2,7 @@
   import { GOAL_KINDS, type GoalChoice, amountsFor, chooseGoal } from "../goals/goals";
   import { deleteConfirmation } from "../profiles/profiles";
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import type { SettingsStore } from "./store.svelte";
 
   // "Perfiles" (S4): each profile has its own history, statistics, layout, language and theme.
@@ -17,7 +18,7 @@
 
   const focus = (el: HTMLElement) => el.focus();
 
-  /** Runs one profile command at a time; its Spanish error stays shown until the next one. */
+  /** Runs one profile command at a time; its error (from the backend) stays shown until the next one. */
   async function run(op: () => Promise<string | null>, done?: () => void) {
     if (busy) return;
     busy = true;
@@ -67,47 +68,45 @@
   }
 </script>
 
-<p class="intro">
-  Cada perfil tiene su historial, sus estadísticas, su distribución, su idioma y su tema; el resto de ajustes es común.
-</p>
+<p class="intro">{t("profilesIntro")}</p>
 
 {#if settings.profiles.length === 0}
-  <p class="notice">{settings.profilesReady ? "No se pudieron cargar los perfiles." : "Cargando perfiles…"}</p>
+  <p class="notice">{settings.profilesReady ? t("profilesFailed") : t("profilesLoading")}</p>
 {:else}
-  <ul class="profiles" aria-label="Perfiles">
+  <ul class="profiles" aria-label={t("sectionProfiles")}>
     {#each settings.profiles as p (p.id)}
       {@const active = p.id === settings.activeProfile?.id}
       <li class:active aria-current={active ? "true" : undefined}>
         {#if renaming === p.id}
           <form class="row" onsubmit={(e) => rename(e, p.id)}>
-            <input type="text" aria-label="Nuevo nombre de «{p.name}»" bind:value={renameValue} {@attach focus} />
-            <button type="submit" disabled={busy}>Guardar</button>
-            <button type="button" onclick={() => (renaming = null)}>Cancelar</button>
+            <input type="text" aria-label={t("renameLabel", { name: p.name })} bind:value={renameValue} {@attach focus} />
+            <button type="submit" disabled={busy}>{t("save")}</button>
+            <button type="button" onclick={() => (renaming = null)}>{t("cancel")}</button>
           </form>
         {:else}
           <div class="row">
             <span class="name">{p.name}</span>
             {#if active}
-              <span class="badge">Activo</span>
+              <span class="badge">{t("active")}</span>
             {:else}
-              <button type="button" disabled={busy} onclick={() => void run(() => settings.useProfile(p.id))}>Usar</button>
+              <button type="button" disabled={busy} onclick={() => void run(() => settings.useProfile(p.id))}>{t("use")}</button>
             {/if}
-            <button type="button" disabled={busy} onclick={() => startRename(p.id, p.name)}>Renombrar</button>
+            <button type="button" disabled={busy} onclick={() => startRename(p.id, p.name)}>{t("rename")}</button>
             <button
               type="button"
               disabled={busy}
               onclick={() => {
                 renaming = null;
                 confirming = p.id;
-              }}>Borrar</button
+              }}>{t("delete")}</button
             >
           </div>
         {/if}
         {#if confirming === p.id}
           <div class="confirm" role="alert">
             <p>{deleteConfirmation(p.name)}</p>
-            <button type="button" class="danger" disabled={busy} onclick={() => remove(p.id)} {@attach focus}>Borrar</button>
-            <button type="button" onclick={() => (confirming = null)}>Cancelar</button>
+            <button type="button" class="danger" disabled={busy} onclick={() => remove(p.id)} {@attach focus}>{t("delete")}</button>
+            <button type="button" onclick={() => (confirming = null)}>{t("cancel")}</button>
           </div>
         {/if}
       </li>
@@ -116,15 +115,15 @@
 {/if}
 
 <form onsubmit={create}>
-  <SettingField label="Nuevo perfil" hint="Empieza con el idioma y la distribución del perfil activo.">
+  <SettingField label={t("newProfileLabel")} hint={t("newProfileHint")}>
     {#snippet children({ id, hintId })}
-      <input {id} type="text" aria-describedby={hintId} placeholder="Nombre" bind:value={newName} />
-      <button type="submit" disabled={busy || settings.activeProfile === null}>Crear</button>
+      <input {id} type="text" aria-describedby={hintId} placeholder={t("namePlaceholder")} bind:value={newName} />
+      <button type="submit" disabled={busy || settings.activeProfile === null}>{t("create")}</button>
     {/snippet}
   </SettingField>
 </form>
 
-<SettingField label="Meta diaria" hint="Del perfil activo: minutos o textos al día, con racha de días.">
+<SettingField label={t("goalLabel")} hint={t("goalHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -139,7 +138,7 @@
     {#if goal}
       <select
         style="min-width: 4.5rem; margin-left: 0.4rem"
-        aria-label={goal.kind === "minutes" ? "Minutos al día" : "Textos al día"}
+        aria-label={goal.kind === "minutes" ? t("minutesPerDay") : t("textsPerDay")}
         disabled={busy}
         onchange={(e: Change<HTMLSelectElement>) => setGoal(goal.kind, Number(e.currentTarget.value))}
       >

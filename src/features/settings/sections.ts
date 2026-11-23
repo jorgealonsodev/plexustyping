@@ -1,5 +1,10 @@
 // Pure helpers for the settings modal (S8); the section list itself lives in `registry.ts`.
 
+import { t } from "./messages";
+
+/** The settings search's match count, e.g. "3 ajustes", in the interface language. */
+export const matchCountText = (matches: number) => t("matchCount", { n: matches });
+
 /** The next section id for a tab-list navigation key, or `null` when the key does not move. */
 export function moveSection(ids: readonly string[], current: string, key: string): string | null {
   const at = ids.indexOf(current);

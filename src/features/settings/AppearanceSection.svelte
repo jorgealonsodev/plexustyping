@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { MAX_THEME_FILE_CHARS, THEMES, TOO_LARGE } from "../themes";
+  import { MAX_THEME_FILE_CHARS, THEMES, tooLargeError } from "../themes";
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import UiLanguageField from "../../i18n/UiLanguageField.svelte";
   import type { SettingsStore } from "./store.svelte";
 
@@ -8,9 +9,9 @@
 
   const groups = $derived(
     [
-      { label: "Oscuros", themes: THEMES.filter((t) => t.dark) },
-      { label: "Claros", themes: THEMES.filter((t) => !t.dark) },
-      { label: "Importados", themes: settings.customThemes },
+      { label: t("themesDark"), themes: THEMES.filter((t) => t.dark) },
+      { label: t("themesLight"), themes: THEMES.filter((t) => !t.dark) },
+      { label: t("themesImported"), themes: settings.customThemes },
     ].filter((g) => g.themes.length > 0),
   );
   const imported = $derived(settings.customThemes.find((t) => t.id === settings.themeId));
@@ -27,11 +28,11 @@
     try {
       // Bytes are at least chars: a file over the limit is never read.
       const result = file.size > MAX_THEME_FILE_CHARS ? null : settings.importTheme(await file.text(), file.name);
-      if (!result) notice = { text: TOO_LARGE, error: true };
-      else if (result.ok) notice = { text: `Tema importado: ${result.name}`, error: false };
+      if (!result) notice = { text: tooLargeError(), error: true };
+      else if (result.ok) notice = { text: t("themeImported", { name: result.name }), error: false };
       else notice = { text: result.error, error: true };
     } catch (err) {
-      notice = { text: `No se pudo leer el archivo: ${String(err)}`, error: true };
+      notice = { text: t("fileUnreadable", { error: String(err) }), error: true };
     }
   }
 
@@ -44,7 +45,7 @@
 
 <UiLanguageField />
 
-<SettingField label="Tema" hint="Colores de toda la aplicación; se aplica al momento.">
+<SettingField label={t("themeLabel")} hint={t("themeHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -63,8 +64,8 @@
 </SettingField>
 
 <SettingField
-  label="Temas de VS Code"
-  hint="Importa un archivo de tema (.json) de VS Code: usa sus colores del editor y del terminal."
+  label={t("vsCodeLabel")}
+  hint={t("vsCodeHint")}
 >
   {#snippet children({ id, hintId })}
     <input
@@ -76,9 +77,9 @@
       aria-hidden="true"
       onchange={importFile}
     />
-    <button {id} type="button" aria-describedby={hintId} onclick={() => picker.click()}>Importar tema de VS Code…</button>
+    <button {id} type="button" aria-describedby={hintId} onclick={() => picker.click()}>{t("vsCodeImport")}</button>
     {#if imported}
-      <button type="button" onclick={() => remove(imported.id)}>Eliminar tema importado</button>
+      <button type="button" onclick={() => remove(imported.id)}>{t("vsCodeRemove")}</button>
     {/if}
   {/snippet}
 </SettingField>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ErrorMode } from "../practice/engine";
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import { ERROR_MODES, GHOST_SETTING, LANGUAGES, TARGET_COUNTS, TEXT_LENGTHS, lengthLabel } from "./settings";
   import type { SettingsStore } from "./store.svelte";
   import type { UnlockChange } from "../unlock/api";
@@ -8,7 +9,7 @@
 
   let { settings }: { settings: SettingsStore } = $props();
 
-  /** The last refused unlock change (Spanish, from the backend); cleared by the next one that works. */
+  /** The last refused unlock change (from the backend, in the interface language); cleared by the next one that works. */
   let unlockError = $state<string | null>(null);
   const targetWpm = $derived(settings.unlock?.targetWpm ?? DEFAULT_TARGET_WPM);
 
@@ -19,7 +20,7 @@
   type Change<T extends HTMLElement> = Event & { currentTarget: T };
 </script>
 
-<SettingField label="Idioma" hint="Idioma de los textos; cambiarlo carga un texto nuevo.">
+<SettingField label={t("languageLabel")} hint={t("languageHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -33,7 +34,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Modo de error" hint="Qué pasa al fallar una tecla; cambiarlo reinicia el texto.">
+<SettingField label={t("errorModeLabel")} hint={t("errorModeHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -47,7 +48,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Objetivos" hint="Caracteres o bigramas débiles por texto, desde el siguiente.">
+<SettingField label={t("targetsLabel")} hint={t("targetsHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -61,7 +62,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Longitud" hint="Caracteres por texto, desde el siguiente. Ilimitado: el texto crece mientras escribes; Esc o «Terminar» lo acaban.">
+<SettingField label={t("lengthLabel")} hint={t("lengthHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -75,7 +76,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField toggle label="Estadísticas en vivo" hint="Muestra las métricas mientras escribes.">
+<SettingField toggle label={t("liveStatsLabel")} hint={t("liveStatsHint")}>
   {#snippet children({ id, hintId })}
     <input
       {id}
@@ -122,7 +123,7 @@
       onchange={(e: Change<HTMLSelectElement>) => void setUnlock({ targetWpm: Number(e.currentTarget.value) })}
     >
       {#each TARGET_WPMS as n (n)}
-        <option value={n} selected={n === targetWpm}>{n} PPM</option>
+        <option value={n} selected={n === targetWpm}>{t("wpm", { n })}</option>
       {/each}
     </select>
   {/snippet}

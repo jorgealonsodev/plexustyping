@@ -1,28 +1,45 @@
 import { settingsStorage } from "./persist";
+import { t } from "./textMessages";
 
 /** Ajustes → Texto select of the typing cursor's look, prose and code (cursor-style S1). */
 export const CURSOR_SETTING = {
-  label: "Cursor",
-  hint: "Cómo se marca el siguiente carácter que hay que escribir.",
+  get label() {
+    return t("cursorLabel");
+  },
+  get hint() {
+    return t("cursorHint");
+  },
 };
 
 export const CURSOR_BLINK_SETTING = {
-  label: "Cursor parpadeante",
-  hint: "El cursor parpadea mientras esperas y se queda fijo al escribir; no lo hace con el movimiento reducido del sistema.",
+  get label() {
+    return t("cursorBlinkLabel");
+  },
+  get hint() {
+    return t("cursorBlinkHint");
+  },
 };
 
 export interface CursorStyle {
-  id: string;
-  name: string;
+  readonly id: string;
+  /** In the interface language. */
+  readonly name: string;
 }
+
+const style = (id: string, key: Parameters<typeof t>[0]): CursorStyle => ({
+  id,
+  get name() {
+    return t(key);
+  },
+});
 
 /** Display order; the first, the Monkeytype-style bar, is the default. The practice text reads the id from `data-cursor`. */
 export const CURSOR_STYLES: CursorStyle[] = [
-  { id: "bar", name: "Barra" },
-  { id: "highlight", name: "Resaltado" },
-  { id: "block", name: "Bloque" },
-  { id: "underline", name: "Subrayado" },
-  { id: "outline", name: "Contorno" },
+  style("bar", "cursorBar"),
+  style("highlight", "cursorHighlight"),
+  style("block", "cursorBlock"),
+  style("underline", "cursorUnderline"),
+  style("outline", "cursorOutline"),
 ];
 
 export const DEFAULT_CURSOR_STYLE = CURSOR_STYLES[0].id;

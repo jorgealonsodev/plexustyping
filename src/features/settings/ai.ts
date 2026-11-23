@@ -1,5 +1,8 @@
 // AI settings types and pure helpers for the "IA" section (S2, S3).
 
+import { formatNumber } from "../../i18n/i18n.svelte";
+import { t } from "./aiMessages";
+
 export type ProviderId = "claude" | "openai" | "gemini" | "opencode-go" | "chatgpt";
 
 export interface ChainEntry {
@@ -33,7 +36,7 @@ export interface UsageRow {
   outputTokensTotal: number;
 }
 
-/** A failed AI command: `{ kind, message }`, message in Spanish. */
+/** A failed AI command: `{ kind, message }`, message in the interface language. */
 export interface AiFailure {
   kind: string;
   message: string;
@@ -134,7 +137,8 @@ export function modelChoices(listed: readonly string[], current: string): string
   return current && !listed.includes(current) ? [current, ...listed] : [...listed];
 }
 
-export const densityLabel = (d: number) => `${String(d).replace(".", ",")}×`;
+/** The density as the label shows it, with the interface language's decimal separator. */
+export const densityLabel = (d: number) => `${formatNumber(d)}×`;
 
 /** The message of a typed AI failure, or the error as text. */
 export function failureMessage(err: unknown): string {
@@ -156,7 +160,7 @@ export function usageCells(row: UsageRow, providers: readonly ProviderInfo[]) {
 
 /** Title of the header "IA" toggle (ai-toggle S1). */
 export const aiToggleTitle = (enabled: boolean) =>
-  enabled ? "IA activada: los textos nuevos se generan con IA" : "IA desactivada: textos guardados";
+  enabled ? t("toggleOn") : t("toggleOff");
 
 /** `s` with the AI turned on or off, everything else kept. */
 export const toggleEnabled = (s: AiSettings): AiSettings => ({ ...s, enabled: !s.enabled });
@@ -169,18 +173,16 @@ export const chatgptReady = (s: ChatgptStatus | null | undefined) => !!s && s.si
 
 /** The account lines of the ChatGPT block; `ok` when the row is usable. */
 export function chatgptAccount(s: ChatgptStatus): { account: string; plan: string; ok: boolean } {
-  if (!s.signedIn) return { account: "Sin sesión iniciada", plan: "", ok: false };
+  if (!s.signedIn) return { account: t("signedOut"), plan: "", ok: false };
   return {
-    account: s.email ? `Sesión iniciada como ${s.email}` : "Sesión iniciada",
-    plan: s.planEnabled
-      ? "El uso del plan está activado"
-      : "El uso del plan no está activado: inicia sesión de nuevo y permítelo",
+    account: s.email ? t("signedInAs", { email: s.email }) : t("signedIn"),
+    plan: s.planEnabled ? t("planOn") : t("planOff"),
     ok: s.planEnabled,
   };
 }
 
 /** What to tell after signing out; empty when the revocation was confirmed. */
-export const signOutNotice = (r: ChatgptSignOut) => (r.revoked ? "" : "No se pudo confirmar la revocación");
+export const signOutNotice = (r: ChatgptSignOut) => (r.revoked ? "" : t("revocationUnconfirmed"));
 
 /** OpenAI's page with the ChatGPT plan usage ("Gestionar uso"). */
 export const CHATGPT_USAGE_URL = "https://chatgpt.com/settings/usage";

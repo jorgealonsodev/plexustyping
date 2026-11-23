@@ -3,7 +3,7 @@ import type { PracticeKind } from "../code/api";
 import type { ErrorMode, IndentMode } from "../practice/engine";
 import {
   DEFAULT_THEME_ID,
-  TOO_MANY,
+  tooManyError,
   addCustomTheme,
   applyTheme,
   initCustomThemes,
@@ -176,7 +176,7 @@ export class SettingsStore {
     const parsed = parseVsCodeTheme(text, fileName);
     if (!parsed.ok) return parsed;
     const next = addCustomTheme(this.customThemes, parsed.theme);
-    if (!next) return { ok: false, error: TOO_MANY };
+    if (!next) return { ok: false, error: tooManyError() };
     this.storeCustomThemes(next.themes);
     this.setTheme(next.theme.id);
     return { ok: true, name: next.theme.name };

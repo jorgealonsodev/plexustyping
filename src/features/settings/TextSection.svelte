@@ -1,16 +1,15 @@
 <script lang="ts">
   import SettingField from "./SettingField.svelte";
-  import { DIM_PENDING_SETTING, TYPOGRAPHY_FIELDS, type Typography } from "./settings";
-  import { FONT_GROUPS, FONT_SETTING, PRACTICE_FONTS, fontById } from "./fonts";
+  import { t } from "./textMessages";
+  import { t as settingsT } from "./messages";
+  import { DIM_PENDING_SETTING, TYPOGRAPHY_FIELDS, type Typography, typographyValue } from "./settings";
+  import { FONT_GROUPS, FONT_SETTING, PRACTICE_FONTS, fontById, fontGroupLabel } from "./fonts";
   import { CURSOR_BLINK_SETTING, CURSOR_SETTING, CURSOR_STYLES } from "./cursor";
   import type { SettingsStore } from "./store.svelte";
 
   // How the practice text looks, prose and code: typeface, size and spacing, cursor and pending text.
   let { settings }: { settings: SettingsStore } = $props();
 
-  const UNITS: Record<keyof Typography, string> = { fontScale: " %", letterSpacing: " em", lineHeight: "" };
-  /** A value as the hint shows it: Spanish decimal comma and its unit, e.g. `0,12 em`. */
-  const shown = (key: keyof Typography, value: number) => `${String(value).replace(".", ",")}${UNITS[key]}`;
   const setTypography = (key: keyof Typography) => (e: Event & { currentTarget: HTMLInputElement }) => {
     const value = e.currentTarget.valueAsNumber;
     if (Number.isFinite(value)) settings.setTypography({ [key]: value });
@@ -30,7 +29,7 @@
       onchange={(e: Event & { currentTarget: HTMLSelectElement }) => settings.setPracticeFont(e.currentTarget.value)}
     >
       {#each FONT_GROUPS as g (g)}
-        <optgroup label={g}>
+        <optgroup label={fontGroupLabel(g)}>
           {#each PRACTICE_FONTS.filter((f) => f.group === g) as f (f.id)}
             <option value={f.id} selected={f.id === font.id} style="font-family: {f.family}">{f.name}</option>
           {/each}
@@ -40,8 +39,8 @@
     <input
       type="text"
       class="preview"
-      aria-label="Prueba la fuente"
-      placeholder="Escribe aquí para probarla: Ñandú 0O 1lI ¿{'{}'}?"
+      aria-label={t("fontPreviewLabel")}
+      placeholder={t("fontPreviewPlaceholder")}
       spellcheck="false"
       autocomplete="off"
       style="font-family: {font.family}"
@@ -54,7 +53,11 @@
 {#each TYPOGRAPHY_FIELDS as f (f.key)}
   <SettingField
     label={f.label}
-    hint="Texto de práctica: {shown(f.key, settings.typography[f.key])} (de {shown(f.key, f.min)} a {shown(f.key, f.max)})."
+    hint={t("typographyHint", {
+      value: typographyValue(f.key, settings.typography[f.key]),
+      min: typographyValue(f.key, f.min),
+      max: typographyValue(f.key, f.max),
+    })}
   >
     {#snippet children({ id, hintId })}
       <input
@@ -63,7 +66,7 @@
         max={f.max}
         step={f.step}
         value={settings.typography[f.key]}
-        aria-label="{f.label} (deslizador)"
+        aria-label={settingsT("slider", { label: f.label })}
         oninput={setTypography(f.key)}
       />
       <input

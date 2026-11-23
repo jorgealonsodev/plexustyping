@@ -1,5 +1,6 @@
 <script lang="ts">
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import { LAYOUTS } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
@@ -10,8 +11,8 @@
 </script>
 
 <SettingField
-  label="Distribución"
-  hint="Debe coincidir con la del sistema; cambiarla carga un texto nuevo."
+  label={t("layoutLabel")}
+  hint={t("layoutHint")}
 >
   {#snippet children({ id, hintId })}
     <select {id} aria-describedby={hintId} onchange={(e: SelectChange) => settings.setLayout(e.currentTarget.value)}>
@@ -22,7 +23,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField toggle label="Teclado visual" shortcut="F2" hint="Teclado en pantalla que resalta la siguiente tecla.">
+<SettingField toggle label={t("keyboardLabel")} shortcut="F2" hint={t("keyboardHint")}>
   {#snippet children({ id, hintId })}
     <input
       {id}
@@ -34,7 +35,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField toggle label="Destellos" hint="Las teclas pulsadas se iluminan en verde o rojo (azul o naranja con el modo daltónico).">
+<SettingField toggle label={t("flashesLabel")} hint={t("flashesHint")}>
   {#snippet children({ id, hintId })}
     <input
       {id}
@@ -46,7 +47,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField toggle label="Mapa de calor" hint="Tiñe cada tecla según tus errores y lentitud y la marca con su nivel, de 1 a 5.">
+<SettingField toggle label={t("heatmapLabel")} hint={t("heatmapHint")}>
   {#snippet children({ id, hintId })}
     <input
       {id}

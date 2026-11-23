@@ -46,10 +46,12 @@
     aiTest,
     aiUsage,
   } from "./aiApi";
+  import { formatNumber } from "../../i18n/i18n.svelte";
+  import { t } from "./aiMessages";
   import SettingField from "./SettingField.svelte";
   import type { SettingsStore } from "./store.svelte";
 
-  // "IA" settings (S2, S3). Keys typed here go once to `ai_key_save`, read straight from the
+  // "IA" settings (S2, S3); texts in `aiMessages.ts`. Keys typed here go once to `ai_key_save`, read straight from the
   // form field, which is then cleared; they are never kept in component state.
   let { settings }: { settings: SettingsStore } = $props();
 
@@ -75,12 +77,8 @@
   let chatgptNotice = $state("");
   let density = $state(3);
 
-  const KEY_LABELS: Record<KeyState, string> = {
-    saved: "Guardada",
-    none: "Sin clave",
-    unavailable: "Llavero no disponible",
-    unknown: "…",
-  };
+  const keyLabel = (state: KeyState) =>
+    state === "saved" ? t("keySaved") : state === "none" ? t("keyNone") : state === "unavailable" ? t("keyUnavailable") : "…";
   const OTHER = "__other__";
 
   const nameOf = (id: ProviderId) => providers.find((p) => p.id === id)?.name ?? id;
@@ -247,7 +245,7 @@
     tests[id] = "pending";
     try {
       await aiTest(id, entry.model);
-      tests[id] = { ok: true, message: "Conexión correcta" };
+      tests[id] = { ok: true, message: t("connectionOk") };
     } catch (err) {
       tests[id] = { ok: false, message: failureMessage(err) };
     }
@@ -287,7 +285,7 @@
 
 <div class="ai" bind:this={root}>
 {#if ai}
-  <SettingField toggle label="Usar IA para generar textos" hint="Si falla, se usa un texto del caché o del corpus local.">
+  <SettingField toggle label={t("enabledLabel")} hint={t("enabledHint")}>
     {#snippet children({ id, hintId })}
       <input
         {id}
@@ -299,13 +297,13 @@
     {/snippet}
   </SettingField>
 
-  <p class="privacy">Solo se envían los caracteres objetivo, el idioma y el tema; nunca lo que escribes.</p>
+  <p class="privacy">{t("privacy")}</p>
 
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
-  <section class="chain" aria-label="Cadena de respaldo">
-    <h3>Cadena de respaldo</h3>
-    <p class="hint">Se prueba cada proveedor en orden; las claves se guardan en el llavero del sistema.</p>
+  <section class="chain" aria-label={t("chain")}>
+    <h3>{t("chain")}</h3>
+    <p class="hint">{t("chainHint")}</p>
     <ol>
       {#each ai.chain as entry, i (entry.provider)}
         {@const listed = models[entry.provider]}
@@ -315,7 +313,7 @@
           <div class="row">
             <span class="order">{i + 1}.</span>
             <select
-              aria-label="Proveedor {i + 1}"
+              aria-label={t("providerN", { n: i + 1 })}
               onchange={(e: Change<HTMLSelectElement>) => onProvider(i, e.currentTarget.value as ProviderId)}
             >
               {#each providerChoices(ai.chain, i, providers) as p (p.id)}
@@ -326,37 +324,37 @@
               <input
                 class="model"
                 type="text"
-                aria-label="Modelo de {nameOf(entry.provider)}"
-                placeholder="Modelo"
+                aria-label={t("modelOf", { name: nameOf(entry.provider) })}
+                placeholder={t("modelPlaceholder")}
                 value={entry.model}
                 onchange={(e: Change<HTMLInputElement>) => ai && commitChain(setModel(ai.chain, i, e.currentTarget.value))}
               />
             {:else}
               <select
                 class="model"
-                aria-label="Modelo de {nameOf(entry.provider)}"
+                aria-label={t("modelOf", { name: nameOf(entry.provider) })}
                 onchange={(e: Change<HTMLSelectElement>) => onModelSelect(i, entry.provider, e.currentTarget.value)}
               >
-                {#if !entry.model}<option value="" selected>Elige un modelo</option>{/if}
+                {#if !entry.model}<option value="" selected>{t("chooseModel")}</option>{/if}
                 {#each modelOptions(listed ?? [], entry.model) as m (m.id)}
                   <option value={m.id} selected={m.id === entry.model}>{m.name}</option>
                 {/each}
-                <option value={OTHER}>Otro…</option>
+                <option value={OTHER}>{t("otherModel")}</option>
               </select>
             {/if}
             <span class="moves">
-              <button type="button" aria-label="Subir" title="Subir" disabled={i === 0} onclick={() => ai && commitChain(moveEntry(ai.chain, i, -1))}>↑</button>
+              <button type="button" aria-label={t("moveUp")} title={t("moveUp")} disabled={i === 0} onclick={() => ai && commitChain(moveEntry(ai.chain, i, -1))}>↑</button>
               <button
                 type="button"
-                aria-label="Bajar"
-                title="Bajar"
+                aria-label={t("moveDown")}
+                title={t("moveDown")}
                 disabled={i === ai.chain.length - 1}
                 onclick={() => ai && commitChain(moveEntry(ai.chain, i, 1))}>↓</button
               >
               <button
                 type="button"
-                aria-label="Quitar"
-                title="Quitar"
+                aria-label={t("remove")}
+                title={t("remove")}
                 disabled={ai.chain.length === 1}
                 onclick={() => ai && commitChain(removeEntry(ai.chain, i))}>×</button
               >
@@ -364,14 +362,14 @@
           </div>
           {#if needsKey(entry.provider)}
             <form class="row" onsubmit={(e) => void saveKey(e, entry.provider)}>
-              <input name="key" type="password" autocomplete="off" placeholder="Clave de API" aria-label="Clave de {nameOf(entry.provider)}" />
-              <button type="submit">Guardar clave</button>
-              <button type="button" onclick={() => void deleteKey(entry.provider)}>Borrar clave</button>
-              <span class="status" class:ok={keyState[entry.provider] === "saved"}>{KEY_LABELS[keyState[entry.provider] ?? "unknown"]}</span>
+              <input name="key" type="password" autocomplete="off" placeholder={t("apiKeyPlaceholder")} aria-label={t("keyOf", { name: nameOf(entry.provider) })} />
+              <button type="submit">{t("saveKey")}</button>
+              <button type="button" onclick={() => void deleteKey(entry.provider)}>{t("deleteKey")}</button>
+              <span class="status" class:ok={keyState[entry.provider] === "saved"}>{keyLabel(keyState[entry.provider] ?? "unknown")}</span>
             </form>
             {#if keyError[entry.provider]}<p class="error" role="alert">{keyError[entry.provider]}</p>{/if}
           {:else}
-            <div class="account" aria-label="Cuenta de ChatGPT">
+            <div class="account" aria-label={t("chatgptAccount")}>
               {#if chatgpt}
                 {@const acc = chatgptAccount(chatgpt)}
                 <div class="row">
@@ -381,24 +379,24 @@
               {/if}
               <div class="row">
                 {#if signingIn}
-                  <span class="status" role="status">Esperando al navegador…</span>
-                  <button type="button" onclick={() => void aiChatgptCancel()}>Cancelar</button>
+                  <span class="status" role="status">{t("waitingBrowser")}</span>
+                  <button type="button" onclick={() => void aiChatgptCancel()}>{t("cancel")}</button>
                 {:else if chatgpt?.signedIn}
-                  <button type="button" onclick={() => void signOut()}>Cerrar sesión</button>
+                  <button type="button" onclick={() => void signOut()}>{t("signOut")}</button>
                 {:else}
-                  <button type="button" onclick={() => void signIn()}>Iniciar sesión con ChatGPT</button>
+                  <button type="button" onclick={() => void signIn()}>{t("signIn")}</button>
                 {/if}
-                <a href={CHATGPT_USAGE_URL} onclick={openUsage}>Gestionar uso</a>
+                <a href={CHATGPT_USAGE_URL} onclick={openUsage}>{t("manageUsage")}</a>
               </div>
-              <p class="hint">Los textos usan tu plan de ChatGPT.</p>
+              <p class="hint">{t("chatgptPlan")}</p>
               {#if chatgptNotice}<p class="error" role="status">{chatgptNotice}</p>{/if}
               {#if chatgptError}<p class="error" role="alert">{chatgptError}</p>{/if}
             </div>
           {/if}
           <div class="row">
-            <button type="button" disabled={test_ === "pending"} onclick={() => void test(entry)}>Probar conexión</button>
+            <button type="button" disabled={test_ === "pending"} onclick={() => void test(entry)}>{t("testConnection")}</button>
             {#if test_ === "pending"}
-              <span class="status">Probando…</span>
+              <span class="status">{t("testing")}</span>
             {:else if test_}
               <span class="status" class:ok={test_.ok} class:bad={!test_.ok} role="status">{test_.message}</span>
             {/if}
@@ -407,11 +405,11 @@
       {/each}
     </ol>
     <button type="button" disabled={ai.chain.length >= MAX_CHAIN || ai.chain.length >= providers.length} onclick={add}>
-      Añadir proveedor
+      {t("addProvider")}
     </button>
   </section>
 
-  <SettingField label="Densidad: {densityLabel(density)}" hint="Cuántas veces más de lo normal aparecen los objetivos.">
+  <SettingField label={t("densityLabel", { value: densityLabel(density) })} hint={t("densityHint")}>
     {#snippet children({ id, hintId })}
       <input
         {id}
@@ -427,13 +425,13 @@
     {/snippet}
   </SettingField>
 
-  <SettingField label="Tema" hint="Opcional, por ejemplo «viajes».">
+  <SettingField label={t("topicLabel")} hint={t("topicHint")}>
     {#snippet children({ id, hintId })}
       <input
         {id}
         type="text"
         maxlength={MAX_TOPIC}
-        placeholder="Libre"
+        placeholder={t("topicPlaceholder")}
         aria-describedby={hintId}
         value={ai?.topic ?? ""}
         onchange={(e: Change<HTMLInputElement>) => onTopic(e.currentTarget.value)}
@@ -441,20 +439,20 @@
     {/snippet}
   </SettingField>
 
-  <section class="usage" aria-label="Uso de la IA">
+  <section class="usage" aria-label={t("usageLabel")}>
     <div class="usage-head">
-      <h3>Uso</h3>
-      <button type="button" onclick={refreshUsage}>Actualizar</button>
+      <h3>{t("usage")}</h3>
+      <button type="button" onclick={refreshUsage}>{t("refresh")}</button>
     </div>
     {#if usage.length === 0}
-      <p class="hint">Aún no hay llamadas.</p>
+      <p class="hint">{t("noCalls")}</p>
     {:else}
       <table>
-        <thead><tr><th>Proveedor</th><th>Llamadas</th><th>Tokens hoy</th><th>Tokens totales</th></tr></thead>
+        <thead><tr><th>{t("provider")}</th><th>{t("calls")}</th><th>{t("tokensToday")}</th><th>{t("tokensTotal")}</th></tr></thead>
         <tbody>
           {#each usage as row (row.provider)}
             {@const c = usageCells(row, providers)}
-            <tr><td>{c.name}</td><td>{c.calls.toLocaleString("es-ES")}</td><td>{c.today.toLocaleString("es-ES")}</td><td>{c.total.toLocaleString("es-ES")}</td></tr>
+            <tr><td>{c.name}</td><td>{formatNumber(c.calls)}</td><td>{formatNumber(c.today)}</td><td>{formatNumber(c.total)}</td></tr>
           {/each}
         </tbody>
       </table>
@@ -463,7 +461,7 @@
 {:else if error}
   <p class="error" role="alert">{error}</p>
 {:else}
-  <p class="hint">Cargando…</p>
+  <p class="hint">{t("loading")}</p>
 {/if}
 </div>
 

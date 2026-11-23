@@ -2,7 +2,8 @@
   import { type FocusTarget, returnFocus } from "../practice/focus";
   import { SECTIONS } from "./registry";
   import { tick } from "svelte";
-  import { isSearchShortcut, isSettingsShortcut, matchesSettingQuery, moveSection } from "./sections";
+  import { isSearchShortcut, isSettingsShortcut, matchCountText, matchesSettingQuery, moveSection } from "./sections";
+  import { t } from "./messages";
   import type { SettingsStore } from "./store.svelte";
 
   // Settings modal (S8). A native modal <dialog> traps focus, makes the page inert (typing never
@@ -164,26 +165,26 @@
 >
   <div class="frame">
     <header>
-      <h2 id="settings-title">Ajustes</h2>
+      <h2 id="settings-title">{t("title")}</h2>
       <input
         bind:this={search}
         bind:value={query}
         type="search"
         class="search"
-        placeholder="Buscar ajuste…  (Ctrl+F)"
-        aria-label="Buscar ajuste"
+        placeholder={t("searchPlaceholder")}
+        aria-label={t("searchLabel")}
         aria-describedby="settings-search-count"
         spellcheck="false"
         autocomplete="off"
         onkeydown={onSearchKeydown}
       />
       <p id="settings-search-count" class="count" aria-live="polite">
-        {#if searching}{matches === 0 ? "Ningún ajuste coincide" : matches === 1 ? "1 ajuste" : `${matches} ajustes`}{/if}
+        {#if searching}{matchCountText(matches)}{/if}
       </p>
-      <button type="button" class="close" aria-label="Cerrar" title="Cerrar" onclick={close}>×</button>
+      <button type="button" class="close" aria-label={t("close")} title={t("close")} onclick={close}>×</button>
     </header>
     <div class="body">
-      <div class="tabs" role="tablist" aria-orientation="vertical" aria-label="Secciones de ajustes">
+      <div class="tabs" role="tablist" aria-orientation="vertical" aria-label={t("sectionsLabel")}>
         {#each SECTIONS as s (s.id)}
           <button
             type="button"

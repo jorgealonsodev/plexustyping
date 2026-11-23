@@ -2,6 +2,7 @@ import { settingsStorage } from "../settings/persist";
 import { LANGUAGES, LAYOUTS } from "../settings/settings";
 import { isThemeId } from "../themes";
 import type { Profile, ProfileFields, ProfilesApi, ProfilesList } from "./api";
+import { t } from "./messages";
 
 // Profile logic (S4–S6) over the profile commands; the settings store applies the results.
 
@@ -21,8 +22,7 @@ export interface Appearance {
 }
 
 /** The confirmation shown before a profile and its data are deleted (S4). */
-export const deleteConfirmation = (name: string) =>
-  `Se borrarán el historial y las estadísticas de «${name}». ¿Continuar?`;
+export const deleteConfirmation = (name: string) => t("deleteConfirmation", { name });
 
 /** The stored valid layout, language and theme to write to the active profile; `null` once carried over. */
 export function carryOver(storage: Storage = settingsStorage()): ProfileFields | null {

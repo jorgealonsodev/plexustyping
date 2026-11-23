@@ -2,6 +2,7 @@
   import type { Sound } from "../metronome/api";
   import { MAX_ACCENT_EVERY, MAX_BPM, MIN_BPM, SOUNDS } from "../metronome/beat";
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -11,7 +12,7 @@
   const number = (e: Change<HTMLInputElement>) => e.currentTarget.valueAsNumber;
 </script>
 
-<SettingField toggle label="Metrónomo" shortcut="F4" hint="Suena mientras practicas; un clic = una pulsación esperada.">
+<SettingField toggle label={t("metronomeLabel")} shortcut="F4" hint={t("metronomeHint")}>
   {#snippet children({ id, hintId })}
     <input
       {id}
@@ -23,14 +24,14 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Tempo" hint="Pulsaciones por minuto, de {MIN_BPM} a {MAX_BPM}.">
+<SettingField label={t("tempoLabel")} hint={t("tempoHint", { min: MIN_BPM, max: MAX_BPM })}>
   {#snippet children({ id, hintId })}
     <input
       type="range"
       min={MIN_BPM}
       max={MAX_BPM}
       value={m.bpm}
-      aria-label="Tempo (deslizador)"
+      aria-label={t("slider", { label: t("tempoLabel") })}
       oninput={(e: Change<HTMLInputElement>) => settings.setMetronome({ bpm: number(e) })}
     />
     <input
@@ -47,8 +48,8 @@
 
 <SettingField
   toggle
-  label="Tempo adaptativo"
-  hint="Tras cada texto sube el tempo si aciertas y sigues el ritmo, y lo baja si fallas o lo pierdes."
+  label={t("adaptiveLabel")}
+  hint={t("adaptiveHint")}
 >
   {#snippet children({ id, hintId })}
     <input
@@ -61,7 +62,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Sonido" hint="Sonido de cada pulsación.">
+<SettingField label={t("soundLabel")} hint={t("soundHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -75,7 +76,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Volumen" hint="{m.volume} %">
+<SettingField label={t("volumeLabel")} hint={t("volumeHint", { n: m.volume })}>
   {#snippet children({ id, hintId })}
     <input
       {id}
@@ -89,7 +90,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Acento" hint="Acentúa una de cada N pulsaciones; 0 = sin acento.">
+<SettingField label={t("accentLabel")} hint={t("accentHint")}>
   {#snippet children({ id, hintId })}
     <input
       {id}

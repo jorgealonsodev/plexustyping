@@ -3,6 +3,7 @@
   import { LANGUAGES } from "../code/languages.svelte";
   import type { IndentMode } from "../practice/engine";
   import SettingField from "./SettingField.svelte";
+  import { t } from "./messages";
   import { CODE_INDENTS, MAX_CODE_LINES, MIN_CODE_LINES } from "./settings";
   import type { SettingsStore } from "./store.svelte";
 
@@ -13,7 +14,7 @@
   onMount(() => void LANGUAGES.load());
 </script>
 
-<SettingField label="Lenguaje" hint="Lenguaje de los fragmentos del modo código.">
+<SettingField label={t("codeLanguageLabel")} hint={t("codeLanguageHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -27,7 +28,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Sangría" hint="Automática: Enter rellena la sangría de la línea siguiente; cambiarla reinicia el texto.">
+<SettingField label={t("indentLabel")} hint={t("indentHint")}>
   {#snippet children({ id, hintId })}
     <select
       {id}
@@ -41,7 +42,7 @@
   {/snippet}
 </SettingField>
 
-<SettingField label="Líneas máximas" hint="Líneas por fragmento, de {MIN_CODE_LINES} a {MAX_CODE_LINES}, desde el siguiente.">
+<SettingField label={t("codeLinesLabel")} hint={t("codeLinesHint", { min: MIN_CODE_LINES, max: MAX_CODE_LINES })}>
   {#snippet children({ id, hintId })}
     <input
       {id}
