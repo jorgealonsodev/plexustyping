@@ -3002,7 +3002,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 
 [[package]]
 name = "plexustyping-ai"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "async-trait",
  "aws-lc-rs",
@@ -3020,7 +3020,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-app"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "keyring",
  "keyring-core",
@@ -3042,7 +3042,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-audio"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "serde",
@@ -3052,7 +3052,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3060,7 +3060,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-corpus"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "plexustyping-layouts",
  "serde",
@@ -3069,7 +3069,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-highlight"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3079,7 +3079,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-layouts"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "thiserror 2.0.21",
@@ -3089,7 +3089,7 @@ dependencies = [
 
 [[package]]
 name = "plexustyping-store"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "plexustyping-core",
  "rusqlite",

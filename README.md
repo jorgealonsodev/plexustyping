@@ -570,7 +570,7 @@ pnpm tauri dev      # run the app
 cargo test --workspace
 pnpm check && pnpm test
 pnpm tauri build    # installers: .deb on Linux, NSIS .exe on Windows
-scripts/package-linux-tarball.sh target/release/plexustyping 0.1.0 out  # .tar.gz
+scripts/package-linux-tarball.sh target/release/plexustyping 0.2.0 out  # .tar.gz
 scripts/test-package-linux-tarball.sh  # test of the .tar.gz script
 ```
 
