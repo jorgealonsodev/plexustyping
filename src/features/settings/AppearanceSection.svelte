@@ -1,6 +1,7 @@
 <script lang="ts">
   import { MAX_THEME_FILE_CHARS, THEMES, TOO_LARGE } from "../themes";
   import SettingField from "./SettingField.svelte";
+  import UiLanguageField from "../../i18n/UiLanguageField.svelte";
   import type { SettingsStore } from "./store.svelte";
 
   let { settings }: { settings: SettingsStore } = $props();
@@ -40,6 +41,8 @@
     notice = null;
   }
 </script>
+
+<UiLanguageField />
 
 <SettingField label="Tema" hint="Colores de toda la aplicación; se aplica al momento.">
   {#snippet children({ id, hintId })}

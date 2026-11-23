@@ -4,6 +4,7 @@ pub mod commands;
 pub mod ghost;
 pub mod goals;
 pub mod history;
+pub mod i18n;
 pub mod metronome;
 pub mod oauth;
 pub mod profiles;
@@ -544,6 +545,12 @@ fn ui_settings_set(state: State<AppState>, key: String, value: String) -> Result
     ui_settings::set(&state, &key, &value)
 }
 
+/// Language of the backend's messages to the interface (ui-i18n S1).
+#[tauri::command]
+fn set_ui_language(language: String) -> Result<(), String> {
+    i18n::set(&language)
+}
+
 /// Forgets one UI setting (S1).
 #[tauri::command]
 fn ui_settings_remove(state: State<AppState>, key: String) -> Result<(), String> {
@@ -614,7 +621,8 @@ pub fn run() {
             unlock_set,
             ui_settings_get,
             ui_settings_set,
-            ui_settings_remove
+            ui_settings_remove,
+            set_ui_language
         ])
         .run(tauri::generate_context!())
         .expect("error while running PlexusTyping");
