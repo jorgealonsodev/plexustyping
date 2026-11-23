@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { ui } from "../../i18n/i18n.svelte";
 import type { SessionSummary } from "./api";
 import {
   CHART_LIMIT,
@@ -209,5 +210,39 @@ describe("request guard", () => {
     expect(g.isCurrent(a)).toBe(false);
     const b = g.next();
     expect(g.isCurrent(b)).toBe(true);
+  });
+});
+
+describe("history in the interface language (ui-i18n S1)", () => {
+  afterEach(() => ui.set("es"));
+
+  it("follows the interface language for filters, summary, modes and notices", () => {
+    ui.set("en");
+    expect(FILTERS.map((f) => f.label)).toEqual(["All", "Prose", "Words", "Code"]);
+    expect(formatSummary({ count: 3, meanNetWpm: 41.5, bestNetWpm: 60.4, meanAccuracy: 0.905 }).map((i) => i.label)).toEqual([
+      "Sessions",
+      "Net WPM (average)",
+      "Net WPM (best)",
+      "Average accuracy",
+    ]);
+    expect(tableRow(session({ mode: "words" }), (id) => id).mode).toBe("Words");
+    expect(tableRow(session({ mode: "code", codeLanguage: "python" }), () => "Python").mode).toBe("Code · Python");
+    expect(exportNotice({ path: "/tmp/a.csv", rows: 1 })).toBe("Exported: /tmp/a.csv (1 session)");
+    expect(exportNotice({ path: "/tmp/a.csv", rows: 3 })).toBe("Exported: /tmp/a.csv (3 sessions)");
+  });
+
+  it("uses the interface language's plural in the chart caption", () => {
+    ui.set("en");
+    expect(chartCaption(1)).toBe("Last session");
+    expect(chartCaption(2)).toBe("Last 2 sessions");
+  });
+
+  it("formats the date in the interface language's order", () => {
+    ui.set("en");
+    expect(formatDate(at(2026, 1, 5, 7, 3))).toBe("01/05/2026 07:03");
+    ui.set("de");
+    expect(formatDate(at(2026, 1, 5, 7, 3))).toBe("05.01.2026 07:03");
+    ui.set("es");
+    expect(formatDate(at(2026, 1, 5, 7, 3))).toBe("05/01/2026 07:03");
   });
 });

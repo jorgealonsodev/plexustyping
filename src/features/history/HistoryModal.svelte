@@ -35,6 +35,7 @@
     type ChartBox,
     type HistoryFilter,
   } from "./history";
+  import { t } from "./messages";
 
   // History window (S1–S5, S7), with views by day and by character (history charts S1–S4). Built
   // like the settings modal: a native modal <dialog> traps focus and makes the page inert, so typing
@@ -166,17 +167,17 @@
 >
   <div class="frame">
     <header>
-      <h2 id="history-title">Historial</h2>
-      <div class="filters" role="group" aria-label="Filtro de sesiones">
+      <h2 id="history-title">{t("title")}</h2>
+      <div class="filters" role="group" aria-label={t("filterGroup")}>
         {#each FILTERS as f (f.id)}
           <button type="button" aria-pressed={filter === f.id} class:active={filter === f.id} onclick={() => choose(f.id)}
             >{f.label}</button
           >
         {/each}
       </div>
-      <button type="button" class="close" aria-label="Cerrar" title="Cerrar" onclick={close}>×</button>
+      <button type="button" class="close" aria-label={t("close")} title={t("close")} onclick={close}>×</button>
     </header>
-    <div class="filters views" role="group" aria-label="Vista del historial">
+    <div class="filters views" role="group" aria-label={t("viewGroup")}>
       {#each VIEWS as v (v.id)}
         <button type="button" aria-pressed={view === v.id} class:active={view === v.id} onclick={() => (view = v.id)}
           >{v.label}</button
@@ -187,7 +188,7 @@
       {#if loadError !== null}
         <p class="error" role="alert">{loadError}</p>
       {:else if loaded && summary === null}
-        <p class="empty">Aún no hay sesiones guardadas.</p>
+        <p class="empty">{t("empty")}</p>
       {:else if summary !== null}
         {#if view === "sessions"}
           <dl class="summary">
@@ -201,22 +202,20 @@
 
           <figure class="chart">
             <figcaption>
-              {chartCaption(chart.wpm.length)}:
-              <span class="key wpm">PPM netas</span>
-              <span class="key accuracy">Precisión</span>
+              {t("captionLead", { caption: chartCaption(chart.wpm.length) })}
+              <span class="key wpm">{t("netWpm")}</span>
+              <span class="key accuracy">{t("accuracy")}</span>
             </figcaption>
             <svg
               viewBox="0 0 {BOX.width} {BOX.height}"
               role="img"
               aria-labelledby="history-chart-title"
             >
-              <title id="history-chart-title"
-                >Evolución de las PPM netas y la precisión, de la sesión más antigua a la más reciente</title
-              >
-              {#each chart.ticks as t (t.y)}
-                <line class="grid" x1={BOX.left} x2={BOX.width - BOX.right} y1={t.y} y2={t.y} />
-                <text class="tick wpm" x={BOX.left - 6} y={t.y} text-anchor="end" dominant-baseline="middle">{t.wpm}</text>
-                <text class="tick accuracy" x={BOX.width - BOX.right + 6} y={t.y} dominant-baseline="middle">{t.accuracy}</text>
+              <title id="history-chart-title">{t("sessionsChartTitle")}</title>
+              {#each chart.ticks as tick (tick.y)}
+                <line class="grid" x1={BOX.left} x2={BOX.width - BOX.right} y1={tick.y} y2={tick.y} />
+                <text class="tick wpm" x={BOX.left - 6} y={tick.y} text-anchor="end" dominant-baseline="middle">{tick.wpm}</text>
+                <text class="tick accuracy" x={BOX.width - BOX.right + 6} y={tick.y} dominant-baseline="middle">{tick.accuracy}</text>
               {/each}
               <polyline class="line accuracy" points={chart.accuracyLine} fill="none" stroke-width="2" />
               <polyline class="line wpm" points={chart.wpmLine} fill="none" stroke-width="2" />
@@ -230,7 +229,7 @@
           </figure>
 
           <div class="export">
-            <button type="button" onclick={exportCsv} disabled={exporting}>Exportar CSV</button>
+            <button type="button" onclick={exportCsv} disabled={exporting}>{t("exportCsv")}</button>
             {#if notice !== null}
               <p class:error={notice.error} role="status">{notice.text}</p>
             {/if}
@@ -239,11 +238,11 @@
           <table>
             <thead>
               <tr>
-                <th scope="col">Fecha</th>
-                <th scope="col">Modo</th>
-                <th scope="col" class="num">PPM netas</th>
-                <th scope="col" class="num">Precisión</th>
-                <th scope="col" class="num">Tiempo</th>
+                <th scope="col">{t("colDate")}</th>
+                <th scope="col">{t("colMode")}</th>
+                <th scope="col" class="num">{t("netWpm")}</th>
+                <th scope="col" class="num">{t("accuracy")}</th>
+                <th scope="col" class="num">{t("colTime")}</th>
                 <th scope="col" class="num">BPM</th>
               </tr>
             </thead>
@@ -263,19 +262,17 @@
         {:else if view === "days"}
           <figure class="chart">
             <figcaption>
-              {dayCaption}:
-              <span class="key wpm">PPM netas</span>
-              <span class="key minutes">Minutos</span>
+              {t("captionLead", { caption: dayCaption })}
+              <span class="key wpm">{t("netWpm")}</span>
+              <span class="key minutes">{t("minutes")}</span>
             </figcaption>
             <svg viewBox="0 0 {DAY_BOX.width} {DAY_BOX.height}" role="img" aria-labelledby="history-day-title">
-              <title id="history-day-title"
-                >PPM netas medias y minutos practicados por día, del día más antiguo al más reciente</title
-              >
-              {#each dayChart.ticks as t (t.y)}
-                <line class="grid" x1={DAY_BOX.left} x2={DAY_BOX.width - DAY_BOX.right} y1={t.y} y2={t.y} />
-                <text class="tick" x={DAY_BOX.left - 6} y={t.y} text-anchor="end" dominant-baseline="middle">{t.wpm}</text>
-                <text class="tick" x={DAY_BOX.width - DAY_BOX.right + 6} y={t.y} dominant-baseline="middle"
-                  >{t.minutes} min</text
+              <title id="history-day-title">{t("dayChartTitle")}</title>
+              {#each dayChart.ticks as tick (tick.y)}
+                <line class="grid" x1={DAY_BOX.left} x2={DAY_BOX.width - DAY_BOX.right} y1={tick.y} y2={tick.y} />
+                <text class="tick" x={DAY_BOX.left - 6} y={tick.y} text-anchor="end" dominant-baseline="middle">{tick.wpm}</text>
+                <text class="tick" x={DAY_BOX.width - DAY_BOX.right + 6} y={tick.y} dominant-baseline="middle"
+                  >{t("minutesShort", { n: tick.minutes })}</text
                 >
               {/each}
               {#each dayChart.bars as b (b.day)}
@@ -301,11 +298,11 @@
           <table>
             <thead>
               <tr>
-                <th scope="col">Día</th>
-                <th scope="col" class="num">Sesiones</th>
-                <th scope="col" class="num">Minutos</th>
-                <th scope="col" class="num">PPM netas</th>
-                <th scope="col" class="num">Precisión</th>
+                <th scope="col">{t("colDay")}</th>
+                <th scope="col" class="num">{t("sessions")}</th>
+                <th scope="col" class="num">{t("minutes")}</th>
+                <th scope="col" class="num">{t("netWpm")}</th>
+                <th scope="col" class="num">{t("accuracy")}</th>
               </tr>
             </thead>
             <tbody>
@@ -321,24 +318,24 @@
             </tbody>
           </table>
         {:else if charRows.length === 0}
-          <p class="empty">Aún no hay bastantes pulsaciones por carácter.</p>
+          <p class="empty">{t("emptyChars")}</p>
         {:else}
           <figure class="chart">
             <figcaption>
-              {charCaption(charChart.bars.length)}:
-              <span class="key error">Error</span>
+              {t("captionLead", { caption: charCaption(charChart.bars.length) })}
+              <span class="key error">{t("error")}</span>
             </figcaption>
             <svg viewBox="0 0 {CHAR_BOX.width} {CHAR_BOX.height}" role="img" aria-labelledby="history-char-title">
-              <title id="history-char-title">Error de los caracteres con más errores, de peor a mejor</title>
-              {#each charChart.ticks as t (t.y)}
-                <line class="grid" x1={CHAR_BOX.left} x2={CHAR_BOX.width - CHAR_BOX.right} y1={t.y} y2={t.y} />
-                <text class="tick" x={CHAR_BOX.left - 6} y={t.y} text-anchor="end" dominant-baseline="middle"
-                  >{t.error}</text
+              <title id="history-char-title">{t("charChartTitle")}</title>
+              {#each charChart.ticks as tick (tick.y)}
+                <line class="grid" x1={CHAR_BOX.left} x2={CHAR_BOX.width - CHAR_BOX.right} y1={tick.y} y2={tick.y} />
+                <text class="tick" x={CHAR_BOX.left - 6} y={tick.y} text-anchor="end" dominant-baseline="middle"
+                  >{tick.error}</text
                 >
               {/each}
               {#each charChart.bars as b, i (b.unit)}
                 <rect class="bar error" x={b.x} y={b.y} width={b.width} height={b.height}>
-                  <title>{b.label}: {charRows[i].error}</title>
+                  <title>{t("charTooltip", { label: b.label, error: charRows[i].error })}</title>
                 </rect>
                 <text
                   class="tick unit"
@@ -355,10 +352,10 @@
           <table>
             <thead>
               <tr>
-                <th scope="col">Carácter</th>
-                <th scope="col" class="num">Muestras</th>
-                <th scope="col" class="num">Error</th>
-                <th scope="col" class="num">Lentitud</th>
+                <th scope="col">{t("colChar")}</th>
+                <th scope="col" class="num">{t("colSamples")}</th>
+                <th scope="col" class="num">{t("error")}</th>
+                <th scope="col" class="num">{t("colSlowness")}</th>
               </tr>
             </thead>
             <tbody>

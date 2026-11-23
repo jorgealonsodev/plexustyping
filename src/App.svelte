@@ -16,6 +16,7 @@
   import { aiSettingsGet, aiSettingsSet } from "./features/settings/aiApi";
   import { aiToggleTitle, toggleEnabled } from "./features/settings/ai";
   import { goalHeaderText } from "./features/goals/goals";
+  import { t } from "./app-messages";
 
   const settings = new SettingsStore();
   const practice = $derived(practiceMode(settings.practiceKind, settings.codeLanguage));
@@ -105,8 +106,8 @@
       type="button"
       class="logo"
       aria-pressed={settings.showKeyboard}
-      aria-label="Teclado en pantalla"
-      title={settings.showKeyboard ? "Ocultar teclado (F2)" : "Mostrar teclado (F2)"}
+      aria-label={t("keyboard")}
+      title={settings.showKeyboard ? t("hideKeyboard") : t("showKeyboard")}
       onclick={(e) => {
         settings.setShowKeyboard(!settings.showKeyboard);
         backToText(e);
@@ -136,9 +137,9 @@
       </svg>
     </button>
     <h1>PlexusTyping</h1>
-    <span>Del cerebro a los dedos.</span>
+    <span>{t("tagline")}</span>
     {#if storageError !== null}
-      <strong class="temporary" title={storageError}>Sin guardar: modo temporal</strong>
+      <strong class="temporary" title={storageError}>{t("temporary")}</strong>
     {/if}
   </div>
   {#if settings.activeProfile}
@@ -147,11 +148,11 @@
       <button
         type="button"
         class="profile"
-        title="Perfil activo: {settings.activeProfile.name}. Cambiar en Ajustes → Perfiles"
+        title={t("profileTitle", { name: settings.activeProfile.name })}
         onclick={(e) => modal?.open("profiles", e.currentTarget)}>{settings.activeProfile.name}</button
       >
       <!-- Today's daily goal progress and streak (S5). -->
-      {#if goalText}<span class="goal" title="Meta diaria del perfil activo">{goalText}</span>{/if}
+      {#if goalText}<span class="goal" title={t("goalTitle")}>{goalText}</span>{/if}
     </div>
   {/if}
   <ModeSwitch {settings} />
@@ -165,14 +166,14 @@
     onclick={(e) => {
       void toggleAi();
       backToText(e);
-    }}><span class="ai-label">IA</span></button
+    }}><span class="ai-label">{t("ai")}</span></button
   >
   <button
     type="button"
     class="gear ai-toggle"
     class:active={settings.ghost}
     aria-pressed={settings.ghost}
-    aria-label="Sesión fantasma"
+    aria-label={t("ghost")}
     title={ghostToggleTitle(settings.ghost)}
     onclick={(e) => {
       settings.setGhost(!settings.ghost);
@@ -194,8 +195,8 @@
     type="button"
     class="gear"
     class:spinning={loadingText !== null}
-    aria-label={loadingText ?? "Nuevo texto"}
-    title={loadingText ?? "Nuevo texto (F5)"}
+    aria-label={loadingText ?? t("newText")}
+    title={loadingText ?? t("newTextTitle")}
     disabled={loadingText !== null}
     onclick={() => practiceScreen?.newText()}
   >
@@ -207,13 +208,13 @@
       <path d="M6.2 21.2v-4h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
-  <button type="button" class="gear" aria-label="Historial" title="Historial" onclick={(e) => history?.open(e.currentTarget)}>
+  <button type="button" class="gear" aria-label={t("history")} title={t("history")} onclick={(e) => history?.open(e.currentTarget)}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.5" stroke-width="2" />
       <path d="M12 7v5l3.5 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
-  <button type="button" class="gear" aria-label="Ajustes" title="Ajustes" onclick={(e) => modal?.open(undefined, e.currentTarget)}>
+  <button type="button" class="gear" aria-label={t("settings")} title={t("settings")} onclick={(e) => modal?.open(undefined, e.currentTarget)}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor">
       <circle cx="12" cy="12" r="8.4" stroke-width="3" stroke-dasharray="3.3 3.3" />
       <circle cx="12" cy="12" r="5.6" stroke-width="2.6" />

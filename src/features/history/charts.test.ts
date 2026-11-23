@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { ui } from "../../i18n/i18n.svelte";
 import type { CharRow, DayRow } from "./api";
 import {
   CHAR_CHART_LIMIT,
@@ -178,5 +179,34 @@ describe("chart captions and tooltips", () => {
   it("describes a day in its bar and point titles", () => {
     expect(dayTooltip(dayTableRow(day()))).toBe("17/11/2026: 3 sesiones, 12 min, 42 PPM netas, 90,5 %");
     expect(dayTooltip(dayTableRow(day({ sessions: 1 })))).toBe("17/11/2026: 1 sesión, 12 min, 42 PPM netas, 90,5 %");
+  });
+});
+
+describe("charts in the interface language (ui-i18n S1)", () => {
+  afterEach(() => ui.set("es"));
+
+  it("translates the views and the names of space, Enter and Tab", () => {
+    ui.set("en");
+    expect(VIEWS.map((v) => v.label)).toEqual(["Sessions", "By day", "By character"]);
+    expect([unitLabel(" "), unitLabel("\n"), unitLabel("\t"), unitLabel("a")]).toEqual(["space", "Enter", "Tab", "a"]);
+  });
+
+  it("uses the interface language's plural in captions and tooltips", () => {
+    ui.set("en");
+    expect(dayChartCaption(1)).toBe("Last day with sessions");
+    expect(dayChartCaption(30)).toBe("Last 30 days with sessions");
+    expect(charCaption(1)).toBe("The character with the most errors");
+    expect(charCaption(20)).toBe("The 20 characters with the most errors");
+    const row = { day: "2026-11-17", date: "11/17/2026", sessions: "1", minutes: "12", netWpm: "42", accuracy: "90.5%" };
+    expect(dayTooltip(row)).toBe("11/17/2026: 1 session, 12 min, 42 net WPM, 90.5%");
+    expect(dayTooltip({ ...row, sessions: "3" })).toBe("11/17/2026: 3 sessions, 12 min, 42 net WPM, 90.5%");
+  });
+
+  it("formats the day and the slowness in the interface language", () => {
+    ui.set("en");
+    expect(formatDay("2026-11-17")).toBe("11/17/2026");
+    expect(formatSlowness(0.25)).toBe("0.3");
+    ui.set("de");
+    expect(formatDay("2027-01-05")).toBe("05.01.2027");
   });
 });

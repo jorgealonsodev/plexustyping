@@ -1,14 +1,37 @@
+import { ui } from "../../i18n/i18n.svelte";
 import { formatPercent, formatTime, formatWpm } from "../practice/format";
 import type { CsvExport, ModeArg, SessionSummary } from "./api";
+import { t } from "./messages";
 
 /** The history filter: every session, or prose, words or code only (S2). */
 export type HistoryFilter = "all" | "prose" | "words" | "code";
 
-export const FILTERS: { id: HistoryFilter; label: string }[] = [
-  { id: "all", label: "Todo" },
-  { id: "prose", label: "Prosa" },
-  { id: "words", label: "Palabras" },
-  { id: "code", label: "Código" },
+/** Labels are getters, so they follow the interface language (ui-i18n S1). */
+export const FILTERS: readonly { readonly id: HistoryFilter; readonly label: string }[] = [
+  {
+    id: "all",
+    get label() {
+      return t("filterAll");
+    },
+  },
+  {
+    id: "prose",
+    get label() {
+      return t("filterProse");
+    },
+  },
+  {
+    id: "words",
+    get label() {
+      return t("filterWords");
+    },
+  },
+  {
+    id: "code",
+    get label() {
+      return t("filterCode");
+    },
+  },
 ];
 
 export const modeArg = (filter: HistoryFilter): ModeArg => (filter === "all" ? null : filter);
@@ -42,18 +65,22 @@ export function summarize(sessions: SessionSummary[]): Summary | null {
 }
 
 export const formatSummary = (s: Summary) => [
-  { label: "Sesiones", value: String(s.count) },
-  { label: "PPM netas (media)", value: formatWpm(s.meanNetWpm) },
-  { label: "PPM netas (mejor)", value: formatWpm(s.bestNetWpm) },
-  { label: "Precisión media", value: formatPercent(s.meanAccuracy) },
+  { label: t("sessions"), value: String(s.count) },
+  { label: t("meanNetWpm"), value: formatWpm(s.meanNetWpm) },
+  { label: t("bestNetWpm"), value: formatWpm(s.bestNetWpm) },
+  { label: t("meanAccuracy"), value: formatPercent(s.meanAccuracy) },
 ];
 
-const pad2 = (n: number) => String(n).padStart(2, "0");
-
-/** Local date and time as `dd/mm/aaaa hh:mm`. */
+/**
+ * Local date and time in the interface language's numeric order, two-digit day and month and a
+ * 24-hour clock: `dd/mm/aaaa hh:mm` in Spanish, `mm/dd/yyyy hh:mm` in English. Date and time are
+ * formatted apart and joined by a space, so no language adds its own comma between them.
+ */
 export function formatDate(ms: number): string {
   const d = new Date(ms);
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  const date = new Intl.DateTimeFormat(ui.tag, { day: "2-digit", month: "2-digit", year: "numeric" }).format(d);
+  const time = new Intl.DateTimeFormat(ui.tag, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+  return `${date} ${time}`;
 }
 
 export interface TableRow {
@@ -68,8 +95,8 @@ export interface TableRow {
 
 /** One table row (S5); `languageName` turns a code language id into its display name. */
 export function tableRow(s: SessionSummary, languageName: (id: string) => string): TableRow {
-  const code = s.codeLanguage ? `Código · ${languageName(s.codeLanguage)}` : "Código";
-  const mode = s.mode === "code" ? code : s.mode === "words" ? "Palabras" : "Prosa";
+  const code = s.codeLanguage ? t("codeWithLanguage", { language: languageName(s.codeLanguage) }) : t("filterCode");
+  const mode = s.mode === "code" ? code : s.mode === "words" ? t("filterWords") : t("filterProse");
   return {
     id: s.id,
     date: formatDate(s.startedAtMs),
@@ -140,11 +167,10 @@ export function chartGeometry(sessions: SessionSummary[], box: ChartBox): ChartG
 }
 
 /** Success notice of the CSV export (S7). */
-export const exportNotice = (r: CsvExport) =>
-  `Exportado: ${r.path} (${r.rows} ${r.rows === 1 ? "sesión" : "sesiones"})`;
+export const exportNotice = (r: CsvExport) => t("exportNotice", { path: r.path, rows: r.rows });
 
 /** Caption of the evolution chart (S4): singular for one session, as the export notice (L4). */
-export const chartCaption = (n: number) => (n === 1 ? "Última sesión" : `Últimas ${n} sesiones`);
+export const chartCaption = (n: number) => t("chartCaption", { n });
 
 /**
  * Lets only the newest request fill the window: `next()` starts one, `invalidate()` drops every

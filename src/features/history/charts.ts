@@ -1,20 +1,39 @@
+import { formatNumber, ui } from "../../i18n/i18n.svelte";
 import { formatPercent, formatWpm } from "../practice/format";
 import type { CharRow, DayRow } from "./api";
 import type { ChartBox } from "./history";
+import { t } from "./messages";
 
 /** The views of the history window (S1); "Sesiones" is the default. */
 export type HistoryView = "sessions" | "days" | "chars";
 
-export const VIEWS: { id: HistoryView; label: string }[] = [
-  { id: "sessions", label: "Sesiones" },
-  { id: "days", label: "Por día" },
-  { id: "chars", label: "Por carácter" },
+/** Labels are getters, so they follow the interface language (ui-i18n S1). */
+export const VIEWS: readonly { readonly id: HistoryView; readonly label: string }[] = [
+  {
+    id: "sessions",
+    get label() {
+      return t("viewSessions");
+    },
+  },
+  {
+    id: "days",
+    get label() {
+      return t("viewDays");
+    },
+  },
+  {
+    id: "chars",
+    get label() {
+      return t("viewChars");
+    },
+  },
 ];
 
-/** `YYYY-MM-DD` as `dd/mm/aaaa`. */
+/** `YYYY-MM-DD` in the interface language's numeric order: `dd/mm/aaaa` in Spanish. */
 export function formatDay(day: string): string {
-  const [y, m, d] = day.split("-");
-  return `${d}/${m}/${y}`;
+  const [y, m, d] = day.split("-").map(Number);
+  const options = { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" } as const;
+  return new Intl.DateTimeFormat(ui.tag, options).format(Date.UTC(y, m - 1, d));
 }
 
 /** Whole minutes, rounded down. */
@@ -41,22 +60,22 @@ export const dayTableRow = (r: DayRow): DayTableRow => ({
 
 /** Title of one day's bar and point in the day chart. */
 export const dayTooltip = (r: DayTableRow) =>
-  `${r.date}: ${r.sessions} ${r.sessions === "1" ? "sesión" : "sesiones"}, ${r.minutes} min, ${r.netWpm} PPM netas, ${r.accuracy}`;
+  t("dayTooltip", { date: r.date, sessions: r.sessions, minutes: r.minutes, netWpm: r.netWpm, accuracy: r.accuracy });
 
 /** Caption of the day chart: how many days with sessions it shows. */
-export const dayChartCaption = (n: number) => (n === 1 ? "Último día con sesiones" : `Últimos ${n} días con sesiones`);
+export const dayChartCaption = (n: number) => t("dayChartCaption", { n });
 
 /** Caption of the character chart: how many characters it shows. */
-export const charCaption = (n: number) =>
-  n === 1 ? "El carácter con más errores" : `Los ${n} caracteres con más errores`;
+export const charCaption = (n: number) => t("charCaption", { n });
 
-const UNIT_NAMES: Record<string, string> = { " ": "espacio", "\n": "Intro", "\t": "Tab" };
+const UNIT_NAMES = { " ": "unitSpace", "\n": "unitEnter", "\t": "unitTab" } as const;
 
 /** A character as shown in the "Por carácter" view: space, Enter and Tab by name. */
-export const unitLabel = (unit: string) => UNIT_NAMES[unit] ?? unit;
+export const unitLabel = (unit: string) => (Object.hasOwn(UNIT_NAMES, unit) ? t(UNIT_NAMES[unit as keyof typeof UNIT_NAMES]) : unit);
 
-/** The stored relative slowness with one decimal comma, e.g. `0,3`. */
-export const formatSlowness = (slowness: number) => (Math.round(slowness * 10) / 10).toFixed(1).replace(".", ",");
+/** The stored relative slowness with one decimal in the interface language, e.g. `0,3` in Spanish. */
+export const formatSlowness = (slowness: number) =>
+  formatNumber(Math.round(slowness * 10) / 10, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export interface CharTableRow {
   unit: string;
