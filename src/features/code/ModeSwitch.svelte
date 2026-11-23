@@ -4,6 +4,7 @@
   import type { SettingsStore } from "../settings/store.svelte";
   import type { PracticeKind } from "./api";
   import { LANGUAGES } from "./languages.svelte";
+  import { lengthChoices } from "./length";
   import { t } from "./messages";
 
   // Prose / words / code switch and the code language, in the header (S1, S6).
@@ -22,6 +23,18 @@
   // Back to the text only after a mouse pick: arrow keys change the select too, and
   // keyboard users keep focus on it (accessibility S2).
   let pointerPick = false;
+
+  const isCode = $derived(settings.practiceKind === "code");
+  const lengths = $derived(lengthChoices(settings.practiceKind, settings.codeLines));
+  const length = $derived(isCode ? settings.codeLines : settings.textLength);
+
+  // Text length (prose, words) or maximum lines (code), as in Ajustes; a new length loads a new text.
+  function chooseLength(e: Event & { currentTarget: HTMLSelectElement }) {
+    const value = Number(e.currentTarget.value);
+    if (isCode) settings.setCodeLines(value);
+    else settings.setTextLength(value);
+    if (pointerPick) focusTyping();
+  }
 
   function choose(e: Event & { currentTarget: HTMLSelectElement }) {
     settings.setCodeLanguage(e.currentTarget.value);
@@ -42,6 +55,17 @@
       {/each}
     </select>
   {/if}
+  <select
+    aria-label={isCode ? t("codeLength") : t("length")}
+    title={isCode ? t("codeLength") : t("length")}
+    onchange={chooseLength}
+    onpointerdown={() => (pointerPick = true)}
+    onkeydown={() => (pointerPick = false)}
+  >
+    {#each lengths as c (c.value)}
+      <option value={c.value} selected={c.value === length}>{c.label}</option>
+    {/each}
+  </select>
   <div class="kinds" role="group" aria-label={t("mode")}>
     {#each KINDS as k (k)}
       <button

@@ -59,7 +59,9 @@ Phase 0 is a working practice screen (Spanish, QWERTY ES, fully offline):
   until corrected, or fix with Backspace; changing it restarts the text),
   targets per text (2 or 3), text length ("Longitud": 100, 200, 300, 450, 600,
   800, 1000, 1500 or 2000 characters, default 300, or "Ilimitado", see
-  [Unlimited texts](#unlimited-texts)), live stats,
+  [Unlimited texts](#unlimited-texts); also in the header, left of the
+  Prose / Words / Code switch, where in code mode it picks the maximum lines:
+  5, 8, 12, 16 or 20), live stats,
   the ghost session (on by default) and progressive unlock.
   "Accesibilidad": "Anunciar con lector de pantalla"
   (off by default): a polite `aria-live` region then announces the next
