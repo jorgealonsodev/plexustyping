@@ -349,6 +349,21 @@ Without saved sessions (or in temporary mode) every view shows "Aún no hay
 sesiones guardadas.". `Escape`, `×` or a click outside closes it and returns
 to the text.
 
+### Interface language
+
+The interface (menus, settings, notices, screen-reader announcements and the
+backend's messages) is available in the same five languages as the practice
+texts: Español, English, Português (Brasil), Français and Deutsch. On first
+start it follows the computer's language (the first supported one among the
+system's preferred languages, by base code: `pt-PT` → Português); when none is
+supported it is English. "Ajustes → Apariencia → Idioma de la interfaz"
+("Settings → Appearance → Interface language") changes it live: "Automático"
+follows the computer again, any other choice is stored (`plexustyping.uiLanguage`)
+and is the same for every profile. It is independent of the practice-text
+language below: neither changes the other. Numbers, percentages and dates use
+the interface language's format. Setting names quoted in this README are those
+of the Spanish interface.
+
 ### Languages and keyboard layouts
 
 "Ajustes → Práctica → Idioma" chooses the language of prose texts: Español
